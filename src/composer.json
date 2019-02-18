@@ -1,0 +1,35 @@
+{
+  "name": "packlink/prestashop",
+  "description": "Packlink Shipping PrestaShop plugin",
+  "type": "library",
+  "repositories": [
+    {
+      "type": "vcs",
+      "no-api": true,
+      "url": "git@github.com:logeecom/pl_module_core.git"
+    }
+  ],
+  "require": {
+    "php": ">=5.3",
+    "packlink/integration-core": "dev-dev",
+    "ext-json": "*",
+    "ext-curl": "*",
+    "ext-zip": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Packlink\\PrestaShop\\Classes\\": "classes",
+      "Packlink\\PrestaShop\\Tests\\": "tests"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Logeecom\\Tests\\Infrastructure\\": "vendor/packlink/integration-core/tests/Infrastructure",
+      "Logeecom\\Tests\\BusinessLogic\\": "vendor/packlink/integration-core/tests/BusinessLogic",
+      "Logeecom\\Tests\\Common\\": "vendor/packlink/integration-core/tests/Common"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^4.8.35"
+  }
+}
