@@ -24,10 +24,9 @@
 
 <div class="pl-login-page" id="pl-main-page-holder">
   <div class="pl-login-page-side-img-wrapper pl-collapse">
-    <img src="{html_entity_decode($loginIcon|escape:'html':'UTF-8')}" class="pl-login-icon">
     <img
-            src="{html_entity_decode($loginImage|escape:'html':'UTF-8')}"
-            class="pl-login-image"
+            src="{html_entity_decode($loginIcon|escape:'html':'UTF-8')}"
+            class="pl-login-icon"
             alt="{l s='Packlink PRO Shipping' mod='packlink'}"
     >
   </div>
@@ -79,11 +78,11 @@
     <div>
       <div class="pl-login-form-header">
         <div class="pl-login-form-title-wrapper">
-          {l s='Allow PrestaShop to connect to PacklinkPRO account' mod='packlink'}
+          {l s='Allow PrestaShop to connect to PacklinkPRO' mod='packlink'}
         </div>
         <div class="pl-login-form-text-wrapper">
           {l s='Your API key can be found under' mod='packlink'}
-          pro.packlink/<strong>Settings/PacklinkProAPIkey</strong>
+          pro.packlink/<strong>Settings/PacklinkPROAPIkey</strong>
         </div>
       </div>
       <div class="pl-login-form-label-wrapper">

@@ -474,7 +474,6 @@ class Packlink extends CarrierModule
 
         $this->context->smarty->assign(array(
             'iconPath' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/flags/',
-            'loginImage' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/login.png',
             'loginIcon' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/logo-pl.svg',
         ));
 
