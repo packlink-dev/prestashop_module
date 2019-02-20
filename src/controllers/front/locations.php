@@ -28,6 +28,7 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\Http\Proxy;
+use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
@@ -61,7 +62,7 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
 
         switch ($input['method']) {
             case 'getLocations':
-                PacklinkPrestaShopUtility::dieJson($this->getLocations($input['serviceId']));
+                PacklinkPrestaShopUtility::dieJson($this->getLocations($input['methodId']));
                 break;
 
             case 'postSelectedDropoff':
@@ -77,7 +78,7 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
     /**
      * Retrieves locations list.
      *
-     * @param string $serviceId
+     * @param string $methodId
      *
      * @return array
      *
@@ -87,7 +88,7 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    protected function getLocations($serviceId)
+    protected function getLocations($methodId)
     {
         /** @var Proxy $proxy */
         $proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
@@ -105,7 +106,7 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
             return array();
         }
 
-        $country = new Country($address->id_country);
+        $country = new \Country($address->id_country);
 
         if (!Validate::isLoadedObject($country)) {
             return array();
@@ -114,7 +115,20 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
         $countryCode = \Tools::strtoupper($country->iso_code);
         $postalCode = $address->postcode;
 
-        $locations = $proxy->getLocations($serviceId, $countryCode, $postalCode);
+        /** @var ShippingMethodService $shippingMethodService */
+        $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
+        $method = $shippingMethodService->getShippingMethod($methodId);
+        if ($method === null) {
+            return array();
+        }
+
+        try {
+            $cheapestService = $method->getCheapestShippingService($countryCode);
+        } catch (\InvalidArgumentException $e) {
+            return array();
+        }
+
+        $locations = $proxy->getLocations($cheapestService->serviceId, $countryCode, $postalCode);
 
         return $this->transformCollectionToResponse($locations);
     }

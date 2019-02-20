@@ -354,15 +354,15 @@ class Packlink extends CarrierModule
         );
         $carrier = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCarrier($this->id_carrier);
         $carrierReferenceId = (int)$carrier->id_reference;
-        $serviceId = $carrierService->getShippingServiceId($carrierReferenceId);
+        $methodId = $carrierService->getShippingMethodId($carrierReferenceId);
 
-        if ($serviceId === null) {
+        if ($methodId === null) {
             return false;
         }
 
         $calculatedCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCosts();
         if ($calculatedCosts !== false) {
-            return isset($calculatedCosts[$serviceId]) ? $calculatedCosts[$serviceId] : false;
+            return isset($calculatedCosts[$methodId]) ? $calculatedCosts[$methodId] : false;
         }
 
         $warehouse = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDefaultWarehouse();
@@ -402,7 +402,7 @@ class Packlink extends CarrierModule
 
         \Packlink\PrestaShop\Classes\Utility\CachingUtility::setCosts($calculatedCosts);
 
-        return isset($calculatedCosts[$serviceId]) ? $calculatedCosts[$serviceId] : false;
+        return isset($calculatedCosts[$methodId]) ? $calculatedCosts[$methodId] : false;
     }
 
     /**

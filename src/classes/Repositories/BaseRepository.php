@@ -417,7 +417,7 @@ class BaseRepository implements RepositoryInterface
 
             $orderByColumn = $filter->getOrderByColumn();
             if ($orderByColumn) {
-                $indexedColumn = $this->getIndexMapping($orderByColumn);
+                $indexedColumn = $orderByColumn === 'id' ? 'id' : $this->getIndexMapping($orderByColumn);
                 if (empty($indexedColumn)) {
                     throw new QueryFilterInvalidParamException(
                         TranslationUtility::__(

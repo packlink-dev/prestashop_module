@@ -32,15 +32,6 @@ class PrestashopGenericBaseRepositoryTest extends AbstractGenericStudentReposito
     /**
      * @inheritdoc
      */
-    public static function tearDownAfterClass()
-    {
-        $packlinkTestTableUninstallScript = 'DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'packlink_test';
-        \Db::getInstance()->execute($packlinkTestTableUninstallScript);
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function setUp()
     {
         parent::setUp();
@@ -60,7 +51,7 @@ class PrestashopGenericBaseRepositoryTest extends AbstractGenericStudentReposito
      */
     public function cleanUpStorage()
     {
-        return null;
+        \Db::getInstance()->execute('DROP TABLE IF EXISTS ' . _DB_PREFIX_ . 'packlink_test');
     }
 
     /**
@@ -68,23 +59,22 @@ class PrestashopGenericBaseRepositoryTest extends AbstractGenericStudentReposito
      */
     private function createTestTable()
     {
-        $packlinkTestTableInstallScript =
-            'CREATE TABLE IF NOT EXISTS ' . _DB_PREFIX_ . 'packlink_test
+        $sql = 'CREATE TABLE IF NOT EXISTS ' . _DB_PREFIX_ . 'packlink_test
             (
              `id` INT NOT NULL AUTO_INCREMENT,
              `type` VARCHAR(128) NOT NULL,
-             `index_1` VARCHAR(255),
-             `index_2` VARCHAR(255),
-             `index_3` VARCHAR(255),
-             `index_4` VARCHAR(255),
-             `index_5` VARCHAR(255),
-             `index_6` VARCHAR(255),
-             `index_7` VARCHAR(255),
+             `index_1` VARCHAR(128),
+             `index_2` VARCHAR(128),
+             `index_3` VARCHAR(128),
+             `index_4` VARCHAR(128),
+             `index_5` VARCHAR(128),
+             `index_6` VARCHAR(128),
+             `index_7` VARCHAR(128),
              `data` LONGTEXT NOT NULL,
               PRIMARY KEY(`id`)
             )
             ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8';
 
-        \Db::getInstance()->execute($packlinkTestTableInstallScript);
+        \Db::getInstance()->execute($sql);
     }
 }

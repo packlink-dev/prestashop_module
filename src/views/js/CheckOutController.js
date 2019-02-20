@@ -84,7 +84,7 @@ var Packlink = window.Packlink || {};
       mapController = new Packlink.MapModalController(
           {
             getUrl: configuration.getLocationsUrl,
-            serviceId: configuration.dropoffIds[id],
+            methodId: configuration.dropoffIds[id],
             carrierId: id,
             onComplete: modalCompleteCallback
           }

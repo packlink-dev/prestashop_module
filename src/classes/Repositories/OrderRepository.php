@@ -38,9 +38,7 @@ use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryIn
 use Packlink\BusinessLogic\Order\Objects\Address;
 use Packlink\BusinessLogic\Order\Objects\Item;
 use Packlink\BusinessLogic\Order\Objects\Order;
-use Packlink\BusinessLogic\Order\Objects\Shipping;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
-use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
@@ -461,9 +459,6 @@ class OrderRepository implements OrderRepositoryInterface
     {
         /** @var CarrierService $carrierService */
         $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
-        /** @var ShippingMethodService $shippingMethodService */
-        $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
-
         $carrier = new \Carrier($carrierId);
 
         if ($carrier === null) {
@@ -472,19 +467,9 @@ class OrderRepository implements OrderRepositoryInterface
             return;
         }
 
-        $shippingServiceId = $carrierService->getShippingServiceId((int)$carrier->id_reference);
-        if ($shippingServiceId !== null) {
-            $shippingService = $shippingMethodService->getShippingMethodForService($shippingServiceId);
-
-            if ($shippingService !== null) {
-                $shipping = new Shipping();
-                $shipping->setShippingServiceId($shippingService->getServiceId());
-                $shipping->setShippingServiceName($shippingService->getServiceName());
-                $shipping->setCarrierName($carrier->name);
-                $order->setShipping($shipping);
-            } else {
-                Logger::logWarning(TranslationUtility::__('Shipping service not found'), 'Integration');
-            }
+        $shippingMethodId = $carrierService->getShippingMethodId((int)$carrier->id_reference);
+        if ($shippingMethodId !== null) {
+            $order->setShippingMethodId($shippingMethodId);
         } else {
             Logger::logWarning(TranslationUtility::__('Carrier service mapping not found'), 'Integration');
         }

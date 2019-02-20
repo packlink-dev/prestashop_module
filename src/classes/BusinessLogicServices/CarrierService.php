@@ -66,7 +66,7 @@ class CarrierService implements ShopShippingMethodService
                 $this->setCarrierZones($carrier, $rangeWeight);
 
                 $this->updateCarrierLogo($shippingMethod, $carrier);
-                $this->saveCarrierServiceMapping((int)$carrier->id, $shippingMethod->getServiceId());
+                $this->saveCarrierServiceMapping((int)$carrier->id, $shippingMethod->getId());
 
                 return true;
             }
@@ -88,7 +88,7 @@ class CarrierService implements ShopShippingMethodService
      */
     public function update(ShippingMethod $shippingMethod)
     {
-        $referenceId = $this->getCarrierReferenceId($shippingMethod->getServiceId());
+        $referenceId = $this->getCarrierReferenceId($shippingMethod->getId());
         if ($referenceId === null) {
             Logger::logWarning(TranslationUtility::__('Carrier service mapping not found'), 'Integration');
         } else {
@@ -122,20 +122,13 @@ class CarrierService implements ShopShippingMethodService
      */
     public function delete(ShippingMethod $shippingMethod)
     {
-        $referenceId = $this->getCarrierReferenceId($shippingMethod->getServiceId());
+        $referenceId = $this->getCarrierReferenceId($shippingMethod->getId());
 
         if ($referenceId === null) {
             return false;
         }
 
-        if (!$this->deleteCarrierServiceMapping($shippingMethod->getServiceId())) {
-            Logger::logError(
-                TranslationUtility::__('Failed deleting carrier'),
-                'Integration'
-            );
-
-            return false;
-        }
+        $this->deleteCarrierServiceMapping($shippingMethod->getId());
 
         /** @var \Carrier $carrier PrestaShop carrier object. */
         $carrier = \Carrier::getCarrierByReference($referenceId);
@@ -183,19 +176,19 @@ class CarrierService implements ShopShippingMethodService
     /**
      * Returns reference ID of the carrier mapped by shipping method service ID.
      *
-     * @param int $serviceId Packlink shipping method service ID.
+     * @param int $methodId Packlink shipping method ID.
      *
      * @return int|null PrestaShop carrier reference ID or null if not found.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
-    public function getCarrierReferenceId($serviceId)
+    public function getCarrierReferenceId($methodId)
     {
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
 
         $filter = new QueryFilter();
-        $filter->where('serviceId', Operators::EQUALS, $serviceId);
+        $filter->where('methodId', Operators::EQUALS, $methodId);
         /** @var CarrierServiceMapping $carrierServiceMapping */
         $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
 
@@ -203,16 +196,16 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
-     * Returns Packlink shipping service ID mapped by carrier reference ID.
+     * Returns Packlink shipping method ID mapped by carrier reference ID.
      *
      * @param int $carrierId PrestaShop carrier reference ID.
      *
-     * @return int|null Packlink shipping method service ID or null if not found.
+     * @return int|null Packlink shipping method ID or null if not found.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
-    public function getShippingServiceId($carrierId)
+    public function getShippingMethodId($carrierId)
     {
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
 
@@ -221,7 +214,7 @@ class CarrierService implements ShopShippingMethodService
         /** @var CarrierServiceMapping $carrierServiceMapping */
         $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
 
-        return $carrierServiceMapping ? $carrierServiceMapping->serviceId : null;
+        return $carrierServiceMapping ? $carrierServiceMapping->methodId : null;
     }
 
     /**
@@ -319,7 +312,7 @@ class CarrierService implements ShopShippingMethodService
         $carrier->external_module_name = 'packlink';
         $carrier->is_module = true;
 
-        $languages = \Language::getLanguages(true);
+        $languages = \Language::getLanguages();
         foreach ($languages as $language) {
             $carrier->delay[(int)$language['id_lang']] = $shippingMethod->getDeliveryTime();
         }
@@ -329,44 +322,40 @@ class CarrierService implements ShopShippingMethodService
      * Saves carrier service mapping.
      *
      * @param int $carrierReferenceId Carrier entity reference ID.
-     * @param int $serviceId Packlink shipping method service ID.
+     * @param int $methodId Packlink shipping method ID.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
-    private function saveCarrierServiceMapping($carrierReferenceId, $serviceId)
+    private function saveCarrierServiceMapping($carrierReferenceId, $methodId)
     {
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
         $carrierServiceMapping = new CarrierServiceMapping();
 
         $carrierServiceMapping->carrierId = $carrierReferenceId;
-        $carrierServiceMapping->serviceId = $serviceId;
+        $carrierServiceMapping->methodId = $methodId;
 
         $serviceMappingRepository->save($carrierServiceMapping);
     }
 
     /**
-     * Deletes carrier service mapping.
+     * Deletes carrier service mapping for given shipping method.
      *
-     * @param int $serviceId Packlink shipping method service ID.
-     *
-     * @return bool Whether deleting has been successfully performed.
+     * @param int $methodId Packlink shipping method ID.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
-    private function deleteCarrierServiceMapping($serviceId)
+    private function deleteCarrierServiceMapping($methodId)
     {
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
 
         $filter = new QueryFilter();
-        $filter->where('serviceId', Operators::EQUALS, $serviceId);
+        $filter->where('methodId', Operators::EQUALS, $methodId);
         $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
 
-        if ($carrierServiceMapping === null) {
-            return false;
+        if ($carrierServiceMapping !== null) {
+            $serviceMappingRepository->delete($carrierServiceMapping);
         }
-
-        return $serviceMappingRepository->delete($carrierServiceMapping);
     }
 
     /**

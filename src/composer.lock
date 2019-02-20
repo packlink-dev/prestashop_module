@@ -86,12 +86,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "42cf46fa727eae975d522321635e375314906cb6"
+              "reference": "6e18fcb12864dbb6f8ebc34384eee5999bd94137"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/42cf46fa727eae975d522321635e375314906cb6",
-                "reference": "42cf46fa727eae975d522321635e375314906cb6",
+              "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/6e18fcb12864dbb6f8ebc34384eee5999bd94137",
+              "reference": "6e18fcb12864dbb6f8ebc34384eee5999bd94137",
                 "shasum": ""
             },
             "require": {
@@ -120,7 +120,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2019-02-19T11:16:34+00:00"
+          "time": "2019-02-19T16:32:55+00:00"
         }
     ],
     "packages-dev": [
@@ -1196,16 +1196,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.4.21",
+          "version": "v3.4.22",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "554a59a1ccbaac238a89b19c8e551a556fd0e2ea"
+              "reference": "ba11776e9e6c15ad5759a07bffb15899bac75c2d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/554a59a1ccbaac238a89b19c8e551a556fd0e2ea",
-                "reference": "554a59a1ccbaac238a89b19c8e551a556fd0e2ea",
+              "url": "https://api.github.com/repos/symfony/yaml/zipball/ba11776e9e6c15ad5759a07bffb15899bac75c2d",
+              "reference": "ba11776e9e6c15ad5759a07bffb15899bac75c2d",
                 "shasum": ""
             },
             "require": {
@@ -1251,7 +1251,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2019-01-01T13:45:19+00:00"
+          "time": "2019-01-16T10:59:17+00:00"
         },
         {
             "name": "webmozart/assert",
