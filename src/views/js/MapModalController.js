@@ -56,7 +56,7 @@ var Packlink = window.Packlink || {};
           configuration.getUrl,
           {
             method: 'getLocations',
-            serviceId: configuration.serviceId
+            methodId: configuration.methodId
           },
           getLocationsSuccessHandler
       )

@@ -25,6 +25,7 @@
 
 namespace Packlink\PrestaShop\Classes\Utility;
 
+use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
@@ -33,6 +34,8 @@ use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 class CarrierUtility
 {
     /**
+     * Gets all carrier IDs that require drop-off.
+     *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
@@ -40,20 +43,19 @@ class CarrierUtility
     {
         $repository = RepositoryRegistry::getRepository(ShippingMethod::getClassName());
         $query = new QueryFilter();
-        $query->where('enabled', '=', true)
-            ->where('destinationDropOff', '=', true);
+        $query->where('enabled', Operators::EQUALS, true)
+            ->where('destinationDropOff', Operators::EQUALS, true);
 
         $methods = $repository->select($query);
 
         $result = array();
-
         $service = new CarrierService();
 
         /** @var ShippingMethod $method */
         foreach ($methods as $method) {
-            $id = $service->getCarrierReferenceId($method->getServiceId());
-            if ($id) {
-                $result[$id] = $method->getServiceId();
+            $carrierId = $service->getCarrierReferenceId($method->getId());
+            if ($carrierId) {
+                $result[$carrierId] = $method->getId();
             }
         }
 

@@ -23,26 +23,20 @@
  *}
 
 <div class="container-fluid pl-main-wrapper" id="pl-main-page-holder">
-
-
   <div class="pl-input-mask" id="pl-input-mask"></div>
-
 
   <div class="pl-spinner" id="pl-spinner">
     <div></div>
   </div>
-
 
   <div class="pl-page-wrapper">
     <div class="pl-sidebar-wrapper">
       <div class="row">
         <div class="col-md-12">
           <div class="pl-logo-wrapper">
-            <img
-                    src="{html_entity_decode($dashboardLogo|escape:'html':'UTF-8')}"
-                    class="pl-dashboard-logo"
-                    alt="{l s='Packlink PRO Shipping' mod='packlink'}"
-            >
+            <img src="{html_entity_decode($dashboardLogo|escape:'html':'UTF-8')}"
+                 class="pl-dashboard-logo"
+                 alt="{l s='Packlink PRO Shipping' mod='packlink'}">
           </div>
         </div>
       </div>
@@ -85,23 +79,13 @@
         </div>
       </div>
 
-
       <div id="pl-sidebar-extension-point"></div>
 
-
       <div class="pl-help">
-        <a
-                class="pl-link"
-                href="{html_entity_decode($helpLink|escape:'html':'UTF-8')}"
-                target="_blank"
-        >
+        <a class="pl-link" href="{html_entity_decode($helpLink|escape:'html':'UTF-8')}" target="_blank">
           <span>{l s='Help' mod='packlink'}</span>
         </a>
-        <a
-                class="pl-link"
-                href="{html_entity_decode($helpLink|escape:'html':'UTF-8')}"
-                target="_blank"
-        >
+        <a class="pl-link" href="{html_entity_decode($helpLink|escape:'html':'UTF-8')}" target="_blank">
           <i class="material-icons">help</i>
         </a>
         <div class="pl-contact">{l s='Contact us' mod='packlink'}:</div>
