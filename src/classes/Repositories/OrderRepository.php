@@ -41,6 +41,7 @@ use Packlink\BusinessLogic\Order\Objects\Order;
 use Packlink\BusinessLogic\Order\Objects\Shipping;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
+use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
@@ -62,6 +63,26 @@ class OrderRepository implements OrderRepositoryInterface
      * @var BaseRepository
      */
     private $orderDetailsRepository;
+
+    /**
+     * Returns shipment references of the orders that have not yet been completed.
+     *
+     * @return \Packlink\PrestaShop\Classes\Entities\ShopOrderDetails Array of shipment references.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    public function getIncompleteOrderReferences()
+    {
+        $filter = new QueryFilter();
+
+        $filter->where('status', Operators::NOT_EQUALS, ShipmentStatus::STATUS_DELIVERED);
+        /** @var ShopOrderDetails $orderDetails */
+        /** @noinspection OneTimeUseVariablesInspection */
+        $orderDetails = $this->getOrderDetailsRepository()->select($filter);
+
+        return $orderDetails;
+    }
 
     /**
      * Fetches and returns system order by its unique identifier.
@@ -308,6 +329,27 @@ class OrderRepository implements OrderRepositoryInterface
         $this->setSourceOrderStatus($orderDetails->getOrderId(), $shippingStatus);
 
         $orderDetails->setShippingStatus($shippingStatus);
+        $this->getOrderDetailsRepository()->update($orderDetails);
+    }
+
+    /**
+     * Sets shipping price to an order by shipment reference.
+     *
+     * @param string $shipmentReference Packlink shipment reference.
+     * @param float $price Shipment price.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order with provided reference is not found.
+     */
+    public function setShippingPriceByReference($shipmentReference, $price)
+    {
+        $orderDetails = $this->getOrderDetailsByReference($shipmentReference);
+
+        $order = new \Order($orderDetails->getOrderId());
+        $order->updateShippingCost($price);
+
+        $orderDetails->setPacklinkShippingPrice($price);
         $this->getOrderDetailsRepository()->update($orderDetails);
     }
 

@@ -26,15 +26,10 @@
 namespace Packlink\PrestaShop\Classes\Utility;
 
 use Logeecom\Infrastructure\Logger\Logger;
-use Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
-use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\Exceptions\TaskRunnerStatusStorageUnavailableException;
-use Packlink\BusinessLogic\Scheduler\Models\Schedule;
-use Packlink\BusinessLogic\Scheduler\Models\WeeklySchedule;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
-use Packlink\BusinessLogic\Tasks\UpdateShippingServicesTask;
-use Packlink\BusinessLogic\WebHook\Events\ShipmentStatusChangedEvent;
+use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
@@ -203,7 +198,7 @@ class PacklinkInstaller
     {
         $this->addDefaultStatusMapping();
 
-        return $this->addDefaultPluginConfiguration() && $this->createSchedules();
+        return $this->addDefaultPluginConfiguration();
     }
 
     /**
@@ -452,35 +447,6 @@ class PacklinkInstaller
         return true;
     }
 
-    /**
-     * Creates schedules.
-     *
-     * @return bool
-     */
-    protected function createSchedules()
-    {
-        /** @var ConfigurationService $configService */
-        $configService = ServiceRegister::getService(\Packlink\BusinessLogic\Configuration::CLASS_NAME);
-        $schedule = new WeeklySchedule(new UpdateShippingServicesTask());
-
-        $schedule->setQueueName($configService->getDefaultQueueName());
-        $schedule->setDay(1);
-        $schedule->setHour(2);
-        $schedule->setNextSchedule();
-
-        try {
-            $repository = RepositoryRegistry::getRepository(Schedule::CLASS_NAME);
-        } catch (RepositoryNotRegisteredException $e) {
-            Logger::logError('Schedule repository not registered.', 'Integration');
-
-            return false;
-        }
-
-        $repository->save($schedule);
-
-        return true;
-    }
-
     private function addDefaultStatusMapping()
     {
         /** @var ConfigurationService $configService */
@@ -490,11 +456,11 @@ class PacklinkInstaller
         if (empty($mappings)) {
             $configService->setOrderStatusMappings(
                 array(
-                    ShipmentStatusChangedEvent::STATUS_PENDING => 0,
-                    ShipmentStatusChangedEvent::STATUS_ACCEPTED => 3,
-                    ShipmentStatusChangedEvent::STATUS_READY => 3,
-                    ShipmentStatusChangedEvent::STATUS_IN_TRANSIT => 4,
-                    ShipmentStatusChangedEvent::STATUS_DELIVERED => 5,
+                    ShipmentStatus::STATUS_PENDING => 0,
+                    ShipmentStatus::STATUS_ACCEPTED => 3,
+                    ShipmentStatus::STATUS_READY => 3,
+                    ShipmentStatus::STATUS_IN_TRANSIT => 4,
+                    ShipmentStatus::STATUS_DELIVERED => 5,
                 )
             );
         }

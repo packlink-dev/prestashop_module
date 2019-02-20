@@ -133,6 +133,7 @@ class ShopOrderDetails extends Entity
 
         $map->addIntegerIndex('orderId');
         $map->addStringIndex('shipmentReference');
+        $map->addStringIndex('status');
 
         return new EntityConfiguration($map, 'ShopOrderDetails');
     }
@@ -194,13 +195,15 @@ class ShopOrderDetails extends Entity
      */
     public function setShipmentLabels(array $links)
     {
-        $shipmentLabels = array();
+        if (empty($this->shipmentLabels)) {
+            $shipmentLabels = array();
 
-        foreach ($links as $link) {
-            $shipmentLabels[] = new ShipmentLabel($link);
+            foreach ($links as $link) {
+                $shipmentLabels[] = new ShipmentLabel($link);
+            }
+
+            $this->shipmentLabels = $shipmentLabels;
         }
-
-        $this->shipmentLabels = $shipmentLabels;
     }
 
     /**

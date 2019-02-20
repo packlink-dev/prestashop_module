@@ -31,6 +31,7 @@ use Logeecom\Infrastructure\TaskExecution\Task;
 use Packlink\BusinessLogic\Http\Proxy;
 use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository;
+use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 class UpgradeShopOrderDetailsTask extends Task
@@ -194,7 +195,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setShipmentStatus($reference, $orderRepository, $shipment)
     {
         try {
-            $orderRepository->setShippingStatusByReference($reference, $shipment->status);
+            $orderRepository->setShippingStatusByReference($reference, ShipmentStatus::getStatus($shipment->status));
         } catch (OrderNotFound $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),

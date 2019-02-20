@@ -25,6 +25,7 @@
 
 namespace Packlink\PrestaShop\Classes\WebhookHandlers;
 
+use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\BusinessLogic\WebHook\Events\ShipmentStatusChangedEvent;
 
 /**
@@ -42,7 +43,7 @@ class ShipmentCarrierSuccessHandler extends WebhookHandler
     public function handle($payload)
     {
         $this->eventBus->fire(
-            new ShipmentStatusChangedEvent($payload->shipment_reference, ShipmentStatusChangedEvent::STATUS_ACCEPTED)
+            new ShipmentStatusChangedEvent($payload->shipment_reference, ShipmentStatus::STATUS_ACCEPTED)
         );
     }
 }

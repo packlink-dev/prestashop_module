@@ -316,11 +316,11 @@ function getRegisteredHooks()
 function getOrderStatusMappingsMap()
 {
     return array(
-        'PL_ST_AWAITING' => \Packlink\BusinessLogic\WebHook\Events\ShipmentStatusChangedEvent::STATUS_PENDING,
-        'PL_ST_PENDING' => \Packlink\BusinessLogic\WebHook\Events\ShipmentStatusChangedEvent::STATUS_ACCEPTED,
-        'PL_ST_READY' => \Packlink\BusinessLogic\WebHook\Events\ShipmentStatusChangedEvent::STATUS_READY,
-        'PL_ST_TRANSIT' => \Packlink\BusinessLogic\WebHook\Events\ShipmentStatusChangedEvent::STATUS_IN_TRANSIT,
-        'PL_ST_DELIVERED' => \Packlink\BusinessLogic\WebHook\Events\ShipmentStatusChangedEvent::STATUS_DELIVERED,
+        'PL_ST_AWAITING' => \Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus::STATUS_PENDING,
+        'PL_ST_PENDING' => \Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus::STATUS_ACCEPTED,
+        'PL_ST_READY' => \Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus::STATUS_READY,
+        'PL_ST_TRANSIT' => \Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus::STATUS_IN_TRANSIT,
+        'PL_ST_DELIVERED' => \Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus::STATUS_DELIVERED,
     );
 }
 
