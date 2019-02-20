@@ -65,7 +65,7 @@ class OrderRepository implements OrderRepositoryInterface
     /**
      * Returns shipment references of the orders that have not yet been completed.
      *
-     * @return \Packlink\PrestaShop\Classes\Entities\ShopOrderDetails Array of shipment references.
+     * @return array Array of shipment references.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
@@ -73,13 +73,20 @@ class OrderRepository implements OrderRepositoryInterface
     public function getIncompleteOrderReferences()
     {
         $filter = new QueryFilter();
+        $orderReferences = array();
 
         $filter->where('status', Operators::NOT_EQUALS, ShipmentStatus::STATUS_DELIVERED);
         /** @var ShopOrderDetails $orderDetails */
         /** @noinspection OneTimeUseVariablesInspection */
-        $orderDetails = $this->getOrderDetailsRepository()->select($filter);
+        $orders = $this->getOrderDetailsRepository()->select($filter);
 
-        return $orderDetails;
+        foreach ($orders as $orderDetails) {
+            if ($orderDetails->getShipmentReference() !== null) {
+                $orderReferences[] = $orderDetails->getShipmentReference();
+            }
+        }
+
+        return $orderReferences;
     }
 
     /**
@@ -261,9 +268,6 @@ class OrderRepository implements OrderRepositoryInterface
      */
     public function saveOrderDetails(ShopOrderDetails $orderDetails)
     {
-        $filter = new QueryFilter();
-        $filter->where('orderId', Operators::EQUALS, $orderDetails->getOrderId());
-
         if ($orderDetails->getId() === null) {
             $this->getOrderDetailsRepository()->save($orderDetails);
         } else {

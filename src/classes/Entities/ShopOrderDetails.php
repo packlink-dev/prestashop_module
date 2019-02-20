@@ -207,6 +207,26 @@ class ShopOrderDetails extends Entity
     }
 
     /**
+     * Returns order status.
+     *
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * Sets order status.
+     *
+     * @param string $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    /**
      * Returns order shipping status.
      *
      * @return string
