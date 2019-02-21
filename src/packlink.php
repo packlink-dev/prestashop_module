@@ -333,7 +333,7 @@ class Packlink extends CarrierModule
      * $params var contains the cart, the customer, the address
      * $shipping_cost var contains the price calculated by the range in carrier tab
      *
-     * @param Cart $params Shopping cart object.
+     * @param \Cart $params Shopping cart object.
      * @param int $shippingCost Shipping cost calculated by PrestaShop.
      * @param array $products Array of shop products for which shipping cost is calculated.
      *
@@ -361,6 +361,10 @@ class Packlink extends CarrierModule
         }
 
         $calculatedCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCosts();
+        if ($this->displayBackupCarrier($params, $calculatedCosts, $carrierReferenceId)) {
+            return $shippingCost;
+        }
+
         if ($calculatedCosts !== false) {
             return isset($calculatedCosts[$methodId]) ? $calculatedCosts[$methodId] : false;
         }
@@ -612,6 +616,44 @@ class Packlink extends CarrierModule
             $order->id_address_delivery = $address->id;
             $order->save();
         }
+    }
+
+    /**
+     * Returns whether backup carrier should be displayed.
+     *
+     * @param \Cart $cart PrestaShop cart object.
+     * @param array $calculatedCosts Array of calculated shipping costs.
+     * @param int $carrierId ID of the carrier.
+     *
+     * @return bool Returns TRUE if backup carrier should be displayed, otherwise returns FALSE.
+     */
+    private function displayBackupCarrier($cart, $calculatedCosts, $carrierId)
+    {
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Configuration::CLASS_NAME
+        );
+
+        if (is_array($calculatedCosts)
+            && empty($calculatedCosts)
+            && $carrierId === $configService->getBackupCarrierId()
+        ) {
+            $zoneId = \Address::getZoneById($cart->id_address_delivery);
+            $customer = new \Customer($cart->id_customer);
+
+            $internalCarriers = \Carrier::getCarriers(
+                \Context::getContext()->language->id,
+                true,
+                false,
+                (int)$zoneId,
+                $customer->getGroups(),
+                \Carrier::PS_CARRIERS_ONLY
+            );
+
+            return empty($internalCarriers);
+        }
+
+        return false;
     }
 
     /**

@@ -107,4 +107,24 @@ class ConfigurationService extends Configuration
             \Configuration::get('PS_SHOP_DEFAULT')
         );
     }
+
+    /**
+     * Returns backup carrier ID.
+     *
+     * @return int|null Backup carrier ID if found; otherwise, NULL.
+     */
+    public function getBackupCarrierId()
+    {
+        return $this->getConfigValue('backupCarrierId') ?: null;
+    }
+
+    /**
+     * Sets backup carrier ID.
+     *
+     * @param int $carrierId ID of the backup carrier.
+     */
+    public function setBackupCarrierId($carrierId)
+    {
+        $this->saveConfigValue('backupCarrierId', $carrierId);
+    }
 }

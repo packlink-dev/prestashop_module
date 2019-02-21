@@ -31,6 +31,7 @@ use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
+use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
@@ -57,6 +58,7 @@ class CarrierService implements ShopShippingMethodService
         /** @var \Carrier $carrier PrestaShop carrier object. */
         $carrier = new \Carrier();
 
+        $carrier->name = $shippingMethod->getTitle();
         $this->setCarrierData($carrier, $shippingMethod);
 
         try {
@@ -67,6 +69,10 @@ class CarrierService implements ShopShippingMethodService
 
                 $this->updateCarrierLogo($shippingMethod, $carrier);
                 $this->saveCarrierServiceMapping((int)$carrier->id, $shippingMethod->getId());
+
+                if (count($this->getPacklinkCarrierIds()) === 1) {
+                    $this->addBackupCarrier($shippingMethod);
+                }
 
                 return true;
             }
@@ -145,6 +151,10 @@ class CarrierService implements ShopShippingMethodService
 
             $carrier->deleted = true;
             $carrier->update();
+
+            if (count($this->getPacklinkCarrierIds()) === 1) {
+                $this->deleteBackupCarrier();
+            }
         }
 
         return true;
@@ -223,14 +233,8 @@ class CarrierService implements ShopShippingMethodService
     public function deletePacklinkCarriers()
     {
         try {
-            $query = new \DbQuery();
-            $query->select('id_carrier')
-                ->from('carrier')
-                ->where('external_module_name = \'packlink\'');
-
-            $result = \Db::getInstance()->executeS($query);
-            $carriers = array_column($result, 'id_carrier');
-            foreach ($carriers as $carrierId) {
+            $carrierIds = $this->getPacklinkCarrierIds();
+            foreach ($carrierIds as $carrierId) {
                 $carrier = new \Carrier((int)$carrierId);
                 $carrier->deleted = true;
                 $carrier->update();
@@ -281,7 +285,7 @@ class CarrierService implements ShopShippingMethodService
                 unlink($prestaLogoPath);
             }
 
-            if (!$this->copyCarrierLogo($shippingMethod, (int)$carrier->id)) {
+            if (!$this->copyCarrierLogo($shippingMethod->getCarrierName(), (int)$carrier->id)) {
                 throw new \RuntimeException(
                     TranslationUtility::__('Failed copying carrier logo to the system')
                 );
@@ -301,7 +305,6 @@ class CarrierService implements ShopShippingMethodService
     {
         $carrier->active = true;
         $carrier->deleted = false;
-        $carrier->name = $shippingMethod->getTitle();
         $carrier->shipping_handling = false;
         $carrier->is_free = false;
         $carrier->shipping_method = \Carrier::SHIPPING_METHOD_WEIGHT;
@@ -316,6 +319,67 @@ class CarrierService implements ShopShippingMethodService
         foreach ($languages as $language) {
             $carrier->delay[(int)$language['id_lang']] = $shippingMethod->getDeliveryTime();
         }
+    }
+
+    /**
+     * Adds Packlink backup carrier based on first configured Packlink shipping method entity.
+     *
+     * @param ShippingMethod $shippingMethod First configured Packlink shipping method entity.
+     *
+     * @throws \RuntimeException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function addBackupCarrier(ShippingMethod $shippingMethod)
+    {
+        $carrier = new \Carrier();
+        $carrier->name = 'shipping cost';
+        $this->setCarrierData($carrier, $shippingMethod);
+
+        if (!$carrier->add()) {
+           throw new \RuntimeException(TranslationUtility::__('Failed creating backup carrier'));
+        }
+
+        $this->setCarrierGroups($carrier);
+        $rangeWeight = $this->setCarrierRangeWeight($carrier);
+        $this->setBackupCarrierZones($carrier, $rangeWeight, $shippingMethod);
+
+        if (!$this->copyCarrierLogo($carrier->name, (int)$carrier->id)) {
+            throw new \RuntimeException(
+                TranslationUtility::__('Failed copying carrier logo to the system')
+            );
+        }
+
+        $this->saveCarrierServiceMapping((int)$carrier->id, 0);
+        /** @var ConfigurationService $configService */
+        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
+        $configService->setBackupCarrierId((int)$carrier->id);
+    }
+
+    /**
+     * Deletes Packlink backup carrier.
+     */
+    private function deleteBackupCarrier()
+    {
+        /** @var ConfigurationService $configService */
+        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
+
+        $backupCarrierId = $configService->getBackupCarrierId();
+        if ($backupCarrierId === null) {
+            Logger::logError(TranslationUtility::__('Backup carrier not found'));
+
+            return;
+        }
+
+        $carrierLogoPath = $this->getPrestaCarrierLogoPath($backupCarrierId);
+        if (\Tools::file_exists_cache($carrierLogoPath)) {
+            unlink($carrierLogoPath);
+        }
+
+        $carrier = new \Carrier((int)$backupCarrierId);
+        $carrier->deleted = true;
+        $carrier->update();
+
+        $configService->setBackupCarrierId(null);
     }
 
     /**
@@ -393,12 +457,30 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
+     * Sets zones for backup carrier by adding default shipping cost of the first carrier for delivery price.
+     *
+     * @param \Carrier $carrier PrestaShop carrier entity.
+     * @param \RangeWeight $rangeWeight PrestaShop range weight.
+     * @param ShippingMethod $shippingMethod Packlink shipping method entity.
+     */
+    private function setBackupCarrierZones(\Carrier $carrier, \RangeWeight $rangeWeight, ShippingMethod $shippingMethod)
+    {
+        $defaultCost = PHP_INT_MAX;
+        foreach ($shippingMethod->getShippingServices() as $shippingService) {
+            $defaultCost = min($defaultCost, $shippingService->basePrice);
+        }
+
+        $this->setCarrierZones($carrier, $rangeWeight, $defaultCost);
+    }
+
+    /**
      * Sets carrier zones.
      *
      * @param \Carrier $carrier PrestaShop carrier object.
      * @param \RangeWeight $rangeWeight PrestaShop range weight object.
+     * @param float $price Delivery price.
      */
-    private function setCarrierZones(\Carrier $carrier, \RangeWeight $rangeWeight)
+    private function setCarrierZones(\Carrier $carrier, \RangeWeight $rangeWeight, $price = 0.0)
     {
         $zones = \Zone::getZones(true);
         foreach ($zones as $zone) {
@@ -409,23 +491,41 @@ class CarrierService implements ShopShippingMethodService
                 'id_zone' => (int)$zone['id_zone'],
                 'id_range_price' => null,
                 'id_range_weight' => (int)$rangeWeight->id,
-                'price' => '0', // Price is 0 because it is calculated at runtime.
+                'price' => $price,
             );
             $carrier->addDeliveryPrice($priceList);
         }
     }
 
     /**
+     * Returns IDs of active carriers that have been created by Packlink module.
+     *
+     * @return array Array of carrier IDs.
+     */
+    private function getPacklinkCarrierIds()
+    {
+        $query = new \DbQuery();
+        $query->select('id_carrier')
+            ->from('carrier')
+            ->where('external_module_name = \'packlink\'')
+            ->where('deleted = 0');
+
+        $result = \Db::getInstance()->executeS($query);
+
+        return array_column($result, 'id_carrier');
+    }
+
+    /**
      * Copies carrier logo from plugin directory to PrestaShop shipping images directory.
      *
-     * @param ShippingMethod $shippingMethod Shipping method.
+     * @param string $shippingMethodName Name of the shipping method.
      * @param int $carrierId ID of the carrier.
      *
      * @return bool Returns true if logo has been successfully copied, otherwise returns false.
      */
-    private function copyCarrierLogo(ShippingMethod $shippingMethod, $carrierId)
+    private function copyCarrierLogo($shippingMethodName, $carrierId)
     {
-        $source = _PS_MODULE_DIR_ . $this->getCarrierLogoFilePath($shippingMethod->getCarrierName());
+        $source = _PS_MODULE_DIR_ . $this->getCarrierLogoFilePath($shippingMethodName);
 
         if (!copy($source, $this->getPrestaCarrierLogoPath($carrierId))) {
             return false;
