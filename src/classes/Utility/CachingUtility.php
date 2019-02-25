@@ -187,7 +187,9 @@ class CachingUtility
                 $parcel->length = ceil((float)$product['depth']) ?: (int)$defaultParcel->height;
                 $parcel->weight = (float)$product['weight'] ?: (float)$defaultParcel->weight;
 
-                self::$parcelCache[] = $parcel;
+                for ($i = 0; $i < $product['quantity']; $i++) {
+                    self::$parcelCache[] = $parcel;
+                }
             }
         }
 

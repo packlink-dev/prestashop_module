@@ -30,8 +30,8 @@ use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\Configuration;
+use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
@@ -280,18 +280,16 @@ class CarrierService implements ShopShippingMethodService
     protected function updateCarrierLogo(ShippingMethod $shippingMethod, \Carrier $carrier)
     {
         $prestaLogoPath = $this->getPrestaCarrierLogoPath($carrier->id);
-        if ($shippingMethod->isDisplayLogo()) {
-            if (\Tools::file_exists_cache($prestaLogoPath)) {
-                unlink($prestaLogoPath);
-            }
-
-            if (!$this->copyCarrierLogo($shippingMethod->getCarrierName(), (int)$carrier->id)) {
-                throw new \RuntimeException(
-                    TranslationUtility::__('Failed copying carrier logo to the system')
-                );
-            }
-        } elseif (\Tools::file_exists_cache($prestaLogoPath)) {
+        if (\Tools::file_exists_cache($prestaLogoPath)) {
             unlink($prestaLogoPath);
+        }
+
+        if ($shippingMethod->isDisplayLogo()
+            && !$this->copyCarrierLogo($shippingMethod->getCarrierName(), (int)$carrier->id)
+        ) {
+            throw new \RuntimeException(
+                TranslationUtility::__('Failed copying carrier logo to the system')
+            );
         }
     }
 
@@ -326,8 +324,9 @@ class CarrierService implements ShopShippingMethodService
      *
      * @param ShippingMethod $shippingMethod First configured Packlink shipping method entity.
      *
-     * @throws \RuntimeException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     private function addBackupCarrier(ShippingMethod $shippingMethod)
     {
@@ -357,6 +356,9 @@ class CarrierService implements ShopShippingMethodService
 
     /**
      * Deletes Packlink backup carrier.
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     private function deleteBackupCarrier()
     {
@@ -501,6 +503,8 @@ class CarrierService implements ShopShippingMethodService
      * Returns IDs of active carriers that have been created by Packlink module.
      *
      * @return array Array of carrier IDs.
+     *
+     * @throws \PrestaShopDatabaseException
      */
     private function getPacklinkCarrierIds()
     {

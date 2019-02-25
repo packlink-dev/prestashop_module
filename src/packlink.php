@@ -342,7 +342,7 @@ class Packlink extends CarrierModule
      * $params var contains the cart, the customer, the address
      * $shipping_cost var contains the price calculated by the range in carrier tab
      *
-     * @param \Cart $params Shopping cart object.
+     * @param \Cart $cart Shopping cart object.
      * @param int $shippingCost Shipping cost calculated by PrestaShop.
      * @param array $products Array of shop products for which shipping cost is calculated.
      *
@@ -353,7 +353,7 @@ class Packlink extends CarrierModule
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    public function getPackageShippingCost($params, $shippingCost, $products)
+    public function getPackageShippingCost($cart, $shippingCost, $products)
     {
         \Packlink\PrestaShop\Classes\Bootstrap::init();
 
@@ -370,8 +370,8 @@ class Packlink extends CarrierModule
         }
 
         $calculatedCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCosts();
-        if ($this->displayBackupCarrier($params, $calculatedCosts, $carrierReferenceId)) {
-            return $shippingCost;
+        if ($this->displayBackupCarrier($cart, $calculatedCosts, $carrierReferenceId)) {
+            return $this->calculateBackupCarrierCost($shippingCost, $products);
         }
 
         if ($calculatedCosts !== false) {
@@ -386,9 +386,9 @@ class Packlink extends CarrierModule
         $toCountry = $warehouse->country;
         $toZip = $warehouse->postalCode;
 
-        if (!empty($params->id_address_delivery)) {
+        if (!empty($cart->id_address_delivery)) {
             $deliveryAddress = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getAddress(
-                (int)$params->id_address_delivery
+                (int)$cart->id_address_delivery
             );
             $deliveryCountry = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCountry(
                 (int)$deliveryAddress->id_country
@@ -663,6 +663,24 @@ class Packlink extends CarrierModule
         }
 
         return false;
+    }
+
+    /**
+     * Calculates shipping cost for backup service.
+     *
+     * @param float $defaultCost Default cost per item.
+     * @param array $products Cart items.
+     *
+     * @return float
+     */
+    private function calculateBackupCarrierCost($defaultCost, $products)
+    {
+        $totalQuantity = 0;
+        foreach ($products as $product) {
+            $totalQuantity += $product['quantity'];
+        }
+
+        return $defaultCost * $totalQuantity;
     }
 
     /**
