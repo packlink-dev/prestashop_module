@@ -372,12 +372,18 @@ class CarrierService implements ShopShippingMethodService
             return;
         }
 
+        $carrier = \Carrier::getCarrierByReference($backupCarrierId);
+        if ($carrier === false) {
+            Logger::logError(TranslationUtility::__('Backup carrier not found'));
+
+            return;
+        }
+
         $carrierLogoPath = $this->getPrestaCarrierLogoPath($backupCarrierId);
         if (\Tools::file_exists_cache($carrierLogoPath)) {
             unlink($carrierLogoPath);
         }
 
-        $carrier = new \Carrier((int)$backupCarrierId);
         $carrier->deleted = true;
         $carrier->update();
 

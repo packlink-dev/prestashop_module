@@ -370,8 +370,12 @@ class Packlink extends CarrierModule
         }
 
         $calculatedCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCosts();
+
         if ($this->displayBackupCarrier($cart, $calculatedCosts, $carrierReferenceId)) {
-            return $shippingCost;
+            $allCosts = $this->getCostsForAllShippingMethods($cart, $products);
+            if (!empty($allCosts)) {
+                return min(array_values($allCosts));
+            }
         }
 
         if ($calculatedCosts !== false) {
@@ -383,21 +387,8 @@ class Packlink extends CarrierModule
             return false;
         }
 
-        $toCountry = $warehouse->country;
-        $toZip = $warehouse->postalCode;
-
-        if (!empty($cart->id_address_delivery)) {
-            $deliveryAddress = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getAddress(
-                (int)$cart->id_address_delivery
-            );
-            $deliveryCountry = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCountry(
-                (int)$deliveryAddress->id_country
-            );
-
-            $toCountry = $deliveryCountry->iso_code;
-            $toZip = $deliveryAddress->postcode;
-        }
-
+        $toCountry = $this->getDestinationCountryCode($cart, $warehouse);
+        $toZip = $this->getDestinationCountryZip($cart, $warehouse);
         $parcels = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getParcels($products);
 
         /** @var \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService $shippingMethodService */
@@ -663,6 +654,86 @@ class Packlink extends CarrierModule
         }
 
         return false;
+    }
+
+    /**
+     * Returns shipping costs for all Packlink shipping methods, not just active ones.
+     *
+     * @param \Cart $cart PrestaShop cart object.
+     * @param array $products Array of products.
+     *
+     * @return array Array of shipping costs for all Packlink shipping methods.
+     */
+    private function getCostsForAllShippingMethods($cart, $products)
+    {
+        $warehouse = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDefaultWarehouse();
+        if ($warehouse === null) {
+            return array();
+        }
+
+        /** @var \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService $shippingMethodsService */
+        $shippingMethodService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService::CLASS_NAME
+        );
+        $parcels = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getParcels($products);
+
+        return \Packlink\BusinessLogic\ShippingMethod\ShippingCostCalculator::getShippingCosts(
+            $shippingMethodService->getAllMethods(),
+            $warehouse->country,
+            $warehouse->postalCode,
+            $this->getDestinationCountryCode($cart, $warehouse),
+            $this->getDestinationCountryZip($cart, $warehouse),
+            $parcels
+        );
+    }
+
+    /**
+     * Returns destination country code.
+     *
+     * @param \Cart $cart PrestaShop cart object.
+     * @param \Packlink\BusinessLogic\Http\DTO\Warehouse $warehouse
+     *
+     * @return string Destination country code.
+     */
+    private function getDestinationCountryCode($cart, $warehouse)
+    {
+        $countryCode = $warehouse->country;
+
+        if (!empty($cart->id_address_delivery)) {
+            $deliveryAddress = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getAddress(
+                (int)$cart->id_address_delivery
+            );
+            $deliveryCountry = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCountry(
+                (int)$deliveryAddress->id_country
+            );
+
+            $countryCode = $deliveryCountry->iso_code;
+        }
+
+        return $countryCode;
+    }
+
+    /**
+     * Returns destination country ZIP code.
+     *
+     * @param \Cart $cart PrestaShop cart object.
+     * @param \Packlink\BusinessLogic\Http\DTO\Warehouse $warehouse
+     *
+     * @return string Destination country zip code.
+     */
+    private function getDestinationCountryZip($cart, $warehouse)
+    {
+        $destinationZip = $warehouse->postalCode;
+
+        if (!empty($cart->id_address_delivery)) {
+            $deliveryAddress = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getAddress(
+                (int)$cart->id_address_delivery
+            );
+
+            $destinationZip = $deliveryAddress->postcode;
+        }
+
+        return $destinationZip;
     }
 
     /**
