@@ -86,12 +86,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "beb8c721de1aa501e7140c46f96a26a668aa1780"
+                "reference": "be7e984b50ddedb844909d702a0d7a31e11ad6cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/beb8c721de1aa501e7140c46f96a26a668aa1780",
-                "reference": "beb8c721de1aa501e7140c46f96a26a668aa1780",
+                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/be7e984b50ddedb844909d702a0d7a31e11ad6cd",
+                "reference": "be7e984b50ddedb844909d702a0d7a31e11ad6cd",
                 "shasum": ""
             },
             "require": {
@@ -120,7 +120,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2019-02-22T15:42:11+00:00"
+            "time": "2019-02-25T13:18:42+00:00"
         }
     ],
     "packages-dev": [

@@ -285,11 +285,28 @@
 
   <div id="pl-shipping-methods-page-template">
 
+    <!-- DELETE SHIPPING METHODS MODAL -->
+
+    <div class="pl-dashboard-modal-wrapper hidden" id="pl-delete-methods-modal-wrapper">
+      <div class="pl-dashboard-modal pl-delete-methods-modal" id="pl-delete-methods-modal">
+        <div class="pl-shipping-modal-title">
+          {l s='Congrats! Your first Shipping Method has been successfully created.' mod='packlink'}
+        </div>
+        <div class="pl-shipping-modal-body">
+          {l s='In order to offer you the best possible service, its importatnt to delete your previous carriers. Do you want us to delete them? (recommended)' mod='packlink'}
+        </div>
+        <div class="pl-shipping-modal-row">
+          <button class="btn btn-lg btn-outline-secondary pl-shipping-modal-btn" id="pl-delete-methods-modal-cancel">{l s='Cancel' mod='packlink'}</button>
+          <button class="btn btn-lg btn-primary" id="pl-delete-methods-modal-accept">{l s='Accept' mod='packlink'}</button>
+        </div>
+      </div>
+    </div>
+
     <!-- DASHBOARD MODAL SECTION -->
 
     <div class="pl-dashboard-modal-wrapper hidden" id="pl-dashboard-modal-wrapper">
       <div class="pl-dashboard-modal" id="pl-dashboard-modal">
-        <img src="{html_entity_decode($dashboardIcon|escape:'html':'UTF-8')}">
+        <img src="{html_entity_decode($dashboardIcon|escape:'html':'UTF-8')}" alt="Dashboard icon">
         <div class="pl-dashboard-page-title-wrapper">
           {l s='You\'re almost there!' mod='packlink'}
         </div>
@@ -638,7 +655,7 @@
         </p>
       </td>
       <td>
-        <img class="pl-method-logo" id="pl-logo"
+        <img src="" class="pl-method-logo" id="pl-logo"
              alt="Logo">
       </td>
       <td class="pl-delivery-type" id="pl-delivery-type">
@@ -1023,6 +1040,8 @@
         getSystemOrderStatusesUrl: "{$getSystemOrderStatusesUrl}",
         orderStatusMappingsGetUrl: "{$orderStatusMappingsGetUrl}",
         orderStatusMappingsSaveUrl: "{$orderStatusMappingsSaveUrl}",
+        shopShippingMethodCountGetUrl: "{$shopShippingMethodCountGetUrl}",
+        shopShippingMethodsDeleteUrl: "{$shopShippingMethodsDeleteUrl}",
         debugGetStatusUrl: "{$debugGetStatusUrl}",
         debugSetStatusUrl: "{$debugSetStatusUrl}"
       }

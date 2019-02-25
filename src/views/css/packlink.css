@@ -417,6 +417,37 @@
   border-radius: 5px;
 }
 
+.pl-delete-methods-modal {
+  position: absolute;
+  width: 300px;
+  height: 230px;
+  border-radius: 0;
+  border: 1px #d5d5d5 solid;
+  padding: 20px 10px;
+}
+
+.pl-shipping-modal-title {
+  font-size: 16px;
+  color: #5d5d5d;
+  line-height: 18px;
+  margin-bottom: 20px;
+}
+
+.pl-shipping-modal-body {
+  font-size: 12px;
+  line-height: 14px;
+  color: #5d5d5d;
+}
+
+.pl-shipping-modal-row {
+  position: absolute;
+  bottom: 20px;
+}
+
+.pl-shipping-modal-btn {
+  margin-right: 30px;
+}
+
 .pl-configure-shipping-method-wrapper {
   padding: 0 !important;
   box-sizing: content-box;

@@ -133,6 +133,65 @@ class ShippingMethodsController extends ModuleAdminController
     }
 
     /**
+     * Retrieves number of shop shipping methods.
+     */
+    public function displayAjaxGetNumberShopMethods()
+    {
+        $db = Db::getInstance();
+        $query = new DbQuery();
+        $query->select('count(*) as shippingMethodsCount')
+            ->from('carrier')
+            ->where("external_module_name <> 'packlink'")
+            ->where('deleted = 0');
+
+        try {
+            $result = $db->executeS($query);
+        } catch (PrestaShopDatabaseException $e) {
+            $result = array();
+        }
+
+        $count = !empty($result[0]['shippingMethodsCount']) ? (int) $result[0]['shippingMethodsCount'] : 0;
+
+        PacklinkPrestaShopUtility::dieJson(array('count' => $count));
+    }
+
+    /**
+     * Deletes shop shipping methods.
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    public function displayAjaxDeleteShopShippingMethods()
+    {
+        $db = Db::getInstance();
+
+        $query = new DbQuery();
+        $query->select('id_carrier')
+            ->from('carrier')
+            ->where("external_module_name <> 'packlink'")
+            ->where('deleted = 0');
+
+        try {
+            $result = $db->executeS($query);
+        } catch (PrestaShopDatabaseException $e) {
+            $result = array();
+        }
+
+        if (empty($result)) {
+            PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to delete shipping methods.')));
+        }
+
+        $ids = array_column($result, 'id_carrier');
+        foreach ($ids as $id) {
+            $carrier = new \Carrier((int)$id);
+            $carrier->deleted = true;
+            $carrier->update();
+        }
+
+        PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully deleted shipping methods.')));
+    }
+
+    /**
      * Transforms
      *
      * @param BaseDto[] $data

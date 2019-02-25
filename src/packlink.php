@@ -860,6 +860,7 @@ class Packlink extends CarrierModule
         $debugSetStatusUrl = $this->getAction('Debug', 'setStatus');
         $getSystemInfoUrl = $this->getAction('Debug', 'getSystemInfo', false);
         $shopShippingMethodCountGetUrl = $this->getAction('ShippingMethods', 'getNumberShopMethods');
+        $shopShippingMethodsDeleteUrl = $this->getAction('ShippingMethods', 'deleteShopShippingMethods');
 
         $frontendParams = array(
             'dashboardGetStatusUrl' => $dashGetStatusUrl,
@@ -878,6 +879,7 @@ class Packlink extends CarrierModule
             'debugSetStatusUrl' => $debugSetStatusUrl,
             'getSystemInfoUrl' => $getSystemInfoUrl,
             'shopShippingMethodCountGetUrl' => $shopShippingMethodCountGetUrl,
+            'shopShippingMethodsDeleteUrl' => $shopShippingMethodsDeleteUrl,
             'dashboardIcon' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/dashboard.png',
             'dashboardLogo' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/logo-pl.svg',
             'helpLink' => self::$helpUrls[$linkLanguage],
