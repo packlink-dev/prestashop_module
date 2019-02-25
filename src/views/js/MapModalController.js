@@ -31,26 +31,20 @@ var Packlink = window.Packlink || {};
 
     let modal = null;
     let closeButton = null;
-    let iframe = null;
     let ajaxService = Packlink.ajaxService;
 
     let locations = [];
-    let binaryGate = false;
 
     let selectedId;
 
     function display() {
-      binaryGate = false;
-
       modal = document.getElementById('pl-map-modal');
       modal.classList.remove('hidden');
 
+      document.getElementById('pl-modal-spinner').classList.remove('disabled');
+
       closeButton = document.getElementById('pl-close-modal-btn');
       closeButton.addEventListener('click', closeClickedListener);
-
-      iframe = document.getElementById('pl-map-frame');
-      iframe.contentWindow.postMessage({type: 'reset'}, '*');
-      window.addEventListener('message', iframeMessageHandler);
 
       ajaxService.post(
           configuration.getUrl,
@@ -68,29 +62,16 @@ var Packlink = window.Packlink || {};
     function close() {
       modal.classList.add('hidden');
       closeButton.removeEventListener('click', closeClickedListener);
-      window.removeEventListener('message', iframeMessageHandler);
     }
 
     /**
      * Handles communication with location picker library.
      *
-     * @param message
+     * @param id
      */
-    function iframeMessageHandler(message) {
-      let type = message.data.type;
-
-      if (type === 'select') {
-        selectedId = message.data.payload.id;
-        selectDropoff();
-      }
-
-      if (type === 'ready') {
-        if (binaryGate) {
-          submitLocations();
-        }
-
-        binaryGate = true;
-      }
+    function onDropoffSelected(id) {
+      selectedId = id;
+      selectDropoff();
     }
 
     /**
@@ -105,18 +86,15 @@ var Packlink = window.Packlink || {};
         configuration.onComplete({type: 'no-locations'});
       }
 
-      if (binaryGate) {
-        submitLocations();
-      }
-
-      binaryGate = true;
+      submitLocations();
     }
 
     /**
      * Submits location to location library.
      */
     function submitLocations() {
-      iframe.contentWindow.postMessage({type: 'locations', payload: locations}, '*')
+      Packlink.locationPicker.display(locations, onDropoffSelected);
+      document.getElementById('pl-modal-spinner').classList.add('disabled');
     }
 
     /**

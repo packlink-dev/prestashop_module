@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
     "content-hash": "117cf7f22f12613408f308e8131165bb",
@@ -86,12 +86,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "03215e6a23dfd0d6bc52327231de16f18b793225"
+                "reference": "beb8c721de1aa501e7140c46f96a26a668aa1780"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/03215e6a23dfd0d6bc52327231de16f18b793225",
-                "reference": "03215e6a23dfd0d6bc52327231de16f18b793225",
+                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/beb8c721de1aa501e7140c46f96a26a668aa1780",
+                "reference": "beb8c721de1aa501e7140c46f96a26a668aa1780",
                 "shasum": ""
             },
             "require": {
@@ -120,7 +120,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2019-02-20T13:08:21+00:00"
+            "time": "2019-02-22T15:42:11+00:00"
         }
     ],
     "packages-dev": [

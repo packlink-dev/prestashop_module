@@ -69,6 +69,7 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
      */
     public function getIncompleteOrderReferences()
     {
@@ -125,10 +126,9 @@ class OrderRepository implements OrderRepositoryInterface
 
         if ($dropOffId) {
             $order->setShippingDropOffId($dropOffId);
-            $order->setShippingDropOffAddress($this->getAddress($sourceOrder));
-        } else {
-            $order->setShippingAddress($this->getAddress($sourceOrder));
         }
+
+        $order->setShippingAddress($this->getAddress($sourceOrder));
 
         $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
         $this->setOrderItems($order, $sourceOrder);

@@ -51,9 +51,65 @@
       <div class="pl-modal-spinner"></div>
     </div>
     <div class="pl-close-modal" id="pl-close-modal-btn"><i class="material-icons">close</i></div>
-    <iframe src="https://pro.packlink.fr/index.html?lang=en" height="100%" width="100%" id="pl-map-frame"></iframe>
+
+    <location-picker>
+      <div class="lp-content" data-lp-id="content">
+        <div class="lp-locations">
+          <div class="lp-input-wrapper">
+            <div class="input">
+              <input type="text" title="" required data-lp-id="search-box">
+              <span class="label" data-lp-id="search-box-label"></span>
+            </div>
+          </div>
+
+          <div data-lp-id="locations"></div>
+        </div>
+      </div>
+    </location-picker>
+
   </div>
 </div>
+
+
+<location-picker-template>
+  <div class="lp-template" id="template-container">
+    <div data-lp-id="working-hours-template" class="lp-hour-wrapper">
+      <div class="day" data-lp-id="day">
+      </div>
+      <div class="hours" data-lp-id="hours">
+      </div>
+    </div>
+
+    <div class="lp-location-wrapper" data-lp-id="location-template">
+      <div class="radio-button lp-collapse">
+        <div class="lp-radio"></div>
+      </div>
+      <div class="composite lp-expand">
+        <div class="street-name uppercase" data-lp-id="composite-address"></div>
+        <div class="lp-working-hours-btn excluded" data-lp-composite data-lp-id="show-composite-working-hours-btn"></div>
+        <div data-lp-id="composite-working-hours" class="lp-working-hours">
+
+        </div>
+      </div>
+      <div class="name uppercase lp-collapse" data-lp-id="location-name"></div>
+      <div class="street lp-collapse">
+        <div class="street-name uppercase" data-lp-id="location-street"></div>
+        <div class="lp-working-hours-btn excluded" data-lp-id="show-working-hours-btn"></div>
+        <div data-lp-id="working-hours" class="lp-working-hours">
+
+        </div>
+      </div>
+      <div class="city uppercase lp-collapse" data-lp-id="location-city">
+      </div>
+      <div class="lp-select-column">
+        <div class="lp-select-button excluded" data-lp-id="select-btn"></div>
+      </div>
+      <a class="excluded" href="#" data-lp-id="show-on-map" target="_blank">
+        <div class="lp-show-on-map-btn excluded"></div>
+      </a>
+    </div>
+  </div>
+</location-picker-template>
 
 <script>
   Packlink.trans = {

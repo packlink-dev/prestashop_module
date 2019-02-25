@@ -28,9 +28,11 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\Http\Proxy;
+use Packlink\BusinessLogic\ShippingMethod\ShippingCostCalculator;
 use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
+use Packlink\PrestaShop\Classes\Utility\CachingUtility;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 class PacklinkLocationsModuleFrontController extends ModuleFrontController
@@ -115,6 +117,8 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
         $countryCode = \Tools::strtoupper($country->iso_code);
         $postalCode = $address->postcode;
 
+        $warehouse = CachingUtility::getDefaultWarehouse();
+
         /** @var ShippingMethodService $shippingMethodService */
         $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
         $method = $shippingMethodService->getShippingMethod($methodId);
@@ -123,7 +127,13 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
         }
 
         try {
-            $cheapestService = $method->getCheapestShippingService($countryCode);
+            $cheapestService = ShippingCostCalculator::getCheapestShippingService(
+                $method,
+                $warehouse->country,
+                $warehouse->postalCode,
+                $countryCode,
+                $postalCode
+            );
         } catch (\InvalidArgumentException $e) {
             return array();
         }

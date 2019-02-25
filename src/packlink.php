@@ -157,12 +157,21 @@ class Packlink extends CarrierModule
      */
     public function hookDisplayBeforeCarrier($params)
     {
+        $locationPickerLibrary = $this->_path . 'views/js/location/LocationPicker.js';
+        $output = "<script src=\"{$locationPickerLibrary}\"></script>" . "\n";
+
+        $locationPickerTrans = $this->_path . 'views/js/location/Translations.js';
+        $output .= "<script src=\"{$locationPickerTrans}\"></script>" . "\n";
+
+        $locationPickerCSS = $this->_path . 'views/css/locationPicker.css';
+        $output .= "<link rel=\"stylesheet\" href=\"{$locationPickerCSS}\"/>" . "\n";
+
         if (version_compare(_PS_VERSION_, '1.7.0.0', '<')) {
-            return $this->getPresta16ShippingStepPage($params);
+            return $output . $this->getPresta16ShippingStepPage($params);
         }
 
         $shippingServicePath = $this->_path . 'views/js/ShippingService17.js';
-        $output = "<script src=\"{$shippingServicePath}\"></script>" . "\n";
+        $output .= "<script src=\"{$shippingServicePath}\"></script>" . "\n";
 
         $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
         $output .= "<script src=\"{$ajaxPath}\"></script>" . "\n";
@@ -832,6 +841,7 @@ class Packlink extends CarrierModule
         $debugGetStatusUrl = $this->getAction('Debug', 'getStatus');
         $debugSetStatusUrl = $this->getAction('Debug', 'setStatus');
         $getSystemInfoUrl = $this->getAction('Debug', 'getSystemInfo', false);
+        $shopShippingMethodCountGetUrl = $this->getAction('ShippingMethods', 'getNumberShopMethods');
 
         $frontendParams = array(
             'dashboardGetStatusUrl' => $dashGetStatusUrl,
@@ -849,6 +859,7 @@ class Packlink extends CarrierModule
             'debugGetStatusUrl' => $debugGetStatusUrl,
             'debugSetStatusUrl' => $debugSetStatusUrl,
             'getSystemInfoUrl' => $getSystemInfoUrl,
+            'shopShippingMethodCountGetUrl' => $shopShippingMethodCountGetUrl,
             'dashboardIcon' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/dashboard.png',
             'dashboardLogo' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/logo-pl.svg',
             'helpLink' => self::$helpUrls[$linkLanguage],
