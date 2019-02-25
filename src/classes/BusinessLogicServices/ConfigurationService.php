@@ -33,7 +33,7 @@ class ConfigurationService extends Configuration
     /**
      * @inheritdoc
      */
-    const SCHEDULER_TIME_THRESHOLD = 86400;
+    const SCHEDULER_TIME_THRESHOLD = 1800;
     /**
      * @inheritdoc
      */
