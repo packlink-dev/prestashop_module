@@ -30,11 +30,11 @@ use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
+use Order as PrestaShopOrder;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Http\DTO\Shipment;
 use Packlink\BusinessLogic\Http\DTO\Tracking;
 use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
-use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
 use Packlink\BusinessLogic\Order\Objects\Address;
 use Packlink\BusinessLogic\Order\Objects\Item;
 use Packlink\BusinessLogic\Order\Objects\Order;
@@ -52,7 +52,7 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
  *
  * @package Packlink\PrestaShop\Classes\Repositories
  */
-class OrderRepository implements OrderRepositoryInterface
+class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderRepository
 {
     const PACKLINK_ORDER_DRAFT_FIELD = 'packlink_order_draft';
     /**
@@ -69,6 +69,7 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
      */
     public function getIncompleteOrderReferences()
     {
@@ -103,7 +104,7 @@ class OrderRepository implements OrderRepositoryInterface
      */
     public function getOrderAndShippingData($orderId)
     {
-        $sourceOrder = new \Order($orderId);
+        $sourceOrder = new PrestaShopOrder($orderId);
         $order = new Order();
 
         if ($sourceOrder === null) {
@@ -125,13 +126,12 @@ class OrderRepository implements OrderRepositoryInterface
 
         if ($dropOffId) {
             $order->setShippingDropOffId($dropOffId);
-            $order->setShippingDropOffAddress($this->getAddress($sourceOrder));
-        } else {
-            $order->setShippingAddress($this->getAddress($sourceOrder));
         }
 
+        $order->setShippingAddress($this->getAddress($sourceOrder));
+
         $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
-        $this->setOrderItems($order, $sourceOrder);
+        $order->setItems($this->getOrderItems($sourceOrder));
 
         return $order;
     }
@@ -262,7 +262,6 @@ class OrderRepository implements OrderRepositoryInterface
      *
      * @param ShopOrderDetails $orderDetails Shop order details entity.
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      */
@@ -302,7 +301,7 @@ class OrderRepository implements OrderRepositoryInterface
             $orderDetails->setPacklinkShippingPrice($shipmentDetails->price);
             $orderDetails->setCarrierTrackingUrl($shipmentDetails->carrierTrackingUrl);
             if (!empty($shipmentDetails->trackingCodes)) {
-                $order = new \Order($orderDetails->getOrderId());
+                $order = new PrestaShopOrder($orderDetails->getOrderId());
                 $order->setWsShippingNumber($shipmentDetails->trackingCodes[0]);
 
                 $orderDetails->setCarrierTrackingNumbers($shipmentDetails->trackingCodes);
@@ -343,12 +342,14 @@ class OrderRepository implements OrderRepositoryInterface
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order with provided reference is not found.
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function setShippingPriceByReference($shipmentReference, $price)
     {
         $orderDetails = $this->getOrderDetailsByReference($shipmentReference);
 
-        $order = new \Order($orderDetails->getOrderId());
+        $order = new PrestaShopOrder($orderDetails->getOrderId());
         $order->updateShippingCost($price);
 
         $orderDetails->setPacklinkShippingPrice($price);
@@ -356,22 +357,22 @@ class OrderRepository implements OrderRepositoryInterface
     }
 
     /**
-     * Retrieves dropoff id if shop order has drop off shipping service selected.
+     * Retrieves drop-off id if shop order has drop off shipping service selected.
      *
      * Returns null otherwise.
      *
-     * @param \Order $shopOrder
+     * @param PrestaShopOrder $shopOrder
      *
      * @return string | null
      */
-    private function getDropOffId(\Order $shopOrder)
+    private function getDropOffId(PrestaShopOrder $shopOrder)
     {
         try {
             $repository = RepositoryRegistry::getRepository(
                 CartCarrierDropOffMapping::getClassName()
             );
 
-            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
+            $query = new QueryFilter();
             $query->where('cartId', '=', (string)$shopOrder->id_cart)
                 ->where('carrierReferenceId', '=', (string)$shopOrder->id_carrier);
 
@@ -393,14 +394,14 @@ class OrderRepository implements OrderRepositoryInterface
     /**
      * Returns packlink address from shop address.
      *
-     * @param \Order $shopOrder
+     * @param PrestaShopOrder $shopOrder
      *
      * @return \Packlink\BusinessLogic\Order\Objects\Address
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function getAddress(\Order $shopOrder)
+    private function getAddress(PrestaShopOrder $shopOrder)
     {
         $deliveryAddressId = (int)$shopOrder->id_address_delivery;
 
@@ -439,7 +440,7 @@ class OrderRepository implements OrderRepositoryInterface
      */
     private function setSourceOrderStatus($orderId, $shippingStatus)
     {
-        $order = new \Order($orderId);
+        $order = new PrestaShopOrder($orderId);
         /** @var ConfigurationService $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
         $statusMappings = $configService->getOrderStatusMappings();
@@ -524,13 +525,14 @@ class OrderRepository implements OrderRepositoryInterface
     /**
      * Sets order items that belong to provided order.
      *
-     * @param Order $order Packlink order object.
-     * @param \Order $sourceOrder PrestaShop order object.
+     * @param PrestaShopOrder $sourceOrder PrestaShop order object.
+     *
+     * @return Item[] An array of order items.
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function setOrderItems($order, $sourceOrder)
+    private function getOrderItems(PrestaShopOrder $sourceOrder)
     {
         /** @var ConfigurationService $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
@@ -548,7 +550,7 @@ class OrderRepository implements OrderRepositoryInterface
             $orderItems[] = $orderItem;
         }
 
-        $order->setItems($orderItems);
+        return $orderItems;
     }
 
     /**
@@ -611,7 +613,7 @@ class OrderRepository implements OrderRepositoryInterface
      */
     private function checkIfOrderExists($orderId)
     {
-        $order = new \Order($orderId);
+        $order = new PrestaShopOrder($orderId);
 
         if ($order === null) {
             throw new OrderNotFound(
