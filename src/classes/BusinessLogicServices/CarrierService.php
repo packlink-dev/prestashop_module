@@ -367,14 +367,14 @@ class CarrierService implements ShopShippingMethodService
 
         $backupCarrierId = $configService->getBackupCarrierId();
         if ($backupCarrierId === null) {
-            Logger::logError(TranslationUtility::__('Backup carrier not found'));
+            Logger::logWarning(TranslationUtility::__('Backup carrier not found'));
 
             return;
         }
 
         $carrier = \Carrier::getCarrierByReference($backupCarrierId);
         if ($carrier === false) {
-            Logger::logError(TranslationUtility::__('Backup carrier not found'));
+            Logger::logWarning(TranslationUtility::__('Backup carrier not found'));
 
             return;
         }
