@@ -371,7 +371,7 @@ class Packlink extends CarrierModule
 
         $calculatedCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCosts();
         if ($this->displayBackupCarrier($cart, $calculatedCosts, $carrierReferenceId)) {
-            return $this->calculateBackupCarrierCost($shippingCost, $products);
+            return $shippingCost;
         }
 
         if ($calculatedCosts !== false) {
@@ -663,24 +663,6 @@ class Packlink extends CarrierModule
         }
 
         return false;
-    }
-
-    /**
-     * Calculates shipping cost for backup service.
-     *
-     * @param float $defaultCost Default cost per item.
-     * @param array $products Cart items.
-     *
-     * @return float
-     */
-    private function calculateBackupCarrierCost($defaultCost, $products)
-    {
-        $totalQuantity = 0;
-        foreach ($products as $product) {
-            $totalQuantity += $product['quantity'];
-        }
-
-        return $defaultCost * $totalQuantity;
     }
 
     /**
