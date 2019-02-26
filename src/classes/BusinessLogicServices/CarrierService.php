@@ -54,10 +54,19 @@ class CarrierService implements ShopShippingMethodService
      *
      * @return bool TRUE if activation succeeded; otherwise, FALSE.
      *
-     * @throws \PrestaShopException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws  \PrestaShopException
      */
     public function add(ShippingMethod $shippingMethod)
     {
+        $referenceId = $this->getCarrierReferenceId($shippingMethod->getId());
+        if ($referenceId !== null) {
+            $this->update($shippingMethod);
+
+            return true;
+        }
+
         /** @var \Carrier $carrier PrestaShop carrier object. */
         $carrier = new \Carrier();
 
