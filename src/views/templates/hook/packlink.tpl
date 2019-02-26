@@ -424,7 +424,7 @@
       <div class="col-sm-12 pl-filter-method-item">
         <div class="md-checkbox">
           <label>
-            <input type="checkbox" data-pl-shipping-methods-filter="title-national">
+            <input type="checkbox" data-pl-shipping-methods-filter="title-national" tabindex="-1">
             <i class="md-checkbox-control"></i>
             {l s='National' mod='packlink'}
           </label>
@@ -435,7 +435,7 @@
       <div class="col-sm-12 pl-filter-method-item">
         <div class="md-checkbox">
           <label>
-            <input type="checkbox" data-pl-shipping-methods-filter="title-international">
+            <input type="checkbox" data-pl-shipping-methods-filter="title-international" tabindex="-1">
             <i class="md-checkbox-control"></i>
             {l s='International' mod='packlink'}
           </label>
@@ -451,7 +451,7 @@
       <div class="col-sm-12 pl-filter-method-item">
         <div class="md-checkbox">
           <label>
-            <input type="checkbox" data-pl-shipping-methods-filter="deliveryType-economic">
+            <input type="checkbox" data-pl-shipping-methods-filter="deliveryType-economic" tabindex="-1">
             <i class="md-checkbox-control"></i>
             {l s='Economic' mod='packlink'}
           </label>
@@ -462,7 +462,7 @@
       <div class="col-sm-12 pl-filter-method-item">
         <div class="md-checkbox">
           <label>
-            <input type="checkbox" data-pl-shipping-methods-filter="deliveryType-express">
+            <input type="checkbox" data-pl-shipping-methods-filter="deliveryType-express" tabindex="-1">
             <i class="md-checkbox-control"></i>
             {l s='Express' mod='packlink'}
           </label>
@@ -478,7 +478,7 @@
       <div class="col-sm-12 pl-filter-method-item">
         <div class="md-checkbox">
           <label>
-            <input type="checkbox" data-pl-shipping-methods-filter="parcelOrigin-pickup">
+            <input type="checkbox" data-pl-shipping-methods-filter="parcelOrigin-pickup" tabindex="-1">
             <i class="md-checkbox-control"></i>
             {l s='Collection' mod='packlink'}
           </label>
@@ -489,7 +489,7 @@
       <div class="col-sm-12 pl-filter-method-item">
         <div class="md-checkbox">
           <label>
-            <input type="checkbox" data-pl-shipping-methods-filter="parcelOrigin-dropoff">
+            <input type="checkbox" data-pl-shipping-methods-filter="parcelOrigin-dropoff" tabindex="-1">
             <i class="md-checkbox-control"></i>
             {l s='Drop off' mod='packlink'}
           </label>
@@ -505,7 +505,7 @@
       <div class="col-sm-12 pl-filter-method-item">
         <div class="md-checkbox">
           <label>
-            <input type="checkbox" data-pl-shipping-methods-filter="parcelDestination-home">
+            <input type="checkbox" data-pl-shipping-methods-filter="parcelDestination-home" tabindex="-1">
             <i class="md-checkbox-control"></i>
             {l s='Delivery' mod='packlink'}
           </label>
@@ -516,7 +516,7 @@
       <div class="col-sm-12 pl-filter-method-item">
         <div class="md-checkbox">
           <label>
-            <input type="checkbox" data-pl-shipping-methods-filter="parcelDestination-dropoff">
+            <input type="checkbox" data-pl-shipping-methods-filter="parcelDestination-dropoff" tabindex="-1">
             <i class="md-checkbox-control"></i>
             {l s='Pick up' mod='packlink'}
           </label>
@@ -642,7 +642,7 @@
     <tbody id="pl-shipping-methods-row-template">
     <tr class="pl-table-row-wrapper">
       <td>
-        <div id="pl-shipping-method-select-btn" class="pl-switch">
+        <div id="pl-shipping-method-select-btn" class="pl-switch" tabindex="-1">
           <div class="pl-empty-checkbox">
             <i class="material-icons">
               check_box_outline_blank
@@ -735,7 +735,7 @@
         </div>
       </td>
       <td>
-        <a href="#" id="pl-shipping-method-config-btn">
+        <a href="#" id="pl-shipping-method-config-btn" tabindex="-1">
           {l s='Configure' mod='packlink'}
         </a>
       </td>
@@ -747,10 +747,10 @@
   <div id="pl-shipping-methods-nav-template">
     <div class="row">
       <div class="col-sm-12 pl-nav-wrapper">
-        <div class="pl-nav-item selected" data-pl-shipping-methods-nav-button="all">
+        <div class="pl-nav-item selected" data-pl-shipping-methods-nav-button="all" tabindex="-1">
           {l s='All shipping services' mod='packlink'}
         </div>
-        <div class="pl-nav-item" data-pl-shipping-methods-nav-button="selected">
+        <div class="pl-nav-item" data-pl-shipping-methods-nav-button="selected" tabindex="-1">
           {l s='Selected shipping services' mod='packlink'}
         </div>
       </div>
@@ -834,7 +834,7 @@
       <div class="row">
         <div class="col-sm-12 pl-form-section-input-wrapper pl-fixed-price-wrapper">
           <div class="form-group pl-form-section-input pl-text-input">
-            <input type="text" data-pl-fixed-price="from" disabled/>
+            <input type="text" data-pl-fixed-price="from" disabled tabindex="-1"/>
             <span class="pl-text-input-label">{l s='FROM' mod='packlink'} (kg)</span>
           </div>
           <div class="form-group pl-form-section-input pl-text-input">
