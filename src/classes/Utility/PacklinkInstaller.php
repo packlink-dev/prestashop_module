@@ -98,7 +98,7 @@ class PacklinkInstaller
     public function initializePlugin()
     {
         Bootstrap::init();
-        if (!$this->createBaseTable() || !$this->extendOrdersTable()) {
+        if (!$this->createBaseTable() || !$this->extendOrdersTable() || !$this->addTab()) {
             return false;
         }
 
@@ -130,7 +130,7 @@ class PacklinkInstaller
     {
         Bootstrap::init();
 
-        if (!$this->dropBaseTable()) {
+        if (!$this->dropBaseTable() || !$this->removeTab()) {
             return false;
         }
 
@@ -140,13 +140,49 @@ class PacklinkInstaller
         $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
         $carrierService->deletePacklinkCarriers();
 
-        $this->removeController('AdminTabPacklink');
         $this->removeControllers();
 
         // Make sure that deleted configuration is reflected into cached values as well.
         \Configuration::loadConfiguration();
 
         return true;
+    }
+
+    /**
+     * Adds Packlink menu item to shipping tab group.
+     *
+     * @return bool Returns TRUE if tab has been successfully added, otherwise returns FALSE.
+     */
+    public function addTab()  {
+        $tab = new \Tab();
+
+        $tab->name[\Context::getContext()->language->id] = 'Packlink PRO';
+        $tab->class_name = 'Packlink';
+        $tab->id_parent = (int) \Tab::getIdFromClassName('AdminParentShipping');
+        $tab->module = 'packlink';
+
+        return $tab->add();
+    }
+
+    /**
+     * Removes Packlink menu item from shipping tab group.
+     *
+     * @return bool Returns TRUE if tab has been successfully removed, otherwise returns FALSE.
+     */
+    public function removeTab()
+    {
+        try {
+            $tabId = (int)\Tab::getIdFromClassName('Packlink');
+
+            if ($tabId) {
+                $tab = new \Tab($tabId);
+                return $tab->delete();
+            }
+        } catch (\PrestaShopException $e) {
+            Logger::logWarning('Error removing admin tab. Error: ' . $e->getMessage(), 'Integration');
+        }
+
+        return false;
     }
 
     /**

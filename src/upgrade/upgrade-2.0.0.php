@@ -103,9 +103,25 @@ function upgrade_module_2_0_0($module)
     removePreviousData();
 
     $module->enable();
+    addTab();
     Shop::setContext($previousShopContext);
 
     return true;
+}
+
+/**
+ * Adds Packlink menu item to shipping tab group.
+ */
+function addTab()
+{
+    $tab = new \Tab();
+
+    $tab->name[\Context::getContext()->language->id] = 'Packlink PRO';
+    $tab->class_name = 'Packlink';
+    $tab->id_parent = (int) \Tab::getIdFromClassName('AdminParentShipping');
+    $tab->module = 'packlink';
+
+    $tab->add();
 }
 
 /**
@@ -282,9 +298,30 @@ function removePreviousData()
     $sql_wait = 'DROP TABLE IF EXISTS `' . $db->getPrefix() . 'packlink_wait_draft`';
     $db->execute($sql_wait);
 
+    try {
+        deleteAdminTabs();
+    } catch (\PrestaShopException $e) {
+        Logger::logWarning('Error removing admin tab. Error: ' . $e->getMessage(), 'Integration');
+    }
+
     $configs = getConfigurationKeys();
     foreach ($configs as $config) {
         Configuration::deleteByName($config);
+    }
+}
+
+/**
+ * Deletes all previously added admin tabs
+ *
+ * @param string $name
+ */
+function deleteAdminTabs()
+{
+    $tabs = \Tab::getCollectionFromModule('packlink');
+    if ($tabs && count($tabs)) {
+        foreach ($tabs as $tab) {
+            $tab->delete();
+        }
     }
 }
 
