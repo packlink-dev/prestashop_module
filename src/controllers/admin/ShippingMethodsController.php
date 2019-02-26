@@ -192,6 +192,43 @@ class ShippingMethodsController extends ModuleAdminController
     }
 
     /**
+     * Retrieves available tax classes.
+     */
+    public function displayAjaxGetAvailableTaxClasses()
+    {
+        $db = Db::getInstance();
+        $query = new DbQuery();
+        $query->select('id_tax_rules_group, name')
+            ->from('tax_rules_group')
+            ->where('active = 1')
+            ->where('deleted = 0');
+
+        try {
+            $queryResult = $db->executeS($query);
+        } catch (PrestaShopDatabaseException $e) {
+            $queryResult = array();
+        }
+
+        $result = array(
+            array(
+                'value' => CarrierService::DEFAULT_TAX_CLASS,
+                'label' => $this->l(CarrierService::DEFAULT_TAX_CLASS_LABEL),
+            ),
+        );
+
+        if (!empty($queryResult)) {
+            foreach ($queryResult as $row) {
+                $result[] = array(
+                    'value' => $row['id_tax_rules_group'],
+                    'label' => $row['name']
+                );
+            }
+        }
+
+        PacklinkPrestaShopUtility::dieJson($result);
+    }
+
+    /**
      * Transforms
      *
      * @param BaseDto[] $data
@@ -219,6 +256,8 @@ class ShippingMethodsController extends ModuleAdminController
     protected function getShippingMethodConfiguration()
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
+
+        $data['taxClass'] = (int) $data['taxClass'];
 
         return ShippingMethodConfiguration::fromArray($data);
     }

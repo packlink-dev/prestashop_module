@@ -605,6 +605,21 @@
 
                 <div id="pl-pricing-extension-point"></div>
 
+
+                <div class="row">
+                  <div class="col-sm-12 pl-form-section-subtitle-wrapper">
+                    {l s='Tax' mod='packlink'}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12 pl-form-section-input-wrapper">
+                    <div class="form-group pl-form-section-input">
+                      <select id="pl-tax-selector">
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -1027,6 +1042,7 @@
         },
 
         shippingServiceMaxTitleLength: 64,
+        hasTaxConfiguration: true,
 
         dashboardGetStatusUrl: "{$dashboardGetStatusUrl}",
         defaultParcelGetUrl: "{$defaultParcelGetUrl}",
@@ -1043,7 +1059,8 @@
         shopShippingMethodCountGetUrl: "{$shopShippingMethodCountGetUrl}",
         shopShippingMethodsDeleteUrl: "{$shopShippingMethodsDeleteUrl}",
         debugGetStatusUrl: "{$debugGetStatusUrl}",
-        debugSetStatusUrl: "{$debugSetStatusUrl}"
+        debugSetStatusUrl: "{$debugSetStatusUrl}",
+        shippingMethodsGetTaxClasses: "{$shippingMethodsGetTaxClasses}"
       }
   );
 

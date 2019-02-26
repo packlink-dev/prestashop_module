@@ -914,6 +914,7 @@ class Packlink extends CarrierModule
         $getSystemInfoUrl = $this->getAction('Debug', 'getSystemInfo', false);
         $shopShippingMethodCountGetUrl = $this->getAction('ShippingMethods', 'getNumberShopMethods');
         $shopShippingMethodsDeleteUrl = $this->getAction('ShippingMethods', 'deleteShopShippingMethods');
+        $shippingMethodsGetTaxClasses = $this->getAction('ShippingMethods', 'getAvailableTaxClasses');
 
         $frontendParams = array(
             'dashboardGetStatusUrl' => $dashGetStatusUrl,
@@ -933,6 +934,7 @@ class Packlink extends CarrierModule
             'getSystemInfoUrl' => $getSystemInfoUrl,
             'shopShippingMethodCountGetUrl' => $shopShippingMethodCountGetUrl,
             'shopShippingMethodsDeleteUrl' => $shopShippingMethodsDeleteUrl,
+            'shippingMethodsGetTaxClasses' => $shippingMethodsGetTaxClasses,
             'dashboardIcon' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/dashboard.png',
             'dashboardLogo' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/logo-pl.svg',
             'helpLink' => self::$helpUrls[$linkLanguage],

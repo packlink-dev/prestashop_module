@@ -44,6 +44,9 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
  */
 class CarrierService implements ShopShippingMethodService
 {
+    const DEFAULT_TAX_CLASS = 0;
+    const DEFAULT_TAX_CLASS_LABEL = 'No tax';
+
     /**
      * Adds / Activates shipping method in shop integration.
      *
@@ -63,6 +66,8 @@ class CarrierService implements ShopShippingMethodService
 
         try {
             if ($carrier->add()) {
+                $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS, false);
+
                 $this->setCarrierGroups($carrier);
                 $rangeWeight = $this->setCarrierRangeWeight($carrier);
                 $this->setCarrierZones($carrier, $rangeWeight);
@@ -104,6 +109,7 @@ class CarrierService implements ShopShippingMethodService
             if ($carrier) {
                 try {
                     $this->setCarrierData($carrier, $shippingMethod);
+                    $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS, false);
                     $this->updateCarrierLogo($shippingMethod, $carrier);
                     $carrier->update();
                 } catch (\Exception $e) {
@@ -306,7 +312,6 @@ class CarrierService implements ShopShippingMethodService
         $carrier->shipping_handling = false;
         $carrier->is_free = false;
         $carrier->shipping_method = \Carrier::SHIPPING_METHOD_WEIGHT;
-        $carrier->setTaxRulesGroup(1, true);
         $carrier->range_behavior = false;
         $carrier->need_range = true;
         $carrier->shipping_external = true;

@@ -732,6 +732,7 @@
   cursor: pointer;
   display: inline-block;
   color: #2095f2;
+  margin-bottom: 15px;
 }
 
 .pl-fixed-price-wrapper {
