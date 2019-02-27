@@ -156,12 +156,12 @@ class ShippingMethodsController extends ModuleAdminController
     }
 
     /**
-     * Deletes shop shipping methods.
+     * Disables shop shipping methods.
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    public function displayAjaxDeleteShopShippingMethods()
+    public function displayAjaxDisableShopShippingMethods()
     {
         $db = Db::getInstance();
 
@@ -169,6 +169,7 @@ class ShippingMethodsController extends ModuleAdminController
         $query->select('id_carrier')
             ->from('carrier')
             ->where("external_module_name <> 'packlink'")
+            ->where('active = 1')
             ->where('deleted = 0');
 
         try {
@@ -178,17 +179,17 @@ class ShippingMethodsController extends ModuleAdminController
         }
 
         if (empty($result)) {
-            PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to delete shipping methods.')));
+            PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to disable shipping methods.')));
         }
 
         $ids = array_column($result, 'id_carrier');
         foreach ($ids as $id) {
             $carrier = new \Carrier((int)$id);
-            $carrier->deleted = true;
+            $carrier->active = false;
             $carrier->update();
         }
 
-        PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully deleted shipping methods.')));
+        PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully disabled shipping methods.')));
     }
 
     /**

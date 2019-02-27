@@ -287,17 +287,17 @@
 
     <!-- DELETE SHIPPING METHODS MODAL -->
 
-    <div class="pl-dashboard-modal-wrapper hidden" id="pl-delete-methods-modal-wrapper">
-      <div class="pl-dashboard-modal pl-delete-methods-modal" id="pl-delete-methods-modal">
+    <div class="pl-dashboard-modal-wrapper hidden" id="pl-disable-methods-modal-wrapper">
+      <div class="pl-dashboard-modal pl-disable-methods-modal" id="pl-disable-methods-modal">
         <div class="pl-shipping-modal-title">
           {l s='Congrats! Your first Shipping Method has been successfully created.' mod='packlink'}
         </div>
         <div class="pl-shipping-modal-body">
-          {l s='In order to offer you the best possible service, its importatnt to delete your previous carriers. Do you want us to delete them? (recommended)' mod='packlink'}
+          {l s='In order to offer you the best possible service, its importatnt to disable your previous carriers. Do you want us to disable them? (recommended)' mod='packlink'}
         </div>
         <div class="pl-shipping-modal-row">
-          <button class="btn btn-lg btn-outline-secondary pl-shipping-modal-btn" id="pl-delete-methods-modal-cancel">{l s='Cancel' mod='packlink'}</button>
-          <button class="btn btn-lg btn-primary" id="pl-delete-methods-modal-accept">{l s='Accept' mod='packlink'}</button>
+          <button class="btn btn-lg btn-outline-secondary pl-shipping-modal-btn" id="pl-disable-methods-modal-cancel">{l s='Cancel' mod='packlink'}</button>
+          <button class="btn btn-lg btn-primary" id="pl-disable-methods-modal-accept">{l s='Accept' mod='packlink'}</button>
         </div>
       </div>
     </div>
@@ -1057,7 +1057,7 @@
         orderStatusMappingsGetUrl: "{$orderStatusMappingsGetUrl}",
         orderStatusMappingsSaveUrl: "{$orderStatusMappingsSaveUrl}",
         shopShippingMethodCountGetUrl: "{$shopShippingMethodCountGetUrl}",
-        shopShippingMethodsDeleteUrl: "{$shopShippingMethodsDeleteUrl}",
+        shopShippingMethodsDisableUrl: "{$shopShippingMethodsDisableUrl}",
         debugGetStatusUrl: "{$debugGetStatusUrl}",
         debugSetStatusUrl: "{$debugSetStatusUrl}",
         shippingMethodsGetTaxClasses: "{$shippingMethodsGetTaxClasses}"
