@@ -108,6 +108,8 @@ class PacklinkInstaller
             Logger::logDebug(TranslationUtility::__('Started copying resources from Core'), 'Integration');
             $this->copyResources($baseSource . '/img/carriers', $baseDestination . '/img/carriers');
             $this->copyResources($baseSource . '/js', $baseDestination . '/js/core');
+            $this->copyResources($baseSource . '/LocationPicker/js', $baseDestination . '/js/location');
+            $this->copyResources($baseSource . '/LocationPicker/css', $baseDestination . '/css');
             Logger::logDebug(TranslationUtility::__('Resources copied to module resources directory'), 'Integration');
         } catch (\RuntimeException $e) {
             Logger::logError(

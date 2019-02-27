@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "117cf7f22f12613408f308e8131165bb",
+    "content-hash": "c960b8300ce534c41faddaf14e244e9d",
     "packages": [
         {
             "name": "packlink/integration-core",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "e7047745a46802756d5966ef77f13c2bf150b1c1"
+                "reference": "2718a94487508020ac3df4ac7c84546593b68592"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/e7047745a46802756d5966ef77f13c2bf150b1c1",
-                "reference": "e7047745a46802756d5966ef77f13c2bf150b1c1",
+                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/2718a94487508020ac3df4ac7c84546593b68592",
+                "reference": "2718a94487508020ac3df4ac7c84546593b68592",
                 "shasum": ""
             },
             "require": {
@@ -46,7 +46,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2019-02-27T09:22:42+00:00"
+            "time": "2019-02-27T11:28:41+00:00"
         },
         {
             "name": "zendframework/zend-memory",
@@ -1380,7 +1380,8 @@
         "php": ">=5.3",
         "ext-json": "*",
         "ext-curl": "*",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "ext-fileinfo": "*"
     },
     "platform-dev": []
 }
