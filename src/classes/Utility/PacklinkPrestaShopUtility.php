@@ -95,7 +95,7 @@ class PacklinkPrestaShopUtility
     /**
      * Sets file specified by $filePath as response.
      *
-     * @param $filePath
+     * @param string $filePath
      * @param string $outputFileName
      */
     public static function dieFile($filePath, $outputFileName = '')
@@ -105,6 +105,27 @@ class PacklinkPrestaShopUtility
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename=' . $fileName);
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filePath));
+        readfile($filePath);
+
+        die(200);
+    }
+
+    /**
+     * Returns file inline.
+     *
+     * @param string $filePath
+     * @param string $outputFileName
+     */
+    public static function dieInline($filePath, $outputFileName = '')
+    {
+        $fileName = $outputFileName !== '' ? $outputFileName : basename($filePath);
+
+        header('Content-Type: ' . mime_content_type($filePath));
+        header('Content-Disposition: inline; filename=' . $fileName);
         header('Expires: 0');
         header('Cache-Control: must-revalidate');
         header('Pragma: public');

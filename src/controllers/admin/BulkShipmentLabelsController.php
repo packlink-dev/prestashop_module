@@ -31,6 +31,7 @@ use Packlink\BusinessLogic\Utility\PdfMerge;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Entities\ShopOrderDetails;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
+use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -78,7 +79,6 @@ class BulkShipmentLabelsController extends ModuleAdminController
      */
     protected function bulkPrintLabels(OrderRepository $orderRepository)
     {
-        $pdf = new PdfMerge();
         $orderIds = \Tools::getValue('orders');
 
         $tmpDirectory = _PS_MODULE_DIR_ . 'packlink/tmp';
@@ -90,11 +90,14 @@ class BulkShipmentLabelsController extends ModuleAdminController
 
         $this->saveFilesLocally($orderIds, $orderRepository);
 
+        $result = false;
+
         try {
+            $pdfs = array();
             $iterator = new \DirectoryIterator($tmpDirectory);
             foreach ($iterator as $fileInfo) {
                 if (!$fileInfo->isDot()) {
-                    $pdf->addPDF($fileInfo->getPath() . '/' . $fileInfo->getFilename());
+                    $pdfs[] = $fileInfo->getPath() . '/' . $fileInfo->getFilename();
                 }
             }
 
@@ -106,8 +109,8 @@ class BulkShipmentLabelsController extends ModuleAdminController
             }
 
             $now = date('Y-m-d');
-            $pdf->merge($bulkLabelDirectory . "/Packlink-bulk-shipment-labels_$now.pdf", 'I');
-            $this->deleteTemporaryFiles($tmpDirectory);
+            $outputPath = $bulkLabelDirectory . "/Packlink-bulk-shipment-labels_$now.pdf";
+            $result = PdfMerge::merge($pdfs, $outputPath);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Unable to create bulk labels file'),
@@ -115,7 +118,13 @@ class BulkShipmentLabelsController extends ModuleAdminController
             );
         }
 
-        die();
+        $this->deleteTemporaryFiles($tmpDirectory);
+
+        if ($result !== false) {
+            PacklinkPrestaShopUtility::dieInline($result);
+        }
+
+        PacklinkPrestaShopUtility::die400();
     }
 
     /**

@@ -1,102 +1,28 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
     "content-hash": "117cf7f22f12613408f308e8131165bb",
     "packages": [
-        {
-            "name": "itbz/fpdf",
-            "version": "1.7.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mreg-archive/fpdf.git",
-                "reference": "63340096907ef7525a9002d1ae3d0fd1ff376a6d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mreg-archive/fpdf/zipball/63340096907ef7525a9002d1ae3d0fd1ff376a6d",
-                "reference": "63340096907ef7525a9002d1ae3d0fd1ff376a6d",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "fpdf": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "no usage restriction"
-            ],
-            "description": "Unofficial PSR-0 compliant version of the FPDF library",
-            "homepage": "http://www.fpdf.org/",
-            "abandoned": "setasign/fpdf",
-            "time": "2016-05-27T09:02:54+00:00"
-        },
-        {
-            "name": "itbz/fpdi",
-            "version": "1.6.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mreg-archive/fpdi.git",
-                "reference": "3189f4662a5bbd3838309368d9fc7f5a31c08a6f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mreg-archive/fpdi/zipball/3189f4662a5bbd3838309368d9fc7f5a31c08a6f",
-                "reference": "3189f4662a5bbd3838309368d9fc7f5a31c08a6f",
-                "shasum": ""
-            },
-            "require": {
-                "itbz/fpdf": "~1.7",
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "hanneskod/classtools": "~1.0",
-                "nikic/php-parser": "~1.0",
-                "phpunit/phpunit": "4.*",
-                "symfony/finder": "~2.3",
-                "tecnickcom/tcpdf": "^6.2.12"
-            },
-            "suggest": {
-                "tecnickcom/tcpdf": "FPDI supports TCPDF as a replacement for FPDF"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "fpdi\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Unofficial PSR-4 compliant version of the FPDI library",
-            "abandoned": "setasign/fpdi",
-            "time": "2016-03-02T19:45:05+00:00"
-        },
         {
             "name": "packlink/integration-core",
             "version": "dev-dev",
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "e6d8e149b0d7d740e98e85a6d544307f5b1611e1"
+                "reference": "e7047745a46802756d5966ef77f13c2bf150b1c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/e6d8e149b0d7d740e98e85a6d544307f5b1611e1",
-                "reference": "e6d8e149b0d7d740e98e85a6d544307f5b1611e1",
+                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/e7047745a46802756d5966ef77f13c2bf150b1c1",
+                "reference": "e7047745a46802756d5966ef77f13c2bf150b1c1",
                 "shasum": ""
             },
             "require": {
-                "itbz/fpdi": "1.6.1",
-                "php": ">=5.3"
+                "php": ">=5.3",
+                "zendframework/zendpdf": "2.0.*@dev"
             },
             "require-dev": {
                 "codacy/coverage": "dev-master",
@@ -120,7 +46,145 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2019-02-27T08:59:05+00:00"
+            "time": "2019-02-27T09:22:42+00:00"
+        },
+        {
+            "name": "zendframework/zend-memory",
+            "version": "2.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/zend-memory.git",
+                "reference": "a01d5eb74012c2a170e1ea1e18486152d2eea5f7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zendframework/zend-memory/zipball/a01d5eb74012c2a170e1ea1e18486152d2eea5f7",
+                "reference": "a01d5eb74012c2a170e1ea1e18486152d2eea5f7",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6 || ^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7.27 || ^6.5.8 || ^7.1.4",
+                "zendframework/zend-cache": "^2.7",
+                "zendframework/zend-coding-standard": "~1.0.0"
+            },
+            "suggest": {
+                "zendframework/zend-cache": "To support swapping memory objects into and out of non-memory cache storage"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.6.x-dev",
+                    "dev-develop": "2.7.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Zend\\Memory\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Manage data in an environment with limited memory",
+            "keywords": [
+                "ZendFramework",
+                "memory",
+                "zf"
+            ],
+            "time": "2018-04-30T15:45:17+00:00"
+        },
+        {
+            "name": "zendframework/zend-stdlib",
+            "version": "3.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/zend-stdlib.git",
+                "reference": "66536006722aff9e62d1b331025089b7ec71c065"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zendframework/zend-stdlib/zipball/66536006722aff9e62d1b331025089b7ec71c065",
+                "reference": "66536006722aff9e62d1b331025089b7ec71c065",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6 || ^7.0"
+            },
+            "require-dev": {
+                "phpbench/phpbench": "^0.13",
+                "phpunit/phpunit": "^5.7.27 || ^6.5.8 || ^7.1.2",
+                "zendframework/zend-coding-standard": "~1.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.2.x-dev",
+                    "dev-develop": "3.3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Zend\\Stdlib\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "SPL extensions, array utilities, error handlers, and more",
+            "keywords": [
+                "ZendFramework",
+                "stdlib",
+                "zf"
+            ],
+            "time": "2018-08-28T21:34:05+00:00"
+        },
+        {
+            "name": "zendframework/zendpdf",
+            "version": "2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zendframework/ZendPdf.git",
+                "reference": "041f90c339cff63a3c4d03a28ef1ea5188059793"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zendframework/ZendPdf/zipball/041f90c339cff63a3c4d03a28ef1ea5188059793",
+                "reference": "041f90c339cff63a3c4d03a28ef1ea5188059793",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "zendframework/zend-memory": ">=2.0.0",
+                "zendframework/zend-stdlib": ">=2.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "ZendPdf\\": "library/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "Zend Pdf Component",
+            "homepage": "http://packages.zendframework.com/",
+            "keywords": [
+                "pdf",
+                "zf2"
+            ],
+            "abandoned": true,
+            "time": "2012-11-16T11:16:01+00:00"
         }
     ],
     "packages-dev": [

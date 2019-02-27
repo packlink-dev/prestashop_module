@@ -14,7 +14,8 @@
     "packlink/integration-core": "dev-dev",
     "ext-json": "*",
     "ext-curl": "*",
-    "ext-zip": "*"
+    "ext-zip": "*",
+    "ext-fileinfo": "*"
   },
   "autoload": {
     "psr-4": {
