@@ -142,6 +142,7 @@ class ShippingMethodsController extends ModuleAdminController
         $query->select('count(*) as shippingMethodsCount')
             ->from('carrier')
             ->where("external_module_name <> 'packlink'")
+            ->where('active = 1')
             ->where('deleted = 0');
 
         try {
