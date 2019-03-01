@@ -250,8 +250,10 @@ class PacklinkInstaller
      */
     private function createBaseTable()
     {
-        $sql = 'CREATE TABLE IF NOT EXISTS ' . _DB_NAME_ . '.' . _DB_PREFIX_ . BaseRepository::TABLE_NAME . '
-            (
+        $sql = 'CREATE TABLE IF NOT EXISTS '
+            . '`' . _DB_NAME_ . '`' . '.'
+            . '`' . _DB_PREFIX_ . BaseRepository::TABLE_NAME . '`'
+            . '(
              `id` INT NOT NULL AUTO_INCREMENT,
              `type` VARCHAR(128) NOT NULL,
              `index_1` VARCHAR(255),
