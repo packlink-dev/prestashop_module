@@ -542,12 +542,16 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $orderItems = array();
         /** @var array $sourceOrderItem */
         foreach ($sourceOrderItems as $sourceOrderItem) {
-            $orderItem = $this->getOrderItem($sourceOrderItem, $defaultParcel);
+            /** @var \ProductCore $product */
+            $product = new \Product((int) $sourceOrderItem['product_id']);
+            if (!$product->is_virtual) {
+                $orderItem = $this->getOrderItem($sourceOrderItem, $defaultParcel);
 
-            $orderItem->setPrice((float)$sourceOrderItem['unit_price_tax_excl']);
-            $orderItem->setTotalPrice((float)$sourceOrderItem['unit_price_tax_incl']);
+                $orderItem->setPrice((float)$sourceOrderItem['unit_price_tax_excl']);
+                $orderItem->setTotalPrice((float)$sourceOrderItem['unit_price_tax_incl']);
 
-            $orderItems[] = $orderItem;
+                $orderItems[] = $orderItem;
+            }
         }
 
         return $orderItems;
