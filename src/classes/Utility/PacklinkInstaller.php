@@ -284,7 +284,9 @@ class PacklinkInstaller
      */
     private function dropBaseTable()
     {
-        $script = 'DROP TABLE IF EXISTS ' . _DB_NAME_ . '.' . _DB_PREFIX_ . BaseRepository::TABLE_NAME;
+        $script = 'DROP TABLE IF EXISTS '
+            . '`' . _DB_NAME_ . '`' . '.'
+            . '`' . _DB_PREFIX_ . BaseRepository::TABLE_NAME . '`';
 
         try {
             return (bool)\Db::getInstance()->execute($script);
@@ -315,7 +317,7 @@ class PacklinkInstaller
         }
 
         if (is_array($result) && count($result) === 0) {
-            $alterTableSqlStatement = 'ALTER TABLE ' . pSQL(_DB_NAME_ . '.' . _DB_PREFIX_ . 'orders')
+            $alterTableSqlStatement = 'ALTER TABLE ' . '`' . _DB_NAME_ . '`' . '.' . '`' . _DB_PREFIX_ . 'orders`'
                 . ' ADD ' . $columnName . ' VARCHAR(100) DEFAULT NULL';
             try {
                 return (bool)\Db::getInstance()->execute($alterTableSqlStatement);
@@ -337,7 +339,7 @@ class PacklinkInstaller
     private function removeOrdersColumn()
     {
         try {
-            $sql = 'ALTER TABLE ' . _DB_NAME_ . '.' . _DB_PREFIX_ . 'orders '
+            $sql = 'ALTER TABLE ' . _DB_NAME_ . '.' . '`' . _DB_PREFIX_ . '`' . '`orders` '
                 . 'DROP COLUMN ' . OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
             \Db::getInstance()->execute($sql);
         } catch (\PrestaShopDatabaseException $e) {
