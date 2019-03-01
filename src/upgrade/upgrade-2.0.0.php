@@ -116,7 +116,11 @@ function addTab()
 {
     $tab = new \Tab();
 
-    $tab->name[\Context::getContext()->language->id] = 'Packlink PRO';
+    $languages = \Language::getLanguages(true, \Context::getContext()->shop->id);
+    foreach ($languages as $language) {
+        $tab->name[$language['id_lang']] = 'Packlink PRO';
+    }
+
     $tab->class_name = 'Packlink';
     $tab->id_parent = (int) \Tab::getIdFromClassName('AdminParentShipping');
     $tab->module = 'packlink';

@@ -152,7 +152,7 @@ class DefaultWarehouseController extends ModuleAdminController
             $phoneError |= $match === false || $match < 3;
 
             if ($phoneError) {
-                $result['phone'] = $this->l('Field mus be valid phone number.');
+                $result['phone'] = $this->l('Field must be valid phone number.');
             }
         }
 
