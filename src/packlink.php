@@ -369,10 +369,17 @@ class Packlink extends CarrierModule
             return false;
         }
 
+        $shippingProducts = array();
+        foreach ($products as $product) {
+            if (!$product['is_virtual']) {
+                $shippingProducts[] = $product;
+            }
+        }
+
         $calculatedCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCosts();
 
         if ($this->displayBackupCarrier($cart, $calculatedCosts, $carrierReferenceId)) {
-            $allCosts = $this->getCostsForAllShippingMethods($cart, $products);
+            $allCosts = $this->getCostsForAllShippingMethods($cart, $shippingProducts);
             if (!empty($allCosts)) {
                 return min(array_values($allCosts));
             }
@@ -389,7 +396,7 @@ class Packlink extends CarrierModule
 
         $toCountry = $this->getDestinationCountryCode($cart, $warehouse);
         $toZip = $this->getDestinationCountryZip($cart, $warehouse);
-        $parcels = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getParcels($products);
+        $parcels = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getParcels($shippingProducts);
 
         /** @var \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService $shippingMethodService */
         $shippingMethodService = \Logeecom\Infrastructure\ServiceRegister::getService(
