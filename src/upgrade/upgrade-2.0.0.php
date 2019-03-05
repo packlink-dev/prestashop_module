@@ -33,6 +33,7 @@ use Logeecom\Infrastructure\TaskExecution\QueueService;
 use Packlink\BusinessLogic\User\UserAccountService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Tasks\UpgradeShopOrderDetailsTask;
+use Packlink\PrestaShop\Classes\Utility\PacklinkInstaller;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -42,6 +43,7 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
  *
  * @return bool
  * @throws \PrestaShopException
+ * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
  */
 function upgrade_module_2_0_0($module)
 {
@@ -49,7 +51,7 @@ function upgrade_module_2_0_0($module)
     Shop::setContext(Shop::CONTEXT_ALL);
 
     Bootstrap::init();
-    $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($module);
+    $installer = new PacklinkInstaller($module);
 
     if (!$installer->initializePlugin()) {
         return false;
@@ -57,32 +59,16 @@ function upgrade_module_2_0_0($module)
 
     Logger::logDebug(TranslationUtility::__('Upgrade to plugin v2.0.0 has started.'), 'Integration');
 
-    try {
-        removeControllersAndHooks($module);
-    } catch (PrestaShopException $e) {
-        Logger::logWarning(
-            TranslationUtility::__(
-                'Failed to remove old controllers and hooks because: %s',
-                array($e->getMessage())
-            ),
-            'Integration'
-        );
-    }
+    $installer->removeControllers();
+    removeHooks($module);
 
-    try {
-        removeObsoleteFiles($module);
-    } catch (\Exception $e) {
-        Logger::logDebug(
-            TranslationUtility::__('Could not delete obsolete files because: %s', array($e->getMessage())),
-            'Integration'
-        );
-    }
+    removeObsoleteFiles($module);
 
     if (!$installer->addControllersAndHooks()) {
         return false;
     }
 
-    $apiKey = Configuration::get('PL_API_KEY');
+    $apiKey = \Configuration::get('PL_API_KEY');
 
     if (!empty($apiKey)) {
         Logger::logDebug(TranslationUtility::__('Old api key detected.'), 'Integration');
@@ -103,65 +89,11 @@ function upgrade_module_2_0_0($module)
     removePreviousData();
 
     $module->enable();
-    addTab();
     Shop::setContext($previousShopContext);
 
+    \Configuration::loadConfiguration();
+
     return true;
-}
-
-/**
- * Adds Packlink menu item to shipping tab group.
- */
-function addTab()
-{
-    $tab = new \Tab();
-
-    $languages = \Language::getLanguages(true, \Context::getContext()->shop->id);
-    foreach ($languages as $language) {
-        $tab->name[$language['id_lang']] = 'Packlink PRO';
-    }
-
-    $tab->class_name = 'Packlink';
-    $tab->id_parent = (int) \Tab::getIdFromClassName('AdminParentShipping');
-    $tab->module = 'packlink';
-
-    $tab->add();
-}
-
-/**
- * Removes old controllers and hooks.
- *
- * @param \Module $module
- *
- * @throws \PrestaShopException
- */
-function removeControllersAndHooks($module)
-{
-    Logger::logDebug(TranslationUtility::__('Removing old controllers and hooks.'), 'Integration');
-
-    removeController('packlink');
-    removeController('AdminTabPacklink');
-    removeController('AdminGeneratePdfPl');
-
-    removeHooks($module);
-}
-
-/**
- * Deletes old controllers.
- *
- * @param string $name
- *
- * @throws \PrestaShopException
- */
-function removeController($name)
-{
-    $tabs = Tab::getCollectionFromModule($name);
-    if (!empty($tabs)) {
-        /** @var Tab $tab */
-        foreach ($tabs as $tab) {
-            $tab->delete();
-        }
-    }
 }
 
 /**
@@ -171,10 +103,20 @@ function removeController($name)
  */
 function removeHooks($module)
 {
-    $registeredHooks = getRegisteredHooks();
+    $registeredHooks = array(
+        'actionObjectOrderHistoryAddAfter',
+        'actionObjectOrderUpdateAfter',
+        'actionOrderStatusPostUpdate',
+        'displayOrderDetail',
+        'displayBackOfficeHeader',
+        'displayAdminOrderContentShip',
+        'displayAdminOrderTabShip',
+        'displayAdminOrder',
+        'displayHeader',
+    );
 
     foreach ($registeredHooks as $hook) {
-        Hook::unregisterHook($module, $hook);
+        $module->unregisterHook($hook);
     }
 }
 
@@ -195,31 +137,33 @@ function removeObsoleteFiles($module)
     removeDirectory($installPath . 'classes/helper');
     removeDirectory($installPath . 'views/templates/front');
 
-    unlink($installPath . 'classes/PLOrder.php');
+    removeFile($installPath . 'classes/PLOrder.php');
 
-    unlink($installPath . 'controllers/admin/AdminGeneratePdfPlController.php');
-    unlink($installPath . 'controllers/admin/AdminTabPacklinkController.php');
+    removeFile($installPath . 'controllers/admin/AdminGeneratePdfPlController.php');
+    removeFile($installPath . 'controllers/admin/AdminTabPacklinkController.php');
 
-    unlink($installPath . 'upgrade/Upgrade-1.3.0.php');
-    unlink($installPath . 'upgrade/Upgrade-1.4.0.php');
-    unlink($installPath . 'upgrade/Upgrade-1.5.0.php');
-    unlink($installPath . 'upgrade/Upgrade-1.6.0.php');
-    unlink($installPath . 'upgrade/Upgrade-1.6.3.php');
+    removeFile($installPath . 'upgrade/Upgrade-1.3.0.php');
+    removeFile($installPath . 'upgrade/Upgrade-1.4.0.php');
+    removeFile($installPath . 'upgrade/Upgrade-1.5.0.php');
+    removeFile($installPath . 'upgrade/Upgrade-1.6.0.php');
+    removeFile($installPath . 'upgrade/Upgrade-1.6.3.php');
 
-    unlink($installPath . 'views/css/style16.css');
-    unlink($installPath . 'views/img/add.gif');
-    unlink($installPath . 'views/img/delivery.gif');
-    unlink($installPath . 'views/img/down.png');
-    unlink($installPath . 'views/img/printer.gif');
-    unlink($installPath . 'views/img/search.gif');
-    unlink($installPath . 'views/img/up.png');
-    unlink($installPath . 'views/js/order_detail.js');
-    unlink($installPath . 'views/templates/admin/_pl_action.tpl');
-    unlink($installPath . 'views/templates/hook/back.tpl');
-    unlink($installPath . 'views/templates/hook/expedition.tpl');
-    unlink($installPath . 'views/templates/hook/order_details.tpl');
+    removeFile($installPath . 'views/css/style16.css');
+    removeFile($installPath . 'views/img/add.gif');
+    removeFile($installPath . 'views/img/delivery.gif');
+    removeFile($installPath . 'views/img/down.png');
+    removeFile($installPath . 'views/img/printer.gif');
+    removeFile($installPath . 'views/img/search.gif');
+    removeFile($installPath . 'views/img/up.png');
+    removeFile($installPath . 'views/js/order_detail.js');
+    removeFile($installPath . 'views/templates/admin/_pl_action.tpl');
+    removeFile($installPath . 'views/templates/admin/_pl_action15.tpl');
+    removeFile($installPath . 'views/templates/hook/back.tpl');
+    removeFile($installPath . 'views/templates/hook/expedition.tpl');
+    removeFile($installPath . 'views/templates/hook/expedition15.tpl');
+    removeFile($installPath . 'views/templates/hook/order_details.tpl');
 
-    unlink($installPath . 'status.php');
+    removeFile($installPath . 'status.php');
 }
 
 /**
@@ -234,13 +178,25 @@ function removeDirectory($name)
 
     foreach ($files as $file) {
         if ($file->isDir()) {
-            rmdir($file->getPathname());
+            @rmdir($file->getPathname());
         } else {
-            unlink($file->getPathname());
+            removeFile($file->getPathname());
         }
     }
 
-    rmdir($name);
+    @rmdir($name);
+}
+
+/**
+ * Removes file if it exists.
+ *
+ * @param string $path File path
+ */
+function removeFile($path)
+{
+    if (file_exists($path)) {
+        @unlink($path);
+    }
 }
 
 /**
@@ -296,57 +252,16 @@ function removePreviousData()
 
     $db = Db::getInstance();
 
-    $sql = 'DROP TABLE IF EXISTS `' . $db->getPrefix() . 'packlink_orders`';
+    $sql = 'DROP TABLE IF EXISTS ' . bqSQL(_DB_PREFIX_ . 'packlink_orders');
     $db->execute($sql);
 
-    $sql_wait = 'DROP TABLE IF EXISTS `' . $db->getPrefix() . 'packlink_wait_draft`';
+    $sql_wait = 'DROP TABLE IF EXISTS ' . bqSQL(_DB_PREFIX_ . 'packlink_wait_draft');
     $db->execute($sql_wait);
-
-    try {
-        deleteAdminTabs();
-    } catch (\PrestaShopException $e) {
-        Logger::logWarning('Error removing admin tab. Error: ' . $e->getMessage(), 'Integration');
-    }
 
     $configs = getConfigurationKeys();
     foreach ($configs as $config) {
         Configuration::deleteByName($config);
     }
-}
-
-/**
- * Deletes all previously added admin tabs
- *
- * @param string $name
- */
-function deleteAdminTabs()
-{
-    $tabs = \Tab::getCollectionFromModule('packlink');
-    if ($tabs && count($tabs)) {
-        foreach ($tabs as $tab) {
-            $tab->delete();
-        }
-    }
-}
-
-/**
- * Retrieves registered hooks in old plugin.
- *
- * @return array
- */
-function getRegisteredHooks()
-{
-    return array(
-        'actionObjectOrderHistoryAddAfter',
-        'actionObjectOrderUpdateAfter',
-        'actionOrderStatusPostUpdate',
-        'displayOrderDetail',
-        'displayBackOfficeHeader',
-        'displayAdminOrderContentShip',
-        'displayAdminOrderTabShip',
-        'displayAdminOrder',
-        'displayHeader',
-    );
 }
 
 /**

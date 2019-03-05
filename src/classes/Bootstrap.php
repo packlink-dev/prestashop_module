@@ -25,6 +25,8 @@
 
 namespace Packlink\PrestaShop\Classes;
 
+require_once _PS_MODULE_DIR_ . '/packlink/vendor/autoload.php';
+
 use Logeecom\Infrastructure\Configuration\ConfigEntity;
 use Logeecom\Infrastructure\Http\CurlHttpClient;
 use Logeecom\Infrastructure\Http\HttpClient;

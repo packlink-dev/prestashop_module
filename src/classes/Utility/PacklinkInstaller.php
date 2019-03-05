@@ -98,7 +98,7 @@ class PacklinkInstaller
     public function initializePlugin()
     {
         Bootstrap::init();
-        if (!$this->createBaseTable() || !$this->extendOrdersTable() || !$this->addTab()) {
+        if (!$this->createBaseTable() || !$this->extendOrdersTable()) {
             return false;
         }
 
@@ -132,10 +132,6 @@ class PacklinkInstaller
     {
         Bootstrap::init();
 
-        if (!$this->dropBaseTable() || !$this->removeTab()) {
-            return false;
-        }
-
         $this->removeOrdersColumn();
 
         /** @var CarrierService $carrierService */
@@ -143,6 +139,11 @@ class PacklinkInstaller
         $carrierService->deletePacklinkCarriers();
 
         $this->removeControllers();
+
+        // remove menu item
+        $this->removeController('Packlink');
+
+        $this->dropBaseTable();
 
         // Make sure that deleted configuration is reflected into cached values as well.
         \Configuration::loadConfiguration();
@@ -155,8 +156,13 @@ class PacklinkInstaller
      *
      * @return bool Returns TRUE if tab has been successfully added, otherwise returns FALSE.
      */
-    public function addTab()  {
-        $tab = new \Tab();
+    public function addMenuItem()
+    {
+        try {
+            $tab = new \Tab();
+        } catch (\PrestaShopException $e) {
+            return false;
+        }
 
         $languages = \Language::getLanguages(true, \Context::getContext()->shop->id);
         foreach ($languages as $language) {
@@ -164,31 +170,11 @@ class PacklinkInstaller
         }
 
         $tab->class_name = 'Packlink';
-        $tab->id_parent = (int) \Tab::getIdFromClassName('AdminParentShipping');
-        $tab->module = 'packlink';
+        /** @noinspection PhpDeprecationInspection Exists in PS1.6 */
+        $tab->id_parent = (int)\Tab::getIdFromClassName('AdminParentShipping');
+        $tab->module = $this->module->name;
 
         return $tab->add();
-    }
-
-    /**
-     * Removes Packlink menu item from shipping tab group.
-     *
-     * @return bool Returns TRUE if tab has been successfully removed, otherwise returns FALSE.
-     */
-    public function removeTab()
-    {
-        try {
-            $tabId = (int)\Tab::getIdFromClassName('Packlink');
-
-            if ($tabId) {
-                $tab = new \Tab($tabId);
-                return $tab->delete();
-            }
-        } catch (\PrestaShopException $e) {
-            Logger::logWarning('Error removing admin tab. Error: ' . $e->getMessage(), 'Integration');
-        }
-
-        return false;
     }
 
     /**
@@ -198,7 +184,7 @@ class PacklinkInstaller
      */
     public function addControllersAndHooks()
     {
-        return $this->addHooks() && $this->addControllers();
+        return $this->addMenuItem() && $this->addHooks() && $this->addControllers();
     }
 
     /**
@@ -224,8 +210,15 @@ class PacklinkInstaller
     public function removeControllers()
     {
         $result = true;
-        foreach (self::$controllers as $controller) {
-            $result = $result && $this->removeController($controller);
+        try {
+            $tabs = \Tab::getCollectionFromModule($this->module->name);
+            if ($tabs && count($tabs)) {
+                foreach ($tabs as $tab) {
+                    $tab->delete();
+                }
+            }
+        } catch (\PrestaShopException $e) {
+            Logger::logWarning('Error removing controller! Error: ' . $e->getMessage(), 'Integration');
         }
 
         return $result;
@@ -305,9 +298,10 @@ class PacklinkInstaller
     private function extendOrdersTable()
     {
         $columnName = pSQL(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD);
+        $tableName = _DB_PREFIX_ . 'orders';
         $checkColumnSqlStatement = 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = \'' . _DB_NAME_
-            . '\' AND TABLE_NAME = \'' . pSQL(_DB_PREFIX_ . 'orders')
-            . '\' AND COLUMN_NAME = \'' . $columnName . '\'';
+            . '\' AND TABLE_NAME = \'' . pSQL($tableName)
+            . '\' AND COLUMN_NAME = \'' . pSQL($columnName) . '\'';
         try {
             $result = \Db::getInstance()->executeS($checkColumnSqlStatement);
         } catch (\PrestaShopDatabaseException $e) {
@@ -317,8 +311,8 @@ class PacklinkInstaller
         }
 
         if (is_array($result) && count($result) === 0) {
-            $alterTableSqlStatement = 'ALTER TABLE ' . '`' . _DB_NAME_ . '`' . '.' . '`' . _DB_PREFIX_ . 'orders`'
-                . ' ADD ' . $columnName . ' VARCHAR(100) DEFAULT NULL';
+            $alterTableSqlStatement = 'ALTER TABLE ' . bqSQL($tableName)
+                . ' ADD ' . bqSQL($columnName) . ' VARCHAR(100) DEFAULT NULL';
             try {
                 return (bool)\Db::getInstance()->execute($alterTableSqlStatement);
             } catch (\PrestaShopDatabaseException $e) {
@@ -339,8 +333,9 @@ class PacklinkInstaller
     private function removeOrdersColumn()
     {
         try {
-            $sql = 'ALTER TABLE ' . _DB_NAME_ . '.' . '`' . _DB_PREFIX_ . '`' . '`orders` '
-                . 'DROP COLUMN ' . OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
+            $sql = 'ALTER TABLE ' . bqSQL(_DB_PREFIX_ . 'orders')
+                . ' DROP COLUMN ' . bqSQL(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD);
+
             \Db::getInstance()->execute($sql);
         } catch (\PrestaShopDatabaseException $e) {
             Logger::logError('Error removing orders table column. Error: ' . $e->getMessage(), 'Integration');
