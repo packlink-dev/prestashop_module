@@ -1022,14 +1022,14 @@
 
 <script type="application/javascript">
   Packlink.errorMsgs = {
-    required: '{l s='This field is required.' mod='packlink'}',
-    numeric: '{l s='Value must be valid number.' mod='packlink'}',
-    invalid: '{l s='This field is not valid.' mod='packlink'}',
-    phone: '{l s='This field must be valid phone number.' mod='packlink'}',
-    titleLength: '{l s='Title can have at most 64 characters.' mod='packlink'}',
-    greaterThanZero: '{l s='Value must be greater than 0.' mod='packlink'}',
-    numberOfDecimalPlaces: '{l s='Field must have 2 decimal places.' mod='packlink'}',
-    integer: '{l s='Field must be an integer.' mod='packlink'}'
+    required: "{l s='This field is required.' mod='packlink'}",
+    numeric: "{l s='Value must be valid number.' mod='packlink'}",
+    invalid: "{l s='This field is not valid.' mod='packlink'}",
+    phone: "{l s='This field must be valid phone number.' mod='packlink'}",
+    titleLength: "{l s='Title can have at most 64 characters.' mod='packlink'}",
+    greaterThanZero: "{l s='Value must be greater than 0.' mod='packlink'}",
+    numberOfDecimalPlaces: "{l s='Field must have 2 decimal places.' mod='packlink'}",
+    integer: "{l s='Field must be an integer.' mod='packlink'}"
   };
 
   Packlink.successMsgs = {
