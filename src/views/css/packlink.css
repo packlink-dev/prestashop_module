@@ -419,23 +419,24 @@
 
 .pl-disable-methods-modal {
   position: absolute;
-  width: 300px;
+  max-width: 550px;
   height: 230px;
-  border-radius: 0;
+  border-radius: 5px;
   border: 1px #d5d5d5 solid;
-  padding: 20px 10px;
+  padding: 20px 70px;
 }
 
 .pl-shipping-modal-title {
-  font-size: 16px;
+  font-size: 22px;
   color: #5d5d5d;
-  line-height: 18px;
-  margin-bottom: 20px;
+  line-height: 28px;
+  margin-bottom: 22px;
+  text-align: center;
 }
 
 .pl-shipping-modal-body {
   font-size: 12px;
-  line-height: 14px;
+  line-height: 18px;
   color: #5d5d5d;
 }
 
