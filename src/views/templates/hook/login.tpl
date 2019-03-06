@@ -21,7 +21,7 @@
  * @copyright 2019 Packlink Shipping S.L
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  *}
-<script type="text/javascript" src="/js/jquery/plugins/fancybox/jquery.fancybox.js"></script>
+<script type="text/javascript" src="{$fancyBoxPath}"></script>
 
 <div class="pl-login-page" id="pl-main-page-holder">
   <div class="pl-login-page-side-img-wrapper pl-collapse">
