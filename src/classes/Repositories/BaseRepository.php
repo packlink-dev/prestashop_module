@@ -251,8 +251,10 @@ class BaseRepository implements RepositoryInterface
         foreach ($records as $record) {
             /** @var Entity $entity */
             $entity = $this->unserializeEntity($record['data']);
-            $entity->setId((int)$record['id']);
-            $entities[] = $entity;
+            if ($entity !== null) {
+                $entity->setId((int)$record['id']);
+                $entities[] = $entity;
+            }
         }
 
         return $entities;
@@ -473,8 +475,13 @@ class BaseRepository implements RepositoryInterface
     private function unserializeEntity($data)
     {
         $jsonEntity = json_decode($data, true);
+        if (array_key_exists('class_name', $jsonEntity)) {
+            $entity = new $jsonEntity['class_name'];
+        } else {
+            $entity = new $this->entityClass;
+        }
+
         /** @var Entity $entity */
-        $entity = new $jsonEntity['class_name'];
         $entity->inflate($jsonEntity);
 
         return $entity;
