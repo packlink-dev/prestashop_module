@@ -15,7 +15,7 @@ $_MODULE['<{packlink}prestashop>defaultwarehousecontroller_9e050efac49a5a3e94713
 $_MODULE['<{packlink}prestashop>defaultwarehousecontroller_062a09ebbb3c482025d369422e107d7b'] = 'Este campo debe ser un correo electrónico válido.';
 $_MODULE['<{packlink}prestashop>defaultwarehousecontroller_f6ac41f15ab550497deb7e8eb8c5f69d'] = 'Este campo deber ser un número de teléfono válido.';
 $_MODULE['<{packlink}prestashop>shippingmethodscontroller_3b45a4fca27a98937a7e6dae8a89b4fc'] = 'Error al desactivar el método de envío.';
-$_MODULE['<{packlink}prestashop>shippingmethodscontroller_6541ee050d75bef24b4d179f5ed53812'] = 'Método de envío seleccionado correctamente.vvvvv';
+$_MODULE['<{packlink}prestashop>shippingmethodscontroller_6541ee050d75bef24b4d179f5ed53812'] = 'Método de envío seleccionado correctamente.';
 $_MODULE['<{packlink}prestashop>shippingmethodscontroller_36e8aee63f82e1d2e4d1118898b082e3'] = 'Error al anular la selección de método de envío.';
 $_MODULE['<{packlink}prestashop>shippingmethodscontroller_8b7904bfab7d4ac99282ac6c3cc81028'] = 'Método de envío correctamente deseleccionado.';
 $_MODULE['<{packlink}prestashop>shippingmethodscontroller_dfe6bff7ab8156c1c364f0fab83c4b43'] = 'El nombre puede tener como máximo 64 caracteres.';

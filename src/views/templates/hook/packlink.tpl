@@ -33,50 +33,32 @@
 
   <div class="pl-page-wrapper">
     <div class="pl-sidebar-wrapper">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="pl-logo-wrapper">
-            <img src="{html_entity_decode($dashboardLogo|escape:'html':'UTF-8')}"
-                 class="pl-dashboard-logo"
-                 alt="{l s='Packlink PRO Shipping' mod='packlink'}">
-          </div>
-        </div>
+      <div class="pl-logo-wrapper">
+        <img src="{html_entity_decode($dashboardLogo|escape:'html':'UTF-8')}"
+             class="pl-dashboard-logo"
+             alt="{l s='Packlink PRO Shipping' mod='packlink'}">
       </div>
-      <div class="row">
-        <div id="pl-sidebar-shipping-methods-btn" class="col-sm-12 pl-sidebar-link-wrapper pl-sidebar-link"
-             data-pl-sidebar-btn="shipping-methods">
-          <div class="pl-sidebar-small-line-wrapper">
-            <hr class="pl-sidebar-line"/>
-          </div>
-          <div class="pl-sidebar-icon-wrapper">
-            <i class="material-icons pl-sidebar-icon">
-              local_shipping
-            </i>
-          </div>
+      <div id="pl-sidebar-shipping-methods-btn" class="col-sm-12 pl-sidebar-link-wrapper"
+           data-pl-sidebar-btn="shipping-methods">
+        <div class="pl-sidebar-link-wrapper-line"></div>
+        <div class="pl-sidebar-link-wrapper-inner">
+          <i class="material-icons pl-sidebar-icon">
+            local_shipping
+          </i>
           <div class="pl-sidebar-text-wrapper">
             {l s='SHIPPING SERVICES' mod='packlink'}
           </div>
-          <div class="pl-sidebar-large-line-wrapper">
-            <hr class="pl-sidebar-line"/>
-          </div>
         </div>
       </div>
-      <div class="row">
-        <div id="pl-sidebar-basic-settings-btn" class="col-sm-12 pl-sidebar-link-wrapper"
-             data-pl-sidebar-btn="basic-settings">
-          <div class="pl-sidebar-small-line-wrapper">
-            <hr class="pl-sidebar-line"/>
-          </div>
-          <div class="pl-sidebar-icon-wrapper">
-            <i class="material-icons pl-sidebar-icon">
-              settings
-            </i>
-          </div>
+      <div id="pl-sidebar-basic-settings-btn" class="col-sm-12 pl-sidebar-link-wrapper"
+           data-pl-sidebar-btn="basic-settings">
+        <div class="pl-sidebar-link-wrapper-line"></div>
+        <div class="pl-sidebar-link-wrapper-inner">
+          <i class="material-icons pl-sidebar-icon">
+            settings
+          </i>
           <div class="pl-sidebar-text-wrapper">
             {l s='BASIC SETTINGS' mod='packlink'}
-          </div>
-          <div class="pl-sidebar-large-line-wrapper">
-            <hr class="pl-sidebar-line"/>
           </div>
         </div>
       </div>
@@ -94,12 +76,11 @@
         <a href="mailto:business@packlink.com" class="pl-link" target="_blank">business@packlink.com</a>
       </div>
     </div>
+
     <div class="pl-content-wrapper">
       <div class="row">
 
-
         <div class="col-sm-12 pl-content-wrapper-panel" id="pl-content-extension-point"></div>
-
 
       </div>
     </div>
@@ -643,7 +624,7 @@
   <table>
     <tbody id="pl-shipping-methods-row-template">
     <tr class="pl-table-row-wrapper">
-      <td>
+      <td class="pl-table-row-method-select">
         <div id="pl-shipping-method-select-btn" class="pl-switch" tabindex="-1">
           <div class="pl-empty-checkbox">
             <i class="material-icons">
@@ -671,14 +652,14 @@
           {l s='Fixed prices' mod='packlink'}
         </p>
       </td>
-      <td>
+      <td class="pl-table-row-method-logo">
         <img src="" class="pl-method-logo" id="pl-logo"
              alt="Logo">
       </td>
-      <td class="pl-delivery-type" id="pl-delivery-type">
+      <td class="pl-table-row-method-delivery-type" id="pl-delivery-type">
 
       </td>
-      <td class="pl-method-title" id="pl-method-title">
+      <td class="pl-table-row-method-type" id="pl-method-title">
         <div class="pl-national">
           {l s='National' mod='packlink'}
         </div>
@@ -745,7 +726,6 @@
     </tbody>
   </table>
 
-
   <div id="pl-shipping-methods-nav-template">
     <div class="row">
       <div class="col-sm-12 pl-nav-wrapper">
@@ -759,20 +739,19 @@
     </div>
   </div>
 
-
   <div id="pl-shipping-methods-table-template">
     <table class="table pl-table">
       <thead>
       <tr class="pl-table-header-wrapper">
-        <th scope="col">{l s='SELECT' mod='packlink'}</th>
-        <th scope="col">{l s='SHIPPING SERVICES' mod='packlink'}</th>
-        <th scope="col">{l s='CARRIER' mod='packlink'}</th>
-        <th scope="col">{l s='TRANSIT TIME' mod='packlink'}</th>
-        <th scope="col">{l s='TYPE' mod='packlink'}</th>
-        <th scope="col">{l s='ORIGIN' mod='packlink'}</th>
-        <th scope="col"></th>
-        <th scope="col">{l s='DESTINATION' mod='packlink'}</th>
-        <th scope="col"></th>
+        <th scope="col" class="pl-table-header-select">{l s='SELECT' mod='packlink'}</th>
+        <th scope="col" class="pl-table-header-title">{l s='SHIPPING SERVICES' mod='packlink'}</th>
+        <th scope="col" class="pl-table-header-carrier">{l s='CARRIER' mod='packlink'}</th>
+        <th scope="col" class="pl-table-header-transit">{l s='TRANSIT TIME' mod='packlink'}</th>
+        <th scope="col" class="pl-table-header-type">{l s='TYPE' mod='packlink'}</th>
+        <th scope="col" class="pl-table-header-origin">{l s='ORIGIN' mod='packlink'}</th>
+        <th scope="col" class="pl-table-header-arrow"></th>
+        <th scope="col" class="pl-table-header-destination">{l s='DESTINATION' mod='packlink'}</th>
+        <th scope="col" class="pl-table-header-actions"></th>
       </tr>
       </thead>
       <tbody id="pl-shipping-method-table-row-extension-point" class="pl-tbody">
@@ -780,13 +759,11 @@
     </table>
   </div>
 
-
   <div id="pl-shipping-methods-result-template">
     <div class="pl-num-shipping-method-results-wrapper">
       {l s='Showing' mod='packlink'} <span id="pl-number-showed-methods"></span> {l s='results' mod='packlink'}
     </div>
   </div>
-
 
   <div id="pl-packlink-percent-template">
     <div class="row">
@@ -810,7 +787,6 @@
     </div>
   </div>
 
-
   <div id="pl-fixed-prices-template">
     <div class="row">
       <div class="col-sm-12 pl-form-section-subtitle-wrapper">
@@ -829,7 +805,6 @@
       </div>
     </div>
   </div>
-
 
   <div id="pl-fixed-price-criteria-template">
     <div class="pl-fixed-price-criteria">
@@ -856,7 +831,6 @@
       </div>
     </div>
   </div>
-
 
   <div id="pl-error-template">
     <div class="pl-error-msg" data-pl-element="error">

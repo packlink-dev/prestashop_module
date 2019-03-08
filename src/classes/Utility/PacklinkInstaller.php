@@ -155,14 +155,11 @@ class PacklinkInstaller
      * Adds Packlink menu item to shipping tab group.
      *
      * @return bool Returns TRUE if tab has been successfully added, otherwise returns FALSE.
+     * @throws \PrestaShopException
      */
     public function addMenuItem()
     {
-        try {
-            $tab = new \Tab();
-        } catch (\PrestaShopException $e) {
-            return false;
-        }
+        $tab = new \Tab();
 
         $languages = \Language::getLanguages(true, \Context::getContext()->shop->id);
         foreach ($languages as $language) {
@@ -181,6 +178,7 @@ class PacklinkInstaller
      * Adds controllers and hooks.
      *
      * @return bool Result of method execution.
+     * @throws \PrestaShopException
      */
     public function addControllersAndHooks()
     {
@@ -244,20 +242,19 @@ class PacklinkInstaller
     private function createBaseTable()
     {
         $sql = 'CREATE TABLE IF NOT EXISTS '
-            . '`' . _DB_NAME_ . '`' . '.'
-            . '`' . _DB_PREFIX_ . BaseRepository::TABLE_NAME . '`'
+            . bqSQL(_DB_PREFIX_ . BaseRepository::TABLE_NAME)
             . '(
-             `id` INT NOT NULL AUTO_INCREMENT,
-             `type` VARCHAR(128) NOT NULL,
-             `index_1` VARCHAR(255),
-             `index_2` VARCHAR(255),
-             `index_3` VARCHAR(255),
-             `index_4` VARCHAR(255),
-             `index_5` VARCHAR(255),
-             `index_6` VARCHAR(255),
-             `index_7` VARCHAR(255),
-             `data` LONGTEXT NOT NULL,
-              PRIMARY KEY(`id`)
+                 `id` INT NOT NULL AUTO_INCREMENT,
+                 `type` VARCHAR(128) NOT NULL,
+                 `index_1` VARCHAR(255),
+                 `index_2` VARCHAR(255),
+                 `index_3` VARCHAR(255),
+                 `index_4` VARCHAR(255),
+                 `index_5` VARCHAR(255),
+                 `index_6` VARCHAR(255),
+                 `index_7` VARCHAR(255),
+                 `data` LONGTEXT NOT NULL,
+                 PRIMARY KEY(`id`)
             )
             ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8';
 
@@ -277,9 +274,7 @@ class PacklinkInstaller
      */
     private function dropBaseTable()
     {
-        $script = 'DROP TABLE IF EXISTS '
-            . '`' . _DB_NAME_ . '`' . '.'
-            . '`' . _DB_PREFIX_ . BaseRepository::TABLE_NAME . '`';
+        $script = 'DROP TABLE IF EXISTS ' . bqSQL(_DB_PREFIX_ . BaseRepository::TABLE_NAME);
 
         try {
             return (bool)\Db::getInstance()->execute($script);
@@ -304,7 +299,7 @@ class PacklinkInstaller
             . '\' AND COLUMN_NAME = \'' . pSQL($columnName) . '\'';
         try {
             $result = \Db::getInstance()->executeS($checkColumnSqlStatement);
-        } catch (\PrestaShopDatabaseException $e) {
+        } catch (\PrestaShopException $e) {
             Logger::logError('Error getting schema information. Error: ' . $e->getMessage(), 'Integration');
 
             return false;
@@ -315,7 +310,7 @@ class PacklinkInstaller
                 . ' ADD ' . bqSQL($columnName) . ' VARCHAR(100) DEFAULT NULL';
             try {
                 return (bool)\Db::getInstance()->execute($alterTableSqlStatement);
-            } catch (\PrestaShopDatabaseException $e) {
+            } catch (\PrestaShopException $e) {
                 Logger::logError('Error extending orders table. Error: ' . $e->getMessage(), 'Integration');
 
                 return false;
@@ -337,7 +332,7 @@ class PacklinkInstaller
                 . ' DROP COLUMN ' . bqSQL(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD);
 
             \Db::getInstance()->execute($sql);
-        } catch (\PrestaShopDatabaseException $e) {
+        } catch (\PrestaShopException $e) {
             Logger::logError('Error removing orders table column. Error: ' . $e->getMessage(), 'Integration');
 
             return false;
