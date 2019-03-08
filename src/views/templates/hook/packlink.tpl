@@ -25,8 +25,6 @@
 <script type="text/javascript" src="{$fancyBoxPath}"></script>
 
 <div class="container-fluid pl-main-wrapper" id="pl-main-page-holder">
-  <div class="pl-input-mask" id="pl-input-mask"></div>
-
   <div class="pl-spinner" id="pl-spinner">
     <div></div>
   </div>
@@ -78,6 +76,7 @@
     </div>
 
     <div class="pl-content-wrapper">
+      <div class="pl-input-mask" id="pl-input-mask"></div>
       <div class="row">
 
         <div class="col-sm-12 pl-content-wrapper-panel" id="pl-content-extension-point"></div>
