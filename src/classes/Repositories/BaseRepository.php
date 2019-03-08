@@ -472,9 +472,10 @@ class BaseRepository implements RepositoryInterface
      */
     private function unserializeEntity($data)
     {
+        $jsonEntity = json_decode($data, true);
         /** @var Entity $entity */
-        $entity = new $this->entityClass;
-        $entity->inflate(json_decode($data, true));
+        $entity = new $jsonEntity['class_name'];
+        $entity->inflate($jsonEntity);
 
         return $entity;
     }
