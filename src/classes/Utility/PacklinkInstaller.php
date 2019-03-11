@@ -49,12 +49,6 @@ class PacklinkInstaller
      * @var \Packlink
      */
     private $module;
-    /**
-     * Packlink module directory.
-     *
-     * @var string
-     */
-    private $moduleDir;
     private static $hooks = array(
         'updateCarrier',
         'displayAfterCarrier',
@@ -87,7 +81,6 @@ class PacklinkInstaller
     public function __construct(\Packlink $module)
     {
         $this->module = $module;
-        $this->moduleDir = _PS_MODULE_DIR_ . $this->module->name;
     }
 
     /**
@@ -99,24 +92,6 @@ class PacklinkInstaller
     {
         Bootstrap::init();
         if (!$this->createBaseTable() || !$this->extendOrdersTable()) {
-            return false;
-        }
-
-        $baseSource = $this->moduleDir . '/vendor/packlink/integration-core/src/BusinessLogic/Resources';
-        $baseDestination = $this->moduleDir . '/views';
-        try {
-            Logger::logDebug(TranslationUtility::__('Started copying resources from Core'), 'Integration');
-            $this->copyResources($baseSource . '/img/carriers', $baseDestination . '/img/carriers');
-            $this->copyResources($baseSource . '/js', $baseDestination . '/js/core');
-            $this->copyResources($baseSource . '/LocationPicker/js', $baseDestination . '/js/location');
-            $this->copyResources($baseSource . '/LocationPicker/css', $baseDestination . '/css');
-            Logger::logDebug(TranslationUtility::__('Resources copied to module resources directory'), 'Integration');
-        } catch (\RuntimeException $e) {
-            Logger::logError(
-                TranslationUtility::__('Error copying resources. Error: %s', array($e->getMessage())),
-                'Integration'
-            );
-
             return false;
         }
 
@@ -339,41 +314,6 @@ class PacklinkInstaller
         }
 
         return true;
-    }
-
-    /**
-     * Copies Packlink resources to module resource directory.
-     *
-     * @param string $source Source path.
-     * @param string $destination Destination path.
-     *
-     * @throws \RuntimeException
-     */
-    private function copyResources($source, $destination)
-    {
-        if (is_dir($source)) {
-            $dir_handle = opendir($source);
-
-            while ($file = readdir($dir_handle)) {
-                if ($file !== '.' && $file !== '..') {
-                    if (is_dir($source . '/' . $file)
-                        && !is_dir($destination . '/' . $file)
-                        && !mkdir($concurrentDirectory = $destination . '/' . $file)
-                        && !is_dir($concurrentDirectory)
-                    ) {
-                        throw new \RuntimeException(
-                            sprintf($this->module->l('Directory "%s" was not created'), $concurrentDirectory)
-                        );
-                    }
-
-                    $this->copyResources($source . '/' . $file, $destination . '/' . $file);
-                }
-            }
-
-            closedir($dir_handle);
-        } else {
-            copy($source, $destination);
-        }
     }
 
     /**
