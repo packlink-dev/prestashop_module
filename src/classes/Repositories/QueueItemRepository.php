@@ -143,10 +143,12 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
         /** @var QueueItem[] $runningQueueItems */
         $runningQueueItems = $this->select($filter);
 
-        return array_map(function (QueueItem $runningQueueItem) {
-            return $runningQueueItem->getQueueName();
-        },
-            $runningQueueItems);
+        return array_map(
+            function (QueueItem $runningQueueItem) {
+                return $runningQueueItem->getQueueName();
+            },
+            $runningQueueItems
+        );
     }
 
     /**

@@ -349,7 +349,7 @@ class CarrierService implements ShopShippingMethodService
         $this->setCarrierData($carrier, $shippingMethod);
 
         if (!$carrier->add()) {
-           throw new \RuntimeException(TranslationUtility::__('Failed creating backup carrier'));
+            throw new \RuntimeException(TranslationUtility::__('Failed creating backup carrier'));
         }
 
         $this->setCarrierGroups($carrier);

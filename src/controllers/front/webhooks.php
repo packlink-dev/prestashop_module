@@ -77,19 +77,19 @@ class PacklinkWebhooksModuleFrontController extends ModuleFrontController
      */
     private function validatePayload($payload)
     {
+        $validEvents = array(
+            'shipment.carrier.success',
+            'shipment.carrier.fail',
+            'shipment.label.ready',
+            'shipment.label.fail',
+            'shipment.tracking.update',
+            'shipment.delivered',
+        );
+
         if (empty($payload)
             || !$payload->datetime
             || !$payload->data
-            || !in_array($payload->event,
-                array(
-                    'shipment.carrier.success',
-                    'shipment.carrier.fail',
-                    'shipment.label.ready',
-                    'shipment.label.fail',
-                    'shipment.tracking.update',
-                    'shipment.delivered',
-                ),
-                true)
+            || !in_array($payload->event, $validEvents, true)
         ) {
             PacklinkPrestaShopUtility::die400(array('message' => 'Invalid payload'));
         }
