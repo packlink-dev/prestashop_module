@@ -643,6 +643,22 @@
   transition: all .25s;
 }
 
+.pl-input-search-icon {
+  width: 60px;
+  height: 50px;
+  position: absolute;
+  top: 0;
+  text-align: center;
+  line-height: 50px;
+  right: 0;
+  border-left: 1px solid #dcdcdc;
+}
+
+.pl-input-search-icon i {
+  font-size: 28px;
+  color: #5d5d5d;
+}
+
 .pl-form-section-input {
   position: relative;
 }
@@ -1151,6 +1167,39 @@
 }
 
 /* UTILITY */
+
+.pl-autocomplete-list {
+  position: absolute;
+  top: 50px;
+  z-index: 10;
+  width: 100%;
+  max-height: 250px;
+  min-height: 35px;
+  padding: 0;
+  background: white;
+  border: 1px solid #dcdcdc;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.pl-autocomplete-element {
+  line-height: 35px;
+  height: 35px;
+  padding: 0 10px;
+  font-size: 16px;
+  color: #5d5d5d;
+  list-style-type: none;
+  cursor: pointer;
+}
+
+.pl-autocomplete-element * {
+  pointer-events: none;
+}
+
+.pl-autocomplete-element.focus {
+  background-color: #1a77c2;
+  color: white;
+}
 
 .pl-template-section {
   display: none;

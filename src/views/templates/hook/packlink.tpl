@@ -223,8 +223,9 @@
             <div class="row">
               <div class=" pl-basic-settings-page-form-input-item">
                 <div class=" pl-form-section-input pl-text-input">
-                  <input type="text" class="pl-warehouse-input" id="pl-default-warehouse-postal_code"/>
-                  <span class="pl-text-input-label">{l s='Postal code' mod='packlink'}</span>
+                  <input autocomplete="new-password" type="text" class="pl-warehouse-input" id="pl-default-warehouse-postal_code"/>
+                  <span class="pl-text-input-label">{l s='City or postal code' mod='packlink'}</span>
+                  <span class="pl-input-search-icon"><i class="material-icons">search</i></span>
                 </div>
               </div>
             </div>
@@ -1024,6 +1025,7 @@
         defaultParcelSubmitUrl: "{$defaultParcelSubmitUrl}",
         defaultWarehouseGetUrl: "{$defaultWarehouseGetUrl}",
         defaultWarehouseSubmitUrl: "{$defaultWarehouseSubmitUrl}",
+        defaultWarehouseSearchPostalCodesUrl: "{$defaultWarehouseSearchPostalCodesUrl}",
         shippingMethodsGetAllUrl: "{$shippingMethodsGetAllUrl}",
         shippingMethodsActivateUrl: "{$shippingMethodsActivateUrl}",
         shippingMethodsDeactivateUrl: "{$shippingMethodsDeactivateUrl}",

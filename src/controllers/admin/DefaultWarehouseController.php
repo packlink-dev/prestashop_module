@@ -27,6 +27,7 @@ use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Http\DTO\Warehouse;
 use Packlink\BusinessLogic\Http\Proxy;
+use Packlink\BusinessLogic\Location\LocationService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
@@ -39,6 +40,10 @@ class DefaultWarehouseController extends ModuleAdminController
      * @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService
      */
     protected $configService;
+    /**
+     * @var \Packlink\BusinessLogic\Location\LocationService
+     */
+    protected $locationService;
     /**
      * @var Proxy
      */
@@ -60,6 +65,7 @@ class DefaultWarehouseController extends ModuleAdminController
 
         $this->configService = ServiceRegister::getService(Configuration::CLASS_NAME);
         $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
+        $this->locationService = ServiceRegister::getService(LocationService::CLASS_NAME);
 
         $this->requiredFields = array(
             'alias',
@@ -107,6 +113,33 @@ class DefaultWarehouseController extends ModuleAdminController
         $this->configService->setDefaultWarehouse($warehouse);
 
         PacklinkPrestaShopUtility::dieJson($data);
+    }
+
+    /**
+     * Performs location search.
+     */
+    public function displayAjaxSearchPostalCodes()
+    {
+        $input = PacklinkPrestaShopUtility::getPacklinkPostData();
+
+        if (empty($input['query'])) {
+            PacklinkPrestaShopUtility::dieJson();
+        }
+
+        $platformCountry = $this->configService->getUserInfo()->country;
+        try {
+            $result = $this->locationService->searchLocations($platformCountry, $input['query']);
+        } catch (\Exception $e) {
+            PacklinkPrestaShopUtility::dieJson();
+        }
+
+        $arrayResult = array();
+
+        foreach ($result as $item) {
+            $arrayResult[] = $item->toArray();
+        }
+
+        PacklinkPrestaShopUtility::dieJson($arrayResult);
     }
 
     /**

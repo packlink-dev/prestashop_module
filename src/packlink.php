@@ -913,6 +913,7 @@ class Packlink extends CarrierModule
         $defaultParcelSubmitUrl = $this->getAction('DefaultParcel', 'submitDefaultParcel');
         $defaultWarehouseGetUrl = $this->getAction('DefaultWarehouse', 'getDefaultWarehouse');
         $defaultWarehouseSubmitUrl = $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse');
+        $defaultWarehouseSearchPostalCodesUrl = $this->getAction('DefaultWarehouse', 'searchPostalCodes');
         $shippingMethodsGetAllUrl = $this->getAction('ShippingMethods', 'getAll');
         $shippingMethodsActivateUrl = $this->getAction('ShippingMethods', 'activate');
         $shippingMethodsDeactivateUrl = $this->getAction('ShippingMethods', 'deactivate');
@@ -933,6 +934,7 @@ class Packlink extends CarrierModule
             'defaultParcelSubmitUrl' => $defaultParcelSubmitUrl,
             'defaultWarehouseGetUrl' => $defaultWarehouseGetUrl,
             'defaultWarehouseSubmitUrl' => $defaultWarehouseSubmitUrl,
+            'defaultWarehouseSearchPostalCodesUrl' => $defaultWarehouseSearchPostalCodesUrl,
             'shippingMethodsGetAllUrl' => $shippingMethodsGetAllUrl,
             'shippingMethodsActivateUrl' => $shippingMethodsActivateUrl,
             'shippingMethodsDeactivateUrl' => $shippingMethodsDeactivateUrl,
