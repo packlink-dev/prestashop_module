@@ -935,7 +935,7 @@
   margin-bottom: 15px;
 }
 
-#pl-default-warehouse-country {
+input[readonly][type="text"] {
   background-color: #dcdcdc !important;
 }
 
