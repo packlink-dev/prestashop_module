@@ -83,7 +83,7 @@ class ShippingMethodsController extends ModuleAdminController
     }
 
     /**
-     * Activates shipping method.
+     * Deactivates shipping method.
      */
     public function displayAjaxDeactivate()
     {
@@ -115,8 +115,8 @@ class ShippingMethodsController extends ModuleAdminController
             );
         }
 
+        /** @var ShippingMethodResponse $model */
         $model = $this->controller->save($configuration);
-
         if ($model === false) {
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to save shipping method.')));
         }
@@ -147,7 +147,7 @@ class ShippingMethodsController extends ModuleAdminController
 
         try {
             $result = $db->executeS($query);
-        } catch (PrestaShopDatabaseException $e) {
+        } catch (PrestaShopException $e) {
             $result = array();
         }
 
@@ -159,7 +159,6 @@ class ShippingMethodsController extends ModuleAdminController
     /**
      * Disables shop shipping methods.
      *
-     * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
     public function displayAjaxDisableShopShippingMethods()
@@ -175,7 +174,7 @@ class ShippingMethodsController extends ModuleAdminController
 
         try {
             $result = $db->executeS($query);
-        } catch (PrestaShopDatabaseException $e) {
+        } catch (PrestaShopException $e) {
             $result = array();
         }
 
@@ -207,7 +206,7 @@ class ShippingMethodsController extends ModuleAdminController
 
         try {
             $queryResult = $db->executeS($query);
-        } catch (PrestaShopDatabaseException $e) {
+        } catch (PrestaShopException $e) {
             $queryResult = array();
         }
 

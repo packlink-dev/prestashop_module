@@ -843,7 +843,7 @@ class Packlink extends CarrierModule
         );
         $carrier = new \Carrier((int)$order->id_carrier);
         $orderDetails = $orderRepository->getOrderDetailsById((int)$order->id);
-        $carrierServiceMapping = $carrierService->getMappingByCarrierId((int)$carrier->id_reference);
+        $carrierServiceMapping = $carrierService->getMappingByCarrierReferenceId((int)$carrier->id_reference);
 
         return $orderDetails === null
             && $carrierServiceMapping !== null

@@ -53,9 +53,12 @@ class CarrierUtility
 
         /** @var ShippingMethod $method */
         foreach ($methods as $method) {
-            $carrierId = $service->getCarrierReferenceId($method->getId());
-            if ($carrierId) {
-                $result[$carrierId] = $method->getId();
+            $carrierReferenceId = $service->getCarrierReferenceId($method->getId());
+            if ($carrierReferenceId) {
+                $carrier = \Carrier::getCarrierByReference($carrierReferenceId);
+                if (\Validate::isLoadedObject($carrier)) {
+                    $result[$carrier->id] = $method->getId();
+                }
             }
         }
 

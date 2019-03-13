@@ -36,11 +36,11 @@ class CarrierServiceMapping extends Entity
      */
     const CLASS_NAME = __CLASS__;
     /**
-     * PrestaShop carrier ID.
+     * PrestaShop carrier reference ID.
      *
      * @var int
      */
-    public $carrierId;
+    public $carrierReferenceId;
     /**
      * Packlink shipping method ID.
      *
@@ -52,7 +52,7 @@ class CarrierServiceMapping extends Entity
      *
      * @var array
      */
-    protected $fields = array('id', 'methodId', 'carrierId');
+    protected $fields = array('id', 'methodId', 'carrierReferenceId');
 
     /**
      * Returns full class name.
@@ -72,7 +72,7 @@ class CarrierServiceMapping extends Entity
     public function getConfig()
     {
         $map = new IndexMap();
-        $map->addIntegerIndex('carrierId')
+        $map->addIntegerIndex('carrierReferenceId')
             ->addIntegerIndex('methodId');
 
         return new EntityConfiguration($map, 'CarrierServiceMapping');

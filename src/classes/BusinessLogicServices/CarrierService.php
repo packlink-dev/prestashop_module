@@ -56,7 +56,8 @@ class CarrierService implements ShopShippingMethodService
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws  \PrestaShopException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function add(ShippingMethod $shippingMethod)
     {
@@ -75,7 +76,7 @@ class CarrierService implements ShopShippingMethodService
 
         try {
             if ($carrier->add()) {
-                $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS, false);
+                $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
 
                 $this->setCarrierGroups($carrier);
                 $rangeWeight = $this->setCarrierRangeWeight($carrier);
@@ -118,7 +119,7 @@ class CarrierService implements ShopShippingMethodService
             if ($carrier) {
                 try {
                     $this->setCarrierData($carrier, $shippingMethod);
-                    $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS, false);
+                    $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
                     $this->updateCarrierLogo($shippingMethod, $carrier);
                     $carrier->update();
                 } catch (\Exception $e) {
@@ -144,9 +145,10 @@ class CarrierService implements ShopShippingMethodService
     public function delete(ShippingMethod $shippingMethod)
     {
         $referenceId = $this->getCarrierReferenceId($shippingMethod->getId());
-
         if ($referenceId === null) {
-            return false;
+            Logger::logWarning(TranslationUtility::__('Carrier not found'), 'Integration');
+
+            return true;
         }
 
         $this->deleteCarrierServiceMapping($shippingMethod->getId());
@@ -178,19 +180,19 @@ class CarrierService implements ShopShippingMethodService
     /**
      * Returns carrier service mapping object identified by carrier ID.
      *
-     * @param int $carrierId ID of the carrier.
+     * @param int $carrierReferenceId ID of the carrier.
      *
      * @return CarrierServiceMapping|null Carrier service mapping entity or null if not found.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
-    public function getMappingByCarrierId($carrierId)
+    public function getMappingByCarrierReferenceId($carrierReferenceId)
     {
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
 
         $filter = new QueryFilter();
-        $filter->where('carrierId', Operators::EQUALS, $carrierId);
+        $filter->where('carrierReferenceId', Operators::EQUALS, $carrierReferenceId);
         /** @var CarrierServiceMapping $carrierServiceMapping */
         /** @noinspection OneTimeUseVariablesInspection */
         $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
@@ -217,25 +219,25 @@ class CarrierService implements ShopShippingMethodService
         /** @var CarrierServiceMapping $carrierServiceMapping */
         $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
 
-        return $carrierServiceMapping ? $carrierServiceMapping->carrierId : null;
+        return $carrierServiceMapping ? $carrierServiceMapping->carrierReferenceId : null;
     }
 
     /**
      * Returns Packlink shipping method ID mapped by carrier reference ID.
      *
-     * @param int $carrierId PrestaShop carrier reference ID.
+     * @param int $carrierReferenceId PrestaShop carrier reference ID.
      *
      * @return int|null Packlink shipping method ID or null if not found.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
-    public function getShippingMethodId($carrierId)
+    public function getShippingMethodId($carrierReferenceId)
     {
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
 
         $filter = new QueryFilter();
-        $filter->where('carrierId', Operators::EQUALS, $carrierId);
+        $filter->where('carrierReferenceId', Operators::EQUALS, $carrierReferenceId);
         /** @var CarrierServiceMapping $carrierServiceMapping */
         $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
 
@@ -339,8 +341,8 @@ class CarrierService implements ShopShippingMethodService
      * @param ShippingMethod $shippingMethod First configured Packlink shipping method entity.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function addBackupCarrier(ShippingMethod $shippingMethod)
     {
@@ -417,7 +419,7 @@ class CarrierService implements ShopShippingMethodService
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
         $carrierServiceMapping = new CarrierServiceMapping();
 
-        $carrierServiceMapping->carrierId = $carrierReferenceId;
+        $carrierServiceMapping->carrierReferenceId = $carrierReferenceId;
         $carrierServiceMapping->methodId = $methodId;
 
         $serviceMappingRepository->save($carrierServiceMapping);
@@ -464,6 +466,7 @@ class CarrierService implements ShopShippingMethodService
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function setCarrierRangeWeight(\Carrier $carrier)
     {
@@ -524,7 +527,7 @@ class CarrierService implements ShopShippingMethodService
      *
      * @return array Array of carrier IDs.
      *
-     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     private function getPacklinkCarrierIds()
     {
@@ -564,6 +567,7 @@ class CarrierService implements ShopShippingMethodService
      * @param \Carrier $carrier PrestaShop carrier entity.
      *
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function cleanUpCarrierData(\Carrier $carrier)
     {
