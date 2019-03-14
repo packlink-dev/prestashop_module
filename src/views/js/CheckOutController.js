@@ -36,6 +36,8 @@ var Packlink = window.Packlink || {};
 
     let mapController = null;
 
+    let selectedId = null;
+
     function init() {
       dropOffIds = Object.keys(configuration.dropoffIds);
 
@@ -43,6 +45,10 @@ var Packlink = window.Packlink || {};
 
       let selectedLocation = configuration.selectedLocation;
       let selectedCarrier = configuration.selectedCarrier;
+
+      if (selectedLocation) {
+        selectedId = selectedLocation['id'];
+      }
 
       for (let dropOff of dropOffs) {
         if (dropOff.checked && dropOff.getAttribute('data-pl-dropoff') === 'true') {
@@ -86,7 +92,8 @@ var Packlink = window.Packlink || {};
             getUrl: configuration.getLocationsUrl,
             methodId: configuration.dropoffIds[id],
             carrierId: id,
-            onComplete: modalCompleteCallback
+            onComplete: modalCompleteCallback,
+            dropOffId: selectedId
           }
       );
 
@@ -107,6 +114,7 @@ var Packlink = window.Packlink || {};
       }
 
       if (payload.type === 'success') {
+        selectedId = payload.dropOff.id;
         shippingService.setMessage(Packlink.trans.address + '<br/> <i>' + payload.address + '</i>');
         shippingService.changeBtnText(Packlink.trans.change);
         shippingService.enableSubmit();

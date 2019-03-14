@@ -93,7 +93,7 @@ var Packlink = window.Packlink || {};
      * Submits location to location library.
      */
     function submitLocations() {
-      Packlink.locationPicker.display(locations, onDropoffSelected);
+      Packlink.locationPicker.display(locations, onDropoffSelected, configuration.dropOffId);
       document.getElementById('pl-modal-spinner').classList.add('disabled');
     }
 
@@ -125,7 +125,8 @@ var Packlink = window.Packlink || {};
       configuration.onComplete(
           {
             type: 'success',
-            address: getAddressString(getSelectedDropoff())
+            address: getAddressString(getSelectedDropoff()),
+            dropOff: getSelectedDropoff()
           }
       )
     }
