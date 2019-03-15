@@ -51,6 +51,7 @@ class Packlink extends CarrierModule
     const PACKLINK_SHIPPING_CONTENT = 'packlink/views/templates/admin/packlink_shipping_content/shipping_content.tpl';
     const PRESTASHOP_ORDER_CREATED_STATUS = 0;
     const PRESTASHOP_PAYMENT_ACCEPTED_STATUS = 2;
+    const PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS = 3;
     /**
      * Id of current carrier. This variable will be set by Presta when
      * method for calculating shipping cost is called.
@@ -351,7 +352,6 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
     public function getPackageShippingCost($cart, $shippingCost, $products)
@@ -850,7 +850,8 @@ class Packlink extends CarrierModule
 
         return $orderDetails === null
             && $carrierServiceMapping !== null
-            && $orderStatus === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS;
+            && ($orderStatus === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS
+                || $orderStatus === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS);
     }
 
     /**
@@ -881,12 +882,13 @@ class Packlink extends CarrierModule
         $orderRepository->saveOrderDetails($orderDetails);
 
         $queue->enqueue($configService->getDefaultQueueName(), $draftTask);
-
         if ($draftTask->getExecutionId() !== null) {
+            // get again from database since it can happen that task already finished and
+            // reference has been set, so we don't delete it here.
+            $orderDetails = $orderRepository->getOrderDetailsById($orderId);
             $orderDetails->setTaskId($draftTask->getExecutionId());
+            $orderRepository->saveOrderDetails($orderDetails);
         }
-
-        $orderRepository->saveOrderDetails($orderDetails);
     }
 
     /**
