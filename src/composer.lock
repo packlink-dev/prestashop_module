@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "d3493309239217a042ffd0e12a81a431",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "426310d8557b692127ec0a99a33b8ed0e1c8f037"
+              "reference": "331d781d76e15e318a14d9fc4b0a5aa6d81d3a12"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/426310d8557b692127ec0a99a33b8ed0e1c8f037",
-                "reference": "426310d8557b692127ec0a99a33b8ed0e1c8f037",
+              "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/331d781d76e15e318a14d9fc4b0a5aa6d81d3a12",
+              "reference": "331d781d76e15e318a14d9fc4b0a5aa6d81d3a12",
                 "shasum": ""
             },
             "require": {
@@ -48,7 +48,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2019-03-14T14:01:21+00:00"
+          "time": "2019-03-15T13:07:12+00:00"
         },
         {
             "name": "zendframework/zend-memory",

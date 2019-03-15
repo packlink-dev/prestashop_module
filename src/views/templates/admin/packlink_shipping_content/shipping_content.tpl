@@ -168,9 +168,9 @@
             >
           </td>
           <td style="border:none;">
-                        <span style="font-weight: normal;">
-                            {$message|escape:'html':'UTF-8'}
-                        </span>
+              <span style="font-weight: normal;">
+                  {$message|escape:'html':'UTF-8'}
+              </span>
           </td>
           {if $displayDraftButton}
             <td style="border:none;text-align:right;">

@@ -107,6 +107,111 @@
   </div>
 
 
+  <div id="pl-order-state-mapping-template">
+    <div class="row">
+      <div class="pl-basic-settings-page-wrapper pl-mapping-page-wrapper">
+        <div class="row">
+          <div class="col-sm-12 pl-basic-settings-page-title-wrapper">
+            {l s='Map order statuses' mod='packlink'}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 pl-basic-settings-page-description-wrapper">
+            {l s='Packlink offers you the possibility to update your PrestaShop order status with the shipping info. You can
+            edit anytime.' mod='packlink'}
+          </div>
+        </div>
+        <div>
+          <div class="pl-mapping-page-select-section">
+            {l s='Packlink PRO Shipping Status' mod='packlink'}
+          </div>
+          <div class="pl-mapping-page-wrapper-equals">
+          </div>
+          <div class="pl-mapping-page-select-section">
+            {l s='PrestaShop Order Status' mod='packlink'}
+          </div>
+        </div>
+
+        <div>
+          <div class="pl-mapping-page-select-section">
+            <input type="text" value="{l s='Pending' mod='packlink'}" readonly>
+          </div>
+          <div class="pl-mapping-page-wrapper-equals">
+            =
+          </div>
+          <div class="pl-mapping-page-select-section">
+            <select data-pl-status="pending">
+              <option value="" selected>({l s='None' mod='packlink'})</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="pl-mapping-page-select-section">
+            <input type="text" value="{l s='Processing' mod='packlink'}" readonly>
+          </div>
+          <div class="pl-mapping-page-wrapper-equals">
+            =
+          </div>
+          <div class="pl-mapping-page-select-section">
+            <select data-pl-status="processing">
+              <option value="" selected>({l s='None' mod='packlink'})</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="pl-mapping-page-select-section">
+            <input type="text" value="{l s='Ready for shipping' mod='packlink'}" readonly>
+          </div>
+          <div class="pl-mapping-page-wrapper-equals">
+            =
+          </div>
+          <div class="pl-mapping-page-select-section">
+            <select data-pl-status="readyForShipping">
+              <option value="" selected>({l s='None' mod='packlink'})</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="pl-mapping-page-select-section">
+            <input type="text" value="{l s='In transit' mod='packlink'}" readonly>
+          </div>
+          <div class="pl-mapping-page-wrapper-equals">
+            =
+          </div>
+          <div class="pl-mapping-page-select-section">
+            <select data-pl-status="inTransit">
+              <option value="" selected>({l s='None' mod='packlink'})</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="pl-mapping-page-select-section">
+            <input type="text" value="{l s='Delivered' mod='packlink'}" readonly>
+          </div>
+          <div class="pl-mapping-page-wrapper-equals">
+            =
+          </div>
+          <div class="pl-mapping-page-select-section">
+            <select data-pl-status="delivered">
+              <option value="" selected>({l s='None' mod='packlink'})</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="pl-mapping-page-select-section">
+            <button class="btn btn-primary btn-lg"
+                    id="pl-save-mappings-btn">{l s='Save changes' mod='packlink'}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="pl-default-parcel-template">
     <div class="row">
       <div class="col-sm-12 pl-basic-settings-page-wrapper">
@@ -580,7 +685,8 @@
                       <select id="pl-pricing-policy-selector">
                         <option value="1">{l s='Packlink prices' mod='packlink'}</option>
                         <option value="2">{l s='% of Packlink prices' mod='packlink'}</option>
-                        <option value="3">{l s='Fixed prices' mod='packlink'}</option>
+                        <option value="3">{l s='Fixed prices based on total weight' mod='packlink'}</option>
+                        <option value="4">{l s='Fixed prices based on total price' mod='packlink'}</option>
                       </select>
                     </div>
                   </div>
@@ -647,9 +753,11 @@
         <p class="pl-price-indicator" data-pl-price-indicator="percent">
           {l s='Packlink percent' mod='packlink'}
         </p>
-
-        <p class="pl-price-indicator" data-pl-price-indicator="fixed">
-          {l s='Fixed prices' mod='packlink'}
+        <p class="pl-price-indicator" data-pl-price-indicator="fixed-weight">
+          {l s='Fixed prices based on total weight' mod='packlink'}
+        </p>
+        <p class="pl-price-indicator" data-pl-price-indicator="fixed-value">
+          {l s='Fixed prices based on total price' mod='packlink'}
         </p>
       </td>
       <td class="pl-table-row-method-logo">
@@ -787,7 +895,7 @@
     </div>
   </div>
 
-  <div id="pl-fixed-prices-template">
+  <div id="pl-fixed-prices-by-weight-template">
     <div class="row">
       <div class="col-sm-12 pl-form-section-subtitle-wrapper">
         {l s='Please add price for each weight criteria' mod='packlink'}
@@ -806,7 +914,7 @@
     </div>
   </div>
 
-  <div id="pl-fixed-price-criteria-template">
+  <div id="pl-fixed-price-by-weight-criteria-template">
     <div class="pl-fixed-price-criteria">
       <div class="row">
         <div class="col-sm-12 pl-form-section-input-wrapper pl-fixed-price-wrapper">
@@ -817,6 +925,51 @@
           <div class="form-group pl-form-section-input pl-text-input">
             <input type="text" data-pl-fixed-price="to"/>
             <span class="pl-text-input-label">{l s='TO' mod='packlink'} (kg)</span>
+          </div>
+          <div class="form-group pl-form-section-input pl-text-input">
+            <input type="text" data-pl-fixed-price="amount"/>
+            <span class="pl-text-input-label">{l s='PRICE' mod='packlink'} (€)</span>
+          </div>
+          <div class="pl-remove-fixed-price-criteria-btn" data-pl-remove="criteria">
+            <i class="material-icons">
+              close
+            </i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pl-fixed-prices-by-value-template">
+    <div class="row">
+      <div class="col-sm-12 pl-form-section-subtitle-wrapper">
+        {l s='Please add price for each price criteria' mod='packlink'}
+      </div>
+    </div>
+
+    <div class="row">
+      <div id="pl-fixed-price-criteria-extension-point" style="width: 100%"></div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 pl-form-section-input-wrapper">
+        <div class="pl-fixed-price-add-criteria-button" id="pl-fixed-price-add">
+          + {l s='Add price' mod='packlink'}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pl-fixed-price-by-value-criteria-template">
+    <div class="pl-fixed-price-criteria">
+      <div class="row">
+        <div class="col-sm-12 pl-form-section-input-wrapper pl-fixed-price-wrapper">
+          <div class="form-group pl-form-section-input pl-text-input">
+            <input type="text" data-pl-fixed-price="from" disabled tabindex="-1"/>
+            <span class="pl-text-input-label">{l s='FROM' mod='packlink'} (€)</span>
+          </div>
+          <div class="form-group pl-form-section-input pl-text-input">
+            <input type="text" data-pl-fixed-price="to"/>
+            <span class="pl-text-input-label">{l s='TO' mod='packlink'} (€)</span>
           </div>
           <div class="form-group pl-form-section-input pl-text-input">
             <input type="text" data-pl-fixed-price="amount"/>
@@ -843,109 +996,6 @@
       </div>
     </div>
   </div>
-
-  <div id="pl-order-state-mapping-template">
-    <div class="pl-mapping-page-wrapper">
-      <div class="row">
-        <div class="col-sm-12 pl-basic-settings-page-title-wrapper">
-          {l s='Map order statuses' mod='packlink'}
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm-12 pl-basic-settings-page-description-wrapper">
-          {l s='Packlink offers you the possibility to update your PrestaShop order status with the shipping info. You can
-          edit anytime.' mod='packlink'}
-        </div>
-      </div>
-      <div>
-        <div class="pl-mapping-page-select-section">
-          {l s='Packlink PRO Shipping Status' mod='packlink'}
-        </div>
-        <div class="pl-mapping-page-wrapper-equals">
-        </div>
-        <div class="pl-mapping-page-select-section">
-          {l s='PrestaShop Order Status' mod='packlink'}
-        </div>
-      </div>
-
-      <div>
-        <div class="pl-mapping-page-select-section">
-          <input type="text" value="{l s='Pending' mod='packlink'}" readonly>
-        </div>
-        <div class="pl-mapping-page-wrapper-equals">
-          =
-        </div>
-        <div class="pl-mapping-page-select-section">
-          <select data-pl-status="pending">
-            <option value="" selected>({l s='None' mod='packlink'})</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <div class="pl-mapping-page-select-section">
-          <input type="text" value="{l s='Processing' mod='packlink'}" readonly>
-        </div>
-        <div class="pl-mapping-page-wrapper-equals">
-          =
-        </div>
-        <div class="pl-mapping-page-select-section">
-          <select data-pl-status="processing">
-            <option value="" selected>({l s='None' mod='packlink'})</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <div class="pl-mapping-page-select-section">
-          <input type="text" value="{l s='Ready for shipping' mod='packlink'}" readonly>
-        </div>
-        <div class="pl-mapping-page-wrapper-equals">
-          =
-        </div>
-        <div class="pl-mapping-page-select-section">
-          <select data-pl-status="readyForShipping">
-            <option value="" selected>({l s='None' mod='packlink'})</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <div class="pl-mapping-page-select-section">
-          <input type="text" value="{l s='In transit' mod='packlink'}" readonly>
-        </div>
-        <div class="pl-mapping-page-wrapper-equals">
-          =
-        </div>
-        <div class="pl-mapping-page-select-section">
-          <select data-pl-status="inTransit">
-            <option value="" selected>({l s='None' mod='packlink'})</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <div class="pl-mapping-page-select-section">
-          <input type="text" value="{l s='Delivered' mod='packlink'}" readonly>
-        </div>
-        <div class="pl-mapping-page-wrapper-equals">
-          =
-        </div>
-        <div class="pl-mapping-page-select-section">
-          <select data-pl-status="delivered">
-            <option value="" selected>({l s='None' mod='packlink'})</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <div class="pl-mapping-page-select-section">
-          <button class="btn btn-primary btn-lg" id="pl-save-mappings-btn">{l s='Save changes' mod='packlink'}</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 
   <div id="pl-footer-template">
     <div class="row pl-footer-row">

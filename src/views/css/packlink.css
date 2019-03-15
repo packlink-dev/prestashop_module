@@ -1,9 +1,3 @@
-@media screen and (max-width: 950px) {
-  .pl-collapse {
-    display: none !important;
-  }
-}
-
 .pl-main-wrapper {
   position: relative;
   padding: 0 !important;
@@ -1144,10 +1138,6 @@ input[readonly][type="text"] {
   display: flex;
 }
 
-.pl-mapping-page-wrapper div {
-  height: 50px;
-}
-
 .pl-mapping-status-count-label {
   width: 100px;
   line-height: 50px;
@@ -1326,8 +1316,10 @@ input[readonly][type="text"] {
 .pl-flash-msg-wrapper {
   position: absolute;
   background-color: #ffffff;
-  right: 10px;
-  top: -35px;
+  width: 100%;
+  bottom: -35px;
+  z-index: 10000;
+  right: 0px;
 }
 
 .pl-flash-msg {
@@ -1338,21 +1330,23 @@ input[readonly][type="text"] {
 .pl-flash-msg.success {
   border: 1px solid #56b652;
   border-top: 3px solid #56b652;
+  background-color: #ddf0de;
 }
 
 .pl-flash-msg.danger {
   border: 1px solid #e63f3f;
   border-top: 3px solid #e63f3f;
+  background-color: #ffe0e0;
 }
 
 .pl-flash-msg.warning {
   border: 1px solid #ffe100;
   border-top: 3px solid #ffe100;
+  background-color: #f5e9d3;
 }
 
-.pl-flash-msg-text-section,
-.pl-flash-msg-close-btn {
-  line-height: 30px;
+.pl-flash-msg-text-section, .pl-flash-msg-close-btn, .pl-flash-msg-text-section i {
+  line-height: 50px;
 }
 
 .pl-flash-msg-text-section {
@@ -1369,7 +1363,6 @@ input[readonly][type="text"] {
   display: none;
   font-size: 20px;
   margin-right: 10px;
-  line-height: 30px;
 }
 
 .pl-flash-msg i.success {
@@ -1485,6 +1478,11 @@ body {
   }
 }
 
+@media screen and (max-width: 950px) {
+  .pl-collapse {
+    display: none !important;
+  }
+}
 
 @media screen and (max-width: 1366px) {
   .pl-table-row-arrow-wrapper, .pl-table-header-arrow {

@@ -42,6 +42,10 @@ class CachingUtility
      */
     protected static $costCache;
     /**
+     * @var float
+     */
+    protected static $cartTotal;
+    /**
      * @var \Packlink\BusinessLogic\Http\DTO\Warehouse
      */
     protected static $wareHouse;
@@ -85,7 +89,6 @@ class CachingUtility
      *
      * @return \Carrier
      *
-     * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
     public static function getCarrier($id)
@@ -119,6 +122,30 @@ class CachingUtility
     public static function setCosts($calculatedCosts)
     {
         self::$costCache = $calculatedCosts;
+    }
+
+    /**
+     * Retrieves total cart value.
+     *
+     * @return array | float
+     */
+    public static function getCartTotal()
+    {
+        if (self::$cartTotal === null) {
+            return false;
+        }
+
+        return self::$cartTotal;
+    }
+
+    /**
+     * Sets total cart value.
+     *
+     * @param float $cartTotal Cart total value.
+     */
+    public static function setCartTotal($cartTotal)
+    {
+        self::$cartTotal = $cartTotal;
     }
 
     /**

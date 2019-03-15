@@ -318,6 +318,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function hookActionOrderStatusUpdate($params)
     {
@@ -408,7 +409,8 @@ class Packlink extends CarrierModule
             $warehouse->postalCode,
             $toCountry,
             $toZip,
-            $parcels
+            $parcels,
+            $this->getCartTotal($cart)
         );
 
         \Packlink\PrestaShop\Classes\Utility\CachingUtility::setCosts($calculatedCosts);
@@ -576,7 +578,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Creates dropoff address.
+     * Creates drop-off address.
      *
      * @param \Order $order
      * @param \Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping $mapping
@@ -694,7 +696,8 @@ class Packlink extends CarrierModule
             $warehouse->postalCode,
             $this->getDestinationCountryCode($cart, $warehouse),
             $this->getDestinationCountryZip($cart, $warehouse),
-            $parcels
+            $parcels,
+            $this->getCartTotal($cart)
         );
     }
 
@@ -748,7 +751,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Checks if  Packlink authorization token, default parcel and default warehouse have been set in the shop.
+     * Checks if Packlink authorization token, default parcel and default warehouse have been set in the shop.
      *
      * @return bool Returns TRUE if module has been fully configured, otherwise returns FALSE.
      */
@@ -856,8 +859,8 @@ class Packlink extends CarrierModule
      * @param int $orderId ID of the order.
      * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository Order repository.
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \PrestaShopDatabaseException
      */
@@ -1091,6 +1094,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function prepareShippingTabData($orderId)
     {
@@ -1110,7 +1114,7 @@ class Packlink extends CarrierModule
 
         if ($orderDetails === null || $orderDetails->getTaskId() === null) {
             $message = \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__(
-                'Create order draft on Packlink'
+                'Create order draft in Packlink PRO'
             );
             $displayDraftButton = true;
         } else {
@@ -1159,6 +1163,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function prepareShippingObject(
         $orderId,
@@ -1190,9 +1195,47 @@ class Packlink extends CarrierModule
                 ? $orderDetails->getCarrierTrackingUrl() : '',
             'packlink_shipping_price' => $orderDetails->getPacklinkShippingPrice() !== null
                 ? $orderDetails->getPacklinkShippingPrice() . ' €' : '',
-            'link' => $order->packlink_order_draft,
+            'link' => $this->getOrderDraftUrl($orderDetails->getShipmentReference()),
         );
 
         return $shipping;
+    }
+
+    /**
+     * Gets total cart value.
+     *
+     * @param \Cart $cart
+     *
+     * @return array|float
+     */
+    private function getCartTotal(\Cart $cart)
+    {
+        if (\Packlink\PrestaShop\Classes\Utility\CachingUtility::getCartTotal() === false) {
+            \Packlink\PrestaShop\Classes\Utility\CachingUtility::setCartTotal(
+                $cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING)
+            );
+        }
+
+        return \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCartTotal();
+    }
+
+    /**
+     * Returns link to order draft on Packlink for the provided shipment reference.
+     *
+     * @param string $reference Shipment reference.
+     *
+     * @return string Link to order draft on Packlink.
+     */
+    private function getOrderDraftUrl($reference)
+    {
+        /** @var \Packlink\BusinessLogic\Configuration $configService */
+        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Configuration::CLASS_NAME
+        );
+        $userCountry = $configService->getUserInfo() !== null
+            ? \Tools::strtolower($configService->getUserInfo()->country)
+            : 'es';
+
+        return "https://pro.packlink.$userCountry/private/shipments/$reference";
     }
 }
