@@ -36,6 +36,7 @@ var Packlink = window.Packlink || {};
     let locations = [];
 
     let selectedId;
+    let lang;
 
     function display() {
       modal = document.getElementById('pl-map-modal');
@@ -45,6 +46,8 @@ var Packlink = window.Packlink || {};
 
       closeButton = document.getElementById('pl-close-modal-btn');
       closeButton.addEventListener('click', closeClickedListener);
+
+      lang = configuration.lang ? configuration.lang : 'en';
 
       ajaxService.post(
           configuration.getUrl,
@@ -93,7 +96,7 @@ var Packlink = window.Packlink || {};
      * Submits location to location library.
      */
     function submitLocations() {
-      Packlink.locationPicker.display(locations, onDropoffSelected, configuration.dropOffId);
+      Packlink.locationPicker.display(locations, onDropoffSelected, configuration.dropOffId, lang);
       document.getElementById('pl-modal-spinner').classList.add('disabled');
     }
 

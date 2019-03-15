@@ -93,7 +93,8 @@ var Packlink = window.Packlink || {};
             methodId: configuration.dropoffIds[id],
             carrierId: id,
             onComplete: modalCompleteCallback,
-            dropOffId: selectedId
+            dropOffId: selectedId,
+            lang: configuration.lang
           }
       );
 

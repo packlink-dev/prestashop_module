@@ -511,11 +511,25 @@ class Packlink extends CarrierModule
     {
         \Packlink\PrestaShop\Classes\Bootstrap::init();
 
+        $supportedLanguages = array('en', 'es', 'it', 'fr', 'de');
+
         $dropOffs = \Packlink\PrestaShop\Classes\Utility\CarrierUtility::getDropOffCarrierReferenceIds();
         $configuration = array(
             'dropoffIds' => $dropOffs,
             'getLocationsUrl' => $this->getFrontAction('locations'),
         );
+
+
+        $lang = 'en';
+
+        if (!empty($GLOBALS['locale'])) {
+            $locale = explode('_', $GLOBALS['locale']);
+            if (!empty($locale[0]) && in_array($locale[0], $supportedLanguages, true)) {
+                $lang = $locale[0];
+            }
+        }
+
+        $configuration['lang'] = $lang;
 
         /** @var \Cart $cart */
         $cart = $params['cart'];
