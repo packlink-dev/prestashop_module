@@ -34,6 +34,7 @@ function plCreateOrderDraft(element) {
       orderId = parseInt(element.dataset.order),
       controllerUrl = element.dataset.createDraftUrl;
 
+  element.disabled = true;
   ajaxService.post(
       controllerUrl,
       {orderId: orderId},
@@ -41,6 +42,7 @@ function plCreateOrderDraft(element) {
         window.location.reload();
       },
       function () {
+        element.disabled = false;
       }
   );
 }
