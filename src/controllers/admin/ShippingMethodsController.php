@@ -26,7 +26,7 @@
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodConfiguration;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
-use Packlink\BusinessLogic\Controllers\ShippingMethodController as CoreController;
+use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\PrestaShop\Classes\Bootstrap;
@@ -39,7 +39,7 @@ use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 class ShippingMethodsController extends ModuleAdminController
 {
     /**
-     * @var CoreController
+     * @var ShippingMethodController
      */
     protected $controller;
 
@@ -53,7 +53,7 @@ class ShippingMethodsController extends ModuleAdminController
         parent::__construct();
 
         Bootstrap::init();
-        $this->controller = new CoreController();
+        $this->controller = new ShippingMethodController();
 
         $this->bootstrap = true;
     }
@@ -117,7 +117,7 @@ class ShippingMethodsController extends ModuleAdminController
 
         /** @var ShippingMethodResponse $model */
         $model = $this->controller->save($configuration);
-        if ($model === false) {
+        if ($model === null) {
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to save shipping method.')));
         }
 

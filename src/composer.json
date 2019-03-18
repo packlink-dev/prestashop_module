@@ -21,7 +21,8 @@
   "autoload": {
     "psr-4": {
       "Packlink\\PrestaShop\\Classes\\": "classes",
-      "Packlink\\PrestaShop\\Tests\\": "tests"
+      "Packlink\\PrestaShop\\Tests\\": "tests",
+      "Packlink\\Lib\\": "lib"
     }
   },
   "autoload-dev": {
@@ -33,5 +34,9 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^4.8.35"
+  },
+  "scripts": {
+    "post-update-cmd": "Packlink\\Lib\\Core::postUpdate",
+    "post-install-cmd": "Packlink\\Lib\\Core::postUpdate"
   }
 }

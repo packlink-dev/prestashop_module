@@ -8,6 +8,7 @@ rm -f ./packlink
 echo -e "\e[32mSTEP 1:\e[39m Copying plugin source..."
 mkdir packlink
 cp -r ./src/* packlink
+rm -rf packlink/lib
 rm -rf packlink/tests
 rm -rf packlink/phpunit.xml
 rm -rf packlink/config.xml
