@@ -320,6 +320,7 @@
                           id="pl-default-warehouse-country"
                           value="{$warehouseCountry}"
                           readonly
+                          tabindex="-1"
                   />
                   <span class="pl-text-input-label">{l s='Country' mod='packlink'}</span>
                 </div>
