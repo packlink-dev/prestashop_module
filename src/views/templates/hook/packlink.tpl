@@ -330,7 +330,7 @@
                 <div class=" pl-form-section-input pl-text-input">
                   <input autocomplete="new-password" type="text" class="pl-warehouse-input" id="pl-default-warehouse-postal_code"/>
                   <span class="pl-text-input-label">{l s='City or postal code' mod='packlink'}</span>
-                  <span class="pl-input-search-icon"><i class="material-icons">search</i></span>
+                  <span class="pl-input-search-icon" data-pl-id="search-icon"><i class="material-icons">search</i></span>
                 </div>
               </div>
             </div>

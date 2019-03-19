@@ -646,11 +646,21 @@
   line-height: 50px;
   right: 0;
   border-left: 1px solid #dcdcdc;
+  cursor: pointer;
+}
+
+.pl-input-search-icon * {
+  pointer-events: none;
 }
 
 .pl-input-search-icon i {
   font-size: 28px;
   color: #5d5d5d;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
 }
 
 .pl-form-section-input {
