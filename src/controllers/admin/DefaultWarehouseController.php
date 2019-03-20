@@ -127,6 +127,7 @@ class DefaultWarehouseController extends ModuleAdminController
         }
 
         $platformCountry = $this->configService->getUserInfo()->country;
+        $result = array();
         try {
             $result = $this->locationService->searchLocations($platformCountry, $input['query']);
         } catch (\Exception $e) {
@@ -134,7 +135,6 @@ class DefaultWarehouseController extends ModuleAdminController
         }
 
         $arrayResult = array();
-
         foreach ($result as $item) {
             $arrayResult[] = $item->toArray();
         }
@@ -170,10 +170,8 @@ class DefaultWarehouseController extends ModuleAdminController
             }
         }
 
-        if (!empty($data['email'])) {
-            if (!Validate::isEmail($data['email'])) {
-                $result['email'] = $this->l('Field must be valid email.');
-            }
+        if (!empty($data['email']) && !Validate::isEmail($data['email'])) {
+            $result['email'] = $this->l('Field must be valid email.');
         }
 
         if (!empty($data['phone'])) {

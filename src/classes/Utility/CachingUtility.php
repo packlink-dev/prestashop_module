@@ -27,6 +27,7 @@ namespace Packlink\PrestaShop\Classes\Utility;
 
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
+use Packlink\BusinessLogic\Http\DTO\Package;
 use Packlink\BusinessLogic\Http\DTO\ParcelInfo;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 
@@ -88,8 +89,6 @@ class CachingUtility
      * @param int $id
      *
      * @return \Carrier
-     *
-     * @throws \PrestaShopException
      */
     public static function getCarrier($id)
     {
@@ -184,6 +183,9 @@ class CachingUtility
      * @param $id
      *
      * @return \Country
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public static function getCountry($id)
     {
@@ -195,27 +197,27 @@ class CachingUtility
     }
 
     /**
-     * Retrieves parcel cache for products.
+     * Retrieves package cache for products.
      *
-     * @param array $products
+     * @param array $products Shop products.
      *
-     * @return array
+     * @return \Packlink\BusinessLogic\Http\DTO\Package[]
      */
-    public static function getParcels($products)
+    public static function getPackages($products)
     {
         if (empty(self::$parcelCache)) {
             $defaultParcel = self::getDefaultParcel();
 
             foreach ($products as $product) {
-                $parcel = new ParcelInfo();
-
-                $parcel->height = ceil((float)$product['height']) ?: (int)$defaultParcel->height;
-                $parcel->width = ceil((float)$product['width']) ?: (int)$defaultParcel->width;
-                $parcel->length = ceil((float)$product['depth']) ?: (int)$defaultParcel->height;
-                $parcel->weight = (float)$product['weight'] ?: (float)$defaultParcel->weight;
+                $package = new Package(
+                    (float)$product['weight'] ?: (float)$defaultParcel->weight,
+                    ceil((float)$product['width']) ?: (int)$defaultParcel->width,
+                    ceil((float)$product['height']) ?: (int)$defaultParcel->height,
+                    ceil((float)$product['depth']) ?: (int)$defaultParcel->length
+                );
 
                 for ($i = 0; $i < $product['quantity']; $i++) {
-                    self::$parcelCache[] = $parcel;
+                    self::$parcelCache[] = $package;
                 }
             }
         }

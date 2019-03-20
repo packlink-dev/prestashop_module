@@ -397,7 +397,7 @@ class Packlink extends CarrierModule
 
         $toCountry = $this->getDestinationCountryCode($cart, $warehouse);
         $toZip = $this->getDestinationCountryZip($cart, $warehouse);
-        $parcels = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getParcels($shippingProducts);
+        $parcels = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getPackages($shippingProducts);
 
         /** @var \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService $shippingMethodService */
         $shippingMethodService = \Logeecom\Infrastructure\ServiceRegister::getService(
@@ -702,7 +702,6 @@ class Packlink extends CarrierModule
         $shippingMethodService = \Logeecom\Infrastructure\ServiceRegister::getService(
             \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService::CLASS_NAME
         );
-        $parcels = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getParcels($products);
 
         return \Packlink\BusinessLogic\ShippingMethod\ShippingCostCalculator::getShippingCosts(
             $shippingMethodService->getAllMethods(),
@@ -710,7 +709,7 @@ class Packlink extends CarrierModule
             $warehouse->postalCode,
             $this->getDestinationCountryCode($cart, $warehouse),
             $this->getDestinationCountryZip($cart, $warehouse),
-            $parcels,
+            \Packlink\PrestaShop\Classes\Utility\CachingUtility::getPackages($products),
             $this->getCartTotal($cart)
         );
     }

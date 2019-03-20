@@ -26,10 +26,7 @@
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Http\DTO\BaseDto;
-use Packlink\BusinessLogic\Http\Proxy;
-use Packlink\BusinessLogic\ShippingMethod\ShippingCostCalculator;
-use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
+use Packlink\BusinessLogic\Location\LocationService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
 use Packlink\PrestaShop\Classes\Utility\CachingUtility;
@@ -50,13 +47,11 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
     /**
      * Responds to ajax request.
      *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function postProcess()
     {
@@ -84,17 +79,12 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
      *
      * @return array
      *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     protected function getLocations($methodId)
     {
-        /** @var Proxy $proxy */
-        $proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
-
         $addressId = empty($this->context->cart->id_address_delivery) ? null
             : $this->context->cart->id_address_delivery;
 
@@ -103,13 +93,11 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
         }
 
         $address = new Address($addressId);
-
         if (!Validate::isLoadedObject($address)) {
             return array();
         }
 
         $country = new \Country($address->id_country);
-
         if (!Validate::isLoadedObject($country)) {
             return array();
         }
@@ -117,30 +105,14 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
         $countryCode = \Tools::strtoupper($country->iso_code);
         $postalCode = $address->postcode;
 
-        $warehouse = CachingUtility::getDefaultWarehouse();
-
-        /** @var ShippingMethodService $shippingMethodService */
-        $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
-        $method = $shippingMethodService->getShippingMethod($methodId);
-        if ($method === null) {
-            return array();
-        }
+        /** @var \Packlink\BusinessLogic\Location\LocationService $locationService */
+        $locationService = ServiceRegister::getService(LocationService::CLASS_NAME);
 
         try {
-            $cheapestService = ShippingCostCalculator::getCheapestShippingService(
-                $method,
-                $warehouse->country,
-                $warehouse->postalCode,
-                $countryCode,
-                $postalCode
-            );
+            return $locationService->getLocations($methodId, $countryCode, $postalCode, $this->getCartPackages());
         } catch (\InvalidArgumentException $e) {
             return array();
         }
-
-        $locations = $proxy->getLocations($cheapestService->serviceId, $countryCode, $postalCode);
-
-        return $this->transformCollectionToResponse($locations);
     }
 
     /**
@@ -180,20 +152,24 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
     }
 
     /**
-     * Transforms collection of DTO's to an array response.
+     * Gets packages out of cart products.
      *
-     * @param BaseDto[] $collection
-     *
-     * @return array
+     * @return \Packlink\BusinessLogic\Http\DTO\Package[]
      */
-    protected function transformCollectionToResponse($collection)
+    protected function getCartPackages()
     {
-        $result = array();
-
-        foreach ($collection as $element) {
-            $result[] = $element->toArray();
+        $shippingProducts = array();
+        if (!empty($this->context->cart)) {
+            $products = $this->context->cart->getProducts();
+            if (!empty($products)) {
+                foreach ($this->context->cart->getProducts() as $product) {
+                    if (!$product['is_virtual']) {
+                        $shippingProducts[] = $product;
+                    }
+                }
+            }
         }
 
-        return $result;
+        return CachingUtility::getPackages($shippingProducts);
     }
 }
