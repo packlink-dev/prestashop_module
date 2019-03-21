@@ -23,11 +23,9 @@
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-use Logeecom\Infrastructure\Logger\Logger;
-use Logeecom\Infrastructure\ServiceRegister;
+use Packlink\BusinessLogic\WebHook\WebHookEventHandler;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
-use Packlink\PrestaShop\Classes\WebhookHandlers\WebhookHandlerFactory;
 
 /** @noinspection AutoloadingIssuesInspection */
 
@@ -53,56 +51,12 @@ class PacklinkWebhooksModuleFrontController extends ModuleFrontController
     {
         $input = \Tools::file_get_contents('php://input');
 
-        Logger::logDebug(
-            $this->l('Webhook from Packlink received.'),
-            'Integration',
-            array('payload' => $input)
-        );
+        $webhookHandler = WebHookEventHandler::getInstance();
 
-        $payload = json_decode($input);
-
-        $this->validatePayload($payload);
-        $this->checkAuthToken();
-
-        $webhookHandler = WebhookHandlerFactory::create($payload->event);
-        $webhookHandler->handle($payload->data);
-
-        PacklinkPrestaShopUtility::dieJson(array('success' => true));
-    }
-
-    /**
-     * Validates request payload and returns bad request response in case of invalid payload.
-     *
-     * @param \stdClass $payload Request data.
-     */
-    private function validatePayload($payload)
-    {
-        $validEvents = array(
-            'shipment.carrier.success',
-            'shipment.carrier.fail',
-            'shipment.label.ready',
-            'shipment.label.fail',
-            'shipment.tracking.update',
-            'shipment.delivered',
-        );
-
-        if (empty($payload)
-            || !$payload->datetime
-            || !$payload->data
-            || !in_array($payload->event, $validEvents, true)
-        ) {
+        if (!$webhookHandler->handle($input)) {
             PacklinkPrestaShopUtility::die400(array('message' => 'Invalid payload'));
         }
-    }
 
-    private function checkAuthToken()
-    {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = ServiceRegister::getService(Logeecom\Infrastructure\Configuration\Configuration::CLASS_NAME);
-        $authToken = $configService->getAuthorizationToken();
-
-        if (empty($authToken)) {
-            PacklinkPrestaShopUtility::die404(array('message' => 'Authorization token not found'));
-        }
+        PacklinkPrestaShopUtility::dieJson(array('success' => true));
     }
 }
