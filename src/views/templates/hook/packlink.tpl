@@ -117,8 +117,7 @@
         </div>
         <div class="row">
           <div class="col-sm-12 pl-basic-settings-page-description-wrapper">
-            {l s='Packlink offers you the possibility to update your PrestaShop order status with the shipping info. You can
-            edit anytime.' mod='packlink'}
+            {l s='Packlink offers you the possibility to update your PrestaShop order status with the shipping info. You can edit anytime.' mod='packlink'}
           </div>
         </div>
         <div>
@@ -533,7 +532,7 @@
     </div>
     <div class="row">
       <div class="col-sm-12 pl-filter-method">
-        <b>{l s='Delivery' mod='packlink'}</b>
+        <b>{l s='Delivery type' mod='packlink'}</b>
       </div>
     </div>
     <div class="row">
