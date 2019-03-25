@@ -10,9 +10,10 @@
       "url": "git@github.com:logeecom/pl_module_core.git"
     }
   ],
+  "minimum-stability": "dev",
   "require": {
     "php": ">=5.3",
-    "packlink/integration-core": "dev-dev",
+    "packlink/integration-core": "v1.0.0",
     "ext-json": "*",
     "ext-curl": "*",
     "ext-zip": "*",
