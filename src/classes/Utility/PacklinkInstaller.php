@@ -120,10 +120,23 @@ class PacklinkInstaller
 
         $this->dropBaseTable();
 
+        $this->deleteLogs();
+
         // Make sure that deleted configuration is reflected into cached values as well.
         \Configuration::loadConfiguration();
 
         return true;
+    }
+
+    /**
+     * Adds controllers and hooks.
+     *
+     * @return bool Result of method execution.
+     * @throws \PrestaShopException
+     */
+    public function addControllersAndHooks()
+    {
+        return $this->addMenuItem() && $this->addHooks() && $this->addControllers();
     }
 
     /**
@@ -147,17 +160,6 @@ class PacklinkInstaller
         $tab->module = $this->module->name;
 
         return $tab->add();
-    }
-
-    /**
-     * Adds controllers and hooks.
-     *
-     * @return bool Result of method execution.
-     * @throws \PrestaShopException
-     */
-    public function addControllersAndHooks()
-    {
-        return $this->addMenuItem() && $this->addHooks() && $this->addControllers();
     }
 
     /**
@@ -255,6 +257,24 @@ class PacklinkInstaller
             return (bool)\Db::getInstance()->execute($script);
         } catch (\PrestaShopException $e) {
             Logger::logError('Error dropping base database table. Error: ' . $e->getMessage(), 'Integration');
+        }
+
+        return false;
+    }
+
+    /**
+     * Deletes all packlink logs.
+     *
+     * @return bool
+     */
+    private function deleteLogs()
+    {
+        $script = 'DELETE FROM ' . _DB_PREFIX_ . 'log WHERE `message` LIKE \'' . pSQL('%PACKLINK LOG%') . '\'';
+
+        try {
+            return (bool)\Db::getInstance()->execute($script);
+        } catch (\PrestaShopException $e) {
+            Logger::logError('Error deleting packlink logs. Error: ' . $e->getMessage(), 'Integration');
         }
 
         return false;

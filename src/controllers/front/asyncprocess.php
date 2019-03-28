@@ -23,6 +23,7 @@
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\AsyncProcessStarterService;
 use Logeecom\Infrastructure\TaskExecution\Interfaces\AsyncProcessService;
@@ -52,6 +53,8 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         $guid = trim(Tools::getValue('guid'));
+        Logger::logDebug('Received async process request.', 'Integration', array('guid' => $guid));
+
         /** @var AsyncProcessStarterService $asyncProcessService */
         $asyncProcessService = ServiceRegister::getService(AsyncProcessService::CLASS_NAME);
         $asyncProcessService->runProcess($guid);

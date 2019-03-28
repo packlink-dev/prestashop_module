@@ -27,6 +27,7 @@ rm -rf packlink/vendor/packlink/integration-core/.idea
 rm -rf packlink/vendor/packlink/integration-core/tests
 rm -rf packlink/vendor/packlink/integration-core/generic_tests
 rm -rf packlink/vendor/packlink/integration-core/README.md
+rm -rf packlink/vendor/zendframework/zendpdf/.git
 rm -rf packlink/vendor/zendframework/zendpdf/tests
 
 # Copy resources
