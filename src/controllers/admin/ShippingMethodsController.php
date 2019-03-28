@@ -197,16 +197,10 @@ class ShippingMethodsController extends ModuleAdminController
      */
     public function displayAjaxGetAvailableTaxClasses()
     {
-        $db = Db::getInstance();
-        $query = new DbQuery();
-        $query->select('id_tax_rules_group, name')
-            ->from('tax_rules_group')
-            ->where('active = 1');
-
         try {
-            $queryResult = $db->executeS($query);
+            $taxRules = TaxRulesGroup::getTaxRulesGroups();
         } catch (PrestaShopException $e) {
-            $queryResult = array();
+            $taxRules = array();
         }
 
         $result = array(
@@ -216,11 +210,11 @@ class ShippingMethodsController extends ModuleAdminController
             ),
         );
 
-        if (!empty($queryResult)) {
-            foreach ($queryResult as $row) {
+        if (!empty($taxRules)) {
+            foreach ($taxRules as $taxRule) {
                 $result[] = array(
-                    'value' => $row['id_tax_rules_group'],
-                    'label' => $row['name']
+                    'value' => $taxRule['id_tax_rules_group'],
+                    'label' => $taxRule['name']
                 );
             }
         }
