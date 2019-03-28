@@ -201,8 +201,7 @@ class ShippingMethodsController extends ModuleAdminController
         $query = new DbQuery();
         $query->select('id_tax_rules_group, name')
             ->from('tax_rules_group')
-            ->where('active = 1')
-            ->where('deleted = 0');
+            ->where('active = 1');
 
         try {
             $queryResult = $db->executeS($query);
