@@ -119,7 +119,7 @@
   };
 
   Packlink.checkOut = new Packlink.CheckOutController(
-      JSON.parse('{$configuration|escape:'html':'UTF-8'}'.replace(/&quot;/g, '"'))
+      JSON.parse('{$configuration|escape:'UTF-8'}'.replace(/&quot;/g, '"').replace(/&amp;/g, '&'))
   );
 
   function checkLoadStatus() {

@@ -111,7 +111,7 @@ class Packlink extends CarrierModule
         $this->displayName = $this->l('Packlink PRO Shipping');
         $this->description = $this->l('Save up to 70% on your shipping costs. No fixed fees, no minimum shipping volume required. Manage all your shipments in a single platform.');
 
-        $this->context = \Context::getContext();
+        $this->context = Context::getContext();
     }
 
     /**
@@ -323,7 +323,7 @@ class Packlink extends CarrierModule
      */
     public function hookActionOrderStatusUpdate($params)
     {
-        $order = new \Order((int)$params['id_order']);
+        $order = new Order((int)$params['id_order']);
 
         // If order has just been created, this hook should not handle that event
         // since it has already been handled by hook for validating order.
@@ -606,7 +606,7 @@ class Packlink extends CarrierModule
     ) {
         $address = new Address();
 
-        $db = \Db::getInstance();
+        $db = Db::getInstance();
 
         $dropOff = $mapping->getDropOff();
 
@@ -633,6 +633,7 @@ class Packlink extends CarrierModule
         $address->address1 = $dropOff['address'];
         $address->postcode = $dropOff['zip'];
         $address->city = $dropOff['city'];
+        $address->company = $dropOff['name'];
         $address->firstname = $this->context->customer->firstname;
         $address->lastname = $this->context->customer->lastname;
         $address->phone = $this->getPhone($order);
@@ -665,16 +666,16 @@ class Packlink extends CarrierModule
             && empty($calculatedCosts)
             && $carrierId === $configService->getBackupCarrierId()
         ) {
-            $zoneId = \Address::getZoneById($cart->id_address_delivery);
-            $customer = new \Customer($cart->id_customer);
+            $zoneId = Address::getZoneById($cart->id_address_delivery);
+            $customer = new Customer($cart->id_customer);
 
-            $internalCarriers = \Carrier::getCarriers(
-                \Context::getContext()->language->id,
+            $internalCarriers = Carrier::getCarriers(
+                Context::getContext()->language->id,
                 true,
                 false,
                 (int)$zoneId,
                 $customer->getGroups(),
-                \Carrier::PS_CARRIERS_ONLY
+                Carrier::PS_CARRIERS_ONLY
             );
 
             return empty($internalCarriers);
@@ -789,7 +790,7 @@ class Packlink extends CarrierModule
      *
      * @return string
      */
-    private function getPhone(\Order $order)
+    private function getPhone(Order $order)
     {
         $phone = '';
 
@@ -822,7 +823,7 @@ class Packlink extends CarrierModule
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function createOrderDraft(\Order $order, \OrderState $orderState)
+    private function createOrderDraft(Order $order, OrderState $orderState)
     {
         \Packlink\PrestaShop\Classes\Bootstrap::init();
         /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
@@ -851,13 +852,13 @@ class Packlink extends CarrierModule
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function draftShouldBeCreated(\Order $order, $orderStatus, $orderRepository)
+    private function draftShouldBeCreated(Order $order, $orderStatus, $orderRepository)
     {
         /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
         $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
             \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
         );
-        $carrier = new \Carrier((int)$order->id_carrier);
+        $carrier = new Carrier((int)$order->id_carrier);
         $orderDetails = $orderRepository->getOrderDetailsById((int)$order->id);
         $carrierServiceMapping = $carrierService->getMappingByCarrierReferenceId((int)$carrier->id_reference);
 
@@ -1050,7 +1051,7 @@ class Packlink extends CarrierModule
             array(),
             null,
             null,
-            \Configuration::get('PS_SHOP_DEFAULT')
+            Configuration::get('PS_SHOP_DEFAULT')
         );
     }
 
@@ -1190,7 +1191,7 @@ class Packlink extends CarrierModule
             \Logeecom\Infrastructure\Utility\TimeProvider::CLASS_NAME
         );
 
-        $order = new \Order($orderId);
+        $order = new Order($orderId);
         $carrier = new Carrier((int)$order->id_carrier);
 
         $this->prepareLabelsTemplate($orderRepository, $orderId);
@@ -1223,11 +1224,11 @@ class Packlink extends CarrierModule
      *
      * @return array|float
      */
-    private function getCartTotal(\Cart $cart)
+    private function getCartTotal(Cart $cart)
     {
         if (\Packlink\PrestaShop\Classes\Utility\CachingUtility::getCartTotal() === false) {
             \Packlink\PrestaShop\Classes\Utility\CachingUtility::setCartTotal(
-                $cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING)
+                $cart->getOrderTotal(true, Cart::BOTH_WITHOUT_SHIPPING)
             );
         }
 
@@ -1248,7 +1249,7 @@ class Packlink extends CarrierModule
             \Packlink\BusinessLogic\Configuration::CLASS_NAME
         );
         $userCountry = $configService->getUserInfo() !== null
-            ? \Tools::strtolower($configService->getUserInfo()->country)
+            ? Tools::strtolower($configService->getUserInfo()->country)
             : 'es';
 
         return "https://pro.packlink.$userCountry/private/shipments/$reference";
