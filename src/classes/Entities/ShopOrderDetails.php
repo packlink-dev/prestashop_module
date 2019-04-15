@@ -60,6 +60,7 @@ class ShopOrderDetails extends Entity
         'carrierTrackingUrl',
         'packlinkShippingPrice',
         'taskId',
+        'deleted',
     );
     /**
      * Shop order ID.
@@ -121,6 +122,12 @@ class ShopOrderDetails extends Entity
      * @var int
      */
     private $taskId;
+    /**
+     * If order has been deleted on the system.
+     *
+     * @var bool
+     */
+    private $deleted = false;
 
     /**
      * Returns entity configuration object.
@@ -411,5 +418,25 @@ class ShopOrderDetails extends Entity
         }
 
         return $data;
+    }
+
+    /**
+     * Returns whether this order has been deleted on the system.
+     *
+     * @return bool
+     */
+    public function isDeleted()
+    {
+        return $this->deleted;
+    }
+
+    /**
+     * Sets deleted flag on the order.
+     *
+     * @param bool $deleted
+     */
+    public function setDeleted($deleted)
+    {
+        $this->deleted = $deleted;
     }
 }

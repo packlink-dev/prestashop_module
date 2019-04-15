@@ -82,7 +82,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $orders = $this->getOrderDetailsRepository()->select($filter);
 
         foreach ($orders as $orderDetails) {
-            if ($orderDetails->getShipmentReference() !== null) {
+            if ($orderDetails->getShipmentReference() !== null && !$orderDetails->isDeleted()) {
                 $orderReferences[] = $orderDetails->getShipmentReference();
             }
         }
@@ -353,6 +353,24 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $order->updateShippingCost($price);
 
         $orderDetails->setPacklinkShippingPrice($price);
+        $this->getOrderDetailsRepository()->update($orderDetails);
+    }
+
+    /**
+     * Marks order as deleted on the system.
+     *
+     * @param string $shipmentReference Packlink shipment reference.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     */
+    public function setDeleted($shipmentReference)
+    {
+        $orderDetails = $this->getOrderDetailsByReference($shipmentReference);
+
+        $orderDetails->setDeleted(true);
+
         $this->getOrderDetailsRepository()->update($orderDetails);
     }
 

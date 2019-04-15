@@ -28,8 +28,8 @@ namespace Packlink\PrestaShop\Classes\Tasks;
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\Task;
+use Logeecom\Infrastructure\Utility\TimeProvider;
 use Packlink\BusinessLogic\Http\Proxy;
-use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
@@ -40,6 +40,10 @@ class UpgradeShopOrderDetailsTask extends Task
      * @var array
      */
     protected $orderReferenceMap;
+    /**
+     * @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository
+     */
+    private $orderRepository;
 
     /**
      * UpgradeShopOrderDetailsTask constructor.
@@ -79,10 +83,10 @@ class UpgradeShopOrderDetailsTask extends Task
             return;
         }
 
-        /** @var OrderRepository $orderRepository */
-        $orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
         /** @var Proxy $proxy */
         $proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
+        /** @var TimeProvider $timeProvider */
+        $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
 
         $progress = 0;
         $step = (int)($size / 10) + 1;
@@ -93,11 +97,13 @@ class UpgradeShopOrderDetailsTask extends Task
                 $this->reportProgress($progress);
             }
 
-            if (!$this->setReference($map['id_order'], $map['draft_reference'], $orderRepository)) {
+            $orderDetails = json_decode($map['details'], true);
+            $orderCreated = $timeProvider->deserializeDateString($orderDetails['date'], 'Y/m/d');
+
+            if (!$this->setReference($map['id_order'], $map['draft_reference'])
+                || $orderCreated < $timeProvider->getDateTime(strtotime('-60 days'))) {
                 continue;
             }
-
-            $this->setLabels($map['draft_reference'], $orderRepository, $proxy);
 
             try {
                 $shipment = $proxy->getShipment($map['draft_reference']);
@@ -106,11 +112,26 @@ class UpgradeShopOrderDetailsTask extends Task
             }
 
             if ($shipment === null) {
+                $this->setDeleted($map['draft_reference']);
+
                 continue;
             }
 
-            $this->setShipmentStatus($map['draft_reference'], $orderRepository, $shipment);
-            $this->setTrackingInfo($map['draft_reference'], $orderRepository, $proxy, $shipment);
+            if (in_array(
+                $orderDetails['state'],
+                array(
+                    'READY_TO_PRINT',
+                    'READY_FOR_COLLECTION',
+                    'IN_TRANSIT',
+                    'DELIVERED',
+                ),
+                true
+            )) {
+                $this->setLabels($map['draft_reference'], $proxy);
+            }
+
+            $this->setShipmentStatus($map['draft_reference'], $shipment);
+            $this->setTrackingInfo($map['draft_reference'], $proxy, $shipment);
         }
 
         $this->reportProgress(100);
@@ -121,15 +142,14 @@ class UpgradeShopOrderDetailsTask extends Task
      *
      * @param string $orderId
      * @param string $referenceId
-     * @param OrderRepository $orderRepository
      *
      * @return bool
      */
-    protected function setReference($orderId, $referenceId, $orderRepository)
+    protected function setReference($orderId, $referenceId)
     {
         try {
-            $orderRepository->setReference($orderId, $referenceId);
-        } catch (OrderNotFound $e) {
+            $this->getOrderRepository()->setReference($orderId, $referenceId);
+        } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Failed to create reference for order %d', array($orderId)),
                 'Integration'
@@ -145,14 +165,13 @@ class UpgradeShopOrderDetailsTask extends Task
      * Sets labels for order.
      *
      * @param string $reference
-     * @param OrderRepository $orderRepository
      * @param Proxy $proxy
      */
-    protected function setLabels($reference, $orderRepository, $proxy)
+    protected function setLabels($reference, $proxy)
     {
         try {
             $labels = $proxy->getLabels($reference);
-            $orderRepository->setLabelsByReference($reference, $labels);
+            $this->getOrderRepository()->setLabelsByReference($reference, $labels);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Failed to set labels for order with reference %s', array($reference)),
@@ -165,15 +184,14 @@ class UpgradeShopOrderDetailsTask extends Task
      * Sets tracking info for order.
      *
      * @param string $reference
-     * @param OrderRepository $orderRepository
      * @param Proxy $proxy
      * @param \Packlink\BusinessLogic\Http\DTO\Shipment $shipment
      */
-    protected function setTrackingInfo($reference, $orderRepository, $proxy, $shipment)
+    protected function setTrackingInfo($reference, $proxy, $shipment)
     {
         try {
             $trackingInfo = $proxy->getTrackingInfo($reference);
-            $orderRepository->updateTrackingInfo($reference, $trackingInfo, $shipment);
+            $this->getOrderRepository()->updateTrackingInfo($reference, $trackingInfo, $shipment);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__(
@@ -189,18 +207,51 @@ class UpgradeShopOrderDetailsTask extends Task
      * Sets order status.
      *
      * @param string $reference
-     * @param OrderRepository $orderRepository
-     * @param \Packlink\BusinessLogic\Http\DTO\Shipment
+     * @param $shipment
      */
-    protected function setShipmentStatus($reference, $orderRepository, $shipment)
+    protected function setShipmentStatus($reference, $shipment)
     {
         try {
-            $orderRepository->setShippingStatusByReference($reference, ShipmentStatus::getStatus($shipment->status));
-        } catch (OrderNotFound $e) {
+            $this->getOrderRepository()->setShippingStatusByReference(
+                $reference,
+                ShipmentStatus::getStatus($shipment->status)
+            );
+        } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),
                 'Integration'
             );
         }
+    }
+
+    /**
+     * Marks order with provided reference as deleted on the system.
+     *
+     * @param string $reference
+     */
+    protected function setDeleted($reference)
+    {
+        try {
+            $this->getOrderRepository()->setDeleted($reference);
+        } catch (\Exception $e) {
+            Logger::logError(
+                TranslationUtility::__('Order with reference %s not found.', array($reference)),
+                'Integration'
+            );
+        }
+    }
+
+    /**
+     * Returns an instance of order repository service.
+     *
+     * @return \Packlink\PrestaShop\Classes\Repositories\OrderRepository
+     */
+    private function getOrderRepository()
+    {
+        if ($this->orderRepository === null) {
+            $this->orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
+        }
+
+        return $this->orderRepository;
     }
 }

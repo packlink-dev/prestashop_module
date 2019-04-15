@@ -223,14 +223,14 @@ function transferOrderStatusMappings()
  */
 function transferOrderReferences()
 {
-    $references = getReferenceIds();
-    if (!empty($references)) {
+    $packlinkOrders = getPacklinkOrders();
+    if (!empty($packlinkOrders)) {
         $config = getConfigService();
 
         /** @var QueueService $queue */
         $queue = ServiceRegister::getService(QueueService::CLASS_NAME);
         try {
-            $queue->enqueue($config->getDefaultQueueName(), new UpgradeShopOrderDetailsTask($references));
+            $queue->enqueue($config->getDefaultQueueName(), new UpgradeShopOrderDetailsTask($packlinkOrders));
         } catch (\Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException $e) {
             Logger::logError(
                 TranslationUtility::__(
@@ -307,12 +307,13 @@ function getConfigurationKeys()
  *
  * @return array
  */
-function getReferenceIds()
+function getPacklinkOrders()
 {
     $db = Db::getInstance();
     $query = new DbQuery();
     $query->select('id_order')
         ->select('draft_reference')
+        ->select('details')
         ->from('packlink_orders');
 
     try {
