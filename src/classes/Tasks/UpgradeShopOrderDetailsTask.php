@@ -97,11 +97,16 @@ class UpgradeShopOrderDetailsTask extends Task
                 $this->reportProgress($progress);
             }
 
+            if (!$this->setReference($map['id_order'], $map['draft_reference'])) {
+                continue;
+            }
+
             $orderDetails = json_decode($map['details'], true);
             $orderCreated = $timeProvider->deserializeDateString($orderDetails['date'], 'Y/m/d');
 
-            if (!$this->setReference($map['id_order'], $map['draft_reference'])
-                || $orderCreated < $timeProvider->getDateTime(strtotime('-60 days'))) {
+            if ($orderCreated < $timeProvider->getDateTime(strtotime('-60 days'))) {
+                $this->setDeleted($map['draft_reference']);
+
                 continue;
             }
 
@@ -111,27 +116,13 @@ class UpgradeShopOrderDetailsTask extends Task
                 $shipment = null;
             }
 
-            if ($shipment === null) {
+            if ($shipment !== null) {
+                $this->setLabels($map['draft_reference'], $orderDetails['state'], $proxy);
+                $this->setShipmentStatus($map['draft_reference'], $shipment);
+                $this->setTrackingInfo($map['draft_reference'], $proxy, $shipment);
+            } else {
                 $this->setDeleted($map['draft_reference']);
-
-                continue;
             }
-
-            if (in_array(
-                $orderDetails['state'],
-                array(
-                    'READY_TO_PRINT',
-                    'READY_FOR_COLLECTION',
-                    'IN_TRANSIT',
-                    'DELIVERED',
-                ),
-                true
-            )) {
-                $this->setLabels($map['draft_reference'], $proxy);
-            }
-
-            $this->setShipmentStatus($map['draft_reference'], $shipment);
-            $this->setTrackingInfo($map['draft_reference'], $proxy, $shipment);
         }
 
         $this->reportProgress(100);
@@ -164,19 +155,31 @@ class UpgradeShopOrderDetailsTask extends Task
     /**
      * Sets labels for order.
      *
-     * @param string $reference
-     * @param Proxy $proxy
+     * @param string $reference Packlink shipment reference.
+     * @param string $orderState State of the order.
+     * @param Proxy $proxy Packlink proxy.
      */
-    protected function setLabels($reference, $proxy)
+    protected function setLabels($reference, $orderState, $proxy)
     {
-        try {
-            $labels = $proxy->getLabels($reference);
-            $this->getOrderRepository()->setLabelsByReference($reference, $labels);
-        } catch (\Exception $e) {
-            Logger::logError(
-                TranslationUtility::__('Failed to set labels for order with reference %s', array($reference)),
-                'Integration'
-            );
+        if (in_array(
+            $orderState,
+            array(
+                'READY_TO_PRINT',
+                'READY_FOR_COLLECTION',
+                'IN_TRANSIT',
+                'DELIVERED',
+            ),
+            true
+        )) {
+            try {
+                $labels = $proxy->getLabels($reference);
+                $this->getOrderRepository()->setLabelsByReference($reference, $labels);
+            } catch (\Exception $e) {
+                Logger::logError(
+                    TranslationUtility::__('Failed to set labels for order with reference %s', array($reference)),
+                    'Integration'
+                );
+            }
         }
     }
 

@@ -146,6 +146,53 @@ class ShopOrderDetails extends Entity
     }
 
     /**
+     * Sets raw array data to this entity instance properties.
+     *
+     * @param array $data Raw array data with keys for class fields. @see self::$fields for field names.
+     *
+     * @throws \Exception
+     */
+    public function inflate(array $data)
+    {
+        /** @var TimeProvider $timeProvider */
+        $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
+
+        foreach ($this->fields as $fieldName) {
+            if ($fieldName === 'shipmentLabels' && !empty($data['shipmentLabels'])) {
+                $this->shipmentLabels = ShipmentLabel::fromArrayBatch($data['shipmentLabels']);
+            } elseif ($fieldName === 'lastStatusUpdateTime' && !empty($data['lastStatusUpdateTime'])) {
+                $this->lastStatusUpdateTime = $timeProvider->getDateTime($data['lastStatusUpdateTime']);
+            } else {
+                $this->$fieldName = static::getArrayValue($data, $fieldName);
+            }
+        }
+    }
+
+    /**
+     * Transforms entity to its array format representation.
+     *
+     * @return array Entity in array format.
+     */
+    public function toArray()
+    {
+        $data = array();
+
+        foreach ($this->fields as $fieldName) {
+            if ($fieldName === 'shipmentLabels' && $this->shipmentLabels !== null) {
+                foreach ($this->shipmentLabels as $shipmentLabel) {
+                    $data['shipmentLabels'][] = $shipmentLabel->toArray();
+                }
+            } elseif ($fieldName === 'lastStatusUpdateTime') {
+                $data[$fieldName] = $this->lastStatusUpdateTime ? $this->lastStatusUpdateTime->getTimestamp() : null;
+            } else {
+                $data[$fieldName] = $this->$fieldName;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * Returns order ID.
      *
      * @return int
@@ -371,53 +418,6 @@ class ShopOrderDetails extends Entity
     public function setTaskId($taskId)
     {
         $this->taskId = $taskId;
-    }
-
-    /**
-     * Sets raw array data to this entity instance properties.
-     *
-     * @param array $data Raw array data with keys for class fields. @see self::$fields for field names.
-     *
-     * @throws \Exception
-     */
-    public function inflate(array $data)
-    {
-        /** @var TimeProvider $timeProvider */
-        $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
-
-        foreach ($this->fields as $fieldName) {
-            if ($fieldName === 'shipmentLabels' && !empty($data['shipmentLabels'])) {
-                $this->shipmentLabels = ShipmentLabel::fromArrayBatch($data['shipmentLabels']);
-            } elseif ($fieldName === 'lastStatusUpdateTime' && !empty($data['lastStatusUpdateTime'])) {
-                $this->lastStatusUpdateTime = $timeProvider->getDateTime($data['lastStatusUpdateTime']);
-            } else {
-                $this->$fieldName = static::getArrayValue($data, $fieldName);
-            }
-        }
-    }
-
-    /**
-     * Transforms entity to its array format representation.
-     *
-     * @return array Entity in array format.
-     */
-    public function toArray()
-    {
-        $data = array();
-
-        foreach ($this->fields as $fieldName) {
-            if ($fieldName === 'shipmentLabels' && $this->shipmentLabels !== null) {
-                foreach ($this->shipmentLabels as $shipmentLabel) {
-                    $data['shipmentLabels'][] = $shipmentLabel->toArray();
-                }
-            } elseif ($fieldName === 'lastStatusUpdateTime') {
-                $data[$fieldName] = $this->lastStatusUpdateTime ? $this->lastStatusUpdateTime->getTimestamp() : null;
-            } else {
-                $data[$fieldName] = $this->$fieldName;
-            }
-        }
-
-        return $data;
     }
 
     /**
