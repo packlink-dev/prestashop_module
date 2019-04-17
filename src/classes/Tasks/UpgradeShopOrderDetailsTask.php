@@ -25,6 +25,7 @@
 
 namespace Packlink\PrestaShop\Classes\Tasks;
 
+use Logeecom\Infrastructure\Http\Exceptions\HttpUnhandledException;
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\Task;
@@ -36,10 +37,25 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 class UpgradeShopOrderDetailsTask extends Task
 {
+    const INITIAL_PROGRESS_PERCENT = 5;
+    const DEFAULT_BATCH_SIZE = 100;
+
     /**
      * @var array
      */
-    protected $orderReferenceMap;
+    private $ordersToSync;
+    /**
+     * @var int
+     */
+    private $batchSize;
+    /**
+     * @var int
+     */
+    private $numberOfOrders;
+    /**
+     * @var int
+     */
+    private $currentProgress;
     /**
      * @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository
      */
@@ -48,27 +64,46 @@ class UpgradeShopOrderDetailsTask extends Task
     /**
      * UpgradeShopOrderDetailsTask constructor.
      *
-     * @param array $orderReferenceMap
+     * @param array $oldOrders
      */
-    public function __construct(array $orderReferenceMap)
+    public function __construct(array $oldOrders)
     {
-        $this->orderReferenceMap = $orderReferenceMap;
+        $this->ordersToSync = $oldOrders;
+        $this->batchSize = self::DEFAULT_BATCH_SIZE;
+        $this->numberOfOrders = count($this->ordersToSync);
+        $this->currentProgress = self::INITIAL_PROGRESS_PERCENT;
     }
 
     /**
+     * Returns string representation of object.
+     *
      * @inheritdoc
      */
     public function serialize()
     {
-        return serialize($this->orderReferenceMap);
+        return serialize(
+            array(
+                $this->ordersToSync,
+                $this->batchSize,
+                $this->numberOfOrders,
+                $this->currentProgress,
+            )
+        );
     }
 
     /**
+     * Constructs the object.
+     *
      * @inheritdoc
      */
     public function unserialize($serialized)
     {
-        $this->orderReferenceMap = unserialize($serialized);
+        list(
+            $this->ordersToSync,
+            $this->batchSize,
+            $this->numberOfOrders,
+            $this->currentProgress,
+        ) = unserialize($serialized);
     }
 
     /**
@@ -76,8 +111,9 @@ class UpgradeShopOrderDetailsTask extends Task
      */
     public function execute()
     {
-        $size = count($this->orderReferenceMap);
-        if ($size === 0) {
+        $this->reportProgress($this->currentProgress);
+
+        if ($this->numberOfOrders === 0) {
             $this->reportProgress(100);
 
             return;
@@ -88,44 +124,75 @@ class UpgradeShopOrderDetailsTask extends Task
         /** @var TimeProvider $timeProvider */
         $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
 
-        $progress = 0;
-        $step = (int)($size / 10) + 1;
+        $count = count($this->ordersToSync);
 
-        foreach ($this->orderReferenceMap as $index => $map) {
-            if ($index % $step === 0) {
-                $progress += 9;
-                $this->reportProgress($progress);
+        while ($count > 0) {
+            $orders = $this->getBatchOrders();
+            $this->reportAlive();
+
+            foreach ($orders as $order) {
+                if (!$this->setReference($order['id_order'], $order['draft_reference'])) {
+                    continue;
+                }
+
+                $orderDetails = json_decode($order['details'], true);
+                $orderCreated = $timeProvider->deserializeDateString($orderDetails['date'], 'Y/m/d');
+
+                if ($orderCreated < $timeProvider->getDateTime(strtotime('-60 days'))) {
+                    $this->setDeleted($order['draft_reference']);
+
+                    continue;
+                }
+
+                try {
+                    $shipment = $proxy->getShipment($order['draft_reference']);
+                } catch (\Exception $e) {
+                    $shipment = null;
+                }
+
+                if ($shipment !== null) {
+                    $this->setLabels($order['draft_reference'], $orderDetails['state'], $proxy);
+                    $this->setShipmentStatus($order['draft_reference'], $shipment);
+                    $this->setTrackingInfo($order['draft_reference'], $proxy, $shipment);
+                } else {
+                    $this->setDeleted($order['draft_reference']);
+                }
             }
 
-            if (!$this->setReference($map['id_order'], $map['draft_reference'])) {
-                continue;
-            }
-
-            $orderDetails = json_decode($map['details'], true);
-            $orderCreated = $timeProvider->deserializeDateString($orderDetails['date'], 'Y/m/d');
-
-            if ($orderCreated < $timeProvider->getDateTime(strtotime('-60 days'))) {
-                $this->setDeleted($map['draft_reference']);
-
-                continue;
-            }
-
-            try {
-                $shipment = $proxy->getShipment($map['draft_reference']);
-            } catch (\Exception $e) {
-                $shipment = null;
-            }
-
-            if ($shipment !== null) {
-                $this->setLabels($map['draft_reference'], $orderDetails['state'], $proxy);
-                $this->setShipmentStatus($map['draft_reference'], $shipment);
-                $this->setTrackingInfo($map['draft_reference'], $proxy, $shipment);
-            } else {
-                $this->setDeleted($map['draft_reference']);
-            }
+            $this->removeFinishedBatch();
+            $this->reportProgressForBatch();
+            $count = count($this->ordersToSync);
         }
 
         $this->reportProgress(100);
+    }
+
+    /**
+     * Reduces batch size.
+     *
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpUnhandledException
+     */
+    public function reconfigure()
+    {
+        if ($this->batchSize >= 100) {
+            $this->batchSize -= 50;
+        } elseif ($this->batchSize > 10 && $this->batchSize < 100) {
+            $this->batchSize -= 10;
+        } elseif ($this->batchSize > 1 && $this->batchSize <= 10) {
+            -- $this->batchSize;
+        } else {
+            throw new HttpUnhandledException(TranslationUtility::__('Batch size can not be smaller than 1'));
+        }
+    }
+
+    /**
+     * Determines whether task can be reconfigured.
+     *
+     * @return bool TRUE if task can be reconfigured; otherwise, FALSE.
+     */
+    public function canBeReconfigured()
+    {
+        return true;
     }
 
     /**
@@ -240,6 +307,35 @@ class UpgradeShopOrderDetailsTask extends Task
                 'Integration'
             );
         }
+    }
+
+    /**
+     * Returns array of orders that should be processed in this batch.
+     *
+     * @return array Batch of orders.
+     */
+    private function getBatchOrders()
+    {
+        return array_slice($this->ordersToSync, 0, $this->batchSize);
+    }
+
+    /**
+     * Removes finished batch orders.
+     */
+    private function removeFinishedBatch()
+    {
+        $this->ordersToSync = array_slice($this->ordersToSync, $this->batchSize);
+    }
+
+    /**
+     * Reports progress for a batch.
+     */
+    private function reportProgressForBatch()
+    {
+        $synced = $this->numberOfOrders - count($this->ordersToSync);
+        $progressStep = $synced  * (100 - self::INITIAL_PROGRESS_PERCENT) / $this->numberOfOrders;
+        $this->currentProgress = self::INITIAL_PROGRESS_PERCENT + $progressStep;
+        $this->reportProgress($this->currentProgress);
     }
 
     /**
