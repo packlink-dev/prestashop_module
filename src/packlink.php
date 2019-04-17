@@ -1128,13 +1128,15 @@ class Packlink extends CarrierModule
         $message = '';
         $displayDraftButton = false;
 
-        if ($orderDetails === null || $orderDetails->getTaskId() === null) {
+        if ($orderDetails === null
+            || ($orderDetails->getShipmentReference() === null && $orderDetails->getTaskId() === null)
+        ) {
             $message = \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__(
                 'Create order draft in Packlink PRO'
             );
             $displayDraftButton = true;
         } else {
-            $draftTask = $queue->find($orderDetails->getTaskId());
+            $draftTask = $orderDetails->getTaskId() ? $queue->find($orderDetails->getTaskId()) : null;
 
             if ($draftTask !== null
                 && $draftTask->getStatus() === \Logeecom\Infrastructure\TaskExecution\QueueItem::FAILED) {
