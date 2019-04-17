@@ -161,16 +161,14 @@ class UpgradeShopOrderDetailsTask extends Task
      */
     protected function setLabels($reference, $orderState, $proxy)
     {
-        if (in_array(
-            $orderState,
-            array(
-                'READY_TO_PRINT',
-                'READY_FOR_COLLECTION',
-                'IN_TRANSIT',
-                'DELIVERED',
-            ),
-            true
-        )) {
+        $validStates = array(
+            'READY_TO_PRINT',
+            'READY_FOR_COLLECTION',
+            'IN_TRANSIT',
+            'DELIVERED',
+        );
+
+        if (in_array($orderState, $validStates, true)) {
             try {
                 $labels = $proxy->getLabels($reference);
                 $this->getOrderRepository()->setLabelsByReference($reference, $labels);
