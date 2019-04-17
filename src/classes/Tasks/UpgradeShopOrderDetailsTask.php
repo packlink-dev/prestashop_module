@@ -30,6 +30,7 @@ use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\Task;
 use Logeecom\Infrastructure\Utility\TimeProvider;
+use Packlink\BusinessLogic\Http\DTO\Shipment;
 use Packlink\BusinessLogic\Http\Proxy;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
@@ -135,8 +136,7 @@ class UpgradeShopOrderDetailsTask extends Task
                     continue;
                 }
 
-                $orderDetails = json_decode($order['details'], true);
-                $orderCreated = $timeProvider->deserializeDateString($orderDetails['date'], 'Y/m/d');
+                $orderCreated = $timeProvider->deserializeDateString($order['date_add'], 'Y-m-d H:i:s');
 
                 if ($orderCreated < $timeProvider->getDateTime(strtotime('-60 days'))) {
                     $this->setDeleted($order['draft_reference']);
@@ -151,9 +151,10 @@ class UpgradeShopOrderDetailsTask extends Task
                 }
 
                 if ($shipment !== null) {
-                    $this->setLabels($order['draft_reference'], $orderDetails['state'], $proxy);
+                    $this->setLabels($order['draft_reference'], $shipment->status, $proxy);
                     $this->setShipmentStatus($order['draft_reference'], $shipment);
                     $this->setTrackingInfo($order['draft_reference'], $proxy, $shipment);
+                    $this->setShipmentPrice($order['draft_reference'], $shipment->price);
                 } else {
                     $this->setDeleted($order['draft_reference']);
                 }
@@ -275,7 +276,7 @@ class UpgradeShopOrderDetailsTask extends Task
      * Sets order status.
      *
      * @param string $reference
-     * @param $shipment
+     * @param Shipment $shipment
      */
     protected function setShipmentStatus($reference, $shipment)
     {
@@ -284,6 +285,24 @@ class UpgradeShopOrderDetailsTask extends Task
                 $reference,
                 ShipmentStatus::getStatus($shipment->status)
             );
+        } catch (\Exception $e) {
+            Logger::logError(
+                TranslationUtility::__('Order with reference %s not found.', array($reference)),
+                'Integration'
+            );
+        }
+    }
+
+    /**
+     * Sets shipment price.
+     *
+     * @param string $reference
+     * @param float $price
+     */
+    protected function setShipmentPrice($reference, $price)
+    {
+        try {
+            $this->getOrderRepository()->setShippingPriceByReference($reference, $price);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),

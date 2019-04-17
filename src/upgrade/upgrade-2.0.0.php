@@ -311,10 +311,11 @@ function getPacklinkOrders()
 {
     $db = Db::getInstance();
     $query = new DbQuery();
-    $query->select('id_order')
-        ->select('draft_reference')
-        ->select('details')
-        ->from('packlink_orders');
+    $query->select('p.id_order')
+        ->select('p.draft_reference')
+        ->select('o.date_add')
+        ->from('packlink_orders', 'p')
+        ->innerJoin('orders', 'o', 'p.id_order = o.id_order');
 
     try {
         $result = $db->executeS($query);
