@@ -40,7 +40,6 @@ class UpgradeShopOrderDetailsTask extends Task
 {
     const INITIAL_PROGRESS_PERCENT = 5;
     const DEFAULT_BATCH_SIZE = 100;
-
     /**
      * @var array
      */
@@ -58,9 +57,13 @@ class UpgradeShopOrderDetailsTask extends Task
      */
     private $currentProgress;
     /**
-     * @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository
+     * @var OrderRepository
      */
     private $orderRepository;
+    /**
+     * @var Proxy
+     */
+    private $proxy;
 
     /**
      * UpgradeShopOrderDetailsTask constructor.
@@ -73,6 +76,8 @@ class UpgradeShopOrderDetailsTask extends Task
         $this->batchSize = self::DEFAULT_BATCH_SIZE;
         $this->numberOfOrders = count($this->ordersToSync);
         $this->currentProgress = self::INITIAL_PROGRESS_PERCENT;
+        $this->orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
+        $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
     }
 
     /**
@@ -95,16 +100,16 @@ class UpgradeShopOrderDetailsTask extends Task
     /**
      * Constructs the object.
      *
-     * @inheritdoc
+     * @param string data <p>
+     * The string representation of the object.
+     * </p>
      */
-    public function unserialize($serialized)
+    public function unserialize($data)
     {
-        list(
-            $this->ordersToSync,
-            $this->batchSize,
-            $this->numberOfOrders,
-            $this->currentProgress,
-        ) = unserialize($serialized);
+        list($this->ordersToSync, $this->batchSize, $this->numberOfOrders, $this->currentProgress) = unserialize($data);
+
+        $this->orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
+        $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
     }
 
     /**
@@ -120,8 +125,6 @@ class UpgradeShopOrderDetailsTask extends Task
             return;
         }
 
-        /** @var Proxy $proxy */
-        $proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
         /** @var TimeProvider $timeProvider */
         $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
 
@@ -145,16 +148,15 @@ class UpgradeShopOrderDetailsTask extends Task
                 }
 
                 try {
-                    $shipment = $proxy->getShipment($order['draft_reference']);
+                    $shipment = $this->proxy->getShipment($order['draft_reference']);
                 } catch (\Exception $e) {
                     $shipment = null;
                 }
 
                 if ($shipment !== null) {
-                    $this->setLabels($order['draft_reference'], $shipment->status, $proxy);
-                    $this->setShipmentStatus($order['draft_reference'], $shipment);
-                    $this->setTrackingInfo($order['draft_reference'], $proxy, $shipment);
-                    $this->setShipmentPrice($order['draft_reference'], $shipment->price);
+                    $this->setLabels($order['draft_reference'], $shipment->status);
+                    $this->setShipmentStatusAndPrice($order['draft_reference'], $shipment);
+                    $this->setTrackingInfo($order['draft_reference'], $shipment);
                 } else {
                     $this->setDeleted($order['draft_reference']);
                 }
@@ -180,7 +182,7 @@ class UpgradeShopOrderDetailsTask extends Task
         } elseif ($this->batchSize > 10 && $this->batchSize < 100) {
             $this->batchSize -= 10;
         } elseif ($this->batchSize > 1 && $this->batchSize <= 10) {
-            -- $this->batchSize;
+            --$this->batchSize;
         } else {
             throw new HttpUnhandledException(TranslationUtility::__('Batch size can not be smaller than 1'));
         }
@@ -207,7 +209,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setReference($orderId, $referenceId)
     {
         try {
-            $this->getOrderRepository()->setReference($orderId, $referenceId);
+            $this->orderRepository->setReference($orderId, $referenceId);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Failed to create reference for order %d', array($orderId)),
@@ -225,9 +227,8 @@ class UpgradeShopOrderDetailsTask extends Task
      *
      * @param string $reference Packlink shipment reference.
      * @param string $orderState State of the order.
-     * @param Proxy $proxy Packlink proxy.
      */
-    protected function setLabels($reference, $orderState, $proxy)
+    protected function setLabels($reference, $orderState)
     {
         $validStates = array(
             'READY_TO_PRINT',
@@ -238,8 +239,8 @@ class UpgradeShopOrderDetailsTask extends Task
 
         if (in_array($orderState, $validStates, true)) {
             try {
-                $labels = $proxy->getLabels($reference);
-                $this->getOrderRepository()->setLabelsByReference($reference, $labels);
+                $labels = $this->proxy->getLabels($reference);
+                $this->orderRepository->setLabelsByReference($reference, $labels);
             } catch (\Exception $e) {
                 Logger::logError(
                     TranslationUtility::__('Failed to set labels for order with reference %s', array($reference)),
@@ -253,14 +254,13 @@ class UpgradeShopOrderDetailsTask extends Task
      * Sets tracking info for order.
      *
      * @param string $reference
-     * @param Proxy $proxy
-     * @param \Packlink\BusinessLogic\Http\DTO\Shipment $shipment
+     * @param Shipment $shipment
      */
-    protected function setTrackingInfo($reference, $proxy, $shipment)
+    protected function setTrackingInfo($reference, $shipment)
     {
         try {
-            $trackingInfo = $proxy->getTrackingInfo($reference);
-            $this->getOrderRepository()->updateTrackingInfo($reference, $trackingInfo, $shipment);
+            $trackingInfo = $this->proxy->getTrackingInfo($reference);
+            $this->orderRepository->updateTrackingInfo($reference, $trackingInfo, $shipment);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__(
@@ -273,36 +273,19 @@ class UpgradeShopOrderDetailsTask extends Task
     }
 
     /**
-     * Sets order status.
+     * Sets order status and Packlink shipping price.
      *
      * @param string $reference
      * @param Shipment $shipment
      */
-    protected function setShipmentStatus($reference, $shipment)
+    protected function setShipmentStatusAndPrice($reference, $shipment)
     {
         try {
-            $this->getOrderRepository()->setShippingStatusByReference(
+            $this->orderRepository->setShippingStatusByReference(
                 $reference,
                 ShipmentStatus::getStatus($shipment->status)
             );
-        } catch (\Exception $e) {
-            Logger::logError(
-                TranslationUtility::__('Order with reference %s not found.', array($reference)),
-                'Integration'
-            );
-        }
-    }
-
-    /**
-     * Sets shipment price.
-     *
-     * @param string $reference
-     * @param float $price
-     */
-    protected function setShipmentPrice($reference, $price)
-    {
-        try {
-            $this->getOrderRepository()->setShippingPriceByReference($reference, $price);
+            $this->orderRepository->setShippingPriceByReference($reference, $shipment->price);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),
@@ -319,7 +302,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setDeleted($reference)
     {
         try {
-            $this->getOrderRepository()->setDeleted($reference);
+            $this->orderRepository->setDeleted($reference);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),
@@ -352,22 +335,8 @@ class UpgradeShopOrderDetailsTask extends Task
     private function reportProgressForBatch()
     {
         $synced = $this->numberOfOrders - count($this->ordersToSync);
-        $progressStep = $synced  * (100 - self::INITIAL_PROGRESS_PERCENT) / $this->numberOfOrders;
+        $progressStep = $synced * (100 - self::INITIAL_PROGRESS_PERCENT) / $this->numberOfOrders;
         $this->currentProgress = self::INITIAL_PROGRESS_PERCENT + $progressStep;
         $this->reportProgress($this->currentProgress);
-    }
-
-    /**
-     * Returns an instance of order repository service.
-     *
-     * @return \Packlink\PrestaShop\Classes\Repositories\OrderRepository
-     */
-    private function getOrderRepository()
-    {
-        if ($this->orderRepository === null) {
-            $this->orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
-        }
-
-        return $this->orderRepository;
     }
 }

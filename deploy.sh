@@ -62,6 +62,8 @@ if [ "$version" = "" ]; then
     if [ "$version" = "" ]; then
         echo "Please enter new plugin version (leave empty to use root folder as destination) [ENTER]:"
         read version
+    else
+      echo -e "\e[35mVersion read from the composer.json file: $version\e[39m"
     fi
 fi
 
