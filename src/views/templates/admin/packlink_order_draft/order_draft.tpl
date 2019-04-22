@@ -26,12 +26,12 @@
 <span class="btn-group-action">
     <span class="btn-group">
         {* Generate HTML code for printing Delivery Icon with link *}
-            <a href="{html_entity_decode($orderDraftLink|escape:'html':'UTF-8')}" target="_blank">
-                <img
-                        src="{html_entity_decode($imgSrc|escape:'html':'UTF-8')}"
-                        alt="{l s='Packlink order draft' mod='packlink'}"
-                        style="width: 32px;"
-                >
-            </a>
+        {if !$deleted }<a href="{html_entity_decode($orderDraftLink|escape:'html':'UTF-8')}" target="_blank">{/if}
+            <img
+                    src="{html_entity_decode($imgSrc|escape:'html':'UTF-8')}"
+                    alt="{l s='Packlink order draft' mod='packlink'}"
+                    style="width: 32px;"
+            >
+        {if !$deleted }</a>{/if}
     </span>
 </span>

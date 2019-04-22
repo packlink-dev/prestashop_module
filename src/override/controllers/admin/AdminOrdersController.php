@@ -92,6 +92,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
         $shipmentLabels = $orderRepository->getLabelsByOrderId((int)$orderId);
 
         $labels = array();
+        /** @var \Packlink\PrestaShop\Classes\Objects\ShipmentLabel $shipmentLabel */
         foreach ($shipmentLabels as $shipmentLabel) {
             $labels[] = (object)array(
                 'printed' => $shipmentLabel->isPrinted(),
@@ -129,25 +130,58 @@ class AdminOrdersController extends AdminOrdersControllerCore
     /**
      * Returns template that should be rendered in order draft column within orders table.
      *
-     * @param string $link Link to order draft on Packlink.
+     * @param string $reference Packlink shipment reference.
      *
      * @return string Rendered template output.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      */
-    public function getOrderDraft($link)
+    public function getOrderDraft($reference)
     {
-        if ($link === '') {
-            return $link;
+        if ($reference === '') {
+            return $reference;
         }
+
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
+        $orderRepository = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Order\Interfaces\OrderRepository::CLASS_NAME
+        );
+        $orderDetails = $orderRepository->getOrderDetailsByReference($reference);
 
         $this->context->smarty->assign(array(
             'imgSrc' => _PS_BASE_URL_ . _MODULE_DIR_ . 'packlink/logo.png',
-            'orderDraftLink' => $link,
+            'deleted' => $orderDetails->isDeleted(),
+            'orderDraftLink' => $this->getOrderDraftUrl($reference),
         ));
 
         return $this->context->smarty->createTemplate(
             _PS_MODULE_DIR_ . self::PACKLINK_ORDER_DRAFT_TEMPLATE,
             $this->context->smarty
         )->fetch();
+    }
+
+    /**
+     * Returns link to order draft on Packlink for the provided shipment reference.
+     *
+     * @param string $reference Shipment reference.
+     *
+     * @return string Link to order draft on Packlink.
+     */
+    private function getOrderDraftUrl($reference)
+    {
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Configuration::CLASS_NAME
+        );
+        $userCountry = $configService->getUserInfo() !== null
+            ? \Tools::strtolower($configService->getUserInfo()->country)
+            : 'es';
+
+        return "https://pro.packlink.$userCountry/private/shipments/$reference";
     }
 
     /**

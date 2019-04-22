@@ -145,7 +145,7 @@
         <dd style="margin-bottom: 10px">{$shipping->packlink_shipping_price|escape:'html':'UTF-8'}</dd>
       {/if}
     </dl>
-    {if $shipping->link}
+    {if $shipping->link && !$shipping->deleted}
       <a
               class="btn btn-default"
               href="{html_entity_decode($shipping->link|escape:'html':'UTF-8')}"

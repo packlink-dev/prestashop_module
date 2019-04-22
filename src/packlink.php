@@ -1201,6 +1201,7 @@ class Packlink extends CarrierModule
         $shipping = (object)array(
             'name' => $carrier->name,
             'reference' => $orderDetails->getShipmentReference(),
+            'deleted' => $orderDetails->isDeleted(),
             'icon' => file_exists(_PS_SHIP_IMG_DIR_ . '/' . (int)$carrier->id . '.jpg') ?
                 _PS_BASE_URL_ . __PS_BASE_URI__ . 'img/s/' . (int)$carrier->id . '.jpg' : '',
             'status' => $orderDetails->getShippingStatus() !== null ? $orderDetails->getShippingStatus()

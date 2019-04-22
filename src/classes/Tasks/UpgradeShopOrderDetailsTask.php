@@ -302,7 +302,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setDeleted($reference)
     {
         try {
-            $this->orderRepository->setDeleted($reference);
+            $this->orderRepository->markShipmentDeleted($reference);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),

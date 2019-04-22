@@ -82,7 +82,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $orders = $this->getOrderDetailsRepository()->select($filter);
 
         foreach ($orders as $orderDetails) {
-            if ($orderDetails->getShipmentReference() !== null && !$orderDetails->isDeleted()) {
+            if ($orderDetails->getShipmentReference() !== null) {
                 $orderReferences[] = $orderDetails->getShipmentReference();
             }
         }
@@ -163,7 +163,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $orderDetails->setShipmentReference($shipmentReference);
 
         $this->getOrderDetailsRepository()->update($orderDetails);
-        $this->setOrderDraftLink($orderId, $shipmentReference);
+        $this->setOrderDraftReference($orderId, $shipmentReference);
     }
 
     /**
@@ -357,7 +357,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
     }
 
     /**
-     * Marks order as deleted on the system.
+     * Marks shipment identified by provided reference as deleted on Packlink.
      *
      * @param string $shipmentReference Packlink shipment reference.
      *
@@ -365,13 +365,62 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      */
-    public function setDeleted($shipmentReference)
+    public function markShipmentDeleted($shipmentReference)
     {
         $orderDetails = $this->getOrderDetailsByReference($shipmentReference);
 
         $orderDetails->setDeleted(true);
 
         $this->getOrderDetailsRepository()->update($orderDetails);
+    }
+
+    /**
+     * Returns whether shipment identified by provided reference is deleted on Packlink or not.
+     *
+     * @param string $shipmentReference Packlink shipment reference.
+     *
+     * @return bool Returns TRUE if shipment has been deleted; otherwise returns FALSE.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     */
+    public function isShipmentDeleted($shipmentReference)
+    {
+        $orderDetails = $this->getOrderDetailsByReference($shipmentReference);
+
+        return $orderDetails->isDeleted();
+    }
+
+    /**
+     * Returns order details entity with provided shipment reference, or throws an exception if it doesn't exist.
+     *
+     * @param string $shipmentReference Packlink order shipment reference.
+     *
+     * @return ShopOrderDetails Order details.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     * @throws \PrestaShopDatabaseException
+     */
+    public function getOrderDetailsByReference($shipmentReference)
+    {
+        $filter = new QueryFilter();
+
+        $filter->where('shipmentReference', Operators::EQUALS, $shipmentReference);
+        /** @var ShopOrderDetails $orderDetails */
+        $orderDetails = $this->getOrderDetailsRepository()->selectOne($filter);
+
+        if ($orderDetails === null) {
+            throw new OrderNotFound(
+                TranslationUtility::__(
+                    "Order with shipment reference $shipmentReference doesn't exist in the shop"
+                )
+            );
+        }
+
+        return $orderDetails;
     }
 
     /**
@@ -476,37 +525,6 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
             $order->setCurrentState((int)$statusMappings[$shippingStatus]);
             $order->save();
         }
-    }
-
-    /**
-     * Returns order details entity with provided shipment reference, or throws an exception if it doesn't exist.
-     *
-     * @param string $shipmentReference Packlink order shipment reference.
-     *
-     * @return ShopOrderDetails Order details.
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
-     * @throws \PrestaShopDatabaseException
-     */
-    private function getOrderDetailsByReference($shipmentReference)
-    {
-        $filter = new QueryFilter();
-
-        $filter->where('shipmentReference', Operators::EQUALS, $shipmentReference);
-        /** @var ShopOrderDetails $orderDetails */
-        $orderDetails = $this->getOrderDetailsRepository()->selectOne($filter);
-
-        if ($orderDetails === null) {
-            throw new OrderNotFound(
-                TranslationUtility::__(
-                    "Order with shipment reference $shipmentReference doesn't exist in the shop"
-                )
-            );
-        }
-
-        return $orderDetails;
     }
 
     /**
@@ -650,31 +668,13 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @param int $orderId ID of the order.
      * @param string $reference Shipment reference.
      */
-    private function setOrderDraftLink($orderId, $reference)
+    private function setOrderDraftReference($orderId, $reference)
     {
         \Db::getInstance()->update(
             'orders',
-            array(self::PACKLINK_ORDER_DRAFT_FIELD => pSQL($this->getOrderDraftUrl($reference))),
+            array(self::PACKLINK_ORDER_DRAFT_FIELD => pSQL($reference)),
             "id_order = $orderId"
         );
-    }
-
-    /**
-     * Returns link to order draft on Packlink for the provided shipment reference.
-     *
-     * @param string $reference Shipment reference.
-     *
-     * @return string Link to order draft on Packlink.
-     */
-    private function getOrderDraftUrl($reference)
-    {
-        /** @var ConfigurationService $configService */
-        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $userCountry = $configService->getUserInfo() !== null
-            ? \Tools::strtolower($configService->getUserInfo()->country)
-            : 'es';
-
-        return "https://pro.packlink.$userCountry/private/shipments/$reference";
     }
 
     /**
