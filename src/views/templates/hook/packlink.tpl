@@ -454,7 +454,7 @@
 
     <!-- SHIPPING PAGE SECTION -->
 
-    <div class="row">
+    <div class="row pl-shipping-page">
       <div class="pl-flash-msg-wrapper">
         <div class="pl-flash-msg" id="pl-flash-message">
           <div class="pl-flash-msg-text-section">

@@ -103,6 +103,7 @@
   vertical-align: middle;
   margin: auto;
   position: relative;
+  max-width: 90%;
 }
 
 .pl-sidebar-link-wrapper-inner * {
@@ -202,6 +203,10 @@
   color: #2095F2;
   font-weight: bold;
   border-color: #2095F2;
+}
+
+.pl-shipping-page {
+  display: block !important;
 }
 
 .pl-num-shipping-method-results-wrapper {
