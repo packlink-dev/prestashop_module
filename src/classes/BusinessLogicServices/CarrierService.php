@@ -118,6 +118,7 @@ class CarrierService implements ShopShippingMethodService
 
             if ($carrier) {
                 try {
+                    $carrier->name = $shippingMethod->getTitle();
                     $this->setCarrierData($carrier, $shippingMethod);
                     $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
                     $this->updateCarrierLogo($shippingMethod, $carrier);
@@ -329,9 +330,11 @@ class CarrierService implements ShopShippingMethodService
         $carrier->external_module_name = 'packlink';
         $carrier->is_module = true;
 
-        $languages = \Language::getLanguages();
-        foreach ($languages as $language) {
-            $carrier->delay[(int)$language['id_lang']] = $shippingMethod->getDeliveryTime();
+        if (empty($carrier->delay)) {
+            $languages = \Language::getLanguages();
+            foreach ($languages as $language) {
+                $carrier->delay[(int)$language['id_lang']] = $shippingMethod->getDeliveryTime();
+            }
         }
     }
 
