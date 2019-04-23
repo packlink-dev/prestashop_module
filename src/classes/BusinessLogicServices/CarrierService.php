@@ -71,7 +71,6 @@ class CarrierService implements ShopShippingMethodService
         /** @var \Carrier $carrier PrestaShop carrier object. */
         $carrier = new \Carrier();
 
-        $carrier->name = $shippingMethod->getTitle();
         $this->setCarrierData($carrier, $shippingMethod);
 
         try {
@@ -118,7 +117,6 @@ class CarrierService implements ShopShippingMethodService
 
             if ($carrier) {
                 try {
-                    $carrier->name = $shippingMethod->getTitle();
                     $this->setCarrierData($carrier, $shippingMethod);
                     $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
                     $this->updateCarrierLogo($shippingMethod, $carrier);
@@ -319,6 +317,7 @@ class CarrierService implements ShopShippingMethodService
      */
     private function setCarrierData(\Carrier $carrier, ShippingMethod $shippingMethod)
     {
+        $carrier->name = $shippingMethod->getTitle();
         $carrier->active = true;
         $carrier->deleted = false;
         $carrier->shipping_handling = false;
@@ -350,8 +349,8 @@ class CarrierService implements ShopShippingMethodService
     private function addBackupCarrier(ShippingMethod $shippingMethod)
     {
         $carrier = new \Carrier();
-        $carrier->name = 'shipping cost';
         $this->setCarrierData($carrier, $shippingMethod);
+        $carrier->name = 'shipping cost';
 
         if (!$carrier->add()) {
             throw new \RuntimeException(TranslationUtility::__('Failed creating backup carrier'));
