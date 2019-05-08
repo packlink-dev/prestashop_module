@@ -61,4 +61,24 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
 
         PacklinkPrestaShopUtility::dieJson(array('success' => true));
     }
+
+    /**
+     * Initializes AsyncProcess controller.
+     */
+    public function init()
+    {
+        if (_PS_MODE_DEV_ && $this->controller_type === 'admin') {
+            set_error_handler(array(__CLASS__, 'myErrorHandler'));
+        }
+
+        if (!defined('_PS_BASE_URL_')) {
+            define('_PS_BASE_URL_', Tools::getShopDomain(true));
+        }
+
+        if (!defined('_PS_BASE_URL_SSL_')) {
+            define('_PS_BASE_URL_SSL_', Tools::getShopDomainSsl(true));
+        }
+
+        $this->container = $this->buildContainer();
+    }
 }
