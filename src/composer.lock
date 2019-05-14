@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "f1a6b9c868eff672ee7be5c9a6d077babc865d6c"
+                "reference": "2af9a9ff34615af6904d8c59b253423a6a66ca67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/f1a6b9c868eff672ee7be5c9a6d077babc865d6c",
-                "reference": "f1a6b9c868eff672ee7be5c9a6d077babc865d6c",
+                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/2af9a9ff34615af6904d8c59b253423a6a66ca67",
+                "reference": "2af9a9ff34615af6904d8c59b253423a6a66ca67",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2019-04-22T10:43:30+00:00"
+            "time": "2019-05-14T12:16:22+00:00"
         },
         {
             "name": "zendframework/zend-memory",
@@ -1256,7 +1256,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "backendtea@gmail.com"
+                    "email": "BackEndTea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
