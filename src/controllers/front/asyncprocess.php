@@ -23,6 +23,7 @@
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+use Logeecom\Infrastructure\Configuration\Configuration as PacklinkConfiguration;
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\AsyncProcessStarterService;
@@ -64,21 +65,18 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
 
     /**
      * Initializes AsyncProcess controller.
+     *
+     * @throws \PrestaShopException
      */
     public function init()
     {
-        if (_PS_MODE_DEV_ && $this->controller_type === 'admin') {
-            set_error_handler(array(__CLASS__, 'myErrorHandler'));
+        /** @var PacklinkConfiguration $configService */
+        $configService = ServiceRegister::getService(PacklinkConfiguration::CLASS_NAME);
+        if ($configService->isDebugModeEnabled()) {
+            error_reporting(E_WARNING);
+            ini_set('display_errors', true);
         }
 
-        if (!defined('_PS_BASE_URL_')) {
-            define('_PS_BASE_URL_', Tools::getShopDomain(true));
-        }
-
-        if (!defined('_PS_BASE_URL_SSL_')) {
-            define('_PS_BASE_URL_SSL_', Tools::getShopDomainSsl(true));
-        }
-
-        $this->container = $this->buildContainer();
+        parent::init();
     }
 }

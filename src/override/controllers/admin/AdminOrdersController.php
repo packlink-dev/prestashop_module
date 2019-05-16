@@ -36,9 +36,11 @@ class AdminOrdersController extends AdminOrdersControllerCore
      */
     public function __construct()
     {
+        /** @noinspection PhpIncludeInspection */
+        require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+
         parent::__construct();
 
-        require_once _PS_MODULE_DIR_ . '/packlink/vendor/autoload.php';
         $column = Packlink\PrestaShop\Classes\Repositories\OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
         $this->_select .= ',a.' . $column . ' AS ' . $column;
 
@@ -75,6 +77,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function printPDFIcons($orderId, $tr)
     {
@@ -137,6 +140,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     * @throws \PrestaShopDatabaseException
      */
     public function getOrderDraft($reference)
     {

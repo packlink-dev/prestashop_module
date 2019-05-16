@@ -27,7 +27,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once _PS_MODULE_DIR_ . '/packlink/vendor/autoload.php';
+/** @noinspection PhpIncludeInspection */
+require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
 
 /**
  * @property bool bootstrap
@@ -353,6 +354,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function getPackageShippingCost($cart, $shippingCost, $products)
     {
@@ -691,6 +693,10 @@ class Packlink extends CarrierModule
      * @param array $products Array of products.
      *
      * @return array Array of shipping costs for all Packlink shipping methods.
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getCostsForAllShippingMethods($cart, $products)
     {
@@ -722,6 +728,10 @@ class Packlink extends CarrierModule
      * @param \Packlink\BusinessLogic\Http\DTO\Warehouse $warehouse
      *
      * @return string Destination country code.
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getDestinationCountryCode($cart, $warehouse)
     {

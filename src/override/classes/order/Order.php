@@ -38,8 +38,11 @@ class Order extends OrderCore
      */
     public function __construct($id = null, $id_lang = null)
     {
-        require_once _PS_MODULE_DIR_ . '/packlink/vendor/autoload.php';
+        /** @noinspection PhpIncludeInspection */
+        require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+
         parent::__construct($id, $id_lang);
+
         $column = Packlink\PrestaShop\Classes\Repositories\OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
 
         self::$definition['fields'][$column] = array(
