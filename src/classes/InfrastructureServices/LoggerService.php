@@ -84,20 +84,19 @@ class LoggerService extends Singleton implements ShopLoggerAdapter
             return;
         }
 
-        $message = 'PACKLINK LOG: 
-            Date: ' . date('d/m/Y') . '
-            Time: ' . date('H:i:s') . '
-            Log level: ' . self::$logLevelName[$logLevel] . '
-            Message: ' . $data->getMessage();
+        $message = 'PACKLINK LOG:' . ' | '
+            . 'Date: ' . date('d/m/Y') . ' | '
+            . 'Time: ' . date('H:i:s') . ' | '
+            . 'Log level: ' . self::$logLevelName[$logLevel] . ' | '
+            . 'Message: ' . $data->getMessage();
         $context = $data->getContext();
         if (!empty($context)) {
-            $message .= '
-            Context data: [';
+            $contextData = array();
             foreach ($context as $item) {
-                $message .= '"' . $item->getName() . '" => "' . print_r($item->getValue(), true) . '", ';
+                $contextData[$item->getName()] = print_r($item->getValue(), true);
             }
 
-            $message .= ']';
+            $message .= ' | ' . 'Context data: [' . json_encode($contextData) . ']';
         }
 
         \PrestaShopLogger::addLog($message, self::$logMapping[$logLevel]);

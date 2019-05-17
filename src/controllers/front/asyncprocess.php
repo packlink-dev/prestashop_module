@@ -65,8 +65,6 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
 
     /**
      * Initializes AsyncProcess controller.
-     *
-     * @throws \PrestaShopException
      */
     public function init()
     {
@@ -77,6 +75,33 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
             ini_set('display_errors', true);
         }
 
-        parent::init();
+        try {
+            parent::init();
+        } catch (\Exception $e) {
+            Logger::logWarning(
+                'Error initializing AsyncProcessController',
+                'Integration',
+                array(
+                    'Message' => $e->getMessage(),
+                    'Stack trace' => $e->getTraceAsString(),
+                )
+            );
+        }
+    }
+
+    /**
+     * Displays maintenance page if shop is closed.
+     */
+    public function displayMaintenancePage()
+    {
+        // allow async process in maintenance mode
+    }
+
+    /**
+     * Displays 'country restricted' page if user's country is not allowed.
+     */
+    protected function displayRestrictedCountryPage()
+    {
+        // allow async process
     }
 }
