@@ -125,3 +125,13 @@
     transform: rotate(360deg);
   }
 }
+
+@media screen and (max-width: 800px) {
+  .pl-close-modal {
+    right: -30px;
+    top: -30px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+  }
+}

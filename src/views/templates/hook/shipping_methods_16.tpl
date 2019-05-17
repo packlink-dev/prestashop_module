@@ -63,6 +63,10 @@
           <div data-lp-id="composite-working-hours" class="lp-working-hours">
 
           </div>
+          <div class="lp-select-column">
+            <div class="lp-select-button excluded" data-lp-id="composite-select-btn"></div>
+            <a class="excluded" href="#" data-lp-id="composite-show-on-map" target="_blank"></a>
+          </div>
         </div>
         <div class="name uppercase lp-collapse" data-lp-id="location-name"></div>
         <div class="street lp-collapse">
@@ -74,10 +78,10 @@
         </div>
         <div class="city uppercase lp-collapse" data-lp-id="location-city">
         </div>
-        <div class="lp-select-column">
+        <div class="lp-select-column lp-collapse">
           <div class="lp-select-button excluded" data-lp-id="select-btn"></div>
         </div>
-        <a class="excluded" href="#" data-lp-id="show-on-map" target="_blank">
+        <a class="excluded lp-collapse" href="#" data-lp-id="show-on-map" target="_blank">
           <div class="lp-show-on-map-btn excluded"></div>
         </a>
       </div>
