@@ -59,4 +59,20 @@ class PacklinkWebhooksModuleFrontController extends ModuleFrontController
 
         PacklinkPrestaShopUtility::dieJson(array('success' => true));
     }
+
+    /**
+     * Displays maintenance page if shop is closed.
+     */
+    public function displayMaintenancePage()
+    {
+        // allow async process in maintenance mode
+    }
+
+    /**
+     * Displays 'country restricted' page if user's country is not allowed.
+     */
+    protected function displayRestrictedCountryPage()
+    {
+        // allow async process
+    }
 }
