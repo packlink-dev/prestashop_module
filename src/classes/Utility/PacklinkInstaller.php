@@ -102,6 +102,8 @@ class PacklinkInstaller
      * Performs actions when module is being uninstalled.
      *
      * @return bool Result of method execution.
+     *
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function uninstall()
     {
@@ -132,7 +134,9 @@ class PacklinkInstaller
      * Adds controllers and hooks.
      *
      * @return bool Result of method execution.
+     *
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function addControllersAndHooks()
     {
@@ -143,7 +147,9 @@ class PacklinkInstaller
      * Adds Packlink menu item to shipping tab group.
      *
      * @return bool Returns TRUE if tab has been successfully added, otherwise returns FALSE.
+     *
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function addMenuItem()
     {
@@ -378,6 +384,8 @@ class PacklinkInstaller
      * Registers module controllers.
      *
      * @return bool
+     *
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function addControllers()
     {
@@ -396,6 +404,8 @@ class PacklinkInstaller
      * @param int $parentId Id of parent controller.
      *
      * @return bool
+     *
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function addController($name, $parentId = -1)
     {
@@ -425,6 +435,8 @@ class PacklinkInstaller
      * @param string $name Name of the controller.
      *
      * @return bool
+     *
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function removeController($name)
     {
