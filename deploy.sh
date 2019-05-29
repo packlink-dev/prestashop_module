@@ -76,7 +76,6 @@ if [ "$version" != "" ]; then
     fi
 
     mv ./packlink.zip ./PluginInstallation/${version}/
-    touch "./PluginInstallation/$version/Release notes $version.txt"
     echo -e "\e[32mDONE!\n\e[93mNew release created under: $PWD/PluginInstallation/$version"
 else
     echo -e "\e[32mDONE!\n\e[93mNew plugin archive created: $PWD/packlink.zip"

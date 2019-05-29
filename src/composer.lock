@@ -4,27 +4,26 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "77c5942645bf061ea360d31422f7f7c3",
+  "content-hash": "47201fa1ba76b96f7ee6e77bc3891062",
     "packages": [
         {
             "name": "packlink/integration-core",
-            "version": "dev-dev",
+          "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "bc82832151f1123d0c371078d264932b59e8328d"
+              "reference": "fbdbed7df2c33715d6b07227dce3cb772a05150d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/bc82832151f1123d0c371078d264932b59e8328d",
-                "reference": "bc82832151f1123d0c371078d264932b59e8328d",
+              "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/fbdbed7df2c33715d6b07227dce3cb772a05150d",
+              "reference": "fbdbed7df2c33715d6b07227dce3cb772a05150d",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3",
-                "zendframework/zend-memory": "2.0.3",
-                "zendframework/zend-stdlib": "2.0.3",
-                "zendframework/zendpdf": "2.0.*@dev"
+              "zendframework/zend-stdlib": "^2.0",
+              "zendframework/zendpdf": "^2.0"
             },
             "require-dev": {
                 "codacy/coverage": "dev-master",
@@ -47,7 +46,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2019-05-23T10:06:19+00:00"
+          "time": "2019-05-29T15:03:53+00:00"
         },
         {
             "name": "zendframework/zend-memory",
@@ -1382,9 +1381,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "packlink/integration-core": 20
-    },
+  "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -1061,7 +1061,7 @@ class Packlink extends CarrierModule
             array(),
             null,
             null,
-            Configuration::get('PS_SHOP_DEFAULT')
+            Context::getContext()->shop->id
         );
     }
 

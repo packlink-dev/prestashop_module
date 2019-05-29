@@ -101,6 +101,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function getOrderAndShippingData($orderId)
     {
@@ -147,6 +148,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order with provided id is not found.
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function setReference($orderId, $shipmentReference)
     {
@@ -277,19 +279,19 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
     /**
      * Sets order packlink shipment tracking history to an order by shipment reference.
      *
-     * @param string $shipmentReference Packlink shipment reference.
+     * @param Shipment $shipment
      * @param Tracking[] $trackingHistory Shipment tracking history.
-     * @param Shipment $shipmentDetails
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order with provided reference is not found.
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
-    public function updateTrackingInfo($shipmentReference, array $trackingHistory, Shipment $shipmentDetails)
+    public function updateTrackingInfo(Shipment $shipment, array $trackingHistory)
     {
-        $orderDetails = $this->getOrderDetailsByReference($shipmentReference);
+        $orderDetails = $this->getOrderDetailsByReference($shipment->reference);
 
         if (!empty($trackingHistory)) {
             $trackingHistory = $this->sortTrackingRecords($trackingHistory);
@@ -297,14 +299,14 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
             $orderDetails->setShippingStatus($latestTrackingRecord->description, $latestTrackingRecord->timestamp);
         }
 
-        if ($shipmentDetails !== null) {
-            $orderDetails->setPacklinkShippingPrice($shipmentDetails->price);
-            $orderDetails->setCarrierTrackingUrl($shipmentDetails->carrierTrackingUrl);
-            if (!empty($shipmentDetails->trackingCodes)) {
+        if ($shipment !== null) {
+            $orderDetails->setPacklinkShippingPrice($shipment->price);
+            $orderDetails->setCarrierTrackingUrl($shipment->carrierTrackingUrl);
+            if (!empty($shipment->trackingCodes)) {
                 $order = new PrestaShopOrder($orderDetails->getOrderId());
-                $order->setWsShippingNumber($shipmentDetails->trackingCodes[0]);
+                $order->setWsShippingNumber($shipment->trackingCodes[0]);
 
-                $orderDetails->setCarrierTrackingNumbers($shipmentDetails->trackingCodes);
+                $orderDetails->setCarrierTrackingNumbers($shipment->trackingCodes);
             }
         }
 
@@ -322,6 +324,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order with provided reference is not found.
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function setShippingStatusByReference($shipmentReference, $shippingStatus)
     {
@@ -344,6 +347,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order with provided reference is not found.
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function setShippingPriceByReference($shipmentReference, $price)
     {
@@ -364,6 +368,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     * @throws \PrestaShopDatabaseException
      */
     public function markShipmentDeleted($shipmentReference)
     {
@@ -384,6 +389,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     * @throws \PrestaShopDatabaseException
      */
     public function isShipmentDeleted($shipmentReference)
     {
@@ -421,6 +427,25 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         }
 
         return $orderDetails;
+    }
+
+    /**
+     * Returns whether shipment identified by provided reference has Packlink shipment label set.
+     *
+     * @param string $shipmentReference Packlink shipment reference.
+     *
+     * @return bool Returns TRUE if label is set; otherwise, FALSE.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     * @throws \PrestaShopDatabaseException
+     */
+    public function isLabelSet($shipmentReference)
+    {
+        $details = $this->getOrderDetailsByReference($shipmentReference);
+
+        return $details !== null && count($details->getShipmentLabels()) > 0;
     }
 
     /**
@@ -467,6 +492,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getAddress(PrestaShopOrder $shopOrder)
     {
@@ -504,6 +530,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function setSourceOrderStatus($orderId, $shippingStatus)
     {
@@ -567,6 +594,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getOrderItems(PrestaShopOrder $sourceOrder)
     {
@@ -604,6 +632,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getOrderItem($sourceOrderItem, $defaultParcel)
     {
@@ -650,6 +679,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function checkIfOrderExists($orderId)
     {
