@@ -91,6 +91,7 @@ class BaseRepository implements RepositoryInterface
      * @return Entity[] A list of resulting entities.
      *
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
     public function select(QueryFilter $filter = null)
@@ -120,6 +121,7 @@ class BaseRepository implements RepositoryInterface
      * @return Entity|null First found entity or NULL.
      *
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
     public function selectOne(QueryFilter $filter = null)
@@ -176,6 +178,7 @@ class BaseRepository implements RepositoryInterface
      * @return int Number of records that match filter criteria.
      *
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
     public function count(QueryFilter $filter = null)
@@ -372,7 +375,7 @@ class BaseRepository implements RepositoryInterface
 
         return $columnName . ' ' . $condition->getOperator()
             . (!in_array($condition->getOperator(), array(Operators::NULL, Operators::NOT_NULL), true)
-                ? "'" . pSQL($conditionValue) . "'" : ''
+                ? "'" . pSQL($conditionValue, true) . "'" : ''
             );
     }
 
@@ -386,6 +389,7 @@ class BaseRepository implements RepositoryInterface
      *
      * @throws \PrestaShopDatabaseException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \PrestaShopException
      */
     private function getRecordsByCondition($condition, QueryFilter $filter = null)
     {
@@ -444,10 +448,10 @@ class BaseRepository implements RepositoryInterface
      */
     private function prepareDataForInsertOrUpdate(Entity $entity, array $indexes)
     {
-        $record = array('data' => pSQL($this->serializeEntity($entity)));
+        $record = array('data' => pSQL($this->serializeEntity($entity), true));
 
         foreach ($indexes as $index => $value) {
-            $record['index_' . $index] = $value !== null ? pSQL($value) : null;
+            $record['index_' . $index] = $value !== null ? pSQL($value, true) : null;
         }
 
         return $record;
