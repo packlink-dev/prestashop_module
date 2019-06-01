@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.1...dev)
 
+## [v2.0.2](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.2...v2.0.1) - 2019-06-01
+### Changed
+- Updated to the latest core changes
+- Module now supports analytics events
+
 ## [v2.0.1](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.1...v2.0.0) - 2019-05-29
 ### Changed
 - Updated to the latest core changes

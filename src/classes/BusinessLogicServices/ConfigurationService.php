@@ -38,6 +38,10 @@ class ConfigurationService extends Configuration
      * @inheritdoc
      */
     const MIN_LOG_LEVEL = Logger::ERROR;
+    /**
+     * @var string
+     */
+    private $moduleVersion;
 
     /**
      * Returns current system identifier.
@@ -46,7 +50,6 @@ class ConfigurationService extends Configuration
      */
     public function getCurrentSystemId()
     {
-        // support multi-shop feature so that everything is installed for all shops.
         return \Configuration::get('PS_SHOP_DEFAULT');
     }
 
@@ -65,26 +68,6 @@ class ConfigurationService extends Configuration
             null,
             \Configuration::get('PS_SHOP_DEFAULT')
         );
-    }
-
-    /**
-     * Retrieves integration name.
-     *
-     * @return string Integration name.
-     */
-    public function getIntegrationName()
-    {
-        return 'PrestaShop';
-    }
-
-    /**
-     * Returns order draft source.
-     *
-     * @return string
-     */
-    public function getDraftSource()
-    {
-        return 'module_prestashop';
     }
 
     /**
@@ -126,5 +109,60 @@ class ConfigurationService extends Configuration
     public function setBackupCarrierId($carrierId)
     {
         $this->saveConfigValue('backupCarrierId', $carrierId);
+    }
+
+    /**
+     * Retrieves integration name.
+     *
+     * @return string Integration name.
+     */
+    public function getIntegrationName()
+    {
+        return 'PrestaShop';
+    }
+
+    /**
+     * Returns order draft source.
+     *
+     * @return string
+     */
+    public function getDraftSource()
+    {
+        return 'module_prestashop';
+    }
+
+    /**
+     * Gets the current version of the module/integration.
+     *
+     * @return string The version number.
+     */
+    public function getModuleVersion()
+    {
+        if (!$this->moduleVersion) {
+            $this->moduleVersion = \Module::getInstanceByName('packlink')->version;
+        }
+
+        return $this->moduleVersion;
+    }
+
+    /**
+     * Gets the name of the integrated e-commerce system.
+     * This name is related to Packlink API which can be different from the official system name.
+     *
+     * @return string The e-commerce name.
+     */
+    public function getECommerceName()
+    {
+        return 'prestashop_2';
+    }
+
+    /**
+     * Gets the current version of the integrated e-commerce system.
+     *
+     * @return string The version number.
+     */
+    public function getECommerceVersion()
+    {
+        return _PS_VERSION_;
     }
 }

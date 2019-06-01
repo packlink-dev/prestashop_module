@@ -381,7 +381,7 @@
           {l s='Congrats! Your first Shipping Method has been successfully created.' mod='packlink'}
         </div>
         <div class="pl-shipping-modal-body">
-          {l s='In order to offer you the best possible service, its important to disable your previous carriers. Do you want us to disable them? (recommended)' mod='packlink'}
+          {l s='In order to offer you the best possible service, it\'s important to disable your previous carriers. Do you want us to disable them? (recommended)' mod='packlink'}
         </div>
         <div class="pl-shipping-modal-row">
           <button class="btn btn-lg btn-outline-secondary pl-shipping-modal-btn" id="pl-disable-methods-modal-cancel">{l s='Cancel' mod='packlink'}</button>

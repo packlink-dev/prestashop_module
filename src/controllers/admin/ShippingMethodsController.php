@@ -24,6 +24,7 @@
  */
 
 use Logeecom\Infrastructure\ServiceRegister;
+use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodConfiguration;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
 use Packlink\BusinessLogic\Controllers\ShippingMethodController;
@@ -75,9 +76,7 @@ class ShippingMethodsController extends ModuleAdminController
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
 
-        if (!$data['id'] || !$this->controller->activate((int)$data['id'])) {
-            PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to select shipping method.')));
-        }
+        $this->activateShippingMethod(array_key_exists('id', $data) ? $data['id'] : 0);
 
         PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Shipping method successfully selected.')));
     }
@@ -123,9 +122,7 @@ class ShippingMethodsController extends ModuleAdminController
 
         $model->logoUrl = $this->generateCarrierLogoUrl($model->carrierName);
 
-        if (!$model->id || !$this->controller->activate((int)$model->id)) {
-            PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to activate shipping method.')));
-        }
+        $this->activateShippingMethod($model->id);
 
         $model->selected = true;
 
@@ -189,6 +186,8 @@ class ShippingMethodsController extends ModuleAdminController
             $carrier->update();
         }
 
+        AnalyticsController::sendOtherServicesDisabledEvent();
+
         PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully disabled shipping methods.')));
     }
 
@@ -222,6 +221,15 @@ class ShippingMethodsController extends ModuleAdminController
         PacklinkPrestaShopUtility::dieJson($result);
     }
 
+    private function activateShippingMethod($id)
+    {
+        if (!$id || !$this->controller->activate((int)$id)) {
+            PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to activate shipping method.')));
+        }
+
+        AnalyticsController::sendSetupEvent();
+    }
+
     /**
      * Transforms
      *
@@ -229,7 +237,7 @@ class ShippingMethodsController extends ModuleAdminController
      *
      * @return array
      */
-    protected function formatCollectionJsonResponse($data)
+    private function formatCollectionJsonResponse($data)
     {
         $collection = array();
 
@@ -247,7 +255,7 @@ class ShippingMethodsController extends ModuleAdminController
      *
      * @return ShippingMethodConfiguration
      */
-    protected function getShippingMethodConfiguration()
+    private function getShippingMethodConfiguration()
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
 

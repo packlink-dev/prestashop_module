@@ -2,8 +2,6 @@
 
 namespace Packlink\Lib;
 
-use Composer\Script\Event;
-
 /**
  * Class Core
  *
@@ -11,10 +9,7 @@ use Composer\Script\Event;
  */
 class Core
 {
-    /**
-     * @param Event $event
-     */
-    public static function postUpdate(Event $event)
+    public static function postUpdate()
     {
         $from = __DIR__ . '/../vendor/packlink/integration-core/src/BusinessLogic/Resources';
         $to = __DIR__ . '/../views';
@@ -35,9 +30,14 @@ class Core
         while (false !== ($file = readdir($dir))) {
             if (($file !== '.') && ($file !== '..')) {
                 if (is_dir($src . '/' . $file)) {
+                    if (!file_exists($dst . '/' . $file)) {
+                        /** @noinspection MkdirRaceConditionInspection */
+                        mkdir($dst . '/' . $file);
+                    }
+
                     self::copyDirectory($src . '/' . $file, $dst . '/' . $file);
                 } else {
-                    @copy($src . '/' . $file, $dst . '/' . $file);
+                    copy($src . '/' . $file, $dst . '/' . $file);
                 }
             }
         }

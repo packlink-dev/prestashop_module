@@ -101,10 +101,10 @@ class Packlink extends CarrierModule
         $this->module_key = '0b685e39fafb6de6bd21daaa455f4404';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.0';
+        $this->version = '2.0.2';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.6.1', 'max' => _PS_VERSION_);
         $this->bootstrap = true;
 
         parent::__construct();
@@ -121,6 +121,7 @@ class Packlink extends CarrierModule
      * @return bool
      *
      * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function install()
     {
@@ -139,6 +140,7 @@ class Packlink extends CarrierModule
      * Handle plugin uninstall
      *
      * @return bool
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function uninstall()
     {
@@ -446,6 +448,7 @@ class Packlink extends CarrierModule
      *
      * @throws \PrestaShopException
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
     public function getContent()
     {
@@ -1012,6 +1015,7 @@ class Packlink extends CarrierModule
      * @return bool
      *
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
     private function login()
     {
@@ -1187,6 +1191,7 @@ class Packlink extends CarrierModule
      * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository Order repository.
      *
      * @return object
+     *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
