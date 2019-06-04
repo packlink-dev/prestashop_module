@@ -392,7 +392,7 @@ class Packlink extends CarrierModule
         }
 
         if ($calculatedCosts !== false) {
-            return isset($calculatedCosts[$methodId]) ? $calculatedCosts[$methodId] : false;
+            return $this->addHandlingCost($calculatedCosts, $methodId, $carrier);
         }
 
         $warehouse = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDefaultWarehouse();
@@ -420,7 +420,7 @@ class Packlink extends CarrierModule
 
         \Packlink\PrestaShop\Classes\Utility\CachingUtility::setCosts($calculatedCosts);
 
-        return isset($calculatedCosts[$methodId]) ? $calculatedCosts[$methodId] : false;
+        return $this->addHandlingCost($calculatedCosts, $methodId, $carrier);
     }
 
     /**
@@ -1272,5 +1272,23 @@ class Packlink extends CarrierModule
             : 'es';
 
         return "https://pro.packlink.$userCountry/private/shipments/$reference";
+    }
+
+    /**
+     * @param array $calculatedCosts
+     * @param $methodId
+     * @param \Carrier $carrier
+     *
+     * @return bool|int|mixed
+     *
+     */
+    private function addHandlingCost(array $calculatedCosts, $methodId, Carrier $carrier)
+    {
+        $cost = isset($calculatedCosts[$methodId]) ? $calculatedCosts[$methodId] : false;
+        if ($cost !== false && $carrier->shipping_handling) {
+            $cost += (float)\Configuration::get('PS_SHIPPING_HANDLING') ?: 0;
+        }
+
+        return $cost;
     }
 }
