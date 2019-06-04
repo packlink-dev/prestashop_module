@@ -27,9 +27,9 @@ use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
+use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Utility\PdfMerge;
 use Packlink\PrestaShop\Classes\Bootstrap;
-use Packlink\PrestaShop\Classes\Entities\ShopOrderDetails;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
@@ -59,6 +59,7 @@ class BulkShipmentLabelsController extends ModuleAdminController
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function initContent()
     {
@@ -76,6 +77,7 @@ class BulkShipmentLabelsController extends ModuleAdminController
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     protected function bulkPrintLabels(OrderRepository $orderRepository)
     {
@@ -136,10 +138,11 @@ class BulkShipmentLabelsController extends ModuleAdminController
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     private function saveFilesLocally(array $orderIds, OrderRepository $orderRepository)
     {
-        $orderDetailsRepository = RepositoryRegistry::getRepository(ShopOrderDetails::getClassName());
+        $orderDetailsRepository = RepositoryRegistry::getRepository(OrderShipmentDetails::getClassName());
 
         foreach ($orderIds as $orderId) {
             $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);

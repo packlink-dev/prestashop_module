@@ -23,6 +23,7 @@
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+/** @noinspection PhpUnusedParameterInspection */
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -326,7 +327,7 @@ class Packlink extends CarrierModule
      */
     public function hookActionOrderStatusUpdate($params)
     {
-        $order = new Order((int)$params['id_order']);
+        $order = new \Order((int)$params['id_order']);
 
         // If order has just been created, this hook should not handle that event
         // since it has already been handled by hook for validating order.
@@ -606,7 +607,7 @@ class Packlink extends CarrierModule
      * @throws \PrestaShopException
      */
     protected function createDropOffAddress(
-        Order $order,
+        \Order $order,
         \Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping $mapping
     ) {
         $address = new Address();
@@ -678,7 +679,7 @@ class Packlink extends CarrierModule
                 Context::getContext()->language->id,
                 true,
                 false,
-                (int)$zoneId,
+                $zoneId,
                 $customer->getGroups(),
                 Carrier::PS_CARRIERS_ONLY
             );
@@ -803,7 +804,7 @@ class Packlink extends CarrierModule
      *
      * @return string
      */
-    private function getPhone(Order $order)
+    private function getPhone(\Order $order)
     {
         $phone = '';
 
@@ -836,7 +837,7 @@ class Packlink extends CarrierModule
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function createOrderDraft(Order $order, OrderState $orderState)
+    private function createOrderDraft(\Order $order, OrderState $orderState)
     {
         \Packlink\PrestaShop\Classes\Bootstrap::init();
         /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
@@ -865,7 +866,7 @@ class Packlink extends CarrierModule
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function draftShouldBeCreated(Order $order, $orderStatus, $orderRepository)
+    private function draftShouldBeCreated(\Order $order, $orderStatus, $orderRepository)
     {
         /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
         $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
@@ -891,6 +892,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     private function enqueueDraftTask($orderId, $orderRepository)
     {
@@ -903,7 +905,7 @@ class Packlink extends CarrierModule
             \Logeecom\Infrastructure\TaskExecution\QueueService::CLASS_NAME
         );
 
-        $orderDetails = new \Packlink\PrestaShop\Classes\Entities\ShopOrderDetails();
+        $orderDetails = new \Packlink\BusinessLogic\Order\Models\OrderShipmentDetails();
         $draftTask = new \Packlink\BusinessLogic\Tasks\SendDraftTask($orderId);
         $orderDetails->setOrderId($orderId);
         $orderRepository->saveOrderDetails($orderDetails);
@@ -1036,8 +1038,6 @@ class Packlink extends CarrierModule
      * @param bool $ajax
      *
      * @return string
-     *
-     * @throws \PrestaShopException
      */
     private function getAction($controller, $action, $ajax = true)
     {
@@ -1076,6 +1076,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     private function prepareLabelsTemplate(
         \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository,
@@ -1143,7 +1144,7 @@ class Packlink extends CarrierModule
         $displayDraftButton = false;
 
         if ($orderDetails === null
-            || ($orderDetails->getShipmentReference() === null && $orderDetails->getTaskId() === null)
+            || ($orderDetails->getReference() === null && $orderDetails->getTaskId() === null)
         ) {
             $message = \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__(
                 'Create order draft in Packlink PRO'
@@ -1159,7 +1160,7 @@ class Packlink extends CarrierModule
                     array($draftTask->getFailureDescription())
                 );
                 $displayDraftButton = true;
-            } elseif ($orderDetails->getShipmentReference() === null) {
+            } elseif ($orderDetails->getReference() === null) {
                 $message = \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__(
                     'Draft is currently being created in Packlink'
                 );
@@ -1187,7 +1188,7 @@ class Packlink extends CarrierModule
      * Prepares shipping details object for Packlink shipping tab.
      *
      * @param int $orderId ID of the order.
-     * @param \Packlink\PrestaShop\Classes\Entities\ShopOrderDetails $orderDetails Details of the order.
+     * @param \Packlink\BusinessLogic\Order\Models\OrderShipmentDetails $orderDetails Details of the order.
      * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository Order repository.
      *
      * @return object
@@ -1208,14 +1209,14 @@ class Packlink extends CarrierModule
             \Logeecom\Infrastructure\Utility\TimeProvider::CLASS_NAME
         );
 
-        $order = new Order($orderId);
+        $order = new \Order($orderId);
         $carrier = new Carrier((int)$order->id_carrier);
 
         $this->prepareLabelsTemplate($orderRepository, $orderId);
 
         $shipping = (object)array(
             'name' => $carrier->name,
-            'reference' => $orderDetails->getShipmentReference(),
+            'reference' => $orderDetails->getReference(),
             'deleted' => $orderDetails->isDeleted(),
             'icon' => file_exists(_PS_SHIP_IMG_DIR_ . '/' . (int)$carrier->id . '.jpg') ?
                 _PS_BASE_URL_ . __PS_BASE_URI__ . 'img/s/' . (int)$carrier->id . '.jpg' : '',
@@ -1227,9 +1228,9 @@ class Packlink extends CarrierModule
             'carrier_tracking_numbers' => $orderDetails->getCarrierTrackingNumbers(),
             'carrier_tracking_url' => $orderDetails->getCarrierTrackingUrl() !== null
                 ? $orderDetails->getCarrierTrackingUrl() : '',
-            'packlink_shipping_price' => $orderDetails->getPacklinkShippingPrice() !== null
-                ? $orderDetails->getPacklinkShippingPrice() . ' €' : '',
-            'link' => $this->getOrderDraftUrl($orderDetails->getShipmentReference()),
+            'packlink_shipping_price' => $orderDetails->getShippingCost() !== null
+                ? $orderDetails->getShippingCost() . ' €' : '',
+            'link' => $this->getOrderDraftUrl($orderDetails->getReference()),
         );
 
         return $shipping;

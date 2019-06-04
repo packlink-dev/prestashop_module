@@ -33,8 +33,10 @@ use Logeecom\Infrastructure\ServiceRegister;
 use Order as PrestaShopOrder;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Http\DTO\Shipment;
+use Packlink\BusinessLogic\Http\DTO\ShipmentLabel;
 use Packlink\BusinessLogic\Http\DTO\Tracking;
 use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
+use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Order\Objects\Address;
 use Packlink\BusinessLogic\Order\Objects\Item;
 use Packlink\BusinessLogic\Order\Objects\Order;
@@ -43,8 +45,6 @@ use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
-use Packlink\PrestaShop\Classes\Entities\ShopOrderDetails;
-use Packlink\PrestaShop\Classes\Objects\ShipmentLabel;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -70,6 +70,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function getIncompleteOrderReferences()
     {
@@ -77,13 +78,13 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $orderReferences = array();
 
         $filter->where('status', Operators::NOT_EQUALS, ShipmentStatus::STATUS_DELIVERED);
-        /** @var ShopOrderDetails $orderDetails */
+        /** @var \Packlink\BusinessLogic\Order\Models\OrderShipmentDetails $orderDetails */
         /** @noinspection OneTimeUseVariablesInspection */
         $orders = $this->getOrderDetailsRepository()->select($filter);
 
         foreach ($orders as $orderDetails) {
-            if ($orderDetails->getShipmentReference() !== null) {
-                $orderReferences[] = $orderDetails->getShipmentReference();
+            if ($orderDetails->getReference() !== null) {
+                $orderReferences[] = $orderDetails->getReference();
             }
         }
 
@@ -157,12 +158,12 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $orderDetails = $this->getOrderDetailsById($orderId);
 
         if ($orderDetails === null) {
-            $orderDetails = new ShopOrderDetails();
+            $orderDetails = new OrderShipmentDetails();
             $orderDetails->setOrderId($orderId);
             $this->getOrderDetailsRepository()->save($orderDetails);
         }
 
-        $orderDetails->setShipmentReference($shipmentReference);
+        $orderDetails->setReference($shipmentReference);
 
         $this->getOrderDetailsRepository()->update($orderDetails);
         $this->setOrderDraftReference($orderId, $shipmentReference);
@@ -178,6 +179,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order with provided reference is not found.
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function setLabelsByReference($shipmentReference, array $labels)
     {
@@ -197,6 +199,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function setLabelPrinted($orderId, $link)
     {
@@ -208,7 +211,6 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         }
 
         $labels = $orderDetails->getShipmentLabels();
-
         foreach ($labels as $label) {
             if ($label->getLink() === $link) {
                 $label->setPrinted(true);
@@ -228,6 +230,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function getLabelsByOrderId($orderId)
     {
@@ -241,18 +244,19 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      *
      * @param int $orderId ID of the order.
      *
-     * @return ShopOrderDetails | null Shop order details entity or null if not found.
+     * @return OrderShipmentDetails | null Order packlink shipment details entity or null if not found.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function getOrderDetailsById($orderId)
     {
         $filter = new QueryFilter();
 
         $filter->where('orderId', Operators::EQUALS, $orderId);
-        /** @var ShopOrderDetails $orderDetails */
+        /** @var OrderShipmentDetails $orderDetails */
         /** @noinspection OneTimeUseVariablesInspection */
         $orderDetails = $this->getOrderDetailsRepository()->selectOne($filter);
 
@@ -262,12 +266,12 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
     /**
      * Saves order details entity using order details repository.
      *
-     * @param ShopOrderDetails $orderDetails Shop order details entity.
+     * @param OrderShipmentDetails $orderDetails Shop order details entity.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      */
-    public function saveOrderDetails(ShopOrderDetails $orderDetails)
+    public function saveOrderDetails(OrderShipmentDetails $orderDetails)
     {
         if ($orderDetails->getId() === null) {
             $this->getOrderDetailsRepository()->save($orderDetails);
@@ -300,7 +304,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         }
 
         if ($shipment !== null) {
-            $orderDetails->setPacklinkShippingPrice($shipment->price);
+            $orderDetails->setShippingCost($shipment->price);
             $orderDetails->setCarrierTrackingUrl($shipment->carrierTrackingUrl);
             if (!empty($shipment->trackingCodes)) {
                 $order = new PrestaShopOrder($orderDetails->getOrderId());
@@ -356,7 +360,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $order = new PrestaShopOrder($orderDetails->getOrderId());
         $order->updateShippingCost($price);
 
-        $orderDetails->setPacklinkShippingPrice($price);
+        $orderDetails->setShippingCost($price);
         $this->getOrderDetailsRepository()->update($orderDetails);
     }
 
@@ -369,6 +373,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function markShipmentDeleted($shipmentReference)
     {
@@ -390,6 +395,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function isShipmentDeleted($shipmentReference)
     {
@@ -401,27 +407,28 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
     /**
      * Returns order details entity with provided shipment reference, or throws an exception if it doesn't exist.
      *
-     * @param string $shipmentReference Packlink order shipment reference.
+     * @param string $reference Packlink order shipment reference.
      *
-     * @return ShopOrderDetails Order details.
+     * @return OrderShipmentDetails Order details.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
-    public function getOrderDetailsByReference($shipmentReference)
+    public function getOrderDetailsByReference($reference)
     {
         $filter = new QueryFilter();
 
-        $filter->where('shipmentReference', Operators::EQUALS, $shipmentReference);
-        /** @var ShopOrderDetails $orderDetails */
+        $filter->where('reference', Operators::EQUALS, $reference);
+        /** @var OrderShipmentDetails $orderDetails */
         $orderDetails = $this->getOrderDetailsRepository()->selectOne($filter);
 
         if ($orderDetails === null) {
             throw new OrderNotFound(
                 TranslationUtility::__(
-                    "Order with shipment reference $shipmentReference doesn't exist in the shop"
+                    "Order with shipment reference $reference doesn't exist in the shop"
                 )
             );
         }
@@ -440,6 +447,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function isLabelSet($shipmentReference)
     {
@@ -562,8 +570,6 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      */
     private function setOrderShippingDetails($order, $carrierId)
     {
@@ -740,7 +746,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
     private function getOrderDetailsRepository()
     {
         if ($this->orderDetailsRepository === null) {
-            $this->orderDetailsRepository = RepositoryRegistry::getRepository(ShopOrderDetails::getClassName());
+            $this->orderDetailsRepository = RepositoryRegistry::getRepository(OrderShipmentDetails::getClassName());
         }
 
         return $this->orderDetailsRepository;

@@ -124,7 +124,7 @@
   };
 
   Packlink.checkOut = new Packlink.CheckOutController(
-      JSON.parse('{$configuration|escape:'UTF-8'}'.replace(/&quot;/g, '"').replace(/&amp;/g, '&'))
+      JSON.parse('{$configuration}'.replace(/&quot;/g, '"').replace(/&amp;/g, '&'))
   );
 
   Packlink.checkOut.init();

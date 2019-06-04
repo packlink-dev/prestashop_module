@@ -39,6 +39,7 @@ use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Packlink\BusinessLogic\BootstrapComponent;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
+use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
@@ -46,7 +47,6 @@ use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
-use Packlink\PrestaShop\Classes\Entities\ShopOrderDetails;
 use Packlink\PrestaShop\Classes\InfrastructureServices\LoggerService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
@@ -114,7 +114,7 @@ class Bootstrap extends BootstrapComponent
         RepositoryRegistry::registerRepository(QueueItem::CLASS_NAME, QueueItemRepository::getClassName());
         RepositoryRegistry::registerRepository(ShippingMethod::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(CarrierServiceMapping::CLASS_NAME, BaseRepository::getClassName());
-        RepositoryRegistry::registerRepository(ShopOrderDetails::CLASS_NAME, BaseRepository::getClassName());
+        RepositoryRegistry::registerRepository(OrderShipmentDetails::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(Schedule::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(
             CartCarrierDropOffMapping::getClassName(),

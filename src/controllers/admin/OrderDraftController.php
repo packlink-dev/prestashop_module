@@ -27,10 +27,10 @@ use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueService;
 use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
+use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Tasks\SendDraftTask;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
-use Packlink\PrestaShop\Classes\Entities\ShopOrderDetails;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
@@ -59,6 +59,7 @@ class OrderDraftController extends ModuleAdminController
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function displayAjaxCreateOrderDraft()
     {
@@ -76,7 +77,7 @@ class OrderDraftController extends ModuleAdminController
 
             $orderDetails = $orderRepository->getOrderDetailsById($orderId);
             if ($orderDetails === null) {
-                $orderDetails = new ShopOrderDetails();
+                $orderDetails = new OrderShipmentDetails();
                 $orderDetails->setOrderId($orderId);
                 $orderRepository->saveOrderDetails($orderDetails);
             }

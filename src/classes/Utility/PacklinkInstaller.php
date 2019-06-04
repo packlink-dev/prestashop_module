@@ -95,6 +95,8 @@ class PacklinkInstaller
             return false;
         }
 
+        $this->copyCoreFiles();
+
         return $this->addShopConfiguration();
     }
 
@@ -472,5 +474,46 @@ class PacklinkInstaller
                 )
             );
         }
+    }
+
+    /**
+     * Publishes needed resource from core to the module.
+     */
+    private function copyCoreFiles()
+    {
+        $from = rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/packlink/integration-core/src/BusinessLogic/Resources';
+        $to = rtrim(_PS_MODULE_DIR_, '/') . '/packlink/views';
+
+        self::copyDirectory($from . '/img/carriers', $to . '/img/carriers');
+        self::copyDirectory($from . '/js', $to . '/js/core');
+        self::copyDirectory($from . '/LocationPicker/js', $to . '/js/location');
+        self::copyDirectory($from . '/LocationPicker/css', $to . '/css');
+    }
+
+    /**
+     * Copies content of the source directory to the destination directory.
+     *
+     * @param string $src Source directory
+     * @param string $dst Destination directory
+     */
+    private static function copyDirectory($src, $dst)
+    {
+        $dir = opendir($src);
+        while (false !== ($file = readdir($dir))) {
+            if (($file !== '.') && ($file !== '..')) {
+                if (is_dir($src . '/' . $file)) {
+                    if (!file_exists($dst . '/' . $file)) {
+                        /** @noinspection MkdirRaceConditionInspection */
+                        mkdir($dst . '/' . $file);
+                    }
+
+                    self::copyDirectory($src . '/' . $file, $dst . '/' . $file);
+                } else {
+                    copy($src . '/' . $file, $dst . '/' . $file);
+                }
+            }
+        }
+
+        closedir($dir);
     }
 }

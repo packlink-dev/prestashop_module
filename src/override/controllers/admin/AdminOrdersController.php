@@ -22,47 +22,44 @@
  * @copyright 2019 Packlink Shipping S.L
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+/** @noinspection PhpUnusedPrivateMethodInspection */
+/** @noinspection PhpIncludeInspection */
 
 /**
  * Class AdminOrdersController
  */
 class AdminOrdersController extends AdminOrdersControllerCore
 {
-    const PACKLINK_ORDER_DRAFT_TEMPLATE = 'packlink/views/templates/admin/packlink_order_draft/order_draft.tpl';
-    const PACKLINK_ORDER_ICONS_TEMPLATE = 'packlink/views/templates/admin/packlink_order_icons/_print_pdf_icon.tpl';
+    /** OLD PART START */
+    // this is used to remove old methods from overridden controller, if any.
+    const PACKLINK_ORDER_DRAFT_TEMPLATE = '';
+    const PACKLINK_ORDER_ICONS_TEMPLATE = '';
 
+    private function getOrderDraftUrl()
+    {
+    }
+
+    private function validateOrder()
+    {
+    }
+
+    private function insertElementIntoArrayAfterSpecificKey()
+    {
+    }
+
+    /** OLD PART END */
+    /**
+     * @var \Packlink\PrestaShop\Classes\Overrides\AdminOrdersController
+     */
+    private $packlinkAdminOrderController;
     /**
      * AdminOrdersController constructor.
      */
     public function __construct()
     {
-        /** @noinspection PhpIncludeInspection */
-        require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
-
         parent::__construct();
 
-        $column = Packlink\PrestaShop\Classes\Repositories\OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
-        $this->_select .= ',a.' . $column . ' AS ' . $column;
-
-        $packlinkElement = array(
-            'title' => $this->l('Packlink PRO Shipping'),
-            'align' => 'text-center',
-            'filter_key' => 'a!' . $column,
-            'callback' => 'getOrderDraft',
-        );
-
-        $this->fields_list = $this->insertElementIntoArrayAfterSpecificKey(
-            $this->fields_list,
-            'payment',
-            array($column => $packlinkElement)
-        );
-
-        $this->bulk_actions = array_merge(
-            $this->bulk_actions,
-            array(
-                'printShipmentLabels' => array('text' => $this->l('Print Shipment Labels'), 'icon' => 'icon-tag'),
-            )
-        );
+        $this->initializePacklinkHandler();
     }
 
     /**
@@ -81,53 +78,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
      */
     public function printPDFIcons($orderId, $tr)
     {
-        $order = new \Order($orderId);
-        if (!$this->validateOrder($order)) {
-            return '';
-        }
-
-        Packlink\PrestaShop\Classes\Bootstrap::init();
-
-        /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
-        $orderRepository = Logeecom\Infrastructure\ServiceRegister::getService(
-            Packlink\PrestaShop\Classes\Repositories\OrderRepository::CLASS_NAME
-        );
-        $shipmentLabels = $orderRepository->getLabelsByOrderId((int)$orderId);
-
-        $labels = array();
-        /** @var \Packlink\PrestaShop\Classes\Objects\ShipmentLabel $shipmentLabel */
-        foreach ($shipmentLabels as $shipmentLabel) {
-            $labels[] = (object)array(
-                'printed' => $shipmentLabel->isPrinted(),
-                'link' => $shipmentLabel->getLink(),
-            );
-        }
-
-        $printLabelUrl = $this->context->link->getAdminLink('ShipmentLabels') . '&' .
-            http_build_query(
-                array(
-                    'ajax' => true,
-                    'action' => 'setLabelPrinted',
-                )
-            );
-
-        $printLabelsUrl = $this->context->link->getAdminLink('BulkShipmentLabels');
-
-        $this->context->smarty->assign(array(
-            'orderId' => $orderId,
-            'order' => $order,
-            'labels' => $labels,
-            'printLabelUrl' => $printLabelUrl,
-            'printLabelsUrl' => $printLabelsUrl,
-        ));
-
-        $this->context->controller->addJS(_PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js');
-        $this->context->controller->addJS(_PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js');
-
-        return $this->context->smarty->createTemplate(
-            _PS_MODULE_DIR_ . self::PACKLINK_ORDER_ICONS_TEMPLATE,
-            $this->context->smarty
-        )->fetch();
+        return $this->packlinkAdminOrderController->printPDFIcons($orderId, $this->context);
     }
 
     /**
@@ -141,95 +92,24 @@ class AdminOrdersController extends AdminOrdersControllerCore
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function getOrderDraft($reference)
     {
-        if ($reference === '') {
-            return $reference;
-        }
-
-        \Packlink\PrestaShop\Classes\Bootstrap::init();
-
-        /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
-        $orderRepository = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Order\Interfaces\OrderRepository::CLASS_NAME
-        );
-        $orderDetails = $orderRepository->getOrderDetailsByReference($reference);
-
-        $this->context->smarty->assign(array(
-            'imgSrc' => _PS_BASE_URL_ . _MODULE_DIR_ . 'packlink/logo.png',
-            'deleted' => $orderDetails->isDeleted(),
-            'orderDraftLink' => $this->getOrderDraftUrl($reference),
-        ));
-
-        return $this->context->smarty->createTemplate(
-            _PS_MODULE_DIR_ . self::PACKLINK_ORDER_DRAFT_TEMPLATE,
-            $this->context->smarty
-        )->fetch();
+        return $this->packlinkAdminOrderController->getOrderDraft($reference, $this->context);
     }
 
     /**
-     * Returns link to order draft on Packlink for the provided shipment reference.
-     *
-     * @param string $reference Shipment reference.
-     *
-     * @return string Link to order draft on Packlink.
+     * Initializes Packlink module handler for extending order details page.
      */
-    private function getOrderDraftUrl($reference)
+    private function initializePacklinkHandler()
     {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Configuration::CLASS_NAME
-        );
-        $userCountry = $configService->getUserInfo() !== null
-            ? \Tools::strtolower($configService->getUserInfo()->country)
-            : 'es';
+        require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
 
-        return "https://pro.packlink.$userCountry/private/shipments/$reference";
-    }
+        $this->packlinkAdminOrderController = new \Packlink\PrestaShop\Classes\Overrides\AdminOrdersController();
 
-    /**
-     * Validates provided order.
-     *
-     * @param \Order $order
-     *
-     * @return bool Returns true if order object is valid, otherwise returns false.
-     */
-    private function validateOrder($order)
-    {
-        static $valid_order_state = array();
+        $this->fields_list = $this->packlinkAdminOrderController->insertOrderColumn($this->_select, $this->fields_list);
 
-        if (!Validate::isLoadedObject($order)) {
-            return false;
-        }
-
-        if (!isset($valid_order_state[$order->current_state])) {
-            $valid_order_state[$order->current_state] = Validate::isLoadedObject($order->getCurrentOrderState());
-        }
-
-        if (!$valid_order_state[$order->current_state]) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Insert a value or key/value pair after a specific key in an array.  If key doesn't exist, value is appended
-     * to the end of the array.
-     *
-     * @param array $array Array in which the value should be inserted.
-     * @param string $key Key of the element that should precede inserted element.
-     * @param array $new New element that is being inserted into array.
-     *
-     * @return array Array with new element inserted at a specified position.
-     */
-    private function insertElementIntoArrayAfterSpecificKey(array $array, $key, array $new)
-    {
-        $keys = array_keys($array);
-        $index = array_search($key, $keys, true);
-        $pos = false === $index ? count($array) : $index + 1;
-
-        return array_merge(array_slice($array, 0, $pos), $new, array_slice($array, $pos));
+        $this->packlinkAdminOrderController->addBulkActions($this->bulk_actions);
     }
 }

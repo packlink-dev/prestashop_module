@@ -37,6 +37,9 @@ rm -rf packlink/vendor/packlink/integration-core/generic_tests
 rm -rf packlink/vendor/packlink/integration-core/README.md
 rm -rf packlink/vendor/zendframework/zendpdf/.git
 rm -rf packlink/vendor/zendframework/zendpdf/tests
+# remove resources. They are added in the installation process.
+rm -rf packlink/views/js/core
+rm -rf packlink/views/js/location
 
 # Adding PrestaShop mandatory index.php file to all folders
 echo -e "\e[32mSTEP 5:\e[39m Adding PrestaShop mandatory index.php file to all folders..."
