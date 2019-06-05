@@ -226,8 +226,6 @@ class ShippingMethodsController extends ModuleAdminController
         if (!$id || !$this->controller->activate((int)$id)) {
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to activate shipping method.')));
         }
-
-        AnalyticsController::sendSetupEvent();
     }
 
     /**
