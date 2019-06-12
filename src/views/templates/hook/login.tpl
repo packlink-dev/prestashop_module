@@ -108,5 +108,5 @@
   Packlink.utilityService.configureInputElements();
   hidePrestaSpinner();
   initRegisterForm();
-  calculateContentHeight(0);
+  calculateContentHeight(20);
 </script>
