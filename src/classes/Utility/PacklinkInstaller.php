@@ -95,8 +95,6 @@ class PacklinkInstaller
             return false;
         }
 
-        $this->copyCoreFiles();
-
         return $this->addShopConfiguration();
     }
 
@@ -113,9 +111,12 @@ class PacklinkInstaller
 
         $this->removeOrdersColumn();
 
-        /** @var CarrierService $carrierService */
-        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
-        $carrierService->deletePacklinkCarriers();
+        try {
+            /** @var CarrierService $carrierService */
+            $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
+            $carrierService->deletePacklinkCarriers();
+        } catch (\Exception $exception) {
+        }
 
         $this->removeControllers();
 
@@ -201,7 +202,7 @@ class PacklinkInstaller
                 }
             }
         } catch (\PrestaShopException $e) {
-            Logger::logWarning('Error removing controller! Error: ' . $e->getMessage(), 'Integration');
+            $this->tryLogError('Error removing controller! Error: ' . $e->getMessage());
         }
 
         return $result;
@@ -264,7 +265,7 @@ class PacklinkInstaller
         try {
             return (bool)\Db::getInstance()->execute($script);
         } catch (\PrestaShopException $e) {
-            Logger::logError('Error dropping base database table. Error: ' . $e->getMessage(), 'Integration');
+            $this->tryLogError('Error dropping base database table. Error: ' . $e->getMessage());
         }
 
         return false;
@@ -282,7 +283,7 @@ class PacklinkInstaller
         try {
             return (bool)\Db::getInstance()->execute($script);
         } catch (\PrestaShopException $e) {
-            Logger::logError('Error deleting packlink logs. Error: ' . $e->getMessage(), 'Integration');
+            $this->tryLogError('Error deleting packlink logs. Error: ' . $e->getMessage());
         }
 
         return false;
@@ -336,7 +337,7 @@ class PacklinkInstaller
 
             \Db::getInstance()->execute($sql);
         } catch (\PrestaShopException $e) {
-            Logger::logError('Error removing orders table column. Error: ' . $e->getMessage(), 'Integration');
+            $this->tryLogError('Error removing orders table column. Error: ' . $e->getMessage());
 
             return false;
         }
@@ -449,7 +450,7 @@ class PacklinkInstaller
                 $tab->delete();
             }
         } catch (\PrestaShopException $e) {
-            Logger::logWarning('Error removing controller "' . $name . '". Error: ' . $e->getMessage(), 'Integration');
+            $this->tryLogError('Error removing controller "' . $name . '". Error: ' . $e->getMessage());
 
             return false;
         }
@@ -477,43 +478,15 @@ class PacklinkInstaller
     }
 
     /**
-     * Publishes needed resource from core to the module.
-     */
-    private function copyCoreFiles()
-    {
-        $from = rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/packlink/integration-core/src/BusinessLogic/Resources';
-        $to = rtrim(_PS_MODULE_DIR_, '/') . '/packlink/views';
-
-        self::copyDirectory($from . '/img/carriers', $to . '/img/carriers');
-        self::copyDirectory($from . '/js', $to . '/js/core');
-        self::copyDirectory($from . '/LocationPicker/js', $to . '/js/location');
-        self::copyDirectory($from . '/LocationPicker/css', $to . '/css');
-    }
-
-    /**
-     * Copies content of the source directory to the destination directory.
+     * Tries to log the error.
      *
-     * @param string $src Source directory
-     * @param string $dst Destination directory
+     * @param string $message
      */
-    private static function copyDirectory($src, $dst)
+    private function tryLogError($message)
     {
-        $dir = opendir($src);
-        while (false !== ($file = readdir($dir))) {
-            if (($file !== '.') && ($file !== '..')) {
-                if (is_dir($src . '/' . $file)) {
-                    if (!file_exists($dst . '/' . $file)) {
-                        /** @noinspection MkdirRaceConditionInspection */
-                        mkdir($dst . '/' . $file);
-                    }
-
-                    self::copyDirectory($src . '/' . $file, $dst . '/' . $file);
-                } else {
-                    copy($src . '/' . $file, $dst . '/' . $file);
-                }
-            }
+        try {
+            Logger::logError($message, 'Integration');
+        } catch (\Exception $exception) {
         }
-
-        closedir($dir);
     }
 }

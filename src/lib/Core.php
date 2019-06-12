@@ -27,13 +27,12 @@ class Core
     private static function copyDirectory($src, $dst)
     {
         $dir = opendir($src);
+        self::mkdir($dst);
+
         while (false !== ($file = readdir($dir))) {
             if (($file !== '.') && ($file !== '..')) {
                 if (is_dir($src . '/' . $file)) {
-                    if (!file_exists($dst . '/' . $file)) {
-                        /** @noinspection MkdirRaceConditionInspection */
-                        mkdir($dst . '/' . $file);
-                    }
+                    self::mkdir($dst . '/' . $file);
 
                     self::copyDirectory($src . '/' . $file, $dst . '/' . $file);
                 } else {
@@ -43,5 +42,16 @@ class Core
         }
 
         closedir($dir);
+    }
+
+    /**
+     * @param $dst
+     *
+     */
+    private static function mkdir($dst)
+    {
+        if (!file_exists($dst) && !mkdir($dst) && !is_dir($dst)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $dst));
+        }
     }
 }

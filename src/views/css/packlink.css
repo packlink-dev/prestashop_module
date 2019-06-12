@@ -1010,11 +1010,12 @@ input[readonly][type="text"] {
 }
 
 .pl-login-page {
-  padding: 0;
+  padding: 15px 0;
   margin: 0;
   width: 100%;
   height: 100%;
   display: flex;
+  background-color: #FFF;
 }
 
 .pl-login-image {
@@ -1427,7 +1428,7 @@ input[readonly][type="text"] {
   margin: auto;
 }
 
-.pl-switch .pl-checked-checkbox, .pl-switch.selected .pl-empty-checkbox {
+.material-icons.js-mobile-menu, .pl-switch .pl-checked-checkbox, .pl-switch.selected .pl-empty-checkbox {
   display: none;
 }
 

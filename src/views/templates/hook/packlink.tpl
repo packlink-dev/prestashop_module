@@ -1106,5 +1106,5 @@
   Packlink.state.display();
 
   hidePrestaSpinner();
-  calculateContentHeight(35);
+  calculateContentHeight(60);
 </script>

@@ -18,8 +18,16 @@ cp -r ./src/* packlink
 # Ensure proper composer dependencies
 echo -e "\e[32mSTEP 2:\e[39m Installing composer dependencies..."
 cd packlink
+# remove resources that will be copied from the core in the post-install script
+rm -rf views/img/carriers/de/*
+rm -rf views/img/carriers/es/*
+rm -rf views/img/carriers/fr/*
+rm -rf views/img/carriers/it/*
+rm -rf views/js/core
+rm -rf views/js/location
 rm -rf vendor
-composer install --no-dev -q
+
+composer install --no-dev
 cd ..
 
 # Remove unnecessary files from final release archive
@@ -37,9 +45,6 @@ rm -rf packlink/vendor/packlink/integration-core/generic_tests
 rm -rf packlink/vendor/packlink/integration-core/README.md
 rm -rf packlink/vendor/zendframework/zendpdf/.git
 rm -rf packlink/vendor/zendframework/zendpdf/tests
-# remove resources. They are added in the installation process.
-rm -rf packlink/views/js/core
-rm -rf packlink/views/js/location
 
 # Adding PrestaShop mandatory index.php file to all folders
 echo -e "\e[32mSTEP 5:\e[39m Adding PrestaShop mandatory index.php file to all folders..."
