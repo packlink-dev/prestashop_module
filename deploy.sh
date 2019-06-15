@@ -6,17 +6,17 @@ echo
 sleep 2
 
 # Cleanup any leftovers
-echo -e "\e[32mCleaning up...\e[39m"
-rm -f ./packlink.zip
-rm -f ./packlink
+echo -e "\e[32mCleaning up...\e[0m"
+rm -rf ./packlink.zip
+rm -rf ./packlink
 
 # Create deployment source
-echo -e "\e[32mSTEP 1:\e[39m Copying plugin source..."
+echo -e "\e[32mSTEP 1:\e[0m Copying plugin source..."
 mkdir packlink
 cp -r ./src/* packlink
 
 # Ensure proper composer dependencies
-echo -e "\e[32mSTEP 2:\e[39m Installing composer dependencies..."
+echo -e "\e[32mSTEP 2:\e[0m Installing composer dependencies..."
 cd packlink
 # remove resources that will be copied from the core in the post-install script
 rm -rf views/img/carriers/de/*
@@ -31,12 +31,14 @@ composer install --no-dev
 cd ..
 
 # Remove unnecessary files from final release archive
-echo -e "\e[32mSTEP 3:\e[39m Removing unnecessary files from final release archive..."
+echo -e "\e[32mSTEP 3:\e[0m Removing unnecessary files from final release archive..."
 rm -rf packlink/lib
 rm -rf packlink/tests
 rm -rf packlink/phpunit.xml
 rm -rf packlink/config.xml
 rm -rf packlink/deploy.sh
+rm -rf packlink/views/css/.gitignore
+rm -rf packlink/views/img/carriers/.gitignore
 rm -rf packlink/vendor/packlink/integration-core/.git
 rm -rf packlink/vendor/packlink/integration-core/.gitignore
 rm -rf packlink/vendor/packlink/integration-core/.idea
@@ -46,12 +48,15 @@ rm -rf packlink/vendor/packlink/integration-core/README.md
 rm -rf packlink/vendor/zendframework/zendpdf/.git
 rm -rf packlink/vendor/zendframework/zendpdf/tests
 
+echo -e "\e[32mSTEP 4:\e[0m Adding PrestaShop mandatory licence header to files..."
+php "$PWD/src/lib/autoLicence.php" "$PWD/packlink"
+
 # Adding PrestaShop mandatory index.php file to all folders
-echo -e "\e[32mSTEP 5:\e[39m Adding PrestaShop mandatory index.php file to all folders..."
+echo -e "\e[32mSTEP 5:\e[0m Adding PrestaShop mandatory index.php file to all folders..."
 php "$PWD/lib/autoindex/index.php" "$PWD/packlink" >/dev/null
 
 # get plugin version
-echo -e "\e[32mSTEP 6:\e[39m Reading module version..."
+echo -e "\e[32mSTEP 6:\e[0m Reading module version..."
 
 version="$1"
 if [ "$version" = "" ]; then
@@ -60,12 +65,12 @@ if [ "$version" = "" ]; then
         echo "Please enter new plugin version (leave empty to use root folder as destination) [ENTER]:"
         read version
     else
-      echo -e "\e[35mVersion read from the composer.json file: $version\e[39m"
+      echo -e "\e[35mVersion read from the composer.json file: $version\e[0m"
     fi
 fi
 
 # Create plugin archive
-echo -e "\e[32mSTEP 7:\e[39m Creating new archive..."
+echo -e "\e[32mSTEP 7:\e[0m Creating new archive..."
 zip -r -q  packlink.zip ./packlink
 
 if [ "$version" != "" ]; then

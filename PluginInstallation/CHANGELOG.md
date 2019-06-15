@@ -8,7 +8,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [v2.0.2](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.2...v2.0.1) - 2019-06-01
 ### Changed
 - Updated to the latest core changes
-- Module now supports analytics events
+- Module now supports sending analytics events
+- Fix the upgrade process for overrides. Module now handles properly overridden 
+PrestaShop files - if other module did the override before Packlink module, it will 
+be handled gracefully - Packlink overrides will not be installed. Before this update,
+PrestaShop was giving an error message and module could not be activated.
+- Moved code for package shipping cost calculation to a separate class `PackageCostCalculator`
+- Removed licence header from all files. This is now maintained in the deploy process.
+- Fixed bug in adding bulk print action.
 
 ## [v2.0.1](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.1...v2.0.0) - 2019-05-29
 ### Changed

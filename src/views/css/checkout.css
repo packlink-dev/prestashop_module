@@ -120,6 +120,10 @@
   max-height: 48px !important;
 }
 
+#order-summary-content .logo-container img {
+  width: 100%;
+}
+
 @keyframes pl-rotate {
   100% {
     transform: rotate(360deg);

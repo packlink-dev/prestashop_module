@@ -1,27 +1,4 @@
 <?php
-/**
- * 2019 Packlink
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Academic Free License (AFL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/afl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
- *
- * @author    Packlink <support@packlink.com>
- * @copyright 2019 Packlink Shipping S.L
- * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
 
 /** @noinspection PhpUnusedParameterInspection */
 if (!defined('_PS_VERSION_')) {
@@ -29,7 +6,8 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /** @noinspection PhpIncludeInspection */
-require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+/** @noinspection DirectoryConstantCanBeUsedInspection */
+require_once rtrim(dirname(__FILE__), '/') . '/vendor/autoload.php';
 
 /**
  * @property bool bootstrap
@@ -43,14 +21,13 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
  * @property string displayName
  * @property string description
  * @property \ContextCore context
- * @property string local_path
  * @method string display($file, $template, $cache_id = null, $compile_id = null)
  * @method unregisterHook($string)
  */
 class Packlink extends CarrierModule
 {
-    const PACKLINK_SHIPPING_TAB = 'packlink/views/templates/admin/packlink_shipping_tab/shipping_tab.tpl';
-    const PACKLINK_SHIPPING_CONTENT = 'packlink/views/templates/admin/packlink_shipping_content/shipping_content.tpl';
+    const PACKLINK_SHIPPING_TAB = 'views/templates/admin/packlink_shipping_tab/shipping_tab.tpl';
+    const PACKLINK_SHIPPING_CONTENT = 'views/templates/admin/packlink_shipping_content/shipping_content.tpl';
     const PRESTASHOP_ORDER_CREATED_STATUS = 0;
     const PRESTASHOP_PAYMENT_ACCEPTED_STATUS = 2;
     const PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS = 3;
@@ -245,7 +222,7 @@ class Packlink extends CarrierModule
         }
 
         return $this->context->smarty->createTemplate(
-            _PS_MODULE_DIR_ . self::PACKLINK_SHIPPING_TAB,
+            $this->getLocalPath() . self::PACKLINK_SHIPPING_TAB,
             $this->context->smarty
         )->fetch();
     }
@@ -269,11 +246,15 @@ class Packlink extends CarrierModule
 
         $this->prepareShippingTabData($orderId);
 
-        $this->context->controller->addJS(_PS_MODULE_DIR_ . 'packlink/views/js/PrestaCreateOrderDraft.js');
-        $this->context->controller->addJS(_PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js');
+        $this->context->controller->addJS(
+            array(
+                $this->_path . 'views/js/PrestaCreateOrderDraft.js',
+                $this->_path . 'views/js/PrestaAjaxService.js',
+            )
+        );
 
         return $this->context->smarty->createTemplate(
-            _PS_MODULE_DIR_ . self::PACKLINK_SHIPPING_CONTENT,
+            $this->getLocalPath() . self::PACKLINK_SHIPPING_CONTENT,
             $this->context->smarty
         )->fetch();
     }
@@ -378,66 +359,11 @@ class Packlink extends CarrierModule
      */
     public function getPackageShippingCost($cart, $shippingCost, $products)
     {
-        \Packlink\PrestaShop\Classes\Bootstrap::init();
-
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
-        $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
+        return \Packlink\PrestaShop\Classes\ShippingServices\PackageCostCalculator::getPackageCost(
+            $cart,
+            $products,
+            $this->id_carrier
         );
-        $carrier = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCarrier($this->id_carrier);
-        $carrierReferenceId = (int)$carrier->id_reference;
-        $methodId = $carrierService->getShippingMethodId($carrierReferenceId);
-
-        if ($methodId === null) {
-            return false;
-        }
-
-        $shippingProducts = array();
-        foreach ($products as $product) {
-            if (!$product['is_virtual']) {
-                $shippingProducts[] = $product;
-            }
-        }
-
-        $calculatedCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCosts();
-
-        if ($this->displayBackupCarrier($cart, $calculatedCosts, $carrierReferenceId)) {
-            $allCosts = $this->getCostsForAllShippingMethods($cart, $shippingProducts);
-            if (!empty($allCosts)) {
-                return min(array_values($allCosts));
-            }
-        }
-
-        if ($calculatedCosts !== false) {
-            return $this->addHandlingCost($calculatedCosts, $methodId, $carrier);
-        }
-
-        $warehouse = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDefaultWarehouse();
-        if ($warehouse === null) {
-            return false;
-        }
-
-        $toCountry = $this->getDestinationCountryCode($cart, $warehouse);
-        $toZip = $this->getDestinationCountryZip($cart, $warehouse);
-        $parcels = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getPackages($shippingProducts);
-
-        /** @var \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService $shippingMethodService */
-        $shippingMethodService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService::CLASS_NAME
-        );
-
-        $calculatedCosts = $shippingMethodService->getShippingCosts(
-            $warehouse->country,
-            $warehouse->postalCode,
-            $toCountry,
-            $toZip,
-            $parcels,
-            $this->getCartTotal($cart)
-        );
-
-        \Packlink\PrestaShop\Classes\Utility\CachingUtility::setCosts($calculatedCosts);
-
-        return $this->addHandlingCost($calculatedCosts, $methodId, $carrier);
     }
 
     /**
@@ -505,16 +431,24 @@ class Packlink extends CarrierModule
             return $this->renderConfigForm();
         }
 
-        $this->context->controller->addCSS($this->_path . 'views/css/packlink.css', 'all');
-        $this->context->controller->addCSS($this->_path . 'views/css/bootstrap-prestashop-ui-kit.css', 'all');
-        $this->context->controller->addJS($this->_path . 'views/js/prestashop-ui-kit.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/UtilityService.js');
-        $this->context->controller->addJS($this->_path . 'views/js/PrestaFix.js');
-        $this->context->controller->addJS($this->_path . 'views/js/Login.js');
+        $this->context->controller->addCSS(
+            array(
+                $this->_path . 'views/css/packlink.css',
+                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css',
+            )
+        );
+        $this->context->controller->addJS(
+            array(
+                $this->_path . 'views/js/prestashop-ui-kit.js',
+                $this->_path . 'views/js/core/UtilityService.js',
+                $this->_path . 'views/js/PrestaFix.js',
+                $this->_path . 'views/js/Login.js',
+            )
+        );
 
         $this->context->smarty->assign(array(
-            'iconPath' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/flags/',
-            'loginIcon' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/logo-pl.svg',
+            'iconPath' => $this->_path . 'views/img/flags/',
+            'loginIcon' => $this->_path . 'views/img/logo-pl.svg',
         ));
 
         return $output . $this->display(__FILE__, 'login.tpl');
@@ -541,7 +475,6 @@ class Packlink extends CarrierModule
             'dropoffIds' => $dropOffs,
             'getLocationsUrl' => $this->getFrontAction('locations'),
         );
-
 
         $lang = 'en';
 
@@ -667,132 +600,6 @@ class Packlink extends CarrierModule
             $order->id_address_delivery = $address->id;
             $order->save();
         }
-    }
-
-    /**
-     * Returns whether backup carrier should be displayed.
-     *
-     * @param \Cart $cart PrestaShop cart object.
-     * @param array $calculatedCosts Array of calculated shipping costs.
-     * @param int $carrierId ID of the carrier.
-     *
-     * @return bool Returns TRUE if backup carrier should be displayed, otherwise returns FALSE.
-     */
-    private function displayBackupCarrier($cart, $calculatedCosts, $carrierId)
-    {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Configuration::CLASS_NAME
-        );
-
-        if (is_array($calculatedCosts)
-            && empty($calculatedCosts)
-            && $carrierId === $configService->getBackupCarrierId()
-        ) {
-            $zoneId = Address::getZoneById($cart->id_address_delivery);
-            $customer = new Customer($cart->id_customer);
-
-            $internalCarriers = Carrier::getCarriers(
-                Context::getContext()->language->id,
-                true,
-                false,
-                $zoneId,
-                $customer->getGroups(),
-                Carrier::PS_CARRIERS_ONLY
-            );
-
-            return empty($internalCarriers);
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns shipping costs for all Packlink shipping methods, not just active ones.
-     *
-     * @param \Cart $cart PrestaShop cart object.
-     * @param array $products Array of products.
-     *
-     * @return array Array of shipping costs for all Packlink shipping methods.
-     *
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
-     */
-    private function getCostsForAllShippingMethods($cart, $products)
-    {
-        $warehouse = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDefaultWarehouse();
-        if ($warehouse === null) {
-            return array();
-        }
-
-        /** @var \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService $shippingMethodsService */
-        $shippingMethodService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService::CLASS_NAME
-        );
-
-        return \Packlink\BusinessLogic\ShippingMethod\ShippingCostCalculator::getShippingCosts(
-            $shippingMethodService->getAllMethods(),
-            $warehouse->country,
-            $warehouse->postalCode,
-            $this->getDestinationCountryCode($cart, $warehouse),
-            $this->getDestinationCountryZip($cart, $warehouse),
-            \Packlink\PrestaShop\Classes\Utility\CachingUtility::getPackages($products),
-            $this->getCartTotal($cart)
-        );
-    }
-
-    /**
-     * Returns destination country code.
-     *
-     * @param \Cart $cart PrestaShop cart object.
-     * @param \Packlink\BusinessLogic\Http\DTO\Warehouse $warehouse
-     *
-     * @return string Destination country code.
-     *
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
-     */
-    private function getDestinationCountryCode($cart, $warehouse)
-    {
-        $countryCode = $warehouse->country;
-
-        if (!empty($cart->id_address_delivery)) {
-            $deliveryAddress = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getAddress(
-                (int)$cart->id_address_delivery
-            );
-            $deliveryCountry = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCountry(
-                (int)$deliveryAddress->id_country
-            );
-
-            $countryCode = $deliveryCountry->iso_code;
-        }
-
-        return $countryCode;
-    }
-
-    /**
-     * Returns destination country ZIP code.
-     *
-     * @param \Cart $cart PrestaShop cart object.
-     * @param \Packlink\BusinessLogic\Http\DTO\Warehouse $warehouse
-     *
-     * @return string Destination country zip code.
-     */
-    private function getDestinationCountryZip($cart, $warehouse)
-    {
-        $destinationZip = $warehouse->postalCode;
-
-        if (!empty($cart->id_address_delivery)) {
-            $deliveryAddress = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getAddress(
-                (int)$cart->id_address_delivery
-            );
-
-            $destinationZip = $deliveryAddress->postcode;
-        }
-
-        return $destinationZip;
     }
 
     /**
@@ -999,8 +806,8 @@ class Packlink extends CarrierModule
             'shopShippingMethodCountGetUrl' => $shopShippingMethodCountGetUrl,
             'shopShippingMethodsDisableUrl' => $shopShippingMethodsDisableUrl,
             'shippingMethodsGetTaxClasses' => $shippingMethodsGetTaxClasses,
-            'dashboardIcon' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/dashboard.png',
-            'dashboardLogo' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/packlink/views/img/logo-pl.svg',
+            'dashboardIcon' => $this->_path . 'views/img/dashboard.png',
+            'dashboardLogo' => $this->_path . 'views/img/logo-pl.svg',
             'helpLink' => self::$helpUrls[$linkLanguage],
             'termsAndConditionsLink' => self::$termsAndConditionsUrls[$linkLanguage],
             'pluginVersion' => $this->version,
@@ -1009,21 +816,30 @@ class Packlink extends CarrierModule
 
         $this->context->smarty->assign($frontendParams);
 
-        $this->context->controller->addCSS($this->_path . 'views/css/packlink.css', 'all');
-        $this->context->controller->addCSS($this->_path . 'views/css/bootstrap-prestashop-ui-kit.css', 'all');
-        $this->context->controller->addJS($this->_path . 'views/js/prestashop-ui-kit.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/StateController.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/TemplateService.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/SidebarController.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/DefaultParcelController.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/PageControllerFactory.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/DefaultWarehouseController.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/ShippingMethodsController.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/UtilityService.js');
-        $this->context->controller->addJS($this->_path . 'views/js/PrestaAjaxService.js');
-        $this->context->controller->addJS($this->_path . 'views/js/PrestaFix.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/OrderStateMappingController.js');
-        $this->context->controller->addJS($this->_path . 'views/js/core/FooterController.js');
+        $this->context->controller->addCSS(
+            array(
+                $this->_path . 'views/css/packlink.css',
+                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css',
+            )
+        );
+
+        $this->context->controller->addJS(
+            array(
+                $this->_path . 'views/js/prestashop-ui-kit.js',
+                $this->_path . 'views/js/core/StateController.js',
+                $this->_path . 'views/js/core/TemplateService.js',
+                $this->_path . 'views/js/core/SidebarController.js',
+                $this->_path . 'views/js/core/DefaultParcelController.js',
+                $this->_path . 'views/js/core/PageControllerFactory.js',
+                $this->_path . 'views/js/core/DefaultWarehouseController.js',
+                $this->_path . 'views/js/core/ShippingMethodsController.js',
+                $this->_path . 'views/js/core/UtilityService.js',
+                $this->_path . 'views/js/PrestaAjaxService.js',
+                $this->_path . 'views/js/PrestaFix.js',
+                $this->_path . 'views/js/core/OrderStateMappingController.js',
+                $this->_path . 'views/js/core/FooterController.js',
+            )
+        );
 
         return $this->display(__FILE__, 'packlink.tpl');
     }
@@ -1099,7 +915,7 @@ class Packlink extends CarrierModule
         \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository,
         $orderId
     ) {
-        $this->context->controller->addJS(_PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js');
+        $this->context->controller->addJS($this->_path . 'views/js/PrestaPrintShipmentLabels.js');
 
         $labels = $orderRepository->getLabelsByOrderId($orderId);
         $printLabels = array();
@@ -1236,7 +1052,7 @@ class Packlink extends CarrierModule
             'reference' => $orderDetails->getReference(),
             'deleted' => $orderDetails->isDeleted(),
             'icon' => file_exists(_PS_SHIP_IMG_DIR_ . '/' . (int)$carrier->id . '.jpg') ?
-                _PS_BASE_URL_ . __PS_BASE_URI__ . 'img/s/' . (int)$carrier->id . '.jpg' : '',
+                __PS_BASE_URI__ . 'img/s/' . (int)$carrier->id . '.jpg' : '',
             'status' => $orderDetails->getShippingStatus() !== null ? $orderDetails->getShippingStatus()
                 : '',
             'time' => $orderDetails->getLastStatusUpdateTime() !== null
@@ -1251,24 +1067,6 @@ class Packlink extends CarrierModule
         );
 
         return $shipping;
-    }
-
-    /**
-     * Gets total cart value.
-     *
-     * @param \Cart $cart
-     *
-     * @return array|float
-     */
-    private function getCartTotal(Cart $cart)
-    {
-        if (\Packlink\PrestaShop\Classes\Utility\CachingUtility::getCartTotal() === false) {
-            \Packlink\PrestaShop\Classes\Utility\CachingUtility::setCartTotal(
-                $cart->getOrderTotal(true, Cart::BOTH_WITHOUT_SHIPPING)
-            );
-        }
-
-        return \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCartTotal();
     }
 
     /**
@@ -1289,23 +1087,5 @@ class Packlink extends CarrierModule
             : 'es';
 
         return "https://pro.packlink.$userCountry/private/shipments/$reference";
-    }
-
-    /**
-     * @param array $calculatedCosts
-     * @param $methodId
-     * @param \Carrier $carrier
-     *
-     * @return bool|int|mixed
-     *
-     */
-    private function addHandlingCost(array $calculatedCosts, $methodId, Carrier $carrier)
-    {
-        $cost = isset($calculatedCosts[$methodId]) ? $calculatedCosts[$methodId] : false;
-        if ($cost !== false && $carrier->shipping_handling) {
-            $cost += (float)\Configuration::get('PS_SHIPPING_HANDLING') ?: 0;
-        }
-
-        return $cost;
     }
 }

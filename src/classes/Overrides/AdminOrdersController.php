@@ -1,27 +1,4 @@
 <?php
-/**
- * 2019 Packlink
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Academic Free License (AFL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/afl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
- *
- * @author    Packlink <support@packlink.com>
- * @copyright 2019 Packlink Shipping S.L
- * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
 
 namespace Packlink\PrestaShop\Classes\Overrides;
 
@@ -40,11 +17,22 @@ class AdminOrdersController
     const PACKLINK_ORDER_DRAFT_TEMPLATE = 'packlink/views/templates/admin/packlink_order_draft/order_draft.tpl';
     const PACKLINK_ORDER_ICONS_TEMPLATE = 'packlink/views/templates/admin/packlink_order_icons/_print_pdf_icon.tpl';
 
+    /**
+     * AdminOrdersController constructor.
+     */
     public function __construct()
     {
         Bootstrap::init();
     }
 
+    /**
+     * Inserts the Packlink order grid column.
+     *
+     * @param string $select
+     * @param array $fields_list
+     *
+     * @return array
+     */
     public function insertOrderColumn(&$select, array $fields_list)
     {
         $column = OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
@@ -71,15 +59,15 @@ class AdminOrdersController
      */
     public function addBulkActions(array &$bulk_actions)
     {
-        $bulk_actions[] = array(
-            'printShipmentLabels' => array(
-                'text' => TranslationUtility::__('Print Shipment Labels'),
-                'icon' => 'icon-tag',
-            ),
+        $bulk_actions['printShipmentLabels'] = array(
+            'text' => TranslationUtility::__('Print Shipment Labels'),
+            'icon' => 'icon-tag',
         );
     }
 
     /**
+     * Renders icons for printing PDF files.
+     *
      * @param int $orderId
      * @param \Context $context
      *
@@ -91,7 +79,7 @@ class AdminOrdersController
      * @throws \PrestaShopException
      * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
-    public function printPDFIcons($orderId, \Context $context)
+    public function renderPdfIcons($orderId, \Context $context)
     {
         $order = new \Order($orderId);
         if (!$this->validateOrder($order)) {
