@@ -35,6 +35,7 @@ use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
+use Tools;
 
 /**
  * Class PacklinkInstaller.
@@ -96,6 +97,32 @@ class PacklinkInstaller
         }
 
         return $this->addShopConfiguration();
+    }
+
+    /**
+     * Detects whether other overrides of the order code exist.
+     *
+     * @return bool TRUE if overrides can be safely applied; otherwise, FALSE.
+     */
+    public function shouldInstallOverrides()
+    {
+        return $this->canPacklinkAddOverride(_PS_ROOT_DIR_ . '/override/controllers/admin/AdminOrdersController.php')
+            && $this->canPacklinkAddOverride(_PS_ROOT_DIR_ . '/override/classes/order/Order.php');
+    }
+
+    /**
+     * Removes overrides from the previous module versions so we don't leave unused code.
+     */
+    public function removeOldOverrides()
+    {
+        $path = $this->module->getLocalPath() . 'override/controllers/admin/AdminOrdersController.php';
+        $oldFile = Tools::file_get_contents($path);
+        $startPos = Tools::strpos($oldFile, '/** OLD PART START */');
+        $endPos = Tools::strpos($oldFile, '/** OLD PART END */');
+        if ($startPos !== false && $endPos !== false) {
+            $newFile = Tools::substr($oldFile, 0, $startPos - 4) . Tools::substr($oldFile, $endPos + 20);
+            file_put_contents($path, $newFile);
+        }
     }
 
     /**
@@ -488,5 +515,21 @@ class PacklinkInstaller
             Logger::logError($message, 'Integration');
         } catch (\Exception $exception) {
         }
+    }
+
+    /**
+     * Checks if we can safely add our overrides.
+     *
+     * @param string $overriddenFilePath
+     *
+     * @return bool
+     */
+    private function canPacklinkAddOverride($overriddenFilePath)
+    {
+        $content = Tools::file_get_contents($overriddenFilePath);
+
+        return $content === false
+            || preg_match('/function __construct/', $content) === 0
+            || strpos($content, 'Packlink') !== false;
     }
 }

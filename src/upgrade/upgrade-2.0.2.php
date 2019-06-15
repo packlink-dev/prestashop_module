@@ -44,8 +44,30 @@ function upgrade_module_2_0_2($module)
 
     Bootstrap::init();
 
-    packlinkUninstallOverrides($module);
+    packlinkMigrateModelNameChanges();
 
+    $module->uninstallOverrides();
+
+    if (version_compare(_PS_VERSION_, '1.7', '<')) {
+        // v1.7+ installs overrides on enable and 1.6 does not.
+        $module->installOverrides();
+    }
+
+    $module->enable();
+
+    Shop::setContext($previousShopContext);
+
+    return true;
+}
+
+/**
+ * Migrates changes in name of the OrderShipmentDetails model from ShopOrderDetails.
+ *
+ * @throws \PrestaShopDatabaseException
+ * @throws \PrestaShopException
+ */
+function packlinkMigrateModelNameChanges()
+{
     $query = new \DbQuery();
     $query->select('*')
         ->from(bqSQL(\Packlink\PrestaShop\Classes\Repositories\BaseRepository::TABLE_NAME))
@@ -68,28 +90,4 @@ function upgrade_module_2_0_2($module)
             "id = $id"
         );
     }
-
-    $module->enable();
-    Shop::setContext($previousShopContext);
-
-    return true;
-}
-
-/**
- * Removes previous overrides.
- *
- * @param \Packlink $module
- */
-function packlinkUninstallOverrides(\Packlink $module)
-{
-    if (version_compare(_PS_VERSION_, '1.7', '>=')) {
-        $module->uninstallOverrides();
-    }
-
-    $path = _PS_MODULE_DIR_ . 'packlink/override/controllers/admin/AdminOrdersController.php';
-    $oldFile = \Tools::file_get_contents($path);
-    $startPos = \Tools::strpos($oldFile, '/** OLD PART START */') - 4;
-    $endPos = \Tools::strpos($oldFile, '/** OLD PART END */') + 20;
-    $newFile = \Tools::substr($oldFile, 0, $startPos) . \Tools::substr($oldFile, $endPos);
-    file_put_contents($path, $newFile);
 }

@@ -138,6 +138,23 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Install overridden files from the module.
+     *
+     * @return bool
+     */
+    public function installOverrides()
+    {
+        $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($this);
+        $installer->removeOldOverrides();
+        if (!$installer->shouldInstallOverrides()) {
+            // skip installing overrides / do not call parent method
+            return true;
+        }
+
+        return parent::installOverrides();
+    }
+
+    /**
      * Handle plugin uninstall
      *
      * @return bool

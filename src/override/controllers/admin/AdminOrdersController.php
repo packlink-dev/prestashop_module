@@ -22,6 +22,7 @@
  * @copyright 2019 Packlink Shipping S.L
  * @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
 /** @noinspection PhpUnusedPrivateMethodInspection */
 /** @noinspection PhpIncludeInspection */
 
@@ -31,7 +32,10 @@
 class AdminOrdersController extends AdminOrdersControllerCore
 {
     /** OLD PART START */
-    // this is used to remove old methods from overridden controller, if any.
+    /**
+     * ***** everything inside this block will be removed on install/upgrade ****
+     * this is a cleanup of the overrides added in version 2.0.0.
+     */
     const PACKLINK_ORDER_DRAFT_TEMPLATE = '';
     const PACKLINK_ORDER_ICONS_TEMPLATE = '';
 
