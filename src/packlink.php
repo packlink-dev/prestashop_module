@@ -79,7 +79,7 @@ class Packlink extends CarrierModule
         $this->module_key = '0b685e39fafb6de6bd21daaa455f4404';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.2';
+        $this->version = '2.0.3';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.1', 'max' => _PS_VERSION_);
