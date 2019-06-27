@@ -76,13 +76,13 @@ class Packlink extends CarrierModule
      */
     public function __construct()
     {
-        $this->module_key = '0b685e39fafb6de6bd21daaa455f4404';
+        $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
         $this->version = '2.0.3';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.6.1', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
         $this->bootstrap = true;
 
         parent::__construct();
@@ -129,6 +129,40 @@ class Packlink extends CarrierModule
         }
 
         return parent::installOverrides();
+    }
+
+    /**
+     * Enables the module.
+     *
+     * @param bool $force_all
+     *
+     * @return bool
+     */
+    public function enable($force_all = false)
+    {
+        if (version_compare(_PS_VERSION_, '1.7', '<')) {
+            // v1.7+ installs overrides on enable and 1.6 does not.
+            $this->installOverrides();
+        }
+
+        return parent::enable($force_all);
+    }
+
+    /**
+     * Disables the module.
+     *
+     * @param bool $force_all
+     *
+     * @return bool
+     */
+    public function disable($force_all = false)
+    {
+        if (version_compare(_PS_VERSION_, '1.7', '<')) {
+            // v1.7+ uninstalls overrides on disable and 1.6 does not.
+            $this->uninstallOverrides();
+        }
+
+        return parent::disable($force_all);
     }
 
     /**

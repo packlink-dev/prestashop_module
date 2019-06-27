@@ -25,11 +25,6 @@ function upgrade_module_2_0_2($module)
 
     $module->uninstallOverrides();
 
-    if (version_compare(_PS_VERSION_, '1.7', '<')) {
-        // v1.7+ installs overrides on enable and 1.6 does not.
-        $module->installOverrides();
-    }
-
     $module->enable();
 
     Shop::setContext($previousShopContext);

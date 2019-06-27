@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-  "content-hash": "2e37d08ea899e61ddab91d2ec3820564",
+  "content-hash": "6f029271aac0ca132444d57fbe7bfdce",
     "packages": [
         {
           "name": "ircmaxell/password-compat",
@@ -50,16 +50,16 @@
         },
       {
             "name": "packlink/integration-core",
-        "version": "v1.2.2",
+        "version": "1.2.2",
             "source": {
                 "type": "git",
-                "url": "git@github.com:logeecom/pl_module_core.git",
-              "reference": "bc0078cd671d3cdb60b01fabb94edee65eb8950b"
+              "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
+              "reference": "4e29814de6a51228652fe628fd68c658bd85a99d"
             },
             "dist": {
                 "type": "zip",
-              "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/bc0078cd671d3cdb60b01fabb94edee65eb8950b",
-              "reference": "bc0078cd671d3cdb60b01fabb94edee65eb8950b",
+              "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/4e29814de6a51228652fe628fd68c658bd85a99d",
+              "reference": "4e29814de6a51228652fe628fd68c658bd85a99d",
                 "shasum": ""
             },
             "require": {
@@ -90,7 +90,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-        "time": "2019-06-20T10:05:14+00:00"
+        "time": "2019-06-26T08:14:15+00:00"
       },
       {
         "name": "symfony/polyfill-php54",

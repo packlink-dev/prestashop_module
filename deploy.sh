@@ -47,6 +47,9 @@ rm -rf packlink/vendor/packlink/integration-core/generic_tests
 rm -rf packlink/vendor/packlink/integration-core/README.md
 rm -rf packlink/vendor/zendframework/zendpdf/.git
 rm -rf packlink/vendor/zendframework/zendpdf/tests
+rm -rf packlink/vendor/ircmaxell/password-compat/.git
+rm -rf packlink/vendor/symfony/polyfill-php54/.git
+rm -rf packlink/vendor/symfony/polyfill-php55/.git
 
 echo -e "\e[32mSTEP 4:\e[0m Adding PrestaShop mandatory licence header to files..."
 php "$PWD/src/lib/autoLicence.php" "$PWD/packlink"
