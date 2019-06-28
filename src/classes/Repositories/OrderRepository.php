@@ -1,7 +1,9 @@
 <?php
+/** @noinspection PhpDocRedundantThrowsInspection */
 
 namespace Packlink\PrestaShop\Classes\Repositories;
 
+use Address as PrestaShopAddress;
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
@@ -484,24 +486,28 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $deliveryAddressId = (int)$shopOrder->id_address_delivery;
 
         $shippingAddress = new Address();
-        $deliveryAddress = new \Address($deliveryAddressId);
+        $deliveryAddress = new PrestaShopAddress($deliveryAddressId);
         $customer = new \Customer($shopOrder->id_customer);
+        /** @noinspection PhpMethodParametersCountMismatchInspection */
         $country = new \Country($deliveryAddress->id_country);
 
         if ($country !== null) {
             $shippingAddress->setCountry($country->iso_code);
         }
+
         $shippingAddress->setZipCode($deliveryAddress->postcode);
         $shippingAddress->setCity($deliveryAddress->city);
         $shippingAddress->setCompany($deliveryAddress->company);
         $shippingAddress->setPhone($deliveryAddress->phone ?: $deliveryAddress->phone_mobile);
         $shippingAddress->setStreet1($deliveryAddress->address1);
         $shippingAddress->setStreet2($deliveryAddress->address2);
+        $shippingAddress->setName($deliveryAddress->firstname);
+        $shippingAddress->setSurname($deliveryAddress->lastname);
 
         if ($customer !== null) {
             $shippingAddress->setEmail($customer->email);
-            $shippingAddress->setName($customer->firstname);
-            $shippingAddress->setSurname($customer->lastname);
+            $shippingAddress->setName($deliveryAddress->firstname ?: $customer->firstname);
+            $shippingAddress->setSurname($deliveryAddress->lastname ?: $customer->lastname);
         }
 
         return $shippingAddress;
@@ -590,7 +596,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         /** @var array $sourceOrderItem */
         foreach ($sourceOrderItems as $sourceOrderItem) {
             /** @var \ProductCore $product */
-            $product = new \Product((int) $sourceOrderItem['product_id']);
+            $product = new \Product((int)$sourceOrderItem['product_id']);
             if (!$product->is_virtual) {
                 $orderItem = $this->getOrderItem($sourceOrderItem, $defaultParcel);
 
@@ -643,6 +649,7 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         $productCoverImage = \Image::getCover($product->id);
         if (!empty($productCoverImage)) {
             $link = new \Link();
+            /** @noinspection PhpDeprecationInspection */
             $productImageUrl = $link->getImageLink(
                 $product->link_rewrite[$languageId],
                 (int)$productCoverImage['id_image'],
