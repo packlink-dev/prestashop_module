@@ -47,6 +47,10 @@ function packlinkMigrateModelNameChanges()
 
     $data = \Db::getInstance()->executeS($query);
 
+    if (!$data) {
+        return;
+    }
+
     foreach ($data as $record) {
         $id = (int)$record['id'];
         $record['type'] = 'OrderShipmentDetails';
