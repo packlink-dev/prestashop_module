@@ -336,9 +336,6 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
     {
         $orderDetails = $this->getOrderDetailsByReference($shipmentReference);
 
-        $order = new PrestaShopOrder($orderDetails->getOrderId());
-        $order->updateShippingCost($price);
-
         $orderDetails->setShippingCost($price);
         $this->getOrderDetailsRepository()->update($orderDetails);
     }
