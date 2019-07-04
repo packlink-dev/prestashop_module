@@ -1,0 +1,10 @@
+.idea/*
+!.idea/encodings.xml
+!.idea/codeStyles
+!.idea/inspectionProfiles
+
+vendor
+*.log
+*.zip
+!PluginInstallation/**/*.zip
+src/tests/autoload.php
