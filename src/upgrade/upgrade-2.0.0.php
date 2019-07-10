@@ -110,73 +110,40 @@ function removeObsoleteFiles($module)
     Logger::logDebug(TranslationUtility::__('Removing obsolete files.'), 'Integration');
 
     $installPath = $module->getLocalPath();
-    removeDirectory($installPath . 'ajax');
-    removeDirectory($installPath . 'api');
-    removeDirectory($installPath . 'pdf');
-    removeDirectory($installPath . 'libraries');
-    removeDirectory($installPath . 'classes/helper');
-    removeDirectory($installPath . 'views/templates/front');
+    \Tools::deleteDirectory($installPath . 'ajax');
+    \Tools::deleteDirectory($installPath . 'api');
+    \Tools::deleteDirectory($installPath . 'pdf');
+    \Tools::deleteDirectory($installPath . 'libraries');
+    \Tools::deleteDirectory($installPath . 'classes/helper');
+    \Tools::deleteDirectory($installPath . 'views/templates/front');
 
-    removeFile($installPath . 'classes/PLOrder.php');
+    \Tools::deleteFile($installPath . 'classes/PLOrder.php');
 
-    removeFile($installPath . 'controllers/admin/AdminGeneratePdfPlController.php');
-    removeFile($installPath . 'controllers/admin/AdminTabPacklinkController.php');
+    \Tools::deleteFile($installPath . 'controllers/admin/AdminGeneratePdfPlController.php');
+    \Tools::deleteFile($installPath . 'controllers/admin/AdminTabPacklinkController.php');
 
-    removeFile($installPath . 'upgrade/Upgrade-1.3.0.php');
-    removeFile($installPath . 'upgrade/Upgrade-1.4.0.php');
-    removeFile($installPath . 'upgrade/Upgrade-1.5.0.php');
-    removeFile($installPath . 'upgrade/Upgrade-1.6.0.php');
-    removeFile($installPath . 'upgrade/Upgrade-1.6.3.php');
+    \Tools::deleteFile($installPath . 'upgrade/Upgrade-1.3.0.php');
+    \Tools::deleteFile($installPath . 'upgrade/Upgrade-1.4.0.php');
+    \Tools::deleteFile($installPath . 'upgrade/Upgrade-1.5.0.php');
+    \Tools::deleteFile($installPath . 'upgrade/Upgrade-1.6.0.php');
+    \Tools::deleteFile($installPath . 'upgrade/Upgrade-1.6.3.php');
 
-    removeFile($installPath . 'views/css/style16.css');
-    removeFile($installPath . 'views/img/add.gif');
-    removeFile($installPath . 'views/img/delivery.gif');
-    removeFile($installPath . 'views/img/down.png');
-    removeFile($installPath . 'views/img/printer.gif');
-    removeFile($installPath . 'views/img/search.gif');
-    removeFile($installPath . 'views/img/up.png');
-    removeFile($installPath . 'views/js/order_detail.js');
-    removeFile($installPath . 'views/templates/admin/_pl_action.tpl');
-    removeFile($installPath . 'views/templates/admin/_pl_action15.tpl');
-    removeFile($installPath . 'views/templates/hook/back.tpl');
-    removeFile($installPath . 'views/templates/hook/expedition.tpl');
-    removeFile($installPath . 'views/templates/hook/expedition15.tpl');
-    removeFile($installPath . 'views/templates/hook/order_details.tpl');
+    \Tools::deleteFile($installPath . 'views/css/style16.css');
+    \Tools::deleteFile($installPath . 'views/img/add.gif');
+    \Tools::deleteFile($installPath . 'views/img/delivery.gif');
+    \Tools::deleteFile($installPath . 'views/img/down.png');
+    \Tools::deleteFile($installPath . 'views/img/printer.gif');
+    \Tools::deleteFile($installPath . 'views/img/search.gif');
+    \Tools::deleteFile($installPath . 'views/img/up.png');
+    \Tools::deleteFile($installPath . 'views/js/order_detail.js');
+    \Tools::deleteFile($installPath . 'views/templates/admin/_pl_action.tpl');
+    \Tools::deleteFile($installPath . 'views/templates/admin/_pl_action15.tpl');
+    \Tools::deleteFile($installPath . 'views/templates/hook/back.tpl');
+    \Tools::deleteFile($installPath . 'views/templates/hook/expedition.tpl');
+    \Tools::deleteFile($installPath . 'views/templates/hook/expedition15.tpl');
+    \Tools::deleteFile($installPath . 'views/templates/hook/order_details.tpl');
 
-    removeFile($installPath . 'status.php');
-}
-
-/**
- * Removes directory.
- *
- * @param string $name
- */
-function removeDirectory($name)
-{
-    $iterator = new RecursiveDirectoryIterator($name, RecursiveDirectoryIterator::SKIP_DOTS);
-    $files = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::CHILD_FIRST);
-
-    foreach ($files as $file) {
-        if ($file->isDir()) {
-            @rmdir($file->getPathname());
-        } else {
-            removeFile($file->getPathname());
-        }
-    }
-
-    @rmdir($name);
-}
-
-/**
- * Removes file if it exists.
- *
- * @param string $path File path
- */
-function removeFile($path)
-{
-    if (file_exists($path)) {
-        @unlink($path);
-    }
+    \Tools::deleteFile($installPath . 'status.php');
 }
 
 /**
@@ -226,7 +193,7 @@ function transferOrderReferences()
 }
 
 /**
- * Removes previously used databases.
+ * Removes previously used database tables.
  *
  * @throws \PrestaShopException
  */

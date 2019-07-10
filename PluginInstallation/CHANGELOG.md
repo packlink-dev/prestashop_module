@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [v2.0.4](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.3...v2.0.2) - 2019-07-10
 ### Changed
 - Update to latest core v1.3.0
-- 
+- Fixed override mechanism and disabled adding overrides when it already exist by other module.
 
 ## [v2.0.3](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.3...v2.0.2) - 2019-07-01
 First marketplace release of the new version.
