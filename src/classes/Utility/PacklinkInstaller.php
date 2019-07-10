@@ -505,8 +505,6 @@ class PacklinkInstaller
     {
         $content = Tools::file_get_contents($overriddenFilePath);
 
-        return $content === false
-            || preg_match('/function __construct/', $content) === 0
-            || strpos($content, 'Packlink') !== false;
+        return $content === false || preg_match('/function __construct/', $content) === 0;
     }
 }

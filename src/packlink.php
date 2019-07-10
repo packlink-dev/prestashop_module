@@ -121,6 +121,7 @@ class Packlink extends CarrierModule
      */
     public function installOverrides()
     {
+        $this->uninstallOverrides();
         $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($this);
         $installer->removeOldOverrides();
         if (!$installer->shouldInstallOverrides()) {
