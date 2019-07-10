@@ -5,7 +5,6 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
 use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
-use Packlink\BusinessLogic\Utility\PdfMerge;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
@@ -32,74 +31,19 @@ class BulkShipmentLabelsController extends ModuleAdminController
 
     /**
      * Controller entry endpoint.
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      */
     public function initContent()
     {
-        /** @var OrderRepository $orderRepository */
-        $orderRepository = ServiceRegister::getService(OrderRepositoryInterface::CLASS_NAME);
-
-        $this->bulkPrintLabels($orderRepository);
-    }
-
-    /**
-     * Prints all available shipment labels in one merged PDF document.
-     *
-     * @param OrderRepository $orderRepository Order repository.
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    protected function bulkPrintLabels(OrderRepository $orderRepository)
-    {
-        $orderIds = \Tools::getValue('orders');
-
-        $tmpDirectory = _PS_MODULE_DIR_ . 'packlink/tmp';
-        /** @noinspection MkdirRaceConditionInspection */
-        if (!empty($orderIds) && !is_dir($tmpDirectory) && !mkdir($tmpDirectory)) {
-            throw new \RuntimeException(
-                TranslationUtility::__('Directory "%s" was not created', array($tmpDirectory))
-            );
-        }
-
-        $this->saveFilesLocally($orderIds, $orderRepository);
-
         $result = false;
 
         try {
-            $pdfs = array();
-            $iterator = new \DirectoryIterator($tmpDirectory);
-            foreach ($iterator as $fileInfo) {
-                if (!$fileInfo->isDot()) {
-                    $pdfs[] = $fileInfo->getPath() . '/' . $fileInfo->getFilename();
-                }
-            }
-
-            $bulkLabelDirectory = _PS_MODULE_DIR_ . 'packlink/labels';
-            /** @noinspection MkdirRaceConditionInspection */
-            if (!is_dir($bulkLabelDirectory) && !mkdir($bulkLabelDirectory)) {
-                throw new \RuntimeException(
-                    TranslationUtility::__('Directory "%s" was not created', array($bulkLabelDirectory))
-                );
-            }
-
-            $now = date('Y-m-d');
-            $outputPath = $bulkLabelDirectory . "/Packlink-bulk-shipment-labels_$now.pdf";
-            $result = PdfMerge::merge($pdfs, $outputPath);
+            $result = $this->bulkPrintLabels();
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Unable to create bulk labels file'),
                 'Integration'
             );
         }
-
-        $this->deleteTemporaryFiles($tmpDirectory);
 
         if ($result !== false) {
             PacklinkPrestaShopUtility::dieInline($result);
@@ -109,19 +53,86 @@ class BulkShipmentLabelsController extends ModuleAdminController
     }
 
     /**
-     * Saves PDF files to temporary directory on the system.
+     * Prints all available shipment labels in one merged PDF document.
      *
-     * @param array $orderIds
-     * @param OrderRepository $orderRepository
+     * @return bool|string File path of the final merged PDF document; FALSE on error.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \iio\libmergepdf\Exception
+     */
+    protected function bulkPrintLabels()
+    {
+        $outputPath = false;
+        $tmpDirectory = _PS_MODULE_DIR_ . 'packlink/tmp';
+        $paths = $this->prepareAllLabels($tmpDirectory);
+
+        $now = date('Y-m-d');
+        $merger = new \iio\libmergepdf\Merger();
+        $merger->addIterator($paths);
+        $outputFile = $merger->merge();
+        if (!empty($outputFile)) {
+            $bulkLabelDirectory = _PS_MODULE_DIR_ . 'packlink/labels';
+            /** @noinspection MkdirRaceConditionInspection */
+            if (!is_dir($bulkLabelDirectory) && !mkdir($bulkLabelDirectory)) {
+                throw new \RuntimeException(
+                    TranslationUtility::__('Directory "%s" was not created', array($bulkLabelDirectory))
+                );
+            }
+
+            $outputPath = $bulkLabelDirectory . "/Packlink-bulk-shipment-labels_$now.pdf";
+            file_put_contents($outputPath, $outputFile);
+        }
+
+        \Tools::deleteDirectory($tmpDirectory);
+
+        return $outputPath;
+    }
+
+    /**
+     * @param string $tmpDirectory
+     *
+     * @return array
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function saveFilesLocally(array $orderIds, OrderRepository $orderRepository)
+    protected function prepareAllLabels($tmpDirectory)
     {
+        $orderIds = \Tools::getValue('orders');
+
+        /** @noinspection MkdirRaceConditionInspection */
+        if (!empty($orderIds) && !is_dir($tmpDirectory) && !mkdir($tmpDirectory)) {
+            throw new \RuntimeException(
+                TranslationUtility::__('Directory "%s" was not created', array($tmpDirectory))
+            );
+        }
+
+        return $this->saveFilesLocally($orderIds);
+    }
+
+    /**
+     * Saves PDF files to temporary directory on the system.
+     *
+     * @param array $orderIds
+     *
+     * @return array An array of paths of the saved files.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    private function saveFilesLocally(array $orderIds)
+    {
+        $result = array();
         $orderDetailsRepository = RepositoryRegistry::getRepository(OrderShipmentDetails::getClassName());
+        /** @var OrderRepository $orderRepository */
+        $orderRepository = ServiceRegister::getService(OrderRepositoryInterface::CLASS_NAME);
 
         foreach ($orderIds as $orderId) {
             $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
@@ -133,7 +144,10 @@ class BulkShipmentLabelsController extends ModuleAdminController
                         $label->setPrinted(true);
                     }
 
-                    $this->savePDF($label->getLink());
+                    $path = $this->savePDF($label->getLink());
+                    if (!empty($path)) {
+                        $result[] = $path;
+                    }
                 }
 
                 $orderDetailsRepository->update($orderDetails);
@@ -141,18 +155,24 @@ class BulkShipmentLabelsController extends ModuleAdminController
                 Logger::logWarning(TranslationUtility::__('Order details not found'), 'Integration');
             }
         }
+
+        return $result;
     }
 
     /**
      * Saves PDF file from provided URL to temporary location on the system.
      *
-     * @param string $link
+     * @param string $link Web link to the PDF file.
+     *
+     * @return string Path to the saved file
      */
     private function savePDF($link)
     {
+        $path = '';
         $file = fopen($link, 'rb');
         if ($file) {
-            $tmpFile = fopen(_PS_MODULE_DIR_ . 'packlink/tmp/' . microtime() . '.pdf', 'wb');
+            $path = _PS_MODULE_DIR_ . 'packlink/tmp/' . microtime() . '.pdf';
+            $tmpFile = fopen($path, 'wb');
             if ($tmpFile) {
                 while (!feof($file)) {
                     fwrite($tmpFile, fread($file, 1024 * 8), 1024 * 8);
@@ -163,28 +183,7 @@ class BulkShipmentLabelsController extends ModuleAdminController
 
             fclose($file);
         }
-    }
 
-    /**
-     * Deletes all temporary files created in the process of bulk printing of labels.
-     *
-     * @param string $tmpDirectory
-     */
-    private function deleteTemporaryFiles($tmpDirectory)
-    {
-        $it = new RecursiveDirectoryIterator($tmpDirectory, RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = new RecursiveIteratorIterator(
-            $it,
-            RecursiveIteratorIterator::CHILD_FIRST
-        );
-        foreach ($files as $file) {
-            if ($file->isDir()) {
-                rmdir($file->getRealPath());
-            } else {
-                unlink($file->getRealPath());
-            }
-        }
-
-        rmdir($tmpDirectory);
+        return $path;
     }
 }

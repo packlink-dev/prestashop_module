@@ -51,8 +51,10 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
      *  UPDATE queue_storage_table SET .... WHERE .... AND status => 'queued'
      *
      * @return int Id of saved queue item
+     *
      * @throws QueueItemSaveException if queue item could not be saved
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \PrestaShopException
      */
     public function saveWithCondition(QueueItem $queueItem, array $additionalWhere = array())
     {
@@ -84,6 +86,7 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueItemSaveException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     private function updateQueueItem($queueItem, array $additionalWhere)
     {
@@ -97,7 +100,7 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
         /** @var QueueItem $item */
         $item = $this->selectOne($filter);
         if ($item === null) {
-            throw new QueueItemSaveException("Can not update queue item with id {$queueItem->getId()} .");
+            throw new QueueItemSaveException("Cannot update queue item with id {$queueItem->getId()}.");
         }
 
         $this->update($queueItem);
@@ -110,6 +113,7 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     private function getRunningQueueNames()
     {
