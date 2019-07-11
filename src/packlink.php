@@ -247,6 +247,8 @@ class Packlink extends CarrierModule
      * Hooks on tab display to add shipping tab.
      *
      * @return string Rendered template output.
+     *
+     * @throws \SmartyException
      */
     public function hookDisplayAdminOrderTabShip()
     {
@@ -906,6 +908,8 @@ class Packlink extends CarrierModule
      * @param bool $ajax
      *
      * @return string
+     *
+     * @throws \PrestaShopException
      */
     private function getAction($controller, $action, $ajax = true)
     {
