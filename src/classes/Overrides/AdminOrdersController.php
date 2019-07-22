@@ -3,6 +3,7 @@
 namespace Packlink\PrestaShop\Classes\Overrides;
 
 use Logeecom\Infrastructure\ServiceRegister;
+use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
@@ -78,6 +79,7 @@ class AdminOrdersController
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     * @throws \SmartyException
      */
     public function renderPdfIcons($orderId, \Context $context)
     {
@@ -136,9 +138,9 @@ class AdminOrdersController
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \SmartyException
      */
     public function getOrderDraft($reference, \Context $context)
     {
@@ -148,7 +150,12 @@ class AdminOrdersController
 
         /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
         $orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
-        $orderDetails = $orderRepository->getOrderDetailsByReference($reference);
+
+        try {
+            $orderDetails = $orderRepository->getOrderDetailsByReference($reference);
+        } catch (OrderNotFound $e) {
+            return '';
+        }
 
         $context->smarty->assign(
             array(
