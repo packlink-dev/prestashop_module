@@ -598,6 +598,7 @@ class Packlink extends CarrierModule
         \Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping $mapping
     ) {
         $address = new Address();
+        $shippingAddress = new Address($order->id_address_delivery);
 
         $db = Db::getInstance();
 
@@ -627,9 +628,14 @@ class Packlink extends CarrierModule
         $address->postcode = $dropOff['zip'];
         $address->city = $dropOff['city'];
         $address->company = $dropOff['name'];
-        $address->firstname = $this->context->customer->firstname;
+        $address->phone = $this->getPhone($order, $shippingAddress);
         $address->lastname = $this->context->customer->lastname;
-        $address->phone = $this->getPhone($order);
+        $address->firstname = $this->context->customer->firstname;
+        if (Validate::isLoadedObject($shippingAddress)) {
+            $address->lastname = $shippingAddress->lastname ?: $address->lastname;
+            $address->firstname = $shippingAddress->firstname ?: $address->firstname;
+        }
+
         $address->alias = $this->l('Drop-Off delivery address');
         $address->other = $this->l('Drop-Off delivery address');
 
@@ -663,13 +669,13 @@ class Packlink extends CarrierModule
      *
      * @param \Order $order
      *
+     * @param \Address $shippingAddress
+     *
      * @return string
      */
-    private function getPhone(\Order $order)
+    private function getPhone(\Order $order, $shippingAddress)
     {
         $phone = '';
-
-        $shippingAddress = new Address($order->id_address_delivery);
 
         if (Validate::isLoadedObject($shippingAddress)) {
             $phone = $shippingAddress->phone;
