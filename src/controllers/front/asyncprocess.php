@@ -1,5 +1,6 @@
 <?php
 
+use Logeecom\Infrastructure\AutoTest\AutoTestService;
 use Logeecom\Infrastructure\Configuration\Configuration as PacklinkConfiguration;
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
@@ -31,7 +32,15 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
     public function initContent()
     {
         $guid = trim(Tools::getValue('guid'));
-        Logger::logDebug('Received async process request.', 'Integration', array('guid' => $guid));
+        $autoTest = Tools::getValue('auto-test');
+
+        if ($autoTest !== false) {
+            $autoTestService = new AutoTestService();
+            $autoTestService->setAutoTestMode();
+            Logger::logInfo('Received auto-test async process request.', 'Integration', array('guid' => $guid));
+        } else {
+            Logger::logDebug('Received async process request.', 'Integration', array('guid' => $guid));
+        }
 
         /** @var AsyncProcessStarterService $asyncProcessService */
         $asyncProcessService = ServiceRegister::getService(AsyncProcessService::CLASS_NAME);

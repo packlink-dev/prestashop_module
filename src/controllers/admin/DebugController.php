@@ -28,6 +28,8 @@ class DebugController extends ModuleAdminController
 
     /**
      * Downloads system info zip file.
+     *
+     * @throws \PrestaShopException
      */
     public function displayAjaxGetSystemInfo()
     {

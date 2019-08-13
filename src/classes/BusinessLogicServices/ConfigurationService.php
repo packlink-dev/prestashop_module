@@ -57,6 +57,9 @@ class ConfigurationService extends Configuration
     public function getAsyncProcessUrl($guid)
     {
         $params = array('guid' => $guid);
+        if ($this->isAutoTestMode()) {
+            $params['auto-test'] = 1;
+        }
 
         return \Context::getContext()->link->getModuleLink(
             'packlink',

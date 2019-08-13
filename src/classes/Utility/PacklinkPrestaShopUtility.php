@@ -92,6 +92,27 @@ class PacklinkPrestaShopUtility
     }
 
     /**
+     * Sets string specified by $content as a file response.
+     *
+     * @param string $content
+     * @param string $fileName
+     */
+    public static function dieFileFromString($content, $fileName)
+    {
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=' . $fileName);
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . strlen($content));
+
+        echo $content;
+
+        die(200);
+    }
+
+    /**
      * Returns file inline.
      *
      * @param string $filePath

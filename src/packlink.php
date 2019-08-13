@@ -1,13 +1,13 @@
 <?php
 
 /** @noinspection PhpUnusedParameterInspection */
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
 /** @noinspection PhpIncludeInspection */
-/** @noinspection DirectoryConstantCanBeUsedInspection */
-require_once rtrim(dirname(__FILE__), '/') . '/vendor/autoload.php';
+require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
 
 /**
  * @property bool bootstrap
@@ -79,7 +79,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.4';
+        $this->version = '2.0.5';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -207,17 +207,7 @@ class Packlink extends CarrierModule
         $shippingServicePath = $this->_path . 'views/js/ShippingService17.js';
         $output .= "<script src=\"{$shippingServicePath}\"></script>" . "\n";
 
-        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
-        $output .= "<script src=\"{$ajaxPath}\"></script>" . "\n";
-
-        $stylePath = $this->_path . 'views/css/checkout.css';
-        $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>" . "\n";
-
-        $checkoutPath = $this->_path . 'views/js/CheckOutController.js';
-        $output .= "<script src=\"{$checkoutPath}\"></script>" . "\n";
-
-        $mapModalPath = $this->_path . 'views/js/MapModalController.js';
-        $output .= "<script src=\"{$mapModalPath}\"></script>" . "\n";
+        $output .= $this->getCheckoutFilesLinks();
 
         return $output;
     }
@@ -569,17 +559,7 @@ class Packlink extends CarrierModule
         $shippingServicePath = $this->_path . 'views/js/ShippingService16.js';
         $output = "<script src=\"{$shippingServicePath}\"></script>" . "\n";
 
-        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
-        $output .= "<script src=\"{$ajaxPath}\"></script>" . "\n";
-
-        $stylePath = $this->_path . 'views/css/checkout.css';
-        $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>" . "\n";
-
-        $checkoutPath = $this->_path . 'views/js/CheckOutController.js';
-        $output .= "<script src=\"{$checkoutPath}\"></script>" . "\n";
-
-        $mapModalPath = $this->_path . 'views/js/MapModalController.js';
-        $output .= "<script src=\"{$mapModalPath}\"></script>" . "\n";
+        $output .= $this->getCheckoutFilesLinks();
 
         return $output . $this->display(__FILE__, 'shipping_methods_16.tpl');
     }
@@ -1132,5 +1112,27 @@ class Packlink extends CarrierModule
             : 'es';
 
         return "https://pro.packlink.$userCountry/private/shipments/$reference";
+    }
+
+    /**
+     * Gets the HTML for links for CSS and JS files needed in checkout process.
+     *
+     * @return string
+     */
+    protected function getCheckoutFilesLinks()
+    {
+        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
+        $output = "<script src=\"{$ajaxPath}\"></script>" . "\n";
+
+        $stylePath = $this->_path . 'views/css/checkout.css';
+        $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>" . "\n";
+
+        $checkoutPath = $this->_path . 'views/js/CheckOutController.js';
+        $output .= "<script src=\"{$checkoutPath}\"></script>" . "\n";
+
+        $mapModalPath = $this->_path . 'views/js/MapModalController.js';
+        $output .= "<script src=\"{$mapModalPath}\"></script>" . "\n";
+
+        return $output;
     }
 }

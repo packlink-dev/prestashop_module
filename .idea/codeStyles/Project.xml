@@ -6,6 +6,9 @@
         <option name="TAB_SIZE" value="2" />
       </value>
     </option>
+    <JSCodeStyleSettings version="0">
+      <option name="USE_CHAINED_CALLS_GROUP_INDENTS" value="true" />
+    </JSCodeStyleSettings>
     <PHPCodeStyleSettings>
       <option name="COMMA_AFTER_LAST_ARRAY_ELEMENT" value="true" />
       <option name="PHPDOC_BLANK_LINES_AROUND_PARAMETERS" value="true" />
@@ -19,17 +22,6 @@
       <option name="PHPDOC_USE_FQCN" value="true" />
     </PHPCodeStyleSettings>
     <codeStyleSettings language="CSS">
-      <indentOptions>
-        <option name="INDENT_SIZE" value="2" />
-      </indentOptions>
-    </codeStyleSettings>
-    <codeStyleSettings language="HTML">
-      <indentOptions>
-        <option name="INDENT_SIZE" value="2" />
-        <option name="TAB_SIZE" value="2" />
-      </indentOptions>
-    </codeStyleSettings>
-    <codeStyleSettings language="JavaScript">
       <indentOptions>
         <option name="INDENT_SIZE" value="2" />
       </indentOptions>
