@@ -1,6 +1,11 @@
 <?php
 
+use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
+use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
+use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
+use Logeecom\Infrastructure\TaskExecution\QueueItem;
+use Logeecom\Infrastructure\Utility\TimeProvider;
 use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodConfiguration;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
@@ -38,10 +43,19 @@ class ShippingMethodsController extends ModuleAdminController
 
     /**
      * Retrieves all shipping methods.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryClassException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueItemDeserializationException
      */
     public function displayAjaxGetAll()
     {
         $shippingMethods = $this->controller->getAll();
+        if ((count($shippingMethods) === 0) && !$this->checkStatusOfGettingServicesTask()) {
+            // maybe the task could not be started
+            PacklinkPrestaShopUtility::dieJson(array('error' => true));
+        }
 
         PacklinkPrestaShopUtility::dieJson($this->formatCollectionJsonResponse($shippingMethods));
     }
@@ -175,7 +189,7 @@ class ShippingMethodsController extends ModuleAdminController
     {
         try {
             $taxRules = TaxRulesGroup::getTaxRulesGroups();
-        } catch (PrestaShopException $e) {
+        } catch (PrestaShopDatabaseException $e) {
             $taxRules = array();
         }
 
@@ -252,5 +266,40 @@ class ShippingMethodsController extends ModuleAdminController
         $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
 
         return _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/' . $carrierService->getCarrierLogoFilePath($carrierName);
+    }
+
+    /**
+     * Checks the status of the task responsible for getting services.
+     *
+     * @return bool TRUE if the task is alive or completed successfully; otherwise, FALSE.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryClassException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueItemDeserializationException
+     */
+    private function checkStatusOfGettingServicesTask()
+    {
+        $repo = RepositoryRegistry::getQueueItemRepository();
+        $filter = new QueryFilter();
+        $filter->where('taskType', Operators::EQUALS, 'UpdateShippingServicesTask');
+        $filter->orderBy('queueTime', 'DESC');
+
+        $item = $repo->selectOne($filter);
+        if ($item) {
+            if ($item->getStatus() === QueueItem::FAILED) {
+                return false;
+            }
+
+            /** @var TimeProvider $timeProvider */
+            $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
+            $currentTimestamp = $timeProvider->getCurrentLocalTime()->getTimestamp();
+            $maxTaskInactivityPeriod = $item->getTask()->getMaxInactivityPeriod();
+
+            return $item->getStatus() === QueueItem::COMPLETED
+                || $item->getLastUpdateTimestamp() + $maxTaskInactivityPeriod > $currentTimestamp;
+        }
+
+        return false;
     }
 }

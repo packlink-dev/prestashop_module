@@ -42,9 +42,11 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
             Logger::logDebug('Received async process request.', 'Integration', array('guid' => $guid));
         }
 
-        /** @var AsyncProcessStarterService $asyncProcessService */
-        $asyncProcessService = ServiceRegister::getService(AsyncProcessService::CLASS_NAME);
-        $asyncProcessService->runProcess($guid);
+        if ($guid !== 'auto-configure') {
+            /** @var AsyncProcessStarterService $asyncProcessService */
+            $asyncProcessService = ServiceRegister::getService(AsyncProcessService::CLASS_NAME);
+            $asyncProcessService->runProcess($guid);
+        }
 
         PacklinkPrestaShopUtility::dieJson(array('success' => true));
     }

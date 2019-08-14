@@ -1,20 +1,23 @@
 <?php
 
-use Logeecom\Infrastructure\AutoTest\AutoTestLogger;
-use Logeecom\Infrastructure\AutoTest\AutoTestService;
-use Logeecom\Infrastructure\Exceptions\StorageNotAccessibleException;
-use Logeecom\Infrastructure\TaskExecution\QueueItem;
+use Logeecom\Infrastructure\Http\AutoConfiguration;
+use Logeecom\Infrastructure\Http\HttpClient;
+use Logeecom\Infrastructure\ServiceRegister;
+use Logeecom\Infrastructure\TaskExecution\QueueService;
+use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
+use Packlink\BusinessLogic\Tasks\UpdateShippingServicesTask;
 use Packlink\PrestaShop\Classes\Bootstrap;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
- * Class PacklinkAutoTestController.
+ * Class PacklinkAutoConfigureController.
  */
 class PacklinkAutoConfigureController extends ModuleAdminController
 {
     /**
-     * PacklinkAutoTestController constructor.
+     * PacklinkAutoConfigureController constructor.
      *
      * @throws \PrestaShopException
      */
@@ -28,63 +31,33 @@ class PacklinkAutoConfigureController extends ModuleAdminController
     }
 
     /**
-     * Runs the auto-test and returns the queue item ID.
+     * Starts the auto-configuration.
      */
-    protected function start()
+    public function initContent()
     {
-        $service = new AutoTestService();
+        /** @var ConfigurationService $configService */
+        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
+        /** @var \Logeecom\Infrastructure\Http\HttpClient $httpService */
+        $httpService = ServiceRegister::getService(HttpClient::CLASS_NAME);
+        $service = new AutoConfiguration($configService, $httpService);
+
         try {
-            PacklinkPrestaShopUtility::dieJson(array('success' => true, 'itemId' => $service->startAutoTest()));
-        } catch (StorageNotAccessibleException $e) {
+            $success = $service->start();
+            if ($success) {
+                // enqueue the task for updating shipping services
+                /** @var QueueService $queueService */
+                $queueService = ServiceRegister::getService(QueueService::CLASS_NAME);
+                $queueService->enqueue($configService->getDefaultQueueName(), new UpdateShippingServicesTask());
+            }
+
+            PacklinkPrestaShopUtility::dieJson(array('success' => $success));
+        } catch (\Logeecom\Infrastructure\Exceptions\BaseException $e) {
             PacklinkPrestaShopUtility::dieJson(
                 array(
                     'success' => false,
-                    'error' => TranslationUtility::__('Database not accessible.'),
+                    'error' => TranslationUtility::__('Auto-configuration could not be completed successfully.'),
                 )
             );
         }
-    }
-
-    /**
-     * Checks the status of the auto-test task.
-     */
-    protected function checkStatus()
-    {
-        $service = new AutoTestService();
-        $queueItemId = Tools::getValue('action', 0);
-
-        $status = $service->getAutoTestTaskStatus($queueItemId);
-
-        PacklinkPrestaShopUtility::dieJson(
-            array(
-                'finished' => in_array($status, array('timeout', QueueItem::COMPLETED, QueueItem::FAILED), true),
-                'error' => $status === 'timeout' ? TranslationUtility::__('Task could not be started.') : '',
-                'logs' => $this->getLogsArray(),
-            )
-        );
-    }
-
-    /**
-     * Exports all logs as a JSON file.
-     */
-    protected function exportLogs()
-    {
-        PacklinkPrestaShopUtility::dieFileFromString(json_encode($this->getLogsArray()), 'auto-test-logs.json');
-    }
-
-    /**
-     * Transforms logs to the plain array.
-     *
-     * @return array An array of logs.
-     */
-    private function getLogsArray()
-    {
-        $logs = AutoTestLogger::getInstance()->getLogs();
-        $result = array();
-        foreach ($logs as $log) {
-            $result[] = $log->toArray();
-        }
-
-        return $result;
     }
 }

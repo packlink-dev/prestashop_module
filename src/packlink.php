@@ -276,6 +276,7 @@ class Packlink extends CarrierModule
         $this->context->controller->addJS(
             array(
                 $this->_path . 'views/js/PrestaCreateOrderDraft.js',
+                $this->_path . 'views/js/core/AjaxService.js',
                 $this->_path . 'views/js/PrestaAjaxService.js',
             )
         );
@@ -789,55 +790,36 @@ class Packlink extends CarrierModule
             );
         }
 
-        $dashGetStatusUrl = $this->getAction('Dashboard', 'getStatus');
-        $defaultParcelGetUrl = $this->getAction('DefaultParcel', 'getDefaultParcel');
-        $defaultParcelSubmitUrl = $this->getAction('DefaultParcel', 'submitDefaultParcel');
-        $defaultWarehouseGetUrl = $this->getAction('DefaultWarehouse', 'getDefaultWarehouse');
-        $defaultWarehouseSubmitUrl = $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse');
-        $defaultWarehouseSearchPostalCodesUrl = $this->getAction('DefaultWarehouse', 'searchPostalCodes');
-        $shippingMethodsGetAllUrl = $this->getAction('ShippingMethods', 'getAll');
-        $shippingMethodsActivateUrl = $this->getAction('ShippingMethods', 'activate');
-        $shippingMethodsDeactivateUrl = $this->getAction('ShippingMethods', 'deactivate');
-        $shippingMethodsSaveUrl = $this->getAction('ShippingMethods', 'save');
-        $getSystemOrderStatusesUrl = $this->getAction('OrderStateMapping', 'getSystemOrderStatuses');
-        $orderStatusMappingsGetUrl = $this->getAction('OrderStateMapping', 'getMappings');
-        $orderStatusMappingSaveUrl = $this->getAction('OrderStateMapping', 'saveMappings');
-        $debugGetStatusUrl = $this->getAction('Debug', 'getStatus');
-        $debugSetStatusUrl = $this->getAction('Debug', 'setStatus');
-        $getSystemInfoUrl = $this->getAction('Debug', 'getSystemInfo', false);
-        $shopShippingMethodCountGetUrl = $this->getAction('ShippingMethods', 'getNumberShopMethods');
-        $shopShippingMethodsDisableUrl = $this->getAction('ShippingMethods', 'disableShopShippingMethods');
-        $shippingMethodsGetTaxClasses = $this->getAction('ShippingMethods', 'getAvailableTaxClasses');
-
-        $frontendParams = array(
-            'dashboardGetStatusUrl' => $dashGetStatusUrl,
-            'defaultParcelGetUrl' => $defaultParcelGetUrl,
-            'defaultParcelSubmitUrl' => $defaultParcelSubmitUrl,
-            'defaultWarehouseGetUrl' => $defaultWarehouseGetUrl,
-            'defaultWarehouseSubmitUrl' => $defaultWarehouseSubmitUrl,
-            'defaultWarehouseSearchPostalCodesUrl' => $defaultWarehouseSearchPostalCodesUrl,
-            'shippingMethodsGetAllUrl' => $shippingMethodsGetAllUrl,
-            'shippingMethodsActivateUrl' => $shippingMethodsActivateUrl,
-            'shippingMethodsDeactivateUrl' => $shippingMethodsDeactivateUrl,
-            'shippingMethodsSaveUrl' => $shippingMethodsSaveUrl,
-            'getSystemOrderStatusesUrl' => $getSystemOrderStatusesUrl,
-            'orderStatusMappingsGetUrl' => $orderStatusMappingsGetUrl,
-            'orderStatusMappingsSaveUrl' => $orderStatusMappingSaveUrl,
-            'debugGetStatusUrl' => $debugGetStatusUrl,
-            'debugSetStatusUrl' => $debugSetStatusUrl,
-            'getSystemInfoUrl' => $getSystemInfoUrl,
-            'shopShippingMethodCountGetUrl' => $shopShippingMethodCountGetUrl,
-            'shopShippingMethodsDisableUrl' => $shopShippingMethodsDisableUrl,
-            'shippingMethodsGetTaxClasses' => $shippingMethodsGetTaxClasses,
-            'dashboardIcon' => $this->_path . 'views/img/dashboard.png',
-            'dashboardLogo' => $this->_path . 'views/img/logo-pl.svg',
-            'helpLink' => self::$helpUrls[$linkLanguage],
-            'termsAndConditionsLink' => self::$termsAndConditionsUrls[$linkLanguage],
-            'pluginVersion' => $this->version,
-            'warehouseCountry' => $warehouseCountry,
+        $this->context->smarty->assign(
+            array(
+                'dashboardGetStatusUrl' => $this->getAction('Dashboard', 'getStatus'),
+                'defaultParcelGetUrl' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
+                'defaultParcelSubmitUrl' => $this->getAction('DefaultParcel', 'submitDefaultParcel'),
+                'defaultWarehouseGetUrl' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
+                'defaultWarehouseSubmitUrl' => $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse'),
+                'defaultWarehouseSearchPostalCodesUrl' => $this->getAction('DefaultWarehouse', 'searchPostalCodes'),
+                'shippingMethodsGetAllUrl' => $this->getAction('ShippingMethods', 'getAll'),
+                'shippingMethodsActivateUrl' => $this->getAction('ShippingMethods', 'activate'),
+                'shippingMethodsDeactivateUrl' => $this->getAction('ShippingMethods', 'deactivate'),
+                'shippingMethodsSaveUrl' => $this->getAction('ShippingMethods', 'save'),
+                'getSystemOrderStatusesUrl' => $this->getAction('OrderStateMapping', 'getSystemOrderStatuses'),
+                'orderStatusMappingsGetUrl' => $this->getAction('OrderStateMapping', 'getMappings'),
+                'orderStatusMappingsSaveUrl' => $this->getAction('OrderStateMapping', 'saveMappings'),
+                'debugGetStatusUrl' => $this->getAction('Debug', 'getStatus'),
+                'debugSetStatusUrl' => $this->getAction('Debug', 'setStatus'),
+                'getSystemInfoUrl' => $this->getAction('Debug', 'getSystemInfo', false),
+                'shopShippingMethodCountGetUrl' => $this->getAction('ShippingMethods', 'getNumberShopMethods'),
+                'shopShippingMethodsDisableUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
+                'shippingMethodsGetTaxClasses' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
+                'autoConfigureStartUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
+                'dashboardIcon' => $this->_path . 'views/img/dashboard.png',
+                'dashboardLogo' => $this->_path . 'views/img/logo-pl.svg',
+                'helpLink' => self::$helpUrls[$linkLanguage],
+                'termsAndConditionsLink' => self::$termsAndConditionsUrls[$linkLanguage],
+                'pluginVersion' => $this->version,
+                'warehouseCountry' => $warehouseCountry,
+            )
         );
-
-        $this->context->smarty->assign($frontendParams);
 
         $this->context->controller->addCSS(
             array(
@@ -857,8 +839,10 @@ class Packlink extends CarrierModule
                 $this->_path . 'views/js/core/DefaultWarehouseController.js',
                 $this->_path . 'views/js/core/ShippingMethodsController.js',
                 $this->_path . 'views/js/core/UtilityService.js',
+                $this->_path . 'views/js/core/AjaxService.js',
                 $this->_path . 'views/js/PrestaAjaxService.js',
                 $this->_path . 'views/js/PrestaFix.js',
+                $this->_path . 'views/js/AutoConfigure.js',
                 $this->_path . 'views/js/core/OrderStateMappingController.js',
                 $this->_path . 'views/js/core/FooterController.js',
             )
@@ -1121,8 +1105,11 @@ class Packlink extends CarrierModule
      */
     protected function getCheckoutFilesLinks()
     {
-        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
+        $ajaxPath = $this->_path . 'views/js/core/AjaxService.js';
         $output = "<script src=\"{$ajaxPath}\"></script>" . "\n";
+
+        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
+        $output .= "<script src=\"{$ajaxPath}\"></script>" . "\n";
 
         $stylePath = $this->_path . 'views/css/checkout.css';
         $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>" . "\n";

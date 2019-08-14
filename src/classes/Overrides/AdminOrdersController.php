@@ -119,8 +119,13 @@ class AdminOrdersController
             'printLabelsUrl' => $printLabelsUrl,
         ));
 
-        $context->controller->addJS(_PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js');
-        $context->controller->addJS(_PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js');
+        $context->controller->addJS(
+            array(
+                _PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/core/AjaxService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js',
+            )
+        );
 
         return $context->smarty->createTemplate(
             _PS_MODULE_DIR_ . self::PACKLINK_ORDER_ICONS_TEMPLATE,

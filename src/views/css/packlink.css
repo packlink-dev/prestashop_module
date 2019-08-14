@@ -85,6 +85,7 @@
   position: absolute;
   width: 100%;
 }
+
 .pl-sidebar-link-wrapper * {
   pointer-events: none !important;
 }
@@ -109,6 +110,7 @@
 .pl-sidebar-link-wrapper-inner * {
   display: inline;
 }
+
 .pl-sidebar-icon {
   position: relative;
 }
@@ -218,15 +220,29 @@
   font-size: 12px;
 }
 
-.pl-no-shipping-services {
+.pl-shipping-services-message {
   text-align: center;
   z-index: 1000 !important;
   margin-top: 30px;
-  font-size: 18px;
+  font-size: 1.3rem;
   color: black;
+  position: relative;
 }
 
-.pl-no-shipping-services.hidden {
+.pl-shipping-services-message div {
+  margin-bottom: 20px;
+}
+
+.pl-shipping-services-message .title {
+  font-size: 1.6rem;
+}
+
+.pl-shipping-services-message .pl-spinner {
+  position: relative;
+  display: flex;
+}
+
+.hidden {
   display: none !important;
 }
 
