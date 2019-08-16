@@ -152,6 +152,8 @@ class PacklinkAutoTestController extends ModuleAdminController
 
     /**
      * Exports all logs as a JSON file.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
     protected function exportLogs()
     {

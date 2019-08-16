@@ -287,17 +287,22 @@ class ShippingMethodsController extends ModuleAdminController
 
         $item = $repo->selectOne($filter);
         if ($item) {
-            if ($item->getStatus() === QueueItem::FAILED) {
+            $status = $item->getStatus();
+            if ($status === QueueItem::FAILED) {
                 return false;
+            }
+
+            if ($status === QueueItem::COMPLETED) {
+                return true;
             }
 
             /** @var TimeProvider $timeProvider */
             $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
             $currentTimestamp = $timeProvider->getCurrentLocalTime()->getTimestamp();
-            $maxTaskInactivityPeriod = $item->getTask()->getMaxInactivityPeriod();
+            $taskTimestamp = $item->getLastUpdateTimestamp() ?: $item->getQueueTimestamp();
+            $expired = $taskTimestamp + $item->getTask()->getMaxInactivityPeriod() < $currentTimestamp;
 
-            return $item->getStatus() === QueueItem::COMPLETED
-                || $item->getLastUpdateTimestamp() + $maxTaskInactivityPeriod > $currentTimestamp;
+            return !$expired;
         }
 
         return false;

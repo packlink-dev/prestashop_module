@@ -20,7 +20,7 @@
 
 .pl-logo-wrapper {
   width: 100%;
-  padding: 20px;
+  padding: 20px !important;
   box-sizing: border-box;
 }
 
