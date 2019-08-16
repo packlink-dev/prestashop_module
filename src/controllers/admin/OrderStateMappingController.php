@@ -2,25 +2,10 @@
 
 use Logeecom\Infrastructure\Configuration\Configuration;
 use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
-class OrderStateMappingController extends ModuleAdminController
+class OrderStateMappingController extends PacklinkBaseController
 {
-    /**
-     * OrderStateMappingController constructor.
-     *
-     * @throws \PrestaShopException
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        Bootstrap::init();
-
-        $this->bootstrap = true;
-    }
-
     /**
      * Retrieves order status mappings.
      */
@@ -53,25 +38,6 @@ class OrderStateMappingController extends ModuleAdminController
      */
     public function displayAjaxGetSystemOrderStatuses()
     {
-        PacklinkPrestaShopUtility::dieJson($this->getAvailableStatuses());
-    }
-
-    /**
-     * Retrieves list of available order statuses in following format:
-     *
-     * [
-     *      [
-     *          'code' => 1,
-     *          'label' => Shipped,
-     *      ],
-     *
-     *      ...
-     * ]
-     *
-     * @return array
-     */
-    protected function getAvailableStatuses()
-    {
         $result = array();
         $states = OrderState::getOrderStates($this->context->language->id);
 
@@ -79,6 +45,6 @@ class OrderStateMappingController extends ModuleAdminController
             $result[] = array('code' => $state['id_order_state'], 'label' => $state['name']);
         }
 
-        return $result;
+        PacklinkPrestaShopUtility::dieJson($result);
     }
 }

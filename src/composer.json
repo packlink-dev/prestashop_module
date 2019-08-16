@@ -24,7 +24,10 @@
     "psr-4": {
       "Packlink\\PrestaShop\\Classes\\": "classes",
       "Packlink\\Lib\\": "lib"
-    }
+    },
+    "classmap": [
+      "controllers/admin/PacklinkBaseController.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

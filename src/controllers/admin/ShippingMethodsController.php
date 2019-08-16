@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpRedundantCatchClauseInspection */
+
 use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
@@ -12,14 +14,13 @@ use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
 use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
-use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /**
  * Class ShippingMethodsController
  */
-class ShippingMethodsController extends ModuleAdminController
+class ShippingMethodsController extends PacklinkBaseController
 {
     /**
      * @var ShippingMethodController
@@ -35,10 +36,7 @@ class ShippingMethodsController extends ModuleAdminController
     {
         parent::__construct();
 
-        Bootstrap::init();
         $this->controller = new ShippingMethodController();
-
-        $this->bootstrap = true;
     }
 
     /**
@@ -139,7 +137,7 @@ class ShippingMethodsController extends ModuleAdminController
             $result = array();
         }
 
-        $count = !empty($result[0]['shippingMethodsCount']) ? (int) $result[0]['shippingMethodsCount'] : 0;
+        $count = !empty($result[0]['shippingMethodsCount']) ? (int)$result[0]['shippingMethodsCount'] : 0;
 
         PacklinkPrestaShopUtility::dieJson(array('count' => $count));
     }
@@ -204,7 +202,7 @@ class ShippingMethodsController extends ModuleAdminController
             foreach ($taxRules as $taxRule) {
                 $result[] = array(
                     'value' => $taxRule['id_tax_rules_group'],
-                    'label' => $taxRule['name']
+                    'label' => $taxRule['name'],
                 );
             }
         }
@@ -248,7 +246,7 @@ class ShippingMethodsController extends ModuleAdminController
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
 
-        $data['taxClass'] = (int) $data['taxClass'];
+        $data['taxClass'] = (int)$data['taxClass'];
 
         return ShippingMethodConfiguration::fromArray($data);
     }

@@ -3,7 +3,6 @@
 use Logeecom\Infrastructure\AutoTest\AutoTestLogger;
 use Logeecom\Infrastructure\AutoTest\AutoTestService;
 use Logeecom\Infrastructure\Exceptions\StorageNotAccessibleException;
-use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\InfrastructureServices\LoggerService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
@@ -11,7 +10,7 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 /**
  * Class PacklinkAutoTestController.
  */
-class PacklinkAutoTestController extends ModuleAdminController
+class PacklinkAutoTestController extends PacklinkBaseController
 {
     /**
      * PacklinkAutoTestController constructor.
@@ -21,10 +20,6 @@ class PacklinkAutoTestController extends ModuleAdminController
     public function __construct()
     {
         parent::__construct();
-
-        Bootstrap::init();
-
-        $this->bootstrap = true;
 
         $this->page_header_toolbar_title = $this->l('PacklinkPRO module auto-test', 'packlink');
         $this->meta_title = $this->page_header_toolbar_title;

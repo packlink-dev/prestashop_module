@@ -1,63 +1,19 @@
 <?php
 
-use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Http\DTO\ParcelInfo;
-use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /**
  * Class DefaultParcelController
  */
-class DefaultParcelController extends ModuleAdminController
+class DefaultParcelController extends PacklinkBaseController
 {
-    /**
-     * @var \Packlink\BusinessLogic\Configuration
-     */
-    protected $configService;
-    /**
-     * @var array
-     */
-    protected $fields;
-    /**
-     * @var array
-     */
-    protected $numericFields;
-
-    /**
-     * DefaultParcelController constructor.
-     *
-     * @throws \PrestaShopException
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        Bootstrap::init();
-
-        $this->configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $this->fields = array(
-            'weight',
-            'width',
-            'height',
-            'length',
-        );
-        $this->numericFields = array(
-            'weight',
-            'width',
-            'height',
-            'length',
-        );
-
-        $this->bootstrap = true;
-    }
-
     /**
      * Retrieves default parcel.
      */
     public function displayAjaxGetDefaultParcel()
     {
-        $parcel = $this->configService->getDefaultParcel();
+        $parcel = $this->getConfigService()->getDefaultParcel();
 
         if (!$parcel) {
             PacklinkPrestaShopUtility::dieJson();
@@ -80,7 +36,7 @@ class DefaultParcelController extends ModuleAdminController
         $data['default'] = true;
 
         $parcelInfo = ParcelInfo::fromArray($data);
-        $this->configService->setDefaultParcel($parcelInfo);
+        $this->getConfigService()->setDefaultParcel($parcelInfo);
 
         PacklinkPrestaShopUtility::dieJson($data);
     }
@@ -95,12 +51,11 @@ class DefaultParcelController extends ModuleAdminController
     private function validate(array $data)
     {
         $result = array();
-
-        foreach ($this->fields as $field) {
+        $fields = array('weight', 'width', 'height', 'length');
+        foreach ($fields as $field) {
             if (!empty($data[$field])) {
-                if (in_array($field, $this->numericFields, true) &&
-                    (!Validate::isFloat($data[$field]) || $data[$field] <= 0)
-                ) {
+                /** @noinspection NotOptimalIfConditionsInspection */
+                if (!Validate::isFloat($data[$field]) || $data[$field] <= 0) {
                     $result[$field] = $this->l('Field must be valid number.');
                 }
             } else {

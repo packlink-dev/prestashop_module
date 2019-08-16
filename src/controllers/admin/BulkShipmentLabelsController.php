@@ -5,7 +5,6 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
 use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
-use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
@@ -13,22 +12,8 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 /**
  * Class BulkShipmentLabelsController
  */
-class BulkShipmentLabelsController extends ModuleAdminController
+class BulkShipmentLabelsController extends PacklinkBaseController
 {
-    /**
-     * BulkShipmentLabelsController constructor.
-     *
-     * @throws \PrestaShopException
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        Bootstrap::init();
-
-        $this->bootstrap = true;
-    }
-
     /**
      * Controller entry endpoint.
      */

@@ -1,72 +1,25 @@
 <?php
 
 use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Http\DTO\Warehouse;
 use Packlink\BusinessLogic\Http\Proxy;
 use Packlink\BusinessLogic\Location\LocationService;
-use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /**
  * Class DefaultWarehouseController
  */
-class DefaultWarehouseController extends ModuleAdminController
+class DefaultWarehouseController extends PacklinkBaseController
 {
-    /**
-     * @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService
-     */
-    protected $configService;
-    /**
-     * @var \Packlink\BusinessLogic\Location\LocationService
-     */
-    protected $locationService;
-    /**
-     * @var Proxy
-     */
-    protected $proxy;
-    /**
-     * @var array
-     */
-    protected $requiredFields;
-
-    /**
-     * DefaultWarehouseController constructor.
-     * @throws \PrestaShopException
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        Bootstrap::init();
-
-        $this->configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
-        $this->locationService = ServiceRegister::getService(LocationService::CLASS_NAME);
-
-        $this->requiredFields = array(
-            'alias',
-            'name',
-            'surname',
-            'country',
-            'postal_code',
-            'address',
-            'phone',
-            'email',
-        );
-
-        $this->bootstrap = true;
-    }
-
     /**
      * Retrieves default warehouse data.
      */
     public function displayAjaxGetDefaultWarehouse()
     {
-        $warehouse = $this->configService->getDefaultWarehouse();
+        $warehouse = $this->getConfigService()->getDefaultWarehouse();
 
         if (!$warehouse) {
-            $userInfo = $this->configService->getUserInfo();
+            $userInfo = $this->getConfigService()->getUserInfo();
             /** @noinspection NullPointerExceptionInspection */
             $warehouse = Warehouse::fromArray(array('country' => $userInfo->country));
         }
@@ -87,7 +40,7 @@ class DefaultWarehouseController extends ModuleAdminController
 
         $data['default'] = true;
         $warehouse = Warehouse::fromArray($data);
-        $this->configService->setDefaultWarehouse($warehouse);
+        $this->getConfigService()->setDefaultWarehouse($warehouse);
 
         PacklinkPrestaShopUtility::dieJson($data);
     }
@@ -103,10 +56,12 @@ class DefaultWarehouseController extends ModuleAdminController
             PacklinkPrestaShopUtility::dieJson();
         }
 
-        $platformCountry = $this->configService->getUserInfo()->country;
+        $platformCountry = $this->getConfigService()->getUserInfo()->country;
         $result = array();
         try {
-            $result = $this->locationService->searchLocations($platformCountry, $input['query']);
+            /** @var LocationService $locationService */
+            $locationService = ServiceRegister::getService(LocationService::CLASS_NAME);
+            $result = $locationService->searchLocations($platformCountry, $input['query']);
         } catch (\Exception $e) {
             PacklinkPrestaShopUtility::dieJson();
         }
@@ -129,16 +84,28 @@ class DefaultWarehouseController extends ModuleAdminController
     private function validate(array $data)
     {
         $result = array();
+        $requiredFields = array(
+            'alias',
+            'name',
+            'surname',
+            'country',
+            'postal_code',
+            'address',
+            'phone',
+            'email',
+        );
 
-        foreach ($this->requiredFields as $field) {
+        foreach ($requiredFields as $field) {
             if (empty($data[$field])) {
                 $result[$field] = $this->l('Field is required.');
             }
         }
 
+        /** @var Proxy $proxy */
+        $proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
         if (!empty($data['country']) && !empty($data['postal_code'])) {
             try {
-                $postalCodes = $this->proxy->getPostalCodes($data['country'], $data['postal_code']);
+                $postalCodes = $proxy->getPostalCodes($data['country'], $data['postal_code']);
                 if (empty($postalCodes)) {
                     $result['postal_code'] = $this->l('Postal code is not correct.');
                 }
