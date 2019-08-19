@@ -566,6 +566,31 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Gets the HTML for links for CSS and JS files needed in checkout process.
+     *
+     * @return string
+     */
+    protected function getCheckoutFilesLinks()
+    {
+        $ajaxPath = $this->_path . 'views/js/core/AjaxService.js';
+        $output = "<script src=\"{$ajaxPath}\"></script>" . "\n";
+
+        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
+        $output .= "<script src=\"{$ajaxPath}\"></script>" . "\n";
+
+        $stylePath = $this->_path . 'views/css/checkout.css';
+        $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>" . "\n";
+
+        $checkoutPath = $this->_path . 'views/js/CheckOutController.js';
+        $output .= "<script src=\"{$checkoutPath}\"></script>" . "\n";
+
+        $mapModalPath = $this->_path . 'views/js/MapModalController.js';
+        $output .= "<script src=\"{$mapModalPath}\"></script>" . "\n";
+
+        return $output;
+    }
+
+    /**
      * Creates drop-off address.
      *
      * @param \Order $order
@@ -1096,30 +1121,5 @@ class Packlink extends CarrierModule
             : 'es';
 
         return "https://pro.packlink.$userCountry/private/shipments/$reference";
-    }
-
-    /**
-     * Gets the HTML for links for CSS and JS files needed in checkout process.
-     *
-     * @return string
-     */
-    protected function getCheckoutFilesLinks()
-    {
-        $ajaxPath = $this->_path . 'views/js/core/AjaxService.js';
-        $output = "<script src=\"{$ajaxPath}\"></script>" . "\n";
-
-        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
-        $output .= "<script src=\"{$ajaxPath}\"></script>" . "\n";
-
-        $stylePath = $this->_path . 'views/css/checkout.css';
-        $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>" . "\n";
-
-        $checkoutPath = $this->_path . 'views/js/CheckOutController.js';
-        $output .= "<script src=\"{$checkoutPath}\"></script>" . "\n";
-
-        $mapModalPath = $this->_path . 'views/js/MapModalController.js';
-        $output .= "<script src=\"{$mapModalPath}\"></script>" . "\n";
-
-        return $output;
     }
 }
