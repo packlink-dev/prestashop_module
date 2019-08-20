@@ -2,9 +2,8 @@
 
 namespace Packlink\PrestaShop\Classes\Utility;
 
+use Logeecom\Infrastructure\Exceptions\BaseException;
 use Logeecom\Infrastructure\ORM\Entity;
-use Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
-use Logeecom\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
@@ -167,9 +166,7 @@ class SystemInfoUtility
             $query->where('status', Operators::NOT_EQUALS, QueueItem::COMPLETED);
 
             $result = $repository->select($query);
-        } catch (RepositoryNotRegisteredException $e) {
-        } catch (QueryFilterInvalidParamException $e) {
-        } catch (RepositoryClassException $e) {
+        } catch (BaseException $e) {
         }
 
         return static::formatJsonOutput($result);
