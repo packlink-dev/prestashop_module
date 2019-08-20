@@ -164,7 +164,7 @@ class SystemInfoUtility
             $repository = RepositoryRegistry::getQueueItemRepository();
 
             $query = new QueryFilter();
-            $query->where('status', Operators::NOT_EQUALS, QueueItem::QUEUED);
+            $query->where('status', Operators::NOT_EQUALS, QueueItem::COMPLETED);
 
             $result = $repository->select($query);
         } catch (RepositoryNotRegisteredException $e) {
