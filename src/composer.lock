@@ -62,12 +62,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-              "reference": "53a964a1c25d4e15bcf585675db3c886e1acb002"
+              "reference": "003739a3cdeee4a73000632f42e45ce6eab8735a"
             },
             "dist": {
                 "type": "zip",
-              "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/53a964a1c25d4e15bcf585675db3c886e1acb002",
-              "reference": "53a964a1c25d4e15bcf585675db3c886e1acb002",
+              "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/003739a3cdeee4a73000632f42e45ce6eab8735a",
+              "reference": "003739a3cdeee4a73000632f42e45ce6eab8735a",
                 "shasum": ""
             },
             "require": {
@@ -94,7 +94,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-          "time": "2019-08-20T10:12:15+00:00"
+          "time": "2019-08-22T14:10:40+00:00"
         },
         {
             "name": "setasign/fpdf",

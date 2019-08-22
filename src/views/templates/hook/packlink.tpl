@@ -1047,7 +1047,7 @@
     };
 
     Packlink.successMsgs = {
-        shippingMethodSaved: '{l s='Shipping service successfully saved.' mod='packlink'}'
+        shippingMethodSaved: "{l s='Shipping service successfully saved.' mod='packlink'}"
     };
 
     Packlink.state = new Packlink.StateController(
@@ -1066,6 +1066,7 @@
             defaultWarehouseGetUrl: "{$defaultWarehouseGetUrl}",
             defaultWarehouseSubmitUrl: "{$defaultWarehouseSubmitUrl}",
             defaultWarehouseSearchPostalCodesUrl: "{$defaultWarehouseSearchPostalCodesUrl}",
+            shippingMethodsGetStatusUrl: "{$shippingMethodsGetStatusUrl}",
             shippingMethodsGetAllUrl: "{$shippingMethodsGetAllUrl}",
             shippingMethodsActivateUrl: "{$shippingMethodsActivateUrl}",
             shippingMethodsDeactivateUrl: "{$shippingMethodsDeactivateUrl}",

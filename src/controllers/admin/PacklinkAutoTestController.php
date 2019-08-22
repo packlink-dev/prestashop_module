@@ -61,19 +61,23 @@ class PacklinkAutoTestController extends PacklinkBaseController
         $path = $this->module->getPathUri();
         $this->addCSS(
             array(
-                $path . 'views/css/auto-test.css',
-                $path . 'views/css/packlink.css',
-                $path . 'views/css/bootstrap-prestashop-ui-kit.css',
-            )
+                $path . 'views/css/auto-test.css?v=' . $this->module->version,
+                $path . 'views/css/packlink.css?v=' . $this->module->version,
+                $path . 'views/css/bootstrap-prestashop-ui-kit.css?v=' . $this->module->version,
+            ),
+            'all',
+            null,
+            false
         );
         $this->addJS(
             array(
-                $path . 'views/js/core/UtilityService.js',
-                $path . 'views/js/core/TemplateService.js',
-                $path . 'views/js/core/AjaxService.js',
-                $path . 'views/js/core/AutoTestController.js',
-                $path . 'views/js/PrestaFix.js',
-            )
+                $path . 'views/js/core/UtilityService.js?v=' . $this->module->version,
+                $path . 'views/js/core/TemplateService.js?v=' . $this->module->version,
+                $path . 'views/js/core/AjaxService.js?v=' . $this->module->version,
+                $path . 'views/js/core/AutoTestController.js?v=' . $this->module->version,
+                $path . 'views/js/PrestaFix.js?v=' . $this->module->version,
+            ),
+            false
         );
 
         // assign template variables

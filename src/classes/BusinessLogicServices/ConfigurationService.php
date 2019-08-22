@@ -18,7 +18,7 @@ class ConfigurationService extends Configuration
     /**
      * Max inactivity period for a task in seconds
      */
-    const MAX_TASK_INACTIVITY_PERIOD = 30;
+    const MAX_TASK_INACTIVITY_PERIOD = 60;
     /**
      * @var string
      */

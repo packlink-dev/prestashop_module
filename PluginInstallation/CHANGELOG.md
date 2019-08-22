@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/logeecom/pl_prestashop_module/compare/master...dev)
+### Added
+- Auto-test and auto-configuration features.
+
 ### Changed
-- Update to latest core v1.3.1
+- Update to latest core v1.4.0
 - Fixed sending full address 
 - Fixed using first and last name for drop-off address from shipping address instead of the customer.
+- Fixed a case when old reference exists and order page was throwing order not found exception. 
 
 ## [v2.0.4](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.4...v2.0.3) - 2019-07-11
 ### Changed

@@ -191,21 +191,21 @@ class Packlink extends CarrierModule
      */
     public function hookDisplayBeforeCarrier($params)
     {
-        $locationPickerLibrary = $this->_path . 'views/js/location/LocationPicker.js';
-        $output = "<script src=\"{$locationPickerLibrary}\"></script>" . "\n";
+        $locationPickerLibrary = $this->_path . 'views/js/location/LocationPicker.js?v=' . $this->version;
+        $output = "<script src=\"{$locationPickerLibrary}\"></script>\n";
 
-        $locationPickerTrans = $this->_path . 'views/js/location/Translations.js';
-        $output .= "<script src=\"{$locationPickerTrans}\"></script>" . "\n";
+        $locationPickerTrans = $this->_path . 'views/js/location/Translations.js?v=' . $this->version;
+        $output .= "<script src=\"{$locationPickerTrans}\"></script>\n";
 
-        $locationPickerCSS = $this->_path . 'views/css/locationPicker.css';
-        $output .= "<link rel=\"stylesheet\" href=\"{$locationPickerCSS}\"/>" . "\n";
+        $locationPickerCSS = $this->_path . 'views/css/locationPicker.css?v=' . $this->version;
+        $output .= "<link rel=\"stylesheet\" href=\"{$locationPickerCSS}\"/>\n";
 
         if (version_compare(_PS_VERSION_, '1.7.0.0', '<')) {
             return $output . $this->getPresta16ShippingStepPage($params);
         }
 
-        $shippingServicePath = $this->_path . 'views/js/ShippingService17.js';
-        $output .= "<script src=\"{$shippingServicePath}\"></script>" . "\n";
+        $shippingServicePath = $this->_path . 'views/js/ShippingService17.js?v=' . $this->version;
+        $output .= "<script src=\"{$shippingServicePath}\"></script>\n";
 
         $output .= $this->getCheckoutFilesLinks();
 
@@ -275,10 +275,11 @@ class Packlink extends CarrierModule
 
         $this->context->controller->addJS(
             array(
-                $this->_path . 'views/js/PrestaCreateOrderDraft.js',
-                $this->_path . 'views/js/core/AjaxService.js',
-                $this->_path . 'views/js/PrestaAjaxService.js',
-            )
+                $this->_path . 'views/js/PrestaCreateOrderDraft.js?v=' . $this->version,
+                $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
+                $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
+            ),
+            false
         );
 
         return $this->context->smarty->createTemplate(
@@ -461,17 +462,21 @@ class Packlink extends CarrierModule
 
         $this->context->controller->addCSS(
             array(
-                $this->_path . 'views/css/packlink.css',
-                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css',
-            )
+                $this->_path . 'views/css/packlink.css?v=' . $this->version,
+                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css?v=' . $this->version,
+            ),
+            'all',
+            null,
+            false
         );
         $this->context->controller->addJS(
             array(
-                $this->_path . 'views/js/prestashop-ui-kit.js',
-                $this->_path . 'views/js/core/UtilityService.js',
-                $this->_path . 'views/js/PrestaFix.js',
-                $this->_path . 'views/js/Login.js',
-            )
+                $this->_path . 'views/js/prestashop-ui-kit.js?v=' . $this->version,
+                $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
+                $this->_path . 'views/js/PrestaFix.js?v=' . $this->version,
+                $this->_path . 'views/js/Login.js?v=' . $this->version,
+            ),
+            false
         );
 
         $this->context->smarty->assign(array(
@@ -557,8 +562,8 @@ class Packlink extends CarrierModule
             array('configuration' => json_encode($configuration))
         );
 
-        $shippingServicePath = $this->_path . 'views/js/ShippingService16.js';
-        $output = "<script src=\"{$shippingServicePath}\"></script>" . "\n";
+        $shippingServicePath = $this->_path . 'views/js/ShippingService16.js?v=' . $this->version;
+        $output = "<script src=\"{$shippingServicePath}\"></script>\n";
 
         $output .= $this->getCheckoutFilesLinks();
 
@@ -572,20 +577,20 @@ class Packlink extends CarrierModule
      */
     protected function getCheckoutFilesLinks()
     {
-        $ajaxPath = $this->_path . 'views/js/core/AjaxService.js';
-        $output = "<script src=\"{$ajaxPath}\"></script>" . "\n";
+        $ajaxPath = $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version;
+        $output = "<script src=\"{$ajaxPath}\"></script>\n";
 
-        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js';
-        $output .= "<script src=\"{$ajaxPath}\"></script>" . "\n";
+        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version;
+        $output .= "<script src=\"{$ajaxPath}\"></script>\n";
 
-        $stylePath = $this->_path . 'views/css/checkout.css';
-        $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>" . "\n";
+        $stylePath = $this->_path . 'views/css/checkout.css?v=' . $this->version;
+        $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>\n";
 
-        $checkoutPath = $this->_path . 'views/js/CheckOutController.js';
-        $output .= "<script src=\"{$checkoutPath}\"></script>" . "\n";
+        $checkoutPath = $this->_path . 'views/js/CheckOutController.js?v=' . $this->version;
+        $output .= "<script src=\"{$checkoutPath}\"></script>\n";
 
-        $mapModalPath = $this->_path . 'views/js/MapModalController.js';
-        $output .= "<script src=\"{$mapModalPath}\"></script>" . "\n";
+        $mapModalPath = $this->_path . 'views/js/MapModalController.js?v=' . $this->version;
+        $output .= "<script src=\"{$mapModalPath}\"></script>\n";
 
         return $output;
     }
@@ -824,6 +829,7 @@ class Packlink extends CarrierModule
                 'defaultWarehouseSubmitUrl' => $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse'),
                 'defaultWarehouseSearchPostalCodesUrl' => $this->getAction('DefaultWarehouse', 'searchPostalCodes'),
                 'shippingMethodsGetAllUrl' => $this->getAction('ShippingMethods', 'getAll'),
+                'shippingMethodsGetStatusUrl' => $this->getAction('ShippingMethods', 'getTaskStatus'),
                 'shippingMethodsActivateUrl' => $this->getAction('ShippingMethods', 'activate'),
                 'shippingMethodsDeactivateUrl' => $this->getAction('ShippingMethods', 'deactivate'),
                 'shippingMethodsSaveUrl' => $this->getAction('ShippingMethods', 'save'),
@@ -848,29 +854,33 @@ class Packlink extends CarrierModule
 
         $this->context->controller->addCSS(
             array(
-                $this->_path . 'views/css/packlink.css',
-                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css',
-            )
+                $this->_path . 'views/css/packlink.css?v=' . $this->version,
+                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css?v=' . $this->version,
+            ),
+            'all',
+            null,
+            false
         );
 
         $this->context->controller->addJS(
             array(
-                $this->_path . 'views/js/prestashop-ui-kit.js',
-                $this->_path . 'views/js/core/StateController.js',
-                $this->_path . 'views/js/core/TemplateService.js',
-                $this->_path . 'views/js/core/SidebarController.js',
-                $this->_path . 'views/js/core/DefaultParcelController.js',
-                $this->_path . 'views/js/core/PageControllerFactory.js',
-                $this->_path . 'views/js/core/DefaultWarehouseController.js',
-                $this->_path . 'views/js/core/ShippingMethodsController.js',
-                $this->_path . 'views/js/core/UtilityService.js',
-                $this->_path . 'views/js/core/AjaxService.js',
-                $this->_path . 'views/js/PrestaAjaxService.js',
-                $this->_path . 'views/js/PrestaFix.js',
-                $this->_path . 'views/js/AutoConfigure.js',
-                $this->_path . 'views/js/core/OrderStateMappingController.js',
-                $this->_path . 'views/js/core/FooterController.js',
-            )
+                $this->_path . 'views/js/prestashop-ui-kit.js?v=' . $this->version,
+                $this->_path . 'views/js/core/StateController.js?v=' . $this->version,
+                $this->_path . 'views/js/core/TemplateService.js?v=' . $this->version,
+                $this->_path . 'views/js/core/SidebarController.js?v=' . $this->version,
+                $this->_path . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
+                $this->_path . 'views/js/core/PageControllerFactory.js?v=' . $this->version,
+                $this->_path . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
+                $this->_path . 'views/js/core/ShippingMethodsController.js?v=' . $this->version,
+                $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
+                $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
+                $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
+                $this->_path . 'views/js/PrestaFix.js?v=' . $this->version,
+                $this->_path . 'views/js/AutoConfigure.js?v=' . $this->version,
+                $this->_path . 'views/js/core/OrderStateMappingController.js?v=' . $this->version,
+                $this->_path . 'views/js/core/FooterController.js?v=' . $this->version,
+            ),
+            false
         );
 
         return $this->display(__FILE__, 'packlink.tpl');
@@ -949,7 +959,10 @@ class Packlink extends CarrierModule
         \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository,
         $orderId
     ) {
-        $this->context->controller->addJS($this->_path . 'views/js/PrestaPrintShipmentLabels.js');
+        $this->context->controller->addJS(
+            $this->_path . 'views/js/PrestaPrintShipmentLabels.js?v=' . $this->version,
+            false
+        );
 
         $labels = $orderRepository->getLabelsByOrderId($orderId);
         $printLabels = array();

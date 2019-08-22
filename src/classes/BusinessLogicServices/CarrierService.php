@@ -61,10 +61,6 @@ class CarrierService implements ShopShippingMethodService
                 $this->updateCarrierLogo($shippingMethod, $carrier);
                 $this->saveCarrierServiceMapping((int)$carrier->id, $shippingMethod->getId());
 
-                if (count($this->getPacklinkCarrierIds()) === 1) {
-                    $this->addBackupCarrier($shippingMethod);
-                }
-
                 return true;
             }
         } catch (\Exception $e) {
@@ -145,11 +141,87 @@ class CarrierService implements ShopShippingMethodService
 
             $carrier->deleted = true;
             $carrier->update();
-
-            if (count($this->getPacklinkCarrierIds()) === 1) {
-                $this->deleteBackupCarrier();
-            }
         }
+
+        return true;
+    }
+
+    /**
+     * Adds backup shipping method based on provided shipping method.
+     *
+     * @param ShippingMethod $shippingMethod
+     *
+     * @return bool TRUE if backup shipping method is added; otherwise, FALSE.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     */
+    public function addBackupShippingMethod(ShippingMethod $shippingMethod)
+    {
+        $carrier = new \Carrier();
+        $this->setCarrierData($carrier, $shippingMethod);
+        $carrier->name = 'shipping cost';
+
+        if (!$carrier->add()) {
+            return false;
+        }
+
+        $this->setCarrierGroups($carrier);
+        $range = $this->setCarrierRange($carrier, $shippingMethod);
+        $this->setBackupCarrierZones($carrier, $range->id, $shippingMethod);
+
+        if (!$this->copyCarrierLogo($carrier->name, (int)$carrier->id)) {
+            throw new \RuntimeException(
+                TranslationUtility::__('Failed copying carrier logo to the system')
+            );
+        }
+
+        $this->saveCarrierServiceMapping((int)$carrier->id, 0);
+        /** @var ConfigurationService $configService */
+        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
+        $configService->setBackupCarrierId((int)$carrier->id);
+
+        return true;
+    }
+
+    /**
+     * Deletes backup shipping method.
+     *
+     * @return bool TRUE if backup shipping method is deleted; otherwise, FALSE.
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    public function deleteBackupShippingMethod()
+    {
+        /** @var ConfigurationService $configService */
+        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
+
+        $backupCarrierId = $configService->getBackupCarrierId();
+        if ($backupCarrierId === null) {
+            Logger::logWarning(TranslationUtility::__('Backup carrier not found'));
+
+            return false;
+        }
+
+        $carrier = \Carrier::getCarrierByReference($backupCarrierId);
+        if ($carrier === false) {
+            Logger::logWarning(TranslationUtility::__('Backup carrier not found'));
+
+            return false;
+        }
+
+        $carrierLogoPath = $this->getPrestaCarrierLogoPath($backupCarrierId);
+        if (\Tools::file_exists_cache($carrierLogoPath)) {
+            unlink($carrierLogoPath);
+        }
+
+        $carrier->deleted = true;
+        $carrier->update();
+
+        $configService->setBackupCarrierId(null);
 
         return true;
     }
@@ -325,77 +397,6 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
-     * Adds Packlink backup carrier based on first configured Packlink shipping method entity.
-     *
-     * @param ShippingMethod $shippingMethod First configured Packlink shipping method entity.
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
-     */
-    private function addBackupCarrier(ShippingMethod $shippingMethod)
-    {
-        $carrier = new \Carrier();
-        $this->setCarrierData($carrier, $shippingMethod);
-        $carrier->name = 'shipping cost';
-
-        if (!$carrier->add()) {
-            throw new \RuntimeException(TranslationUtility::__('Failed creating backup carrier'));
-        }
-
-        $this->setCarrierGroups($carrier);
-        $range = $this->setCarrierRange($carrier, $shippingMethod);
-        $this->setBackupCarrierZones($carrier, $range->id, $shippingMethod);
-
-        if (!$this->copyCarrierLogo($carrier->name, (int)$carrier->id)) {
-            throw new \RuntimeException(
-                TranslationUtility::__('Failed copying carrier logo to the system')
-            );
-        }
-
-        $this->saveCarrierServiceMapping((int)$carrier->id, 0);
-        /** @var ConfigurationService $configService */
-        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
-        $configService->setBackupCarrierId((int)$carrier->id);
-    }
-
-    /**
-     * Deletes Packlink backup carrier.
-     *
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function deleteBackupCarrier()
-    {
-        /** @var ConfigurationService $configService */
-        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
-
-        $backupCarrierId = $configService->getBackupCarrierId();
-        if ($backupCarrierId === null) {
-            Logger::logWarning(TranslationUtility::__('Backup carrier not found'));
-
-            return;
-        }
-
-        $carrier = \Carrier::getCarrierByReference($backupCarrierId);
-        if ($carrier === false) {
-            Logger::logWarning(TranslationUtility::__('Backup carrier not found'));
-
-            return;
-        }
-
-        $carrierLogoPath = $this->getPrestaCarrierLogoPath($backupCarrierId);
-        if (\Tools::file_exists_cache($carrierLogoPath)) {
-            unlink($carrierLogoPath);
-        }
-
-        $carrier->deleted = true;
-        $carrier->update();
-
-        $configService->setBackupCarrierId(null);
-    }
-
-    /**
      * Saves carrier service mapping.
      *
      * @param int $carrierReferenceId Carrier entity reference ID.
@@ -479,18 +480,10 @@ class CarrierService implements ShopShippingMethodService
         /** @var \RangeWeight[] $ranges */
         if ($pricingByValue) {
             $ranges = \RangePrice::getRanges($carrier->id);
-            if (empty($ranges)) {
-                $range = new \RangePrice();
-            } else {
-                $range = new \RangePrice($ranges[0]['id_range_price']);
-            }
+            $range = empty($ranges) ? new \RangePrice() : new \RangePrice($ranges[0]['id_range_price']);
         } else {
             $ranges = \RangeWeight::getRanges($carrier->id);
-            if (empty($ranges)) {
-                $range = new \RangeWeight();
-            } else {
-                $range = new \RangeWeight($ranges[0]['id_range_weight']);
-            }
+            $range = empty($ranges) ? new \RangeWeight() : new \RangeWeight($ranges[0]['id_range_weight']);
         }
 
         $range->id_carrier = $carrier->id;

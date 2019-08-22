@@ -3,10 +3,12 @@
 /** @noinspection PhpRedundantCatchClauseInspection */
 
 use Logeecom\Infrastructure\ServiceRegister;
+use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodConfiguration;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
 use Packlink\BusinessLogic\Controllers\ShippingMethodController;
+use Packlink\BusinessLogic\Controllers\UpdateShippingServicesTaskStatusController;
 use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
@@ -40,12 +42,23 @@ class ShippingMethodsController extends PacklinkBaseController
     public function displayAjaxGetAll()
     {
         $shippingMethods = $this->controller->getAll();
-        if ((count($shippingMethods) === 0) && !$this->checkStatusOfGettingServicesTask()) {
-            // maybe the task could not be started
-            PacklinkPrestaShopUtility::dieJson(array('error' => true));
-        }
 
         PacklinkPrestaShopUtility::dieJson($this->formatCollectionJsonResponse($shippingMethods));
+    }
+
+    /**
+     * Retrieves all shipping methods.
+     */
+    public function displayAjaxGetTaskStatus()
+    {
+        $status = QueueItem::FAILED;
+        try {
+            $controller = new UpdateShippingServicesTaskStatusController();
+            $status = $controller->getLastTaskStatus();
+        } catch (\Logeecom\Infrastructure\Exceptions\BaseException $e) {
+        }
+
+        PacklinkPrestaShopUtility::dieJson(array('status' => $status));
     }
 
     /**
@@ -254,21 +267,5 @@ class ShippingMethodsController extends PacklinkBaseController
         $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
 
         return _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/' . $carrierService->getCarrierLogoFilePath($carrierName);
-    }
-
-    /**
-     * Checks the status of the task responsible for getting services.
-     *
-     * @return bool TRUE if the task is alive or completed successfully; otherwise, FALSE.
-     */
-    private function checkStatusOfGettingServicesTask()
-    {
-        try {
-            $controller = new \Packlink\BusinessLogic\Controllers\AutoConfigurationController();
-
-            return $controller->isGettingServicesTaskSuccessful();
-        } catch (\Logeecom\Infrastructure\Exceptions\BaseException $e) {
-            return false;
-        }
     }
 }
