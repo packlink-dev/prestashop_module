@@ -1078,7 +1078,7 @@
             shopShippingMethodsDisableUrl: "{$shopShippingMethodsDisableUrl}",
             debugGetStatusUrl: "{$debugGetStatusUrl}",
             debugSetStatusUrl: "{$debugSetStatusUrl}",
-            shippingMethodsGetTaxClasses: "{$shippingMethodsGetTaxClasses}",
+            shippingMethodsGetTaxClassesUrl: "{$shippingMethodsGetTaxClassesUrl}",
             autoConfigureStartUrl: "{$autoConfigureStartUrl}"
         }
     );

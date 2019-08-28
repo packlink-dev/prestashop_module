@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d937c43ff342ad7f8423a6a8cce49de",
+  "content-hash": "5646b61d3e24e9301eacc6a4087209ad",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -58,16 +58,16 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "dev-feature/CR-12",
+          "version": "v1.4.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:logeecom/pl_module_core.git",
-              "reference": "003739a3cdeee4a73000632f42e45ce6eab8735a"
+              "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
+              "reference": "fd6e96d57da264f81f8b76559edb6b96b76deb27"
             },
             "dist": {
                 "type": "zip",
-              "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/003739a3cdeee4a73000632f42e45ce6eab8735a",
-              "reference": "003739a3cdeee4a73000632f42e45ce6eab8735a",
+              "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/fd6e96d57da264f81f8b76559edb6b96b76deb27",
+              "reference": "fd6e96d57da264f81f8b76559edb6b96b76deb27",
                 "shasum": ""
             },
             "require": {
@@ -94,7 +94,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-          "time": "2019-08-22T14:10:40+00:00"
+          "time": "2019-08-28T15:08:42+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -339,12 +339,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "1927e75f4ed19131ec9bcc3b002e07fb1173ee76"
+              "reference": "93d6a38116e46a885d13f5fb5db8e0a2cd52a62e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/1927e75f4ed19131ec9bcc3b002e07fb1173ee76",
-                "reference": "1927e75f4ed19131ec9bcc3b002e07fb1173ee76",
+              "url": "https://api.github.com/repos/phpspec/prophecy/zipball/93d6a38116e46a885d13f5fb5db8e0a2cd52a62e",
+              "reference": "93d6a38116e46a885d13f5fb5db8e0a2cd52a62e",
                 "shasum": ""
             },
             "require": {
@@ -394,7 +394,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2019-06-13T12:50:23+00:00"
+          "time": "2019-08-28T15:54:17+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -1256,9 +1256,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "packlink/integration-core": 20
-    },
+  "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
