@@ -11,6 +11,8 @@ use Logeecom\Infrastructure\Http\HttpClient;
 use Logeecom\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use Logeecom\Infrastructure\Logger\LogData;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
+use Logeecom\Infrastructure\Serializer\Concrete\NativeSerializer;
+use Logeecom\Infrastructure\Serializer\Serializer;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\Process;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
@@ -43,6 +45,12 @@ class Bootstrap extends BootstrapComponent
     protected static function initServices()
     {
         parent::initServices();
+
+        ServiceRegister::registerService(Serializer::CLASS_NAME,
+            function () {
+                return new NativeSerializer();
+            }
+        );
 
         ServiceRegister::registerService(
             ShopLoggerAdapter::CLASS_NAME,

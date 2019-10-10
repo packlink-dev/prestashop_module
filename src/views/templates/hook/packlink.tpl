@@ -909,7 +909,7 @@
       <div class="row">
         <div class="col-sm-12 pl-form-section-input-wrapper pl-fixed-price-wrapper">
           <div class="form-group pl-form-section-input pl-text-input">
-            <input type="text" data-pl-fixed-price="from" disabled tabindex="-1"/>
+            <input type="text" data-pl-fixed-price="from" tabindex="-1"/>
             <span class="pl-text-input-label">{l s='FROM' mod='packlink'} (kg)</span>
           </div>
           <div class="form-group pl-form-section-input pl-text-input">
@@ -954,7 +954,7 @@
       <div class="row">
         <div class="col-sm-12 pl-form-section-input-wrapper pl-fixed-price-wrapper">
           <div class="form-group pl-form-section-input pl-text-input">
-            <input type="text" data-pl-fixed-price="from" disabled tabindex="-1"/>
+            <input type="text" data-pl-fixed-price="from" tabindex="-1"/>
             <span class="pl-text-input-label">{l s='FROM' mod='packlink'} (€)</span>
           </div>
           <div class="form-group pl-form-section-input pl-text-input">
