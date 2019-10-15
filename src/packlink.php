@@ -452,8 +452,11 @@ class Packlink extends CarrierModule
         );
         $wakeupService->wakeup();
 
+        $fancyBoxUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . 'js/jquery/plugins/fancybox/jquery.fancybox.js';
+        $fancyBoxUrl = str_replace(array('https:', 'http:'), '', $fancyBoxUrl);
+
         $this->context->smarty->assign(array(
-            'fancyBoxPath' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'js/jquery/plugins/fancybox/jquery.fancybox.js',
+            'fancyBoxPath' => $fancyBoxUrl,
         ));
 
         if ($apiToken || $loggedIn) {
