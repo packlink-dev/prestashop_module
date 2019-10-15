@@ -102,7 +102,7 @@ class SystemInfoUtility
         $result['Async process URL'] = $configService->getAsyncProcessUrl('test');
         $result['Auto-test URL'] = \Context::getContext()->link->getAdminLink('PacklinkAutoTest');
 
-        return json_encode($result, JSON_PRETTY_PRINT);
+        return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -130,7 +130,7 @@ class SystemInfoUtility
         } catch (\Exception $e) {
         }
 
-        return json_encode($result, JSON_PRETTY_PRINT);
+        return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -147,7 +147,7 @@ class SystemInfoUtility
         $result = $configService->getUserInfo()->toArray();
         $result['API key'] = $configService->getAuthorizationToken();
 
-        return json_encode($result, JSON_PRETTY_PRINT);
+        return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -185,7 +185,7 @@ class SystemInfoUtility
         $result['Default parcel'] = $configService->getDefaultParcel() ?: array();
         $result['Default warehouse'] = $configService->getDefaultWarehouse() ?: array();
 
-        return json_encode($result, JSON_PRETTY_PRINT);
+        return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -220,7 +220,7 @@ class SystemInfoUtility
             $response[] = $item->toArray();
         }
 
-        return json_encode($response, JSON_PRETTY_PRINT);
+        return json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
