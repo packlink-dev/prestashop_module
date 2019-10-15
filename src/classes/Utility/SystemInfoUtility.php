@@ -85,6 +85,7 @@ class SystemInfoUtility
     {
         /** @var Configuration $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        $result = array();
         $result['PrestaShop version'] = _PS_VERSION_;
         $result['Theme'] = _THEME_NAME_;
 
@@ -182,6 +183,7 @@ class SystemInfoUtility
         /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
 
+        $result = array();
         $result['Default parcel'] = $configService->getDefaultParcel() ?: array();
         $result['Default warehouse'] = $configService->getDefaultWarehouse() ?: array();
 
