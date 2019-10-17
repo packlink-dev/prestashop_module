@@ -71,6 +71,33 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
     }
 
     /**
+     * Retrieves list of order references where order is in one of the provided statuses.
+     *
+     * @param array $statuses List of order statuses.
+     *
+     * @return string[] Array of shipment references.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    public function getOrderReferencesWithStatus(array $statuses)
+    {
+        $filter = new QueryFilter();
+        $filter->where('status', Operators::IN, $statuses);
+        $orders = $this->getOrderDetailsRepository()->select($filter);
+
+        $result = array();
+        /** @var OrderShipmentDetails $order */
+        foreach ($orders as $order) {
+            $result[] =$order->getReference();
+        }
+
+        return $result;
+    }
+
+    /**
      * Fetches and returns system order by its unique identifier.
      *
      * @param string $orderId $orderId Unique order id.
