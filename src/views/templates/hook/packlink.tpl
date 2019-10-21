@@ -20,7 +20,7 @@
             local_shipping
           </i>
           <div class="pl-sidebar-text-wrapper">
-            {l s='SHIPPING SERVICES' mod='packlink'}
+              {l s='SHIPPING SERVICES' mod='packlink'}
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@
             settings
           </i>
           <div class="pl-sidebar-text-wrapper">
-            {l s='BASIC SETTINGS' mod='packlink'}
+              {l s='BASIC SETTINGS' mod='packlink'}
           </div>
         </div>
       </div>
@@ -67,17 +67,17 @@
   <div id="pl-sidebar-subitem-template">
     <div class="row pl-sidebar-subitem-wrapper" data-pl-sidebar-btn="order-state-mapping">
       <div>
-        {l s='Map order statuses' mod='packlink'}
+          {l s='Map order statuses' mod='packlink'}
       </div>
     </div>
     <div class="row pl-sidebar-subitem-wrapper" data-pl-sidebar-btn="default-warehouse">
       <div>
-        {l s='Default warehouse' mod='packlink'}
+          {l s='Default warehouse' mod='packlink'}
       </div>
     </div>
     <div class="row pl-sidebar-subitem-wrapper" data-pl-sidebar-btn="default-parcel">
       <div>
-        {l s='Default parcel' mod='packlink'}
+          {l s='Default parcel' mod='packlink'}
       </div>
     </div>
   </div>
@@ -88,22 +88,22 @@
       <div class="pl-basic-settings-page-wrapper pl-mapping-page-wrapper">
         <div class="row">
           <div class="col-sm-12 pl-basic-settings-page-title-wrapper">
-            {l s='Map order statuses' mod='packlink'}
+              {l s='Map order statuses' mod='packlink'}
           </div>
         </div>
         <div class="row">
           <div class="col-sm-12 pl-basic-settings-page-description-wrapper">
-            {l s='Packlink offers you the possibility to update your PrestaShop order status with the shipping info. You can edit anytime.' mod='packlink'}
+              {l s='Packlink offers you the possibility to update your PrestaShop order status with the shipping info. You can edit anytime.' mod='packlink'}
           </div>
         </div>
         <div>
           <div class="pl-mapping-page-select-section">
-            {l s='Packlink PRO Shipping Status' mod='packlink'}
+              {l s='Packlink PRO Shipping Status' mod='packlink'}
           </div>
           <div class="pl-mapping-page-wrapper-equals">
           </div>
           <div class="pl-mapping-page-select-section">
-            {l s='PrestaShop Order Status' mod='packlink'}
+              {l s='PrestaShop Order Status' mod='packlink'}
           </div>
         </div>
 
@@ -192,12 +192,12 @@
       <div class="col-sm-12 pl-basic-settings-page-wrapper">
         <div class="row">
           <div class="col-sm-12 pl-basic-settings-page-title-wrapper">
-            {l s='Set default parcel' mod='packlink'}
+              {l s='Set default parcel' mod='packlink'}
           </div>
         </div>
         <div class="row">
           <div class="col-sm-12 pl-basic-settings-page-description-wrapper">
-            {l s='We will use the default parcel in case any item has not defined dimensions and weight. You can edit anytime.' mod='packlink'}
+              {l s='We will use the default parcel in case any item has not defined dimensions and weight. You can edit anytime.' mod='packlink'}
           </div>
         </div>
         <div class="row">
@@ -244,12 +244,12 @@
       <div class="col-sm-12 pl-basic-settings-page-wrapper">
         <div class="row">
           <div class="col-sm-12 pl-basic-settings-page-title-wrapper">
-            {l s='Set default warehouse' mod='packlink'}
+              {l s='Set default warehouse' mod='packlink'}
           </div>
         </div>
         <div class="row">
           <div class="col-sm-12 pl-basic-settings-page-description-wrapper">
-            {l s='We will use the default Warehouse address as your sender address. You can edit anytime.' mod='packlink'}
+              {l s='We will use the default Warehouse address as your sender address. You can edit anytime.' mod='packlink'}
           </div>
         </div>
         <div class="row">
@@ -304,9 +304,11 @@
             <div class="row">
               <div class=" pl-basic-settings-page-form-input-item">
                 <div class=" pl-form-section-input pl-text-input">
-                  <input autocomplete="new-password" type="text" class="pl-warehouse-input" id="pl-default-warehouse-postal_code"/>
+                  <input autocomplete="new-password" type="text" class="pl-warehouse-input"
+                         id="pl-default-warehouse-postal_code"/>
                   <span class="pl-text-input-label">{l s='City or postal code' mod='packlink'}</span>
-                  <span class="pl-input-search-icon" data-pl-id="search-icon"><i class="material-icons">search</i></span>
+                  <span class="pl-input-search-icon" data-pl-id="search-icon"><i
+                            class="material-icons">search</i></span>
                 </div>
               </div>
             </div>
@@ -354,14 +356,16 @@
     <div class="pl-dashboard-modal-wrapper hidden" id="pl-disable-methods-modal-wrapper">
       <div class="pl-dashboard-modal pl-disable-methods-modal" id="pl-disable-methods-modal">
         <div class="pl-shipping-modal-title">
-          {l s='Congrats! Your first Shipping Method has been successfully created.' mod='packlink'}
+            {l s='Congrats! Your first Shipping Method has been successfully created.' mod='packlink'}
         </div>
         <div class="pl-shipping-modal-body">
-          {l s='In order to offer you the best possible service, it\'s important to disable your previous carriers. Do you want us to disable them? (recommended)' mod='packlink'}
+            {l s='In order to offer you the best possible service, it\'s important to disable your previous carriers. Do you want us to disable them? (recommended)' mod='packlink'}
         </div>
         <div class="pl-shipping-modal-row">
-          <button class="btn btn-lg btn-outline-secondary pl-shipping-modal-btn" id="pl-disable-methods-modal-cancel">{l s='Cancel' mod='packlink'}</button>
-          <button class="btn btn-lg btn-primary" id="pl-disable-methods-modal-accept">{l s='Accept' mod='packlink'}</button>
+          <button class="btn btn-lg btn-primary"
+                  id="pl-disable-methods-modal-accept">{l s='Accept' mod='packlink'}</button>
+          <button class="btn btn-lg btn-outline-secondary pl-shipping-modal-btn"
+                  id="pl-disable-methods-modal-cancel">{l s='Cancel' mod='packlink'}</button>
         </div>
       </div>
     </div>
@@ -372,10 +376,10 @@
       <div class="pl-dashboard-modal" id="pl-dashboard-modal">
         <img src="{html_entity_decode($dashboardIcon|escape:'html':'UTF-8')}" alt="Dashboard icon">
         <div class="pl-dashboard-page-title-wrapper">
-          {l s='You\'re almost there!' mod='packlink'}
+            {l s='You\'re almost there!' mod='packlink'}
         </div>
         <div class="pl-dashboard-page-subtitle-wrapper">
-          {l s='Details synced with your existing account' mod='packlink'}
+            {l s='Details synced with your existing account' mod='packlink'}
         </div>
         <div class="pl-dashboard-page-step-wrapper pl-dashboard-page-step" id="pl-parcel-step">
           <div class="pl-empty-checkmark pl-checkmark">
@@ -389,7 +393,7 @@
             </i>
           </div>
           <div class="pl-step-title">
-            {l s='Set default parcel details' mod='packlink'}
+              {l s='Set default parcel details' mod='packlink'}
           </div>
         </div>
         <div class="pl-dashboard-page-step-wrapper pl-dashboard-page-step" id="pl-warehouse-step">
@@ -404,11 +408,11 @@
             </i>
           </div>
           <div class="pl-step-title">
-            {l s='Set default warehouse details' mod='packlink'}
+              {l s='Set default warehouse details' mod='packlink'}
           </div>
         </div>
         <div class="pl-dashboard-page-subtitle-wrapper" id="pl-step-subtitle">
-          {l s='Just a few more steps to complete the setup' mod='packlink'}
+            {l s='Just a few more steps to complete the setup' mod='packlink'}
         </div>
         <div class="pl-dashboard-page-step-wrapper pl-dashboard-page-step" id="pl-shipping-methods-step">
           <div class="pl-empty-checkmark pl-checkmark">
@@ -422,7 +426,7 @@
             </i>
           </div>
           <div class="pl-step-title">
-            {l s='Select shipping services' mod='packlink'}
+              {l s='Select shipping services' mod='packlink'}
           </div>
         </div>
       </div>
@@ -464,8 +468,18 @@
         </div>
         <div class="col-sm-12 pl-table-wrapper" id="pl-table-scroll">
           <div id="pl-shipping-methods-table-extension-point"></div>
-          <div class="pl-no-shipping-services hidden" id="pl-no-shipping-services">
-            {l s='Getting available shipping services from Packlink PRO. Please wait a moment.' mod='packlink'}
+          <div class="pl-shipping-services-message hidden" id="pl-getting-shipping-services">
+            <div class="title">{l s='We are importing the best shipping services for your shipments.' mod='packlink'}</div>
+            <div class="subtitle">{l s='This process could take a few seconds.' mod='packlink'}</div>
+            <div class="pl-spinner" id="pl-getting-services-spinner">
+              <div></div>
+            </div>
+          </div>
+          <div class="pl-shipping-services-message hidden" id="pl-no-shipping-services">
+            <div class="title">{l s='We are having troubles getting shipping services.' mod='packlink'}</div>
+            <div class="subtitle">{l s='Do you want to retry?' mod='packlink'}</div>
+            <button type="button" class="btn btn-primary btn-lg"
+                    id="pl-shipping-services-retry-btn">{l s='Retry' mod='packlink'}</button>
           </div>
         </div>
       </div>
@@ -476,7 +490,7 @@
   <div id="pl-shipping-methods-filters-template">
     <div class="row">
       <div class="col-sm-12 pl-filter-method-tile">
-        {l s='Filter services' mod='packlink'}
+          {l s='Filter services' mod='packlink'}
       </div>
     </div>
     <div class="row">
@@ -490,7 +504,7 @@
           <label>
             <input type="checkbox" data-pl-shipping-methods-filter="title-national" tabindex="-1">
             <i class="md-checkbox-control"></i>
-            {l s='National' mod='packlink'}
+              {l s='National' mod='packlink'}
           </label>
         </div>
       </div>
@@ -501,7 +515,7 @@
           <label>
             <input type="checkbox" data-pl-shipping-methods-filter="title-international" tabindex="-1">
             <i class="md-checkbox-control"></i>
-            {l s='International' mod='packlink'}
+              {l s='International' mod='packlink'}
           </label>
         </div>
       </div>
@@ -517,7 +531,7 @@
           <label>
             <input type="checkbox" data-pl-shipping-methods-filter="deliveryType-economic" tabindex="-1">
             <i class="md-checkbox-control"></i>
-            {l s='Economic' mod='packlink'}
+              {l s='Economic' mod='packlink'}
           </label>
         </div>
       </div>
@@ -528,7 +542,7 @@
           <label>
             <input type="checkbox" data-pl-shipping-methods-filter="deliveryType-express" tabindex="-1">
             <i class="md-checkbox-control"></i>
-            {l s='Express' mod='packlink'}
+              {l s='Express' mod='packlink'}
           </label>
         </div>
       </div>
@@ -544,7 +558,7 @@
           <label>
             <input type="checkbox" data-pl-shipping-methods-filter="parcelOrigin-pickup" tabindex="-1">
             <i class="md-checkbox-control"></i>
-            {l s='Collection' mod='packlink'}
+              {l s='Collection' mod='packlink'}
           </label>
         </div>
       </div>
@@ -555,7 +569,7 @@
           <label>
             <input type="checkbox" data-pl-shipping-methods-filter="parcelOrigin-dropoff" tabindex="-1">
             <i class="md-checkbox-control"></i>
-            {l s='Drop off' mod='packlink'}
+              {l s='Drop off' mod='packlink'}
           </label>
         </div>
       </div>
@@ -571,7 +585,7 @@
           <label>
             <input type="checkbox" data-pl-shipping-methods-filter="parcelDestination-home" tabindex="-1">
             <i class="md-checkbox-control"></i>
-            {l s='Delivery' mod='packlink'}
+              {l s='Delivery' mod='packlink'}
           </label>
         </div>
       </div>
@@ -582,7 +596,7 @@
           <label>
             <input type="checkbox" data-pl-shipping-methods-filter="parcelDestination-dropoff" tabindex="-1">
             <i class="md-checkbox-control"></i>
-            {l s='Pick up' mod='packlink'}
+              {l s='Pick up' mod='packlink'}
           </label>
         </div>
       </div>
@@ -601,7 +615,7 @@
                 <div class="row">
                   <div class="col-sm-12 pl-form-section-title-wrapper">
                     <div class="pl-form-section-title">
-                      {l s='Add service title' mod='packlink'}
+                        {l s='Add service title' mod='packlink'}
                     </div>
                     <div class="pl-form-section-title-line">
                       <hr>
@@ -610,7 +624,7 @@
                 </div>
                 <div class="row">
                   <div class="col-sm-12 pl-form-section-subtitle-wrapper">
-                    {l s='This title will be visible to your customers' mod='packlink'}
+                      {l s='This title will be visible to your customers' mod='packlink'}
                   </div>
                 </div>
                 <div class="row">
@@ -622,7 +636,7 @@
                     <div class="row">
                       <div class="col-sm-12 pl-form-section-title-wrapper">
                         <div class="pl-form-section-title">
-                          {l s='Carrier logo' mod='packlink'}
+                            {l s='Carrier logo' mod='packlink'}
                         </div>
                         <div class="pl-form-section-title-line">
                           <hr>
@@ -633,7 +647,7 @@
                       <label class="pl-form-section-input-checkbox-label">
                         <input type="checkbox" name="method-show-logo-input" checked id="pl-show-logo">
                         <i class="md-checkbox-control"></i>
-                        {l s='Show carrier logo to my customers' mod='packlink'}
+                          {l s='Show carrier logo to my customers' mod='packlink'}
                       </label>
                     </div>
                   </div>
@@ -643,7 +657,7 @@
                 <div class="row">
                   <div class="col-sm-12 pl-form-section-title-wrapper">
                     <div class="pl-form-section-title">
-                      {l s='Select pricing policy' mod='packlink'}
+                        {l s='Select pricing policy' mod='packlink'}
                     </div>
                     <div class="pl-form-section-title-line">
                       <hr>
@@ -652,7 +666,7 @@
                 </div>
                 <div class="row">
                   <div class="col-sm-12 pl-form-section-subtitle-wrapper">
-                    {l s='Choose the pricing policy to show your customers' mod='packlink'}
+                      {l s='Choose the pricing policy to show your customers' mod='packlink'}
                   </div>
                 </div>
                 <div class="row">
@@ -673,7 +687,7 @@
 
                 <div class="row">
                   <div class="col-sm-12 pl-form-section-subtitle-wrapper">
-                    {l s='Tax' mod='packlink'}
+                      {l s='Tax' mod='packlink'}
                   </div>
                 </div>
                 <div class="row">
@@ -724,16 +738,16 @@
         <h2 id="pl-shipping-method-name">
         </h2>
         <p class="pl-price-indicator" data-pl-price-indicator="packlink">
-          {l s='Packlink prices' mod='packlink'}
+            {l s='Packlink prices' mod='packlink'}
         </p>
         <p class="pl-price-indicator" data-pl-price-indicator="percent">
-          {l s='Packlink percent' mod='packlink'}
+            {l s='Packlink percent' mod='packlink'}
         </p>
         <p class="pl-price-indicator" data-pl-price-indicator="fixed-weight">
-          {l s='Fixed prices based on total weight' mod='packlink'}
+            {l s='Fixed prices based on total weight' mod='packlink'}
         </p>
         <p class="pl-price-indicator" data-pl-price-indicator="fixed-value">
-          {l s='Fixed prices based on total price' mod='packlink'}
+            {l s='Fixed prices based on total price' mod='packlink'}
         </p>
       </td>
       <td class="pl-table-row-method-logo">
@@ -745,10 +759,10 @@
       </td>
       <td class="pl-table-row-method-type" id="pl-method-title">
         <div class="pl-national">
-          {l s='National' mod='packlink'}
+            {l s='National' mod='packlink'}
         </div>
         <div class="pl-international">
-          {l s='International' mod='packlink'}
+            {l s='International' mod='packlink'}
         </div>
       </td>
       <td>
@@ -789,7 +803,7 @@
                 home
               </i>
             </p>
-            {l s='Delivery' mod='packlink'}
+              {l s='Delivery' mod='packlink'}
           </div>
           <div class="pl-pudo-dropoff">
             <p class="pl-method-pudo-icon">
@@ -797,13 +811,13 @@
                 location_on
               </i>
             </p>
-            {l s='Pick up' mod='packlink'}
+              {l s='Pick up' mod='packlink'}
           </div>
         </div>
       </td>
       <td>
         <a href="#" id="pl-shipping-method-config-btn" tabindex="-1">
-          {l s='Configure' mod='packlink'}
+            {l s='Configure' mod='packlink'}
         </a>
       </td>
     </tr>
@@ -814,10 +828,10 @@
     <div class="row">
       <div class="col-sm-12 pl-nav-wrapper">
         <div class="pl-nav-item selected" data-pl-shipping-methods-nav-button="all" tabindex="-1">
-          {l s='All shipping services' mod='packlink'}
+            {l s='All shipping services' mod='packlink'}
         </div>
         <div class="pl-nav-item" data-pl-shipping-methods-nav-button="selected" tabindex="-1">
-          {l s='Selected shipping services' mod='packlink'}
+            {l s='Selected shipping services' mod='packlink'}
         </div>
       </div>
     </div>
@@ -845,23 +859,23 @@
 
   <div id="pl-shipping-methods-result-template">
     <div class="pl-num-shipping-method-results-wrapper">
-      {l s='Showing' mod='packlink'} <span id="pl-number-showed-methods"></span> {l s='results' mod='packlink'}
+        {l s='Showing' mod='packlink'} <span id="pl-number-showed-methods"></span> {l s='results' mod='packlink'}
     </div>
   </div>
 
   <div id="pl-packlink-percent-template">
     <div class="row">
       <div class="col-sm-12 pl-form-section-subtitle-wrapper">
-        {l s='Please set pricing rule' mod='packlink'}
+          {l s='Please set pricing rule' mod='packlink'}
       </div>
     </div>
     <div class="row">
       <div class="col-sm-12 pl-form-section-input-wrapper pl-price-increase-wrapper">
         <div class="pl-input-price-switch selected" data-pl-packlink-percent-btn="increase">
-          {l s='Increase' mod='packlink'}
+            {l s='Increase' mod='packlink'}
         </div>
         <div class="pl-input-price-switch" data-pl-packlink-percent-btn="decrease">
-          {l s='Reduce' mod='packlink'}
+            {l s='Reduce' mod='packlink'}
         </div>
         <div class="form-group pl-form-section-input pl-text-input">
           <input type="text" class="form-control" id="pl-perecent-amount"/>
@@ -874,7 +888,7 @@
   <div id="pl-fixed-prices-by-weight-template">
     <div class="row">
       <div class="col-sm-12 pl-form-section-subtitle-wrapper">
-        {l s='Please add price for each weight criteria' mod='packlink'}
+          {l s='Please add price for each weight criteria' mod='packlink'}
       </div>
     </div>
 
@@ -919,7 +933,7 @@
   <div id="pl-fixed-prices-by-value-template">
     <div class="row">
       <div class="col-sm-12 pl-form-section-subtitle-wrapper">
-        {l s='Please add price for each price criteria' mod='packlink'}
+          {l s='Please add price for each price criteria' mod='packlink'}
       </div>
     </div>
 
@@ -1010,7 +1024,7 @@
         </div>
         <div class="pl-footer-copyright-wrapper">
           <a href="{$termsAndConditionsLink}" target="_blank">
-            {l s='General conditions' mod='packlink'}
+              {l s='General conditions' mod='packlink'}
           </a>
           <p>{l s='Developed and managed by Packlink' mod='packlink'}</p>
         </div>
@@ -1021,66 +1035,68 @@
 </div>
 
 <script type="application/javascript">
-  Packlink.errorMsgs = {
-    required: "{l s='This field is required.' mod='packlink'}",
-    numeric: "{l s='Value must be valid number.' mod='packlink'}",
-    invalid: "{l s='This field is not valid.' mod='packlink'}",
-    phone: "{l s='This field must be valid phone number.' mod='packlink'}",
-    titleLength: "{l s='Title can have at most 64 characters.' mod='packlink'}",
-    greaterThanZero: "{l s='Value must be greater than 0.' mod='packlink'}",
-    numberOfDecimalPlaces: "{l s='Field must have 2 decimal places.' mod='packlink'}",
-    integer: "{l s='Field must be an integer.' mod='packlink'}"
-  };
+    Packlink.errorMsgs = {
+        required: "{l s='This field is required.' mod='packlink'}",
+        numeric: "{l s='Value must be valid number.' mod='packlink'}",
+        invalid: "{l s='This field is not valid.' mod='packlink'}",
+        phone: "{l s='This field must be valid phone number.' mod='packlink'}",
+        titleLength: "{l s='Title can have at most 64 characters.' mod='packlink'}",
+        greaterThanZero: "{l s='Value must be greater than 0.' mod='packlink'}",
+        numberOfDecimalPlaces: "{l s='Field must have 2 decimal places.' mod='packlink'}",
+        integer: "{l s='Field must be an integer.' mod='packlink'}"
+    };
 
-  Packlink.successMsgs = {
-    shippingMethodSaved: '{l s='Shipping service successfully saved.' mod='packlink'}'
-  };
+    Packlink.successMsgs = {
+        shippingMethodSaved: "{l s='Shipping service successfully saved.' mod='packlink'}"
+    };
 
-  Packlink.state = new Packlink.StateController(
-      {
-        scrollConfiguration: {
-          rowHeight: 75,
-          scrollOffset: 0
-        },
+    Packlink.state = new Packlink.StateController(
+        {
+            scrollConfiguration: {
+                rowHeight: 75,
+                scrollOffset: 0
+            },
 
-        shippingServiceMaxTitleLength: 64,
-        hasTaxConfiguration: true,
+            shippingServiceMaxTitleLength: 64,
+            hasTaxConfiguration: true,
 
-        dashboardGetStatusUrl: "{$dashboardGetStatusUrl}",
-        defaultParcelGetUrl: "{$defaultParcelGetUrl}",
-        defaultParcelSubmitUrl: "{$defaultParcelSubmitUrl}",
-        defaultWarehouseGetUrl: "{$defaultWarehouseGetUrl}",
-        defaultWarehouseSubmitUrl: "{$defaultWarehouseSubmitUrl}",
-        defaultWarehouseSearchPostalCodesUrl: "{$defaultWarehouseSearchPostalCodesUrl}",
-        shippingMethodsGetAllUrl: "{$shippingMethodsGetAllUrl}",
-        shippingMethodsActivateUrl: "{$shippingMethodsActivateUrl}",
-        shippingMethodsDeactivateUrl: "{$shippingMethodsDeactivateUrl}",
-        shippingMethodsSaveUrl: "{$shippingMethodsSaveUrl}",
-        getSystemOrderStatusesUrl: "{$getSystemOrderStatusesUrl}",
-        orderStatusMappingsGetUrl: "{$orderStatusMappingsGetUrl}",
-        orderStatusMappingsSaveUrl: "{$orderStatusMappingsSaveUrl}",
-        shopShippingMethodCountGetUrl: "{$shopShippingMethodCountGetUrl}",
-        shopShippingMethodsDisableUrl: "{$shopShippingMethodsDisableUrl}",
-        debugGetStatusUrl: "{$debugGetStatusUrl}",
-        debugSetStatusUrl: "{$debugSetStatusUrl}",
-        shippingMethodsGetTaxClasses: "{$shippingMethodsGetTaxClasses}"
-      }
-  );
+            dashboardGetStatusUrl: "{$dashboardGetStatusUrl}",
+            defaultParcelGetUrl: "{$defaultParcelGetUrl}",
+            defaultParcelSubmitUrl: "{$defaultParcelSubmitUrl}",
+            defaultWarehouseGetUrl: "{$defaultWarehouseGetUrl}",
+            defaultWarehouseSubmitUrl: "{$defaultWarehouseSubmitUrl}",
+            defaultWarehouseSearchPostalCodesUrl: "{$defaultWarehouseSearchPostalCodesUrl}",
+            shippingMethodsGetStatusUrl: "{$shippingMethodsGetStatusUrl}",
+            shippingMethodsGetAllUrl: "{$shippingMethodsGetAllUrl}",
+            shippingMethodsActivateUrl: "{$shippingMethodsActivateUrl}",
+            shippingMethodsDeactivateUrl: "{$shippingMethodsDeactivateUrl}",
+            shippingMethodsSaveUrl: "{$shippingMethodsSaveUrl}",
+            getSystemOrderStatusesUrl: "{$getSystemOrderStatusesUrl}",
+            orderStatusMappingsGetUrl: "{$orderStatusMappingsGetUrl}",
+            orderStatusMappingsSaveUrl: "{$orderStatusMappingsSaveUrl}",
+            shopShippingMethodCountGetUrl: "{$shopShippingMethodCountGetUrl}",
+            shopShippingMethodsDisableUrl: "{$shopShippingMethodsDisableUrl}",
+            debugGetStatusUrl: "{$debugGetStatusUrl}",
+            debugSetStatusUrl: "{$debugSetStatusUrl}",
+            shippingMethodsGetTaxClassesUrl: "{$shippingMethodsGetTaxClassesUrl}",
+            autoConfigureStartUrl: "{$autoConfigureStartUrl}"
+        }
+    );
 
-  let inheritShowFlashMessage = Packlink.utilityService.showFlashMessage;
+    let inheritShowFlashMessage = Packlink.utilityService.showFlashMessage;
 
-  Packlink.utilityService.showFlashMessage = function (message, status) {
-    inheritShowFlashMessage(message, status);
+    Packlink.utilityService.showFlashMessage = function (message, status) {
+        inheritShowFlashMessage(message, status);
 
-    let prestaAlerts = document.getElementsByClassName('alert');
+        let prestaAlerts = document.getElementsByClassName('alert');
 
-    for (let alert of prestaAlerts) {
-      alert.style.display = 'none';
-    }
-  };
+        for (let alert of prestaAlerts) {
+            alert.style.display = 'none';
+        }
+    };
 
-  Packlink.state.display();
+    Packlink.state.display();
 
-  hidePrestaSpinner();
-  calculateContentHeight(60);
+    hidePrestaSpinner();
+    calculateContentHeight(60);
 </script>

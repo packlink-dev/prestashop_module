@@ -15,7 +15,7 @@ After installation is over, plugin configuration can be set by clicking on the C
 Packlink module or by using _Shipping > Packlink PRO_ menu. 
 
 ## Version
-2.0.0
+2.1.0
 
 ## Compatibility
 PrestaShop 1.6.x and 1.7.x versions.

@@ -8,13 +8,21 @@ use Packlink\BusinessLogic\Configuration;
 class ConfigurationService extends Configuration
 {
     /**
-     * @inheritdoc
+     * Threshold between two runs of scheduler.
      */
     const SCHEDULER_TIME_THRESHOLD = 1800;
     /**
      * @inheritdoc
      */
     const MIN_LOG_LEVEL = Logger::ERROR;
+    /**
+     * Max inactivity period for a task in seconds
+     */
+    const MAX_TASK_INACTIVITY_PERIOD = 60;
+    /**
+     * Default HTTP method to use for async call.
+     */
+    const ASYNC_CALL_METHOD = 'GET';
     /**
      * @var string
      */
@@ -31,24 +39,28 @@ class ConfigurationService extends Configuration
     }
 
     /**
+     * Gets max inactivity period for a task in seconds.
+     * After inactivity period is passed, system will fail such task as expired.
+     *
+     * @return int Max task inactivity period in seconds if set; otherwise, self::MAX_TASK_INACTIVITY_PERIOD.
+     */
+    public function getMaxTaskInactivityPeriod()
+    {
+        return parent::getMaxTaskInactivityPeriod() ?: self::MAX_TASK_INACTIVITY_PERIOD;
+    }
+
+    /**
      * Returns web-hook callback URL for current system.
      *
      * @return string Web-hook callback URL.
      */
     public function getWebHookUrl()
     {
-        return \Context::getContext()->link->getModuleLink(
-            'packlink',
-            'webhooks',
-            array(),
-            null,
-            null,
-            \Configuration::get('PS_SHOP_DEFAULT')
-        );
+        return $this->getFrontendUrl('webhooks');
     }
 
     /**
-     * Returns async process starter url, always in http.
+     * Returns async process starter URL.
      *
      * @param string $guid Process identifier.
      *
@@ -57,15 +69,11 @@ class ConfigurationService extends Configuration
     public function getAsyncProcessUrl($guid)
     {
         $params = array('guid' => $guid);
+        if ($this->isAutoTestMode()) {
+            $params['auto-test'] = 1;
+        }
 
-        return \Context::getContext()->link->getModuleLink(
-            'packlink',
-            'asyncprocess',
-            $params,
-            null,
-            null,
-            \Configuration::get('PS_SHOP_DEFAULT')
-        );
+        return $this->getFrontendUrl('asyncprocess', $params);
     }
 
     /**
@@ -141,5 +149,20 @@ class ConfigurationService extends Configuration
     public function getECommerceVersion()
     {
         return _PS_VERSION_;
+    }
+
+    /**
+     * Gets the URL of the frontend controller.
+     *
+     * @param string $controller Controller name.
+     * @param array $params Route parameters.
+     *
+     * @return string
+     */
+    private function getFrontendUrl($controller, $params = array())
+    {
+        $shopId = \Configuration::get('PS_SHOP_DEFAULT');
+
+        return \Context::getContext()->link->getModuleLink('packlink', $controller, $params, null, null, $shopId);
     }
 }

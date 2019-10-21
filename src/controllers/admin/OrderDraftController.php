@@ -2,34 +2,17 @@
 
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueService;
-use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
 use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Tasks\SendDraftTask;
-use Packlink\PrestaShop\Classes\Bootstrap;
-use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /**
  * Class OrderDraftController
  */
-class OrderDraftController extends ModuleAdminController
+class OrderDraftController extends PacklinkBaseController
 {
-    /**
-     * ShipmentLabelsController constructor.
-     *
-     * @throws \PrestaShopException
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        Bootstrap::init();
-
-        $this->bootstrap = true;
-    }
-
     /**
      * Creates order draft for order identified by ID in the request by enqueuing SendDraftTask.
      *
@@ -44,9 +27,6 @@ class OrderDraftController extends ModuleAdminController
 
         if ($data['orderId']) {
             $orderId = $data['orderId'];
-            Bootstrap::init();
-            /** @var ConfigurationService $configService */
-            $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
             /** @var QueueService $queue */
             $queue = ServiceRegister::getService(QueueService::CLASS_NAME);
             /** @var OrderRepository $orderRepository */
@@ -62,7 +42,7 @@ class OrderDraftController extends ModuleAdminController
             try {
                 $draftTask = new SendDraftTask($orderId);
 
-                $queue->enqueue($configService->getDefaultQueueName(), $draftTask);
+                $queue->enqueue($this->getConfigService()->getDefaultQueueName(), $draftTask);
 
                 if ($draftTask->getExecutionId() !== null) {
                     $orderDetails->setTaskId($draftTask->getExecutionId());

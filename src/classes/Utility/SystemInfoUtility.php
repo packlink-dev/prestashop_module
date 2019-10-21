@@ -2,8 +2,10 @@
 
 namespace Packlink\PrestaShop\Classes\Utility;
 
-use Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
+use Logeecom\Infrastructure\Exceptions\BaseException;
+use Logeecom\Infrastructure\ORM\Entity;
 use Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
+use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
@@ -14,12 +16,12 @@ use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 class SystemInfoUtility
 {
     const PHP_INFO_FILE_NAME = 'phpinfo.html';
-    const SYSTEM_INFO_FILE_NAME = 'system-info.txt';
-    const LOG_FILE_NAME = 'logs.txt';
-    const USER_INFO_FILE_NAME = 'packlink-user-info.txt';
-    const QUEUE_INFO_FILE_NAME = 'queue.txt';
-    const PARCEL_WAREHOUSE_FILE_NAME = 'parcel-warehouse.txt';
-    const SERVICE_INFO_FILE_NAME = 'services.txt';
+    const SYSTEM_INFO_FILE_NAME = 'system-info.json';
+    const LOG_FILE_NAME = 'logs.json';
+    const USER_INFO_FILE_NAME = 'packlink-user-info.json';
+    const QUEUE_INFO_FILE_NAME = 'queue.json';
+    const PARCEL_WAREHOUSE_FILE_NAME = 'parcel-warehouse.json';
+    const SERVICE_INFO_FILE_NAME = 'services.json';
     const DATABASE = 'MySQL';
     const LOG_NUMBER_DAYS = 7;
     const LIMIT = 10000;
@@ -28,9 +30,14 @@ class SystemInfoUtility
      * Returns path to zip archive that contains current system information.
      *
      * @return string
+     * @throws \PrestaShopException
      */
     public static function getSystemInfo()
     {
+        if (!defined('JSON_PRETTY_PRINT')) {
+            define('JSON_PRETTY_PRINT', 128);
+        }
+
         $file = tempnam(sys_get_temp_dir(), 'packlink_system_info');
 
         $zip = new \ZipArchive();
@@ -71,25 +78,32 @@ class SystemInfoUtility
      * Returns information about prestashop and plugin.
      *
      * @return string
+     *
+     * @throws \PrestaShopException
      */
     protected static function getPrestaShopInfo()
     {
-        $result = 'PrestaShop version: ' . _PS_VERSION_;
-        $result .= "\ntheme: " . _THEME_NAME_;
+        /** @var Configuration $configService */
+        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        $result = array();
+        $result['PrestaShop version'] = _PS_VERSION_;
+        $result['Theme'] = _THEME_NAME_;
 
         $adminDirectoryPath = explode('/', _PS_ADMIN_DIR_);
         $adminDirectory = $adminDirectoryPath[count($adminDirectoryPath) - 1];
 
-        $result .= "\nbase admin url: " . _PS_BASE_URL_ . '/' . $adminDirectory . '/';
+        $result['Base admin URL'] = _PS_BASE_URL_ . '/' . $adminDirectory . '/';
         // PrestaShop only supports MySQL database.
-        $result .= "\ndatabase: " . static::DATABASE;
-        $result .= "\ndatabase version: " . \Db::getInstance()->getVersion();
+        $result['Database'] = \Db::getInstance()->getBestEngine();
+        $result['Database version'] = \Db::getInstance()->getVersion();
 
-        $packlink = new \Packlink();
+        $packlink = \Module::getInstanceByName('packlink');
 
-        $result .= "\nplugin version: " . $packlink->version;
+        $result['Plugin version'] = $packlink->version;
+        $result['Async process URL'] = $configService->getAsyncProcessUrl('test');
+        $result['Auto-test URL'] = \Context::getContext()->link->getAdminLink('PacklinkAutoTest');
 
-        return $result;
+        return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -99,36 +113,25 @@ class SystemInfoUtility
      */
     protected static function getLogs()
     {
-        $result = "\n[";
+        $result = array(array());
 
         try {
             $currentDate = new \DateTime();
             $currentDate->sub(new \DateInterval('P' . static::LOG_NUMBER_DAYS . 'D'));
             $currentOffset = 0;
 
-            $db = \Db::getInstance();
-
-            $query = new \DbQuery();
-            $query->select('*')->from('log')->where("date_add>'" . $currentDate->format('Y-m-d H:i:s') . "'");
-            $query->limit(static::LIMIT, $currentOffset);
-
-            $logs = $db->executeS($query);
-
+            $logs = self::getDatabaseLogs($currentDate, $currentOffset);
             while (!empty($logs)) {
-                $result .= static::formatJsonOutput($logs);
-
+                $result[] = $logs;
                 $currentOffset += static::LIMIT;
-
-                $query = new \DbQuery();
-                $query->select('*')->from('log')->where("date_add>'" . $currentDate->format('Y-m-d H:i:s') . "'");
-                $query->limit(static::LIMIT, $currentOffset);
-
-                $logs = $db->executeS($query);
+                $logs = self::getDatabaseLogs($currentDate, $currentOffset);
             }
+
+            $result = call_user_func_array('array_merge', $result);
         } catch (\Exception $e) {
         }
 
-        return $result . "\n]";
+        return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -141,11 +144,11 @@ class SystemInfoUtility
         /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
 
-        $result = 'user info :' . json_encode($configService->getUserInfo());
+        /** @noinspection NullPointerExceptionInspection */
+        $result = $configService->getUserInfo()->toArray();
+        $result['API key'] = $configService->getAuthorizationToken();
 
-        $result .= "\n\napi key: " . $configService->getAuthorizationToken();
-
-        return $result;
+        return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -158,17 +161,13 @@ class SystemInfoUtility
         $result = array();
 
         try {
-            $repository = RepositoryRegistry::getRepository(QueueItem::CLASS_NAME);
+            $repository = RepositoryRegistry::getQueueItemRepository();
 
             $query = new QueryFilter();
-            $query->orWhere('status', '=', QueueItem::QUEUED);
-            $query->orWhere('status', '=', QueueItem::CREATED);
-            $query->orWhere('status', '=', QueueItem::IN_PROGRESS);
-            $query->orWhere('status', '=', QueueItem::FAILED);
+            $query->where('status', Operators::NOT_EQUALS, QueueItem::COMPLETED);
 
             $result = $repository->select($query);
-        } catch (RepositoryNotRegisteredException $e) {
-        } catch (QueryFilterInvalidParamException $e) {
+        } catch (BaseException $e) {
         }
 
         return static::formatJsonOutput($result);
@@ -184,10 +183,11 @@ class SystemInfoUtility
         /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
 
-        $result = 'default parcel: ' . json_encode($configService->getDefaultParcel() ?: array());
-        $result .= "\n\ndefault warehouse: " . json_encode($configService->getDefaultWarehouse() ?: array());
+        $result = array();
+        $result['Default parcel'] = $configService->getDefaultParcel() ?: array();
+        $result['Default warehouse'] = $configService->getDefaultWarehouse() ?: array();
 
-        return $result;
+        return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     /**
@@ -205,28 +205,40 @@ class SystemInfoUtility
         } catch (RepositoryNotRegisteredException $e) {
         }
 
-        return "[\n" . static::formatJsonOutput($result) . "\n]";
+        return static::formatJsonOutput($result);
     }
 
     /**
      * Formats json output.
      *
-     * @param array $items
+     * @param Entity[] $items
      *
      * @return string
      */
     protected static function formatJsonOutput(array &$items)
     {
-        $result = '';
-
+        $response = array();
         foreach ($items as $item) {
-            if (is_array($item)) {
-                $result .= json_encode($item) . ",\n\n";
-            } else {
-                $result .= json_encode($item->toArray()) . ",\n\n";
-            }
+            $response[] = $item->toArray();
         }
 
-        return rtrim($result, ",\n");
+        return json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
+     * @param \DateTime $currentDate
+     * @param $currentOffset
+     *
+     * @return array
+     *
+     * @throws \PrestaShopDatabaseException
+     */
+    protected static function getDatabaseLogs(\DateTime $currentDate, $currentOffset)
+    {
+        $query = new \DbQuery();
+        $query->select('*')->from('log')->where("date_add > '" . $currentDate->format('Y-m-d H:i:s') . "'");
+        $query->limit(static::LIMIT, $currentOffset);
+
+        return \Db::getInstance()->executeS($query);
     }
 }

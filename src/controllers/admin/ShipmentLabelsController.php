@@ -2,34 +2,20 @@
 
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Order\Interfaces\OrderRepository;
-use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /**
  * Class ShipmentLabelsController
  */
-class ShipmentLabelsController extends ModuleAdminController
+class ShipmentLabelsController extends PacklinkBaseController
 {
-    /**
-     * ShipmentLabelsController constructor.
-     *
-     * @throws \PrestaShopException
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        Bootstrap::init();
-
-        $this->bootstrap = true;
-    }
-
     /**
      * Sets shipment label to have been printed.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function displayAjaxSetLabelPrinted()
     {

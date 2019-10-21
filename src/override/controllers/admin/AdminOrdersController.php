@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection PhpUndefinedClassInspection */
 /** @noinspection PhpUnusedPrivateMethodInspection */
 /** @noinspection PhpIncludeInspection */
 
@@ -56,6 +57,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     * @throws \SmartyException
      */
     public function printPDFIcons($orderId, $tr)
     {
@@ -71,9 +73,9 @@ class AdminOrdersController extends AdminOrdersControllerCore
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws \SmartyException
      */
     public function getOrderDraft($reference)
     {

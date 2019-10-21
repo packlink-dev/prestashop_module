@@ -9,14 +9,16 @@ class PacklinkController extends ModuleAdminController
 {
     /**
      * PacklinkController constructor.
+     *
+     * @throws \PrestaShopException
      */
     public function __construct()
     {
         parent::__construct();
+
         Tools::redirectAdmin(
             Context::getContext()->link->getAdminLink('AdminModules')
-            . '&configure=' . $this->module->name
-            . '&tab_module=shipping_logistics&module_name=' . $this->module->name
+            . '&configure=' . $this->module->name . '&tab_module=shipping_logistics&module_name=' . $this->module->name
         );
     }
 }

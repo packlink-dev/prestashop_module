@@ -1,0 +1,70 @@
+.pl-main-wrapper {
+  background-color: #fff;
+  margin-bottom: 40px;
+}
+
+.pl-auto-test-header {
+  margin: 40px auto 20px;
+  color: #545454;
+  text-align: center;
+}
+
+.pl-auto-test-header .pl-auto-test-title,
+.pl-auto-test-header .pl-auto-test-subtitle {
+  margin-bottom: 25px;
+  padding: 0;
+  font-size: 2rem;
+}
+
+.pl-auto-test-header .pl-auto-test-subtitle {
+  font-size: 1.2rem;
+}
+
+.pl-auto-test-content {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto 15px;
+}
+
+.pl-auto-test-content a:hover {
+  text-decoration: none;
+}
+
+#pl-auto-test-progress .pl-auto-test-log-panel {
+  padding: 20px;
+  background-color: #0a0a0a;
+  color: #efefef;
+  text-align: left;
+  max-height: 500px;
+  overflow-y: auto;
+  display: none;
+}
+
+.pl-auto-test-log-panel .log-date {
+  color: #66ff66;
+  margin-right: 10px;
+}
+
+.pl-auto-test-log-panel .pl-auto-test-log {
+  margin-bottom: 5px;
+}
+
+.pl-auto-test-log-panel pre {
+  margin: 0 0 0 10px;
+  background-color: #3c3c3c;
+  color: #fff;
+  border: none;
+}
+
+#pl-auto-test-done {
+  display: none;
+}
+
+#pl-spinner-box {
+  height: 100px;
+}
+
+.pl-spinner {
+  position: absolute;
+}

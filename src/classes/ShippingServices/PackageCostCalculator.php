@@ -34,6 +34,7 @@ class PackageCostCalculator
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopException
      * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     * @throws \Exception
      */
     public static function getPackageCost(Cart $cart, array $products, $carrierId)
     {
@@ -61,12 +62,13 @@ class PackageCostCalculator
         if (self::displayBackupCarrier($cart, $calculatedCosts, $carrierReferenceId)) {
             $allCosts = self::getCostsForAllShippingMethods($cart, $shippingProducts);
             if (!empty($allCosts)) {
-                return min(array_values($allCosts));
+                return self::applyShopCostCalculationSettings(min(array_values($allCosts)), null, $cart);
             }
         }
 
         if ($calculatedCosts !== false) {
-            return self::addHandlingCost($calculatedCosts, $methodId, $carrier);
+            return isset($calculatedCosts[$methodId])
+                ? self::applyShopCostCalculationSettings($calculatedCosts[$methodId], $carrier, $cart) : false;
         }
 
         $warehouse = CachingUtility::getDefaultWarehouse();
@@ -94,7 +96,8 @@ class PackageCostCalculator
 
         CachingUtility::setCosts($calculatedCosts);
 
-        return self::addHandlingCost($calculatedCosts, $methodId, $carrier);
+        return isset($calculatedCosts[$methodId])
+            ? self::applyShopCostCalculationSettings($calculatedCosts[$methodId], $carrier, $cart) : false;
     }
 
     /**
@@ -144,6 +147,7 @@ class PackageCostCalculator
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     * @throws \Exception
      */
     private static function getCostsForAllShippingMethods($cart, $products)
     {
@@ -217,6 +221,7 @@ class PackageCostCalculator
      * @param \Cart $cart
      *
      * @return array|float
+     * @throws \Exception
      */
     private static function getCartTotal(Cart $cart)
     {
@@ -228,19 +233,40 @@ class PackageCostCalculator
     }
 
     /**
-     * Adds handling cost to the calculated cost.
+     * Checks shipping cost settings and handling costs and applies settings to the given cost.
      *
-     * @param array $calculatedCosts
-     * @param int $methodId
+     * @param float $cost
      * @param \Carrier $carrier
+     * @param \Cart $cart
      *
-     * @return bool|int|mixed
+     * @return float Calculated cost.
+     *
+     * @throws \PrestaShopException
+     * @throws \Exception
      */
-    private static function addHandlingCost(array $calculatedCosts, $methodId, Carrier $carrier)
+    private static function applyShopCostCalculationSettings($cost, $carrier, Cart $cart)
     {
-        $cost = isset($calculatedCosts[$methodId]) ? $calculatedCosts[$methodId] : false;
-        if ($cost !== false && $carrier->shipping_handling) {
-            $cost += (float)\Configuration::get('PS_SHIPPING_HANDLING') ?: 0;
+        // if shipping service is available
+        $configuration = \Configuration::getMultiple(array(
+            'PS_SHIPPING_FREE_PRICE',
+            'PS_SHIPPING_HANDLING',
+            'PS_SHIPPING_FREE_WEIGHT',
+        ));
+
+        if ((float)$configuration['PS_SHIPPING_FREE_PRICE'] > 0
+            && self::getCartTotal($cart) >= (float)$configuration['PS_SHIPPING_FREE_PRICE']
+        ) {
+            return 0;
+        }
+
+        if ((float)$configuration['PS_SHIPPING_FREE_WEIGHT'] > 0
+            && $cart->getTotalWeight() >= (float)$configuration['PS_SHIPPING_FREE_WEIGHT']
+        ) {
+            return 0;
+        }
+
+        if ($carrier && $carrier->shipping_handling) {
+            $cost += (float)$configuration['PS_SHIPPING_HANDLING'] ?: 0;
         }
 
         return $cost;

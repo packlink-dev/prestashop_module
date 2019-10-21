@@ -131,13 +131,7 @@ class BaseRepository implements RepositoryInterface
         $result = \Db::getInstance()->insert(static::TABLE_NAME, $record);
 
         if (!$result) {
-            $message = TranslationUtility::__(
-                'Entity %s with ID %d cannot be saved.',
-                array(
-                    $entity->getConfig()->getType(),
-                    $entity->getConfig()->getType(),
-                )
-            );
+            $message = TranslationUtility::__('Entity %s cannot be inserted .', array($entity->getConfig()->getType()));
             Logger::logError($message);
             throw new \RuntimeException($message);
         }
@@ -182,7 +176,7 @@ class BaseRepository implements RepositoryInterface
                 'Entity %s with ID %d cannot be updated.',
                 array(
                     $entity->getConfig()->getType(),
-                    $entity->getConfig()->getType(),
+                    $id,
                 )
             );
             Logger::logError($message);

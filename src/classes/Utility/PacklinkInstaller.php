@@ -49,6 +49,8 @@ class PacklinkInstaller
         'ShipmentLabels',
         'BulkShipmentLabels',
         'OrderDraft',
+        'PacklinkAutoTest',
+        'PacklinkAutoConfigure',
     );
 
     /**
@@ -222,6 +224,64 @@ class PacklinkInstaller
         $this->addDefaultStatusMapping();
 
         return $this->addDefaultPluginConfiguration();
+    }
+
+    /**
+     * Registers a controller.
+     *
+     * @param string $name Controller name.
+     * @param int $parentId Id of parent controller.
+     *
+     * @return bool
+     *
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     */
+    public function addController($name, $parentId = -1)
+    {
+        try {
+            $tab = new \Tab();
+            $tab->active = 1;
+            $tab->name[(int)\Configuration::get('PS_LANG_DEFAULT')] = $this->module->l('Packlink');
+            $tab->class_name = $name;
+            $tab->module = $this->module->name;
+            $tab->id_parent = $parentId;
+            $tab->add();
+
+            return true;
+        } catch (\PrestaShopException $e) {
+            Logger::logWarning(
+                'Failed to register controller "' . $name . '". Error: ' . $e->getMessage(),
+                'Integration'
+            );
+        }
+
+        return false;
+    }
+
+    /**
+     * Removes a controller.
+     *
+     * @param string $name Name of the controller.
+     *
+     * @return bool
+     *
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     */
+    public function removeController($name)
+    {
+        try {
+            /** @noinspection PhpDeprecationInspection Because it exists in PS1.6 */
+            $tab = new \Tab((int)\Tab::getIdFromClassName($name));
+            if ($tab) {
+                $tab->delete();
+            }
+        } catch (\PrestaShopException $e) {
+            $this->tryLogError('Error removing controller "' . $name . '". Error: ' . $e->getMessage());
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -404,64 +464,6 @@ class PacklinkInstaller
         return $result;
     }
 
-    /**
-     * Registers controller.
-     *
-     * @param string $name Controller name.
-     * @param int $parentId Id of parent controller.
-     *
-     * @return bool
-     *
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
-     */
-    private function addController($name, $parentId = -1)
-    {
-        try {
-            $tab = new \Tab();
-            $tab->active = 1;
-            $tab->name[(int)\Configuration::get('PS_LANG_DEFAULT')] = $this->module->l('Packlink');
-            $tab->class_name = $name;
-            $tab->module = $this->module->name;
-            $tab->id_parent = $parentId;
-            $tab->add();
-
-            return true;
-        } catch (\PrestaShopException $e) {
-            Logger::logWarning(
-                'Failed to register controller "' . $name . '". Error: ' . $e->getMessage(),
-                'Integration'
-            );
-        }
-
-        return false;
-    }
-
-    /**
-     * Removes controller.
-     *
-     * @param string $name Name of the controller.
-     *
-     * @return bool
-     *
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
-     */
-    private function removeController($name)
-    {
-        try {
-            /** @noinspection PhpDeprecationInspection Because it exists in PS1.6 */
-            $tab = new \Tab((int)\Tab::getIdFromClassName($name));
-            if ($tab) {
-                $tab->delete();
-            }
-        } catch (\PrestaShopException $e) {
-            $this->tryLogError('Error removing controller "' . $name . '". Error: ' . $e->getMessage());
-
-            return false;
-        }
-
-        return true;
-    }
-
     private function addDefaultStatusMapping()
     {
         /** @var ConfigurationService $configService */
@@ -505,8 +507,6 @@ class PacklinkInstaller
     {
         $content = Tools::file_get_contents($overriddenFilePath);
 
-        return $content === false
-            || preg_match('/function __construct/', $content) === 0
-            || strpos($content, 'Packlink') !== false;
+        return $content === false || preg_match('/function __construct/', $content) === 0;
     }
 }
