@@ -105,7 +105,7 @@ class PacklinkPrestaShopUtility
         header('Expires: 0');
         header('Cache-Control: must-revalidate');
         header('Pragma: public');
-        header('Content-Length: ' . strlen($content));
+        header('Content-Length: ' . \Tools::strlen($content));
 
         echo $content;
 

@@ -2,7 +2,7 @@
   "name": "packlink/prestashop",
   "description": "Packlink Shipping PrestaShop plugin",
   "type": "library",
-  "version": "2.0.5",
+  "version": "2.1.0",
   "repositories": [
     {
       "type": "vcs",
@@ -45,6 +45,7 @@
     "post-install-cmd": "Packlink\\Lib\\Core::postUpdate"
   },
   "config": {
+    "prepend-autoloader": false,
     "platform": {
       "php": "5.3.29"
     }

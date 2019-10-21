@@ -79,7 +79,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.0.5';
+        $this->version = '2.1.0';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -452,8 +452,11 @@ class Packlink extends CarrierModule
         );
         $wakeupService->wakeup();
 
+        $fancyBoxUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . 'js/jquery/plugins/fancybox/jquery.fancybox.js';
+        $fancyBoxUrl = str_replace(array('https:', 'http:'), '', $fancyBoxUrl);
+
         $this->context->smarty->assign(array(
-            'fancyBoxPath' => _PS_BASE_URL_ . __PS_BASE_URI__ . 'js/jquery/plugins/fancybox/jquery.fancybox.js',
+            'fancyBoxPath' => $fancyBoxUrl,
         ));
 
         if ($apiToken || $loggedIn) {
