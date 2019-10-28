@@ -9,6 +9,9 @@ use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
+/** @noinspection PhpIncludeInspection */
+require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+
 /**
  * Class BulkShipmentLabelsController
  */

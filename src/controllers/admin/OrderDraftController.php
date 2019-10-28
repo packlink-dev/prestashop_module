@@ -8,6 +8,9 @@ use Packlink\BusinessLogic\Tasks\SendDraftTask;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
+/** @noinspection PhpIncludeInspection */
+require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+
 /**
  * Class OrderDraftController
  */
