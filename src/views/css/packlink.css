@@ -1096,6 +1096,7 @@ input[readonly][type="text"] {
   display: flex;
   align-items: center;
   color: #5d5d5d;
+  justify-content: flex-end;
 }
 
 .pl-register-btn-section-wrapper button {
