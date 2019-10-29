@@ -4,6 +4,9 @@ use Logeecom\Infrastructure\Configuration\Configuration;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
+/** @noinspection PhpIncludeInspection */
+require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+
 class OrderStateMappingController extends PacklinkBaseController
 {
     /**

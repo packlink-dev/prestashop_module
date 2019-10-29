@@ -15,6 +15,9 @@ use Packlink\BusinessLogic\Utility\Php\Php55;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
+/** @noinspection PhpIncludeInspection */
+require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+
 /**
  * Class ShippingMethodsController
  */
