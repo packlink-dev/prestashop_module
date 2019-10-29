@@ -11,6 +11,7 @@ use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Controllers\UpdateShippingServicesTaskStatusController;
 use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Packlink\BusinessLogic\Utility\Php\Php55;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
@@ -171,7 +172,7 @@ class ShippingMethodsController extends PacklinkBaseController
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to disable shipping methods.')));
         }
 
-        $ids = array_column($result, 'id_carrier');
+        $ids = Php55::arrayColumn($result, 'id_carrier');
         foreach ($ids as $id) {
             $carrier = new \Carrier((int)$id);
             $carrier->active = false;

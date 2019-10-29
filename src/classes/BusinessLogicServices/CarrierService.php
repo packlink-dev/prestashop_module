@@ -11,6 +11,7 @@ use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
+use Packlink\BusinessLogic\Utility\Php\Php55;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
@@ -444,7 +445,7 @@ class CarrierService implements ShopShippingMethodService
     private function setCarrierGroups(\Carrier $carrier)
     {
         $groups = \Group::getGroups(\Configuration::get('PS_LANG_DEFAULT'));
-        $carrier->setGroups(array_column($groups, 'id_group'));
+        $carrier->setGroups(Php55::arrayColumn($groups, 'id_group'));
     }
 
     /**
@@ -579,7 +580,7 @@ class CarrierService implements ShopShippingMethodService
 
         $result = \Db::getInstance()->executeS($query);
 
-        return array_column($result, 'id_carrier');
+        return Php55::arrayColumn($result, 'id_carrier');
     }
 
     /**
