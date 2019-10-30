@@ -4,6 +4,7 @@ namespace Packlink\PrestaShop\Classes\Tasks;
 
 use Logeecom\Infrastructure\Http\Exceptions\HttpUnhandledException;
 use Logeecom\Infrastructure\Logger\Logger;
+use Logeecom\Infrastructure\Serializer\Serializer;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\Task;
 use Logeecom\Infrastructure\Utility\TimeProvider;
@@ -64,7 +65,7 @@ class UpgradeShopOrderDetailsTask extends Task
      */
     public function serialize()
     {
-        return serialize(
+        return Serializer::serialize(
             array(
                 $this->ordersToSync,
                 $this->batchSize,
@@ -83,10 +84,44 @@ class UpgradeShopOrderDetailsTask extends Task
      */
     public function unserialize($data)
     {
-        list($this->ordersToSync, $this->batchSize, $this->numberOfOrders, $this->currentProgress) = unserialize($data);
+        list($this->ordersToSync, $this->batchSize, $this->numberOfOrders, $this->currentProgress) =
+            Serializer::unserialize($data);
 
         $this->orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
         $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
+    }
+
+    /**
+     * Transforms array into an serializable object,
+     *
+     * @param array $array Data that is used to instantiate serializable object.
+     *
+     * @return \Logeecom\Infrastructure\Serializer\Interfaces\Serializable
+     *      Instance of serialized object.
+     */
+    public static function fromArray(array $array)
+    {
+        $entity = new static($array['ordersToSync']);
+        $entity->batchSize = $array['batchSize'];
+        $entity->numberOfOrders = $array['numberOfOrders'];
+        $entity->currentProgress = $array['currentProgress'];
+
+        return $entity;
+    }
+
+    /**
+     * Transforms serializable object into an array.
+     *
+     * @return array Array representation of a serializable object.
+     */
+    public function toArray()
+    {
+        return array(
+            'ordersToSync' => $this->ordersToSync,
+            'batchSize' => $this->batchSize,
+            'numberOfOrders' => $this->numberOfOrders,
+            'currentProgress' => $this->currentProgress,
+        );
     }
 
     /**
@@ -237,7 +272,7 @@ class UpgradeShopOrderDetailsTask extends Task
     {
         try {
             $trackingInfo = $this->proxy->getTrackingInfo($reference);
-            $this->orderRepository->updateTrackingInfo($reference, $trackingInfo, $shipment);
+            $this->orderRepository->updateTrackingInfo($shipment, $trackingInfo);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__(

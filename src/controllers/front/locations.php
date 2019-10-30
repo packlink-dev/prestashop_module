@@ -34,9 +34,11 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
     {
         $input = PacklinkPrestaShopUtility::getPacklinkPostData();
 
+        $addressId = !empty($input['addressId']) ? $input['addressId'] : null;
+
         switch ($input['method']) {
             case 'getLocations':
-                PacklinkPrestaShopUtility::dieJson($this->getLocations($input['methodId']));
+                PacklinkPrestaShopUtility::dieJson($this->getLocations($input['methodId'], $addressId));
                 break;
 
             case 'postSelectedDropoff':
@@ -54,16 +56,19 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
      *
      * @param string $methodId
      *
+     * @param int $addressId
+     *
      * @return array
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
-    protected function getLocations($methodId)
+    protected function getLocations($methodId, $addressId = null)
     {
-        $addressId = empty($this->context->cart->id_address_delivery) ? null
-            : $this->context->cart->id_address_delivery;
+        if (!$addressId) {
+            $addressId = empty($this->context->cart->id_address_delivery) ? null
+                : $this->context->cart->id_address_delivery;
+        }
 
         if (!$addressId) {
             return array();
@@ -97,12 +102,19 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
      *
      * @param $data
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     protected function createMapping($data)
     {
-        $cartId = empty($this->context->cart->id) ? null : (string)$this->context->cart->id;
+        if (!empty($data['cartId'])) {
+            $cartId = $data['cartId'];
+            $this->updateAddress($data['orderId'], $data['dropOff']);
+        } else {
+            $cartId = empty($this->context->cart->id) ? null : (string)$this->context->cart->id;
+        }
 
         if (!$cartId) {
             return;
@@ -148,5 +160,41 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
         }
 
         return CachingUtility::getPackages($shippingProducts);
+    }
+
+    /**
+     * Updates order address.
+     *
+     * @param int $orderId
+     * @param array $dropOff
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    protected function updateAddress($orderId, $dropOff)
+    {
+        $order = new \Order($orderId);
+        if (!Validate::isLoadedObject($order)) {
+            return;
+        }
+
+        $address = new \Address($order->id_address_delivery);
+        if (!Validate::isLoadedObject($address)) {
+            return;
+        }
+
+        $address->address1 = $dropOff['address'];
+        $address->postcode = $dropOff['zip'];
+        $address->city = $dropOff['city'];
+        $address->company = $dropOff['name'];
+        if (method_exists($this, 'l')) {
+            $address->alias = $this->l('Drop-Off delivery address');
+            $address->other = $this->l('Drop-Off delivery address');
+        } else {
+            $address->alias = 'Drop-Off delivery address';
+            $address->other = 'Drop-Off delivery address';
+        }
+
+        $address->update();
     }
 }
