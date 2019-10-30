@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/logeecom/pl_prestashop_module/compare/master...dev)
+### Added
+- Drop-off selection on order confirm page.
 
 ## [v2.1.1](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.1...v2.1.0) - 2019-10-28 
 ### Changed
