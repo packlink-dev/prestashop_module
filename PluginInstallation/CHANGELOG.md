@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Added
 - Drop-off selection on order confirm page.
 
+### Changed
+- Removed array_column usages from code.
+
 ## [v2.1.1](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.1...v2.1.0) - 2019-10-28 
 ### Changed
 - Fixed class auto-loader.
