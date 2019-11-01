@@ -344,9 +344,15 @@ class BaseRepository implements RepositoryInterface
             $conditionValue = IndexHelper::castFieldValue($condition->getValue(), $condition->getValueType());
         }
 
+        if (in_array($condition->getOperator(), array(Operators::NOT_IN, Operators::IN), true)) {
+            $conditionValue = '(' . implode(',', $condition->getValue()) . ')';
+        } else {
+            $conditionValue = "'" . pSQL($conditionValue, true) . "'";
+        }
+
         return $columnName . ' ' . $condition->getOperator()
             . (!in_array($condition->getOperator(), array(Operators::NULL, Operators::NOT_NULL), true)
-                ? "'" . pSQL($conditionValue, true) . "'" : ''
+                ? $conditionValue : ''
             );
     }
 
