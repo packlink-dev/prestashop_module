@@ -345,7 +345,21 @@ class BaseRepository implements RepositoryInterface
         }
 
         if (in_array($condition->getOperator(), array(Operators::NOT_IN, Operators::IN), true)) {
-            $conditionValue = '(' . implode(',', $condition->getValue()) . ')';
+            $values = array_map(function ($item) {
+                if (is_string($item)) {
+                    return "'$item'";
+                }
+
+                if (is_int($item)) {
+                    $val = IndexHelper::castFieldValue($item, 'integer');
+                    return "'{$val}'";
+                }
+
+                $val = IndexHelper::castFieldValue($item, 'double');
+
+                return "'{$val}'";
+            }, $condition->getValue());
+            $conditionValue = '(' . implode(',', $values) . ')';
         } else {
             $conditionValue = "'" . pSQL($conditionValue, true) . "'";
         }
