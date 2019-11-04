@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.0...v2.0.4)
+## [Unreleased](https://github.com/logeecom/pl_prestashop_module/compare/master...dev)
 
-## [v2.1.0](https://github.com/logeecom/pl_prestashop_module/compare/master...dev)
+## [v2.1.1](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.1...v2.1.0) - 2019-10-28 
+### Changed
+- Fixed class auto-loader.
+
+## [v2.1.0](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.0...v2.0.4) - 2019-10-15 
 ### Added
 - Auto-test and auto-configuration features.
 

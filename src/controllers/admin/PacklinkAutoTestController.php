@@ -7,6 +7,9 @@ use Packlink\PrestaShop\Classes\InfrastructureServices\LoggerService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
+/** @noinspection PhpIncludeInspection */
+require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+
 /**
  * Class PacklinkAutoTestController.
  */

@@ -3,6 +3,9 @@
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\SystemInfoUtility;
 
+/** @noinspection PhpIncludeInspection */
+require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
+
 class DebugController extends PacklinkBaseController
 {
     const SYSTEM_INFO_FILE_NAME = 'packlink-debug-data.zip';
