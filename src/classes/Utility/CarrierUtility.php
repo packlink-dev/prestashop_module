@@ -43,7 +43,7 @@ class CarrierUtility
     }
 
     /**
-     * Checks whether carrier with
+     * Checks whether carrier with provided reference is a drop-off or not.
      *
      * @param int $carrierReference
      *

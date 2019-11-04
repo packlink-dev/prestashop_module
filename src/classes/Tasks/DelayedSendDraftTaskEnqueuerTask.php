@@ -13,13 +13,13 @@ use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Tasks\SendDraftTask;
 
 /**
- * Class DelayedSendDraftTaskEnqueuer
+ * Class DelayedSendDraftTaskEnqueuerTask
  *
  * This task should be enqueued with a delay when send draft task must be enqueued with delay.
  *
  * @package Packlink\PrestaShop\Classes\Tasks
  */
-class DelayedSendDraftTaskEnqueuer extends Task
+class DelayedSendDraftTaskEnqueuerTask extends Task
 {
     /**
      * @var int Shop order id.

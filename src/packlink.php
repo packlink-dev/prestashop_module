@@ -343,7 +343,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Backend hook for order creation.
+     * Hook for order creation.
      *
      * @param array $params Hook parameters.
      *
@@ -659,52 +659,8 @@ class Packlink extends CarrierModule
                 return false;
             }
 
-            $address = new Address();
-            $shippingAddress = new Address($order->id_address_delivery);
-
-            $db = Db::getInstance();
-
             $dropOff = $mapping->getDropOff();
-
-            $countryQuery = new DbQuery();
-            $countryQuery->select('id_country')->from('country')->where("iso_code='{$dropOff['countryCode']}'");
-
-            $countryResult = $db->executeS($countryQuery);
-
-            if (!empty($countryResult[0]['id_country'])) {
-                $address->id_country = (int)$countryResult[0]['id_country'];
-            }
-
-            if (!empty($dropOff['state'])) {
-                $stateQuery = new DbQuery();
-                $stateQuery->select('id_state')->from('state')->where("iso_code='{$dropOff['state']}'");
-
-                $sateResult = $db->executeS($stateQuery);
-
-                if (!empty($sateResult[0]['id_state'])) {
-                    $address->id_state = (int)$sateResult[0]['id_state'];
-                }
-            }
-
-            $address->address1 = $dropOff['address'];
-            $address->postcode = $dropOff['zip'];
-            $address->city = $dropOff['city'];
-            $address->company = $dropOff['name'];
-            $address->phone = $this->getPhone($order, $shippingAddress);
-            $address->lastname = $this->context->customer->lastname;
-            $address->firstname = $this->context->customer->firstname;
-            if (Validate::isLoadedObject($shippingAddress)) {
-                $address->lastname = $shippingAddress->lastname ?: $address->lastname;
-                $address->firstname = $shippingAddress->firstname ?: $address->firstname;
-            }
-
-            $address->alias = $this->l('Drop-Off delivery address');
-            $address->other = $this->l('Drop-Off delivery address');
-
-            if ($address->save()) {
-                $order->id_address_delivery = $address->id;
-                $order->save();
-            }
+            \Packlink\PrestaShop\Classes\Utility\AddressUitlity::createDropOffAddress($order, $dropOff);
         } catch (\Exception $e) {
             \Logeecom\Infrastructure\Logger\Logger::logError(
                 "Failed to created drop-off for order [{$order->id}] becauese: {$e->getMessage()}."
@@ -851,37 +807,10 @@ class Packlink extends CarrierModule
         $orderDetails->setOrderId($orderId);
         $orderRepository->saveOrderDetails($orderDetails);
 
-        if (!$isDelayed) {
-            $draftTask = new \Packlink\BusinessLogic\Tasks\SendDraftTask($orderId);
-
-            $queue->enqueue($configService->getDefaultQueueName(), $draftTask);
-            if ($draftTask->getExecutionId() !== null) {
-                // get again from database since it can happen that task already finished and
-                // reference has been set, so we don't delete it here.
-                $orderDetails = $orderRepository->getOrderDetailsById($orderId);
-                $orderDetails->setTaskId($draftTask->getExecutionId());
-                $orderRepository->saveOrderDetails($orderDetails);
-            }
+        if ($isDelayed) {
+            $this->doEnqueueDelayedSendDraftTask($orderId, $configService);
         } else {
-            $task = new \Packlink\PrestaShop\Classes\Tasks\DelayedSendDraftTaskEnqueuer($orderId);
-            $timestamp = strtotime('+5 minutes');
-            $schedule = new \Packlink\BusinessLogic\Scheduler\Models\HourlySchedule(
-                $task,
-                $configService->getDefaultQueueName()
-            );
-
-            $schedule->setMonth((int)date('m', $timestamp));
-            $schedule->setDay((int)date('d', $timestamp));
-            $schedule->setHour((int)date('H', $timestamp));
-            $schedule->setMinute((int)date('i', $timestamp));
-            $schedule->setRecurring(false);
-            $schedule->setNextSchedule();
-
-            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
-                \Packlink\BusinessLogic\Scheduler\Models\Schedule::CLASS_NAME
-            );
-
-            $repository->save($schedule);
+            $this->doEnqueueSendDraftTask($orderId, $orderRepository, $queue, $configService);
         }
     }
 
@@ -1220,5 +1149,72 @@ class Packlink extends CarrierModule
             : 'es';
 
         return "https://pro.packlink.$userCountry/private/shipments/$reference";
+    }
+
+    /**
+     * Enqueues SendDraftTask.
+     *
+     * @param int $orderId
+     * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository
+     * @param \Logeecom\Infrastructure\TaskExecution\QueueService $queue
+     * @param \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    private function doEnqueueSendDraftTask(
+        $orderId,
+        $orderRepository,
+        $queue,
+        $configService
+    ) {
+        $draftTask = new \Packlink\BusinessLogic\Tasks\SendDraftTask($orderId);
+
+        $queue->enqueue($configService->getDefaultQueueName(), $draftTask);
+        if ($draftTask->getExecutionId() !== null) {
+            // get again from database since it can happen that task already finished and
+            // reference has been set, so we don't delete it here.
+
+            /** @var \Packlink\BusinessLogic\Order\Models\OrderShipmentDetails $orderDetails */
+            $orderDetails = $orderRepository->getOrderDetailsById($orderId);
+            $orderDetails->setTaskId($draftTask->getExecutionId());
+            $orderRepository->saveOrderDetails($orderDetails);
+        }
+    }
+
+    /**
+     * Enqueues delayed send draft task.
+     *
+     * @param int $orderId
+     * @param \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function doEnqueueDelayedSendDraftTask(
+        $orderId,
+        $configService
+    ) {
+        $task = new \Packlink\PrestaShop\Classes\Tasks\DelayedSendDraftTaskEnqueuerTask($orderId);
+        $timestamp = strtotime('+5 minutes');
+        $schedule = new \Packlink\BusinessLogic\Scheduler\Models\HourlySchedule(
+            $task,
+            $configService->getDefaultQueueName()
+        );
+
+        $schedule->setMonth((int)date('m', $timestamp));
+        $schedule->setDay((int)date('d', $timestamp));
+        $schedule->setHour((int)date('H', $timestamp));
+        $schedule->setMinute((int)date('i', $timestamp));
+        $schedule->setRecurring(false);
+        $schedule->setNextSchedule();
+
+        $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
+            \Packlink\BusinessLogic\Scheduler\Models\Schedule::CLASS_NAME
+        );
+
+        $repository->save($schedule);
     }
 }

@@ -6,6 +6,7 @@ use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Location\LocationService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
+use Packlink\PrestaShop\Classes\Utility\AddressUitlity;
 use Packlink\PrestaShop\Classes\Utility\CachingUtility;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
@@ -178,23 +179,6 @@ class PacklinkLocationsModuleFrontController extends ModuleFrontController
             return;
         }
 
-        $address = new \Address($order->id_address_delivery);
-        if (!Validate::isLoadedObject($address)) {
-            return;
-        }
-
-        $address->address1 = $dropOff['address'];
-        $address->postcode = $dropOff['zip'];
-        $address->city = $dropOff['city'];
-        $address->company = $dropOff['name'];
-        if (method_exists($this, 'l')) {
-            $address->alias = $this->l('Drop-Off delivery address');
-            $address->other = $this->l('Drop-Off delivery address');
-        } else {
-            $address->alias = 'Drop-Off delivery address';
-            $address->other = 'Drop-Off delivery address';
-        }
-
-        $address->update();
+        AddressUitlity::createDropOffAddress($order, $dropOff);
     }
 }
