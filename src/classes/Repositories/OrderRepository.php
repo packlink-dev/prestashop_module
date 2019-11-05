@@ -176,27 +176,6 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
     }
 
     /**
-     * Sets order packlink shipment labels to an order by shipment reference.
-     *
-     * @param string $shipmentReference Packlink shipment reference.
-     * @param string[] $labels Packlink shipment labels.
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order with provided reference is not found.
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    public function setLabelsByReference($shipmentReference, array $labels)
-    {
-        $orderDetails = $this->getOrderDetailsByReference($shipmentReference);
-
-        $orderDetails->setShipmentLabels($labels);
-
-        $this->getOrderDetailsRepository()->update($orderDetails);
-    }
-
-    /**
      * Sets label identified by order ID and link to PDF to have been printed.
      *
      * @param int $orderId ID of the order that the shipment label belongs to.
@@ -437,26 +416,6 @@ class OrderRepository implements \Packlink\BusinessLogic\Order\Interfaces\OrderR
         }
 
         return $orderDetails;
-    }
-
-    /**
-     * Returns whether shipment identified by provided reference has Packlink shipment label set.
-     *
-     * @param string $shipmentReference Packlink shipment reference.
-     *
-     * @return bool Returns TRUE if label is set; otherwise, FALSE.
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    public function isLabelSet($shipmentReference)
-    {
-        $details = $this->getOrderDetailsByReference($shipmentReference);
-
-        return $details !== null && count($details->getShipmentLabels()) > 0;
     }
 
     /**
