@@ -9,32 +9,33 @@
 </p>
 <span class="btn-group-action">
     <span class="btn-group">
-    {if Configuration::get('PS_INVOICE') && $order->invoice_number}
-      <a class="btn btn-default _blank"
-         href="{html_entity_decode($link->getAdminLink('AdminPdf')|escape:'html':'UTF-8')}&amp;submitAction=generateInvoicePDF&amp;id_order={$order->id}"
-      >
-                 <i class="icon-file-text"></i>
-            </a>
-    {/if}
-      {foreach from=$labels item=label}
-        <a class="btn btn-default _blank shipment-label" href="{html_entity_decode($label->link|escape:'html':'UTF-8')}"
-           data-link="{html_entity_decode($label->link|escape:'html':'UTF-8')}"
+      {if Configuration::get('PS_INVOICE') && $order->invoice_number}
+        <a class="btn btn-default _blank"
+           href="{html_entity_decode($link->getAdminLink('AdminPdf')|escape:'html':'UTF-8')}&amp;submitAction=generateInvoicePDF&amp;id_order={$order->id}"
+        >
+                   <i class="icon-file-text"></i>
+              </a>
+      {/if}
+
+      {if $isLabelAvailable}
+        <a class="btn btn-default _blank shipment-label" href=""
            data-order="{$orderId|escape:'html':'UTF-8'}"
-           data-print-label-url="{html_entity_decode($printLabelUrl|escape:'html':'UTF-8')}"
            onclick="plPrintLabelOnOrdersPage(this)"
-                {if $label->printed}
+                {if $isLabelPrinted}
                   title="{l s='Printed' mod='packlink'}" style="color: #c3c3c3"
                 {else}
                   title="{l s='Ready' mod='packlink'}"
                 {/if}
               >
                 <i class="icon-tag"
-                  {if $label->printed}
+                  {if $isLabelPrinted}
                     style="color: #c3c3c3"
                   {/if}
                 ></i>
-      </a>
-      {/foreach}
+        </a>
+      {/if}
+
+
       {* Generate HTML code for printing Delivery Icon with link *}
       {if $order->delivery_number}
         <a class="btn btn-default _blank"

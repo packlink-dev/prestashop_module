@@ -10,10 +10,12 @@ function plPrintLabelOnOrdersPage(element) {
       iconElement = childNodes[1],
       labelPrintedText = document.getElementById('pl-label-printed');
   if (iconElement.style.color !== 'grey') {
-    ajaxLabelPrint(element);
     element.title = labelPrintedText ? labelPrintedText.innerText : 'Printed';
     iconElement.style.color = 'grey';
   }
+
+  let printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
+  plOpenPdfTab(printLabelsUrl, ['orders[]=' + element.getAttribute('data-order')]);
 }
 
 /**
@@ -28,9 +30,11 @@ function plPrintLabelOnOrderDetailsPage(element) {
     let labelRow = element.parentElement.parentElement,
         status = labelRow.childNodes[5]; // Table data element that represent shipment label status.
 
-    ajaxLabelPrint(element);
     status.innerText = labelPrintedText ? labelPrintedText.innerText : 'Printed';
   }
+
+  let printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
+  plOpenPdfTab(printLabelsUrl, ['orders[]=' + element.getAttribute('data-order')]);
 }
 
 /**
@@ -74,10 +78,7 @@ function sendBulkAction(form, action) {
     });
 
     if (selectedOrders.length > 0 && labels !== undefined && labels.length > 0) {
-      let printLabelsUrl = document.getElementById('pl-print-labels-url').innerText,
-          disablePopupText = document.getElementById('pl-disable-popup'),
-          popUpBlocked = false,
-          pdfTab;
+      let printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
 
       for (let i = 0; i < labels.length; i++) {
         let childNodes = labels[i].childNodes,
@@ -91,21 +92,7 @@ function sendBulkAction(form, action) {
         }
       }
 
-      pdfTab = window.open(
-          printLabelsUrl + '&' + selectedOrders.join('&'),
-          '_blank'
-      );
-
-      if (!pdfTab || pdfTab.closed) {
-        popUpBlocked = true;
-      }
-
-      if (popUpBlocked) {
-        alert(disablePopupText
-            ? disablePopupText.innerText
-            : 'Please disable pop-up blocker on this page in order to bulk open shipment labels'
-        );
-      }
+      plOpenPdfTab(printLabelsUrl, selectedOrders);
     }
   } else {
     // Default function behaviour.
@@ -124,5 +111,20 @@ function sendBulkAction(form, action) {
       $(form).attr('action', form_action.splice(form_action.lastIndexOf('&'), 0, '&' + action));
 
     $(form).submit();
+  }
+}
+
+function plOpenPdfTab(printLabelsUrl, selectedOrders) {
+  let disablePopupText = document.getElementById('pl-disable-popup');
+  let pdfTab = window.open(
+      printLabelsUrl + '&' + selectedOrders.join('&'),
+      '_blank'
+  );
+
+  if (!pdfTab || pdfTab.closed) {
+    alert(disablePopupText
+        ? disablePopupText.innerText
+        : 'Please disable pop-up blocker on this page in order to bulk open shipment labels'
+    );
   }
 }

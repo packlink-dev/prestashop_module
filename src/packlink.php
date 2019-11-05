@@ -979,34 +979,28 @@ class Packlink extends CarrierModule
             false
         );
 
+        /** @var \Packlink\BusinessLogic\Order\OrderService $orderService */
+        $orderService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Order\OrderService::CLASS_NAME
+        );
+
         $labels = $orderRepository->getLabelsByOrderId($orderId);
-        $printLabels = array();
+        $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
+        $status = $orderDetails ? $orderDetails->getStatus() :
+            \Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus::STATUS_PENDING;
 
-        foreach ($labels as $index => $label) {
-            $printLabels[] = (object)array(
-                'date' => $label->getDateCreated()->format('d/m/Y'),
-                'link' => $label->getLink(),
-                'status' => $label->isPrinted()
-                    ? \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('Printed')
-                    : \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('Ready'),
-                'printed' => $label->isPrinted(),
-                'number' => sprintf('#PLSL%02d', $index + 1),
-            );
-        }
-
-        $printLabelUrl = $this->context->link->getAdminLink('ShipmentLabels') . '&' .
-            http_build_query(
-                array(
-                    'ajax' => true,
-                    'action' => 'setLabelPrinted',
-                )
-            );
+        $isLabelPrinted = !empty($labels) && $labels[0]->isPrinted();
 
         $this->context->smarty->assign(
             array(
                 'orderId' => $orderId,
-                'labels' => $printLabels,
-                'printLabelUrl' => $printLabelUrl,
+                'isLabelPrinted' => $isLabelPrinted,
+                'date' => !empty($labels) ?  $labels[0]->getDateCreated()->format('d/m/Y'): '',
+                'status' => $isLabelPrinted
+                    ? \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('Printed')
+                    : \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('Ready'),
+                'isLabelAvailable' => $orderService->isReadyToFetchShipmentLabels($status),
+                'number' => '#PLSL1'
             )
         );
     }
@@ -1063,9 +1057,13 @@ class Packlink extends CarrierModule
                 $shipping = $this->prepareShippingObject($orderId, $orderDetails, $orderRepository);
             }
         }
+
+        $printLabelsUrl = $this->context->link->getAdminLink('BulkShipmentLabels');
+
         $this->context->smarty->assign(array(
             'shipping' => $shipping,
             'message' => $message,
+            'printLabelsUrl' => $printLabelsUrl,
             'pluginBasePath' => $this->_path,
             'orderId' => $orderId,
             'displayDraftButton' => $displayDraftButton,

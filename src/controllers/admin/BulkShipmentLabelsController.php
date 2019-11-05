@@ -45,6 +45,9 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return bool|string File path of the final merged PDF document; FALSE on error.
      *
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
@@ -84,6 +87,9 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return array
      *
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
@@ -110,6 +116,9 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return array An array of paths of the saved files.
      *
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
+     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
@@ -121,10 +130,18 @@ class BulkShipmentLabelsController extends PacklinkBaseController
         $orderDetailsRepository = RepositoryRegistry::getRepository(OrderShipmentDetails::getClassName());
         /** @var OrderRepository $orderRepository */
         $orderRepository = ServiceRegister::getService(OrderRepositoryInterface::CLASS_NAME);
+        /** @var \Packlink\BusinessLogic\Order\OrderService $orderService */
+        $orderService = ServiceRegister::getService(\Packlink\BusinessLogic\Order\OrderService::CLASS_NAME);
 
         foreach ($orderIds as $orderId) {
             $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
             if ($orderDetails !== null) {
+                $shipmentLabels = $orderDetails->getShipmentLabels();
+                if (empty($shipmentLabels)) {
+                    $shipmentLabels = $orderService->getShipmentLabels($orderDetails->getReference());
+                    $orderDetails->setShipmentLabels($shipmentLabels);
+                }
+
                 $labels = $orderDetails->getShipmentLabels();
 
                 foreach ($labels as $label) {
