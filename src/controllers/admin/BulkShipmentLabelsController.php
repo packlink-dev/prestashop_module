@@ -17,6 +17,8 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
  */
 class BulkShipmentLabelsController extends PacklinkBaseController
 {
+    const FILE_NAME = 'packlink_labels.pdf';
+
     /**
      * Controller entry endpoint.
      */
@@ -34,7 +36,8 @@ class BulkShipmentLabelsController extends PacklinkBaseController
         }
 
         if ($result !== false) {
-            PacklinkPrestaShopUtility::dieInline($result);
+            // Filename is required because generated temp name is random.
+            PacklinkPrestaShopUtility::dieInline($result, self::FILE_NAME);
         }
 
         PacklinkPrestaShopUtility::die400();
@@ -59,6 +62,10 @@ class BulkShipmentLabelsController extends PacklinkBaseController
         $outputPath = false;
         $tmpDirectory = _PS_MODULE_DIR_ . 'packlink/tmp';
         $paths = $this->prepareAllLabels($tmpDirectory);
+
+        if (count($paths) === 1) {
+            return $paths[0];
+        }
 
         $now = date('Y-m-d');
         $merger = new \iio\libmergepdf\Merger();
@@ -169,26 +176,17 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @param string $link Web link to the PDF file.
      *
-     * @return string Path to the saved file
+     * @return string | boolean Path to the saved file
      */
     private function savePDF($link)
     {
-        $path = '';
-        $file = fopen($link, 'rb');
-        if ($file) {
-            $path = _PS_MODULE_DIR_ . 'packlink/tmp/' . microtime() . '.pdf';
-            $tmpFile = fopen($path, 'wb');
-            if ($tmpFile) {
-                while (!feof($file)) {
-                    fwrite($tmpFile, fread($file, 1024 * 8), 1024 * 8);
-                }
-
-                fclose($tmpFile);
-            }
-
-            fclose($file);
+        if (($data = file_get_contents($link)) === false) {
+            return $data;
         }
 
-        return $path;
+        $file = tempnam(sys_get_temp_dir(), 'packlink_pdf');
+        file_put_contents($file, $data);
+
+        return $file;
     }
 }
