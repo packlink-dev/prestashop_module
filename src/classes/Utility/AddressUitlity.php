@@ -17,6 +17,7 @@ class AddressUitlity
         $address = new \Address($order->id_address_delivery);
         $clone = clone $address;
         $clone->id = null;
+        $clone->id_customer = null;
         $clone->address1 = $dropOffData['address'];
         $clone->postcode = $dropOffData['zip'];
         $clone->city = $dropOffData['city'];

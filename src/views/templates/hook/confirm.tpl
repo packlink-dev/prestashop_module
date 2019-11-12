@@ -14,6 +14,7 @@
   }
 
   .pl-confirm-message-box {
+    position: relative;
     max-width: 840px;
     min-height: 170px;
     display: flex;
@@ -25,19 +26,56 @@
     border-radius: 3px;
   }
 
+  .pl-button-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .pl-message-wrapper {
+    display: inline-block;
+  }
+
+  .pl-btn {
+    display: inline-block;
+    align-self: flex-start;
+  }
+
+  .pl-close-msg-btn {
+    box-shadow: none !important;
+  }
+
   .pl-confirm-message {
     margin-bottom: 30px;
+  }
+
+  .pl-hidden {
+    display: none !important;
   }
 </style>
 
 
 <div class="pl-confirm-mask" id="pl-confirm-mask">
   <div class="pl-confirm-message-box">
+    <div class="pl-close-modal pl-close-msg-btn pl-hidden" id="pl-close-message-box-btn">X</div>
     <p class="pl-confirm-message">
         {l s='Selected shipping method delivers only to predefined drop-off locations. Please choose your drop-off location.' mod='packlink'}
     </p>
-    <div class="btn btn-primary" id="pl-dropoff-button">
-        {l s='Select drop-off location' mod='packlink'}
+
+    <div class="pl-button-wrapper">
+      <div class="pl-message-wrapper">
+        <span id="pl-no-locations" class="pl-hidden">
+          <i>{l s='There are no delivery locations available.' mod='packlink'}</i>
+        </span>
+        <span id="pl-message" class="pl-hidden">
+            <i>{l s='Package will be delivered to:' mod='packlink'}</i> <br />
+            <span id="pl-location-address"></span>
+        </span>
+      </div>
+      <div class="btn btn-primary pl-btn" id="pl-dropoff-button">
+        <span id="pl-select-label">{l s='Select drop-off location' mod='packlink'}</span>
+        <span id="pl-change-label" class="pl-hidden">{l s='Change drop-off location' mod='packlink'}</span>
+      </div>
     </div>
   </div>
 </div>
@@ -115,8 +153,10 @@
         let selectBtn = document.getElementById('pl-dropoff-button');
         let confirmMask = document.getElementById('pl-confirm-mask');
         let configuration = JSON.parse('{$configuration}'.replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
+        let closeMessageBoxBtn = document.getElementById('pl-close-message-box-btn');
 
         selectBtn.addEventListener('click', onSelectButtonClicked);
+        closeMessageBoxBtn.addEventListener('click', onCloseMessageBoxBtnClicked);
 
         function onSelectButtonClicked() {
             let id = configuration.id;
@@ -140,10 +180,32 @@
                 mapController.close();
                 mapController = null;
 
-                if (payload.type === 'success' || payload.type === 'no-locations') {
-                    confirmMask.remove();
+                if (payload.type === 'no-locations') {
+                    displayNoLocations();
+                }
+
+                if (payload.type === 'success') {
+                    displaySuccess()
+                }
+
+                function displayNoLocations() {
+                  closeMessageBoxBtn.classList.remove('pl-hidden');
+                  document.getElementById('pl-no-locations').classList.remove('pl-hidden');
+                  selectBtn.classList.add('pl-hidden');
+                }
+
+                function displaySuccess() {
+                  closeMessageBoxBtn.classList.remove('pl-hidden');
+                  document.getElementById('pl-message').classList.remove('pl-hidden');
+                  document.getElementById('pl-location-address').innerText = payload.address;
+                  document.getElementById('pl-select-label').classList.add('pl-hidden');
+                  document.getElementById('pl-change-label').classList.remove('pl-hidden');
                 }
             }
+        }
+
+        function onCloseMessageBoxBtnClicked() {
+            confirmMask.remove();
         }
     })();
 </script>
