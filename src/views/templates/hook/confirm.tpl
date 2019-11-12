@@ -19,7 +19,6 @@
     min-height: 170px;
     display: flex;
     justify-content: center;
-    align-items: center;
     flex-flow: column;
     padding: 10px 30px;
     background: white;
@@ -34,6 +33,7 @@
 
   .pl-message-wrapper {
     display: inline-block;
+    padding-right: 20px;
   }
 
   .pl-btn {
