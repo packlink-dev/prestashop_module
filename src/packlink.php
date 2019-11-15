@@ -412,7 +412,7 @@ class Packlink extends CarrierModule
      * @param int $shippingCost Shipping cost calculated by PrestaShop.
      * @param array $products Array of shop products for which shipping cost is calculated.
      *
-     * @return float|bool Calculated shipping cost if carrier is available, otherwise FALSE.
+     * @return float | bool Calculated shipping cost if carrier is available, otherwise FALSE.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
@@ -421,11 +421,17 @@ class Packlink extends CarrierModule
      */
     public function getPackageShippingCost($cart, $shippingCost, $products)
     {
-        return \Packlink\PrestaShop\Classes\ShippingServices\PackageCostCalculator::getPackageCost(
+        $cost = \Packlink\PrestaShop\Classes\ShippingServices\PackageCostCalculator::getPackageCost(
             $cart,
             $products,
             $this->id_carrier
         );
+
+        if (!empty($cost) && !empty($shippingCost)) {
+            $cost += $shippingCost;
+        }
+
+        return $cost;
     }
 
     /**
