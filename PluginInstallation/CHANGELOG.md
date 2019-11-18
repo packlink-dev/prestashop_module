@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/logeecom/pl_prestashop_module/compare/master...dev)
 
+## [v2.1.2](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.2...v2.1.1) - 2019-11-18 
+### Added
+- Drop-off selection on order confirm page.
+
+### Changed
+- Removed array_column usages from code.
+- Fixed bugs in BaseRepository discovered by the new test suite.
+- Shipping cost calculator now takes in consideration specific shipping costs set on product level.
+- The lowest boundary in fixed price policies (by weight and by price) can be higher than zero. 
+This allows users to disable a shipping method for orders below the set limit.
+
 ## [v2.1.1](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.1...v2.1.0) - 2019-10-28 
 ### Changed
 - Fixed class auto-loader.

@@ -10,7 +10,7 @@ class ConfigurationService extends Configuration
     /**
      * Threshold between two runs of scheduler.
      */
-    const SCHEDULER_TIME_THRESHOLD = 1800;
+    const SCHEDULER_TIME_THRESHOLD = 150;
     /**
      * @inheritdoc
      */

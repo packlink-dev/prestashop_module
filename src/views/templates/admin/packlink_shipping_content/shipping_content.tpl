@@ -1,9 +1,12 @@
 {* Generate HTML code for adding shipping content *}
 <p id="pl-label-printed" hidden>{l s='Printed' mod='packlink'}</p>
 <p id="pl-label-ready" hidden>{l s='Ready' mod='packlink'}</p>
+<p id="pl-print-labels-url" hidden>
+    {html_entity_decode($printLabelsUrl|escape:'html':'UTF-8')}
+</p>
 <div class="tab-pane" id="packlink-shipping">
   {if $shipping neq null}
-    {if !empty($labels)}
+    {if $isLabelAvailable}
       <h4>{l s='Shipment labels' mod='packlink'}</h4>
       <div class="table-responsive">
         <table class="table">
@@ -22,31 +25,31 @@
           </tr>
           </thead>
           <tbody>
-          {foreach from=$labels item=label}
             <tr>
-              <td>{$label->date|escape:'html':'UTF-8'}</td>
+              <td>{$date|escape:'html':'UTF-8'}</td>
               <td>
-                <a href="{html_entity_decode($label->link|escape:'html':'UTF-8')}" target="_blank">
-                  {$label->number|escape:'html':'UTF-8'}
-                </a>
-              </td>
-              <td>{$label->status|escape:'html':'UTF-8'}</td>
-              <td class="text-right">
-                <a class="btn btn-default"
-                   href="{html_entity_decode($label->link|escape:'html':'UTF-8')}"
+                <a
+                   href=""
                    title="{l s='Print' mod='packlink'}"
                    data-order="{$orderId|escape:'html':'UTF-8'}"
-                   data-link="{html_entity_decode($label->link|escape:'html':'UTF-8')}"
-                   data-print-label-url="{html_entity_decode($printLabelUrl|escape:'html':'UTF-8')}"
-                   data-label-printed="{$label->printed|escape:'html':'UTF-8'}"
-                   onclick="plPrintLabelOnOrderDetailsPage(this)"
-                   target="_blank">
-                  <i class="icon-print"></i>
-                  {l s='Print label' mod='packlink'}
+                   data-label-printed="{$isLabelPrinted}"
+                   onclick="plPrintLabelOnOrderDetailsPage(this)">
+                    {$number|escape:'html':'UTF-8'}
                 </a>
               </td>
+              <td>{$status|escape:'html':'UTF-8'}</td>
+              <td class="text-right">
+                  <a class="btn btn-default"
+                     href=""
+                     title="{l s='Print' mod='packlink'}"
+                     data-order="{$orderId|escape:'html':'UTF-8'}"
+                     data-label-printed="{$isLabelPrinted}"
+                     onclick="plPrintLabelOnOrderDetailsPage(this)">
+                  <i class="icon-print"></i>
+                    {l s='Print label' mod='packlink'}
+                  </a>
+              </td>
             </tr>
-          {/foreach}
           </tbody>
         </table>
       </div>

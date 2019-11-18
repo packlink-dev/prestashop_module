@@ -4,6 +4,8 @@ namespace Packlink\PrestaShop\Classes\Overrides;
 
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
+use Packlink\BusinessLogic\Order\OrderService;
+use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
@@ -87,35 +89,21 @@ class AdminOrdersController
         if (!$this->validateOrder($order)) {
             return '';
         }
+        $printLabelsUrl = $context->link->getAdminLink('BulkShipmentLabels');
 
         /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
         $orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
         $shipmentLabels = $orderRepository->getLabelsByOrderId((int)$orderId);
-
-        $labels = array();
-        /** @var \Packlink\BusinessLogic\Http\DTO\ShipmentLabel $shipmentLabel */
-        foreach ($shipmentLabels as $shipmentLabel) {
-            $labels[] = (object)array(
-                'printed' => $shipmentLabel->isPrinted(),
-                'link' => $shipmentLabel->getLink(),
-            );
-        }
-
-        $printLabelUrl = $context->link->getAdminLink('ShipmentLabels') . '&' .
-            http_build_query(
-                array(
-                    'ajax' => true,
-                    'action' => 'setLabelPrinted',
-                )
-            );
-
-        $printLabelsUrl = $context->link->getAdminLink('BulkShipmentLabels');
+        $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
+        $status = $orderDetails ? $orderDetails->getStatus() : ShipmentStatus::STATUS_PENDING;
+        /** @var OrderService $orderService */
+        $orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
 
         $context->smarty->assign(array(
             'orderId' => $orderId,
             'order' => $order,
-            'labels' => $labels,
-            'printLabelUrl' => $printLabelUrl,
+            'isLabelAvailable' => $orderService->isReadyToFetchShipmentLabels($status),
+            'isLabelPrinted' => !empty($shipmentLabels) && $shipmentLabels[0]->isPrinted(),
             'printLabelsUrl' => $printLabelsUrl,
         ));
 

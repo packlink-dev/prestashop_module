@@ -41,4 +41,26 @@ class CarrierUtility
 
         return $result;
     }
+
+    /**
+     * Checks whether carrier with provided reference is a drop-off or not.
+     *
+     * @param int $carrierReference
+     *
+     * @return bool
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    public static function isDropOff($carrierReference)
+    {
+        $service = new CarrierService();
+        $id = $service->getShippingMethodId($carrierReference);
+        $repository = RepositoryRegistry::getRepository(ShippingMethod::getClassName());
+        $filter = new QueryFilter();
+        $filter->where('id', Operators::EQUALS, $id);
+        /** @var ShippingMethod $method */
+        $method = $repository->selectOne($filter);
+
+        return $method && $method->isDestinationDropOff();
+    }
 }

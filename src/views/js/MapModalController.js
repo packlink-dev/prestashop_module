@@ -25,14 +25,16 @@ var Packlink = window.Packlink || {};
 
       lang = configuration.lang ? configuration.lang : 'en';
 
-      ajaxService.post(
-          configuration.getUrl,
-          {
-            method: 'getLocations',
-            methodId: configuration.methodId
-          },
-          getLocationsSuccessHandler
-      )
+      let locationsModel = {
+        method: 'getLocations',
+        methodId: configuration.methodId
+      };
+
+      if (configuration.addressId) {
+        locationsModel.addressId = configuration.addressId;
+      }
+
+      ajaxService.post(configuration.getUrl, locationsModel, getLocationsSuccessHandler)
     }
 
     /**
@@ -88,12 +90,18 @@ var Packlink = window.Packlink || {};
      */
     function selectDropoff() {
       document.getElementById('pl-modal-spinner').classList.remove('disabled');
+      let dropOffModel = {
+        method: 'postSelectedDropoff',
+        carrierId: configuration.carrierId,
+        dropOff: getSelectedDropoff()
+      };
 
-      ajaxService.post(
-          configuration.getUrl,
-          {method: 'postSelectedDropoff', carrierId: configuration.carrierId, dropOff: getSelectedDropoff()},
-          selectDropoffSuccessHandler
-      );
+      if (configuration.cartId) {
+        dropOffModel.cartId = configuration.cartId;
+        dropOffModel.orderId = configuration.orderId;
+      }
+
+      ajaxService.post(configuration.getUrl, dropOffModel, selectDropoffSuccessHandler);
     }
 
     /**

@@ -62,13 +62,13 @@ class PackageCostCalculator
         if (self::displayBackupCarrier($cart, $calculatedCosts, $carrierReferenceId)) {
             $allCosts = self::getCostsForAllShippingMethods($cart, $shippingProducts);
             if (!empty($allCosts)) {
-                return self::applyShopCostCalculationSettings(min(array_values($allCosts)), null, $cart);
+                return self::applyShopCostCalculationSettings(min(array_values($allCosts)), $cart);
             }
         }
 
         if ($calculatedCosts !== false) {
             return isset($calculatedCosts[$methodId])
-                ? self::applyShopCostCalculationSettings($calculatedCosts[$methodId], $carrier, $cart) : false;
+                ? self::applyShopCostCalculationSettings($calculatedCosts[$methodId], $cart) : false;
         }
 
         $warehouse = CachingUtility::getDefaultWarehouse();
@@ -97,7 +97,7 @@ class PackageCostCalculator
         CachingUtility::setCosts($calculatedCosts);
 
         return isset($calculatedCosts[$methodId])
-            ? self::applyShopCostCalculationSettings($calculatedCosts[$methodId], $carrier, $cart) : false;
+            ? self::applyShopCostCalculationSettings($calculatedCosts[$methodId], $cart) : false;
     }
 
     /**
@@ -236,7 +236,6 @@ class PackageCostCalculator
      * Checks shipping cost settings and handling costs and applies settings to the given cost.
      *
      * @param float $cost
-     * @param \Carrier $carrier
      * @param \Cart $cart
      *
      * @return float Calculated cost.
@@ -244,12 +243,11 @@ class PackageCostCalculator
      * @throws \PrestaShopException
      * @throws \Exception
      */
-    private static function applyShopCostCalculationSettings($cost, $carrier, Cart $cart)
+    private static function applyShopCostCalculationSettings($cost, Cart $cart)
     {
         // if shipping service is available
         $configuration = \Configuration::getMultiple(array(
             'PS_SHIPPING_FREE_PRICE',
-            'PS_SHIPPING_HANDLING',
             'PS_SHIPPING_FREE_WEIGHT',
         ));
 
@@ -263,10 +261,6 @@ class PackageCostCalculator
             && $cart->getTotalWeight() >= (float)$configuration['PS_SHIPPING_FREE_WEIGHT']
         ) {
             return 0;
-        }
-
-        if ($carrier && $carrier->shipping_handling) {
-            $cost += (float)$configuration['PS_SHIPPING_HANDLING'] ?: 0;
         }
 
         return $cost;
