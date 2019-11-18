@@ -191,14 +191,7 @@ class Packlink extends CarrierModule
      */
     public function hookDisplayBeforeCarrier($params)
     {
-        $locationPickerLibrary = $this->_path . 'views/js/location/LocationPicker.js?v=' . $this->version;
-        $output = "<script src=\"{$locationPickerLibrary}\"></script>\n";
-
-        $locationPickerTrans = $this->_path . 'views/js/location/Translations.js?v=' . $this->version;
-        $output .= "<script src=\"{$locationPickerTrans}\"></script>\n";
-
-        $locationPickerCSS = $this->_path . 'views/css/locationPicker.css?v=' . $this->version;
-        $output .= "<link rel=\"stylesheet\" href=\"{$locationPickerCSS}\"/>\n";
+        $output = $this->getLocationPickerFilesLinks();
 
         if (version_compare(_PS_VERSION_, '1.7.0.0', '<')) {
             return $output . $this->getPresta16ShippingStepPage($params);
@@ -324,14 +317,7 @@ class Packlink extends CarrierModule
                 array('configuration' => json_encode($configuration))
             );
 
-            $locationPickerLibrary = $this->_path . 'views/js/location/LocationPicker.js?v=' . $this->version;
-            $output = "<script src=\"{$locationPickerLibrary}\"></script>\n";
-
-            $locationPickerTrans = $this->_path . 'views/js/location/Translations.js?v=' . $this->version;
-            $output .= "<script src=\"{$locationPickerTrans}\"></script>\n";
-
-            $locationPickerCSS = $this->_path . 'views/css/locationPicker.css?v=' . $this->version;
-            $output .= "<link rel=\"stylesheet\" href=\"{$locationPickerCSS}\"/>\n";
+            $output = $this->getLocationPickerFilesLinks();
 
             $output .= $this->getCheckoutFilesLinks();
             $output .= $this->display(__FILE__, 'confirm.tpl');
@@ -360,10 +346,12 @@ class Packlink extends CarrierModule
         $isDelayed = false;
 
         if (\Packlink\PrestaShop\Classes\Utility\CarrierUtility::isDropOff((int)$order->id_carrier)) {
-            if (\Packlink\PrestaShop\Classes\Utility\CheckoutUtility::isDropOffSelected(
+            $isDropOffSelected = \Packlink\PrestaShop\Classes\Utility\CheckoutUtility::isDropOffSelected(
                 (string)$order->id_cart,
-                (string)$order->id_carrier)
-            ) {
+                (string)$order->id_carrier
+            );
+
+            if ($isDropOffSelected) {
                 $this->createDropOffAddress($order);
             } else {
                 $isDelayed = true;
@@ -638,6 +626,25 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Gets HTML scripts for output template for checkout process.
+     *
+     * @return string
+     */
+    protected function getLocationPickerFilesLinks()
+    {
+        $locationPickerLibrary = $this->_path . 'views/js/location/LocationPicker.js?v=' . $this->version;
+        $output = "<script src=\"{$locationPickerLibrary}\"></script>\n";
+
+        $locationPickerTrans = $this->_path . 'views/js/location/Translations.js?v=' . $this->version;
+        $output .= "<script src=\"{$locationPickerTrans}\"></script>\n";
+
+        $locationPickerCSS = $this->_path . 'views/css/locationPicker.css?v=' . $this->version;
+        $output .= "<link rel=\"stylesheet\" href=\"{$locationPickerCSS}\"/>\n";
+
+        return $output;
+    }
+
+    /**
      * Creates drop-off address.
      *
      * @param \Order $order
@@ -695,33 +702,6 @@ class Packlink extends CarrierModule
         $defaultWarehouse = $configService->getDefaultWarehouse();
 
         return $authToken && $defaultParcel && $defaultWarehouse;
-    }
-
-    /**
-     * Retrieves customers phone.
-     *
-     * @param \Order $order
-     *
-     * @param \Address $shippingAddress
-     *
-     * @return string
-     */
-    private function getPhone(\Order $order, $shippingAddress)
-    {
-        $phone = '';
-
-        if (Validate::isLoadedObject($shippingAddress)) {
-            $phone = $shippingAddress->phone;
-        }
-
-        if (empty($phone) && $order->id_address_delivery !== $order->id_address_invoice) {
-            $invoiceAddress = new Address($order->id_address_invoice);
-            if (Validate::isLoadedObject($invoiceAddress)) {
-                $phone = $invoiceAddress->phone;
-            }
-        }
-
-        return $phone ?: '';
     }
 
     /**
@@ -992,7 +972,9 @@ class Packlink extends CarrierModule
 
         $labels = $orderRepository->getLabelsByOrderId($orderId);
         $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
-        $status = $orderDetails ? $orderDetails->getStatus() :
+        $status = $orderDetails
+            ? $orderDetails->getStatus()
+            :
             \Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus::STATUS_PENDING;
 
         $isLabelPrinted = !empty($labels) && $labels[0]->isPrinted();
@@ -1001,12 +983,12 @@ class Packlink extends CarrierModule
             array(
                 'orderId' => $orderId,
                 'isLabelPrinted' => $isLabelPrinted,
-                'date' => !empty($labels) ?  $labels[0]->getDateCreated()->format('d/m/Y'): '',
+                'date' => !empty($labels) ? $labels[0]->getDateCreated()->format('d/m/Y') : '',
                 'status' => $isLabelPrinted
                     ? \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('Printed')
                     : \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('Ready'),
                 'isLabelAvailable' => $orderService->isReadyToFetchShipmentLabels($status),
-                'number' => '#PLSL1'
+                'number' => '#PLSL1',
             )
         );
     }

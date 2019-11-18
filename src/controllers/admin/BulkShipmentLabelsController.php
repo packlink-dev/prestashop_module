@@ -180,7 +180,7 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      */
     private function savePDF($link)
     {
-        if (($data = file_get_contents($link)) === false) {
+        if (($data = \Tools::file_get_contents($link)) === false) {
             return $data;
         }
 

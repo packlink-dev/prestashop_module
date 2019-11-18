@@ -46,7 +46,8 @@ class Bootstrap extends BootstrapComponent
     {
         parent::initServices();
 
-        ServiceRegister::registerService(Serializer::CLASS_NAME,
+        ServiceRegister::registerService(
+            Serializer::CLASS_NAME,
             function () {
                 return new NativeSerializer();
             }
