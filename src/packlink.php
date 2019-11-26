@@ -341,6 +341,8 @@ class Packlink extends CarrierModule
      */
     public function hookActionValidateOrder($params)
     {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
         /** @var \Order $order */
         $order = $params['order'];
         $isDelayed = false;
@@ -375,6 +377,8 @@ class Packlink extends CarrierModule
      */
     public function hookActionOrderStatusUpdate($params)
     {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
         $order = new \Order((int)$params['id_order']);
 
         // If order has just been created, this hook should not handle that event
