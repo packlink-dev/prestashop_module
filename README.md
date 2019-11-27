@@ -14,11 +14,8 @@ To work with this integration, the module can be installed in a few minutes by g
 After installation is over, plugin configuration can be set by clicking on the Configure button on 
 Packlink module or by using _Shipping > Packlink PRO_ menu. 
 
-## Version
-2.1.0
-
 ## Compatibility
-PrestaShop 1.6.x and 1.7.x versions.
+PrestaShop 1.6.0.14+ and 1.7.x versions.
 
 ## Prerequisites
 - PHP 5.3 or newer
