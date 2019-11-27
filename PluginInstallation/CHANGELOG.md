@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased](https://github.com/logeecom/pl_prestashop_module/compare/master...dev)
+## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
 
-## [v2.1.2](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.2...v2.1.1) - 2019-11-18 
+## [v2.1.3](https://github.com/packlink-dev/prestashop_module/compare/v2.1.1...v2.1.2) - 2019-11-27
+### Changed
+- Skip handling drop-off location for non-packlink services.
+
+## [v2.1.2](https://github.com/packlink-dev/prestashop_module/compare/v2.1.1...v2.1.2) - 2019-11-18
 ### Added
 - Drop-off selection on order confirm page.
 
@@ -16,11 +20,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - The lowest boundary in fixed price policies (by weight and by price) can be higher than zero. 
 This allows users to disable a shipping method for orders below the set limit.
 
-## [v2.1.1](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.1...v2.1.0) - 2019-10-28 
+## [v2.1.1](https://github.com/packlink-dev/prestashop_module/compare/v2.1.0...v2.1.1) - 2019-10-28 
 ### Changed
 - Fixed class auto-loader.
 
-## [v2.1.0](https://github.com/logeecom/pl_prestashop_module/compare/v2.1.0...v2.0.4) - 2019-10-15 
+## [v2.1.0](https://github.com/packlink-dev/prestashop_module/compare/v2.0.4...v2.1.0) - 2019-10-15 
 ### Added
 - Auto-test and auto-configuration features.
 
@@ -30,19 +34,19 @@ This allows users to disable a shipping method for orders below the set limit.
 - Fixed using first and last name for drop-off address from shipping address instead of the customer.
 - Fixed a case when old reference exists and order page was throwing order not found exception. 
 
-## [v2.0.4](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.4...v2.0.3) - 2019-07-11
+## [v2.0.4](https://github.com/packlink-dev/prestashop_module/compare/v2.0.3...v2.0.4) - 2019-07-11
 ### Changed
 - Update to latest core v1.3.0
 - Fixed override mechanism and disabled adding overrides when it already exist by other module.
 - Added handing of free shipping preferences.
 
-## [v2.0.3](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.3...v2.0.2) - 2019-07-01
+## [v2.0.3](https://github.com/packlink-dev/prestashop_module/compare/v2.0.2...v2.0.3) - 2019-07-01
 First marketplace release of the new version.
 
 ### Changed
 - Update to latest core v1.2.2
 
-## [v2.0.2](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.2...v2.0.1) - 2019-06-01
+## [v2.0.2](https://github.com/packlink-dev/prestashop_module/compare/v2.0.1...v2.0.2) - 2019-06-01
 ### Changed
 - Updated to the latest core changes
 - Module now supports sending analytics events
@@ -54,7 +58,7 @@ PrestaShop was giving an error message and module could not be activated.
 - Removed licence header from all files. This is now maintained in the deploy process.
 - Fixed bug in adding bulk print action.
 
-## [v2.0.1](https://github.com/logeecom/pl_prestashop_module/compare/v2.0.1...v2.0.0) - 2019-05-29
+## [v2.0.1](https://github.com/packlink-dev/prestashop_module/compare/v2.0.0...v2.0.1) - 2019-05-29
 ### Changed
 - Updated to the latest core changes
 - Shipment labels are now fetched from Packlink only when order does not have labels set 
@@ -64,5 +68,5 @@ and shipment status is in one of:
     * IN_TRANSIT
     * DELIVERED
 
-## [v2.0.0](https://github.com/logeecom/pl_prestashop_module/tree/v2.0.0) - 2019-03-11
+## [v2.0.0](https://github.com/packlink-dev/prestashop_module/tree/v2.0.0) - 2019-03-11
 - First stable release of the new module

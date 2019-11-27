@@ -79,7 +79,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.1.2';
+        $this->version = '2.1.3';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -341,6 +341,8 @@ class Packlink extends CarrierModule
      */
     public function hookActionValidateOrder($params)
     {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
         /** @var \Order $order */
         $order = $params['order'];
         $isDelayed = false;
@@ -375,6 +377,8 @@ class Packlink extends CarrierModule
      */
     public function hookActionOrderStatusUpdate($params)
     {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
         $order = new \Order((int)$params['id_order']);
 
         // If order has just been created, this hook should not handle that event

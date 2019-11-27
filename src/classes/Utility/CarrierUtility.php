@@ -55,6 +55,11 @@ class CarrierUtility
     {
         $service = new CarrierService();
         $id = $service->getShippingMethodId($carrierReference);
+
+        if ($id === null) {
+            return false;
+        }
+
         $repository = RepositoryRegistry::getRepository(ShippingMethod::getClassName());
         $filter = new QueryFilter();
         $filter->where('id', Operators::EQUALS, $id);
