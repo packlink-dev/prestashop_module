@@ -530,6 +530,8 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     protected function getShippingStepConfiguration($params)
     {
@@ -544,12 +546,11 @@ class Packlink extends CarrierModule
         );
 
         $lang = 'en';
+        $cart = $params['cart'];
+        $language = new \Language((int) $cart->id_lang);
 
-        if (!empty($GLOBALS['locale'])) {
-            $locale = explode('_', $GLOBALS['locale']);
-            if (!empty($locale[0]) && in_array($locale[0], $supportedLanguages, true)) {
-                $lang = $locale[0];
-            }
+        if (Validate::isLoadedObject($language) && in_array($language->iso_code, $supportedLanguages, true)) {
+            $lang = $language->iso_code;
         }
 
         $configuration['lang'] = $lang;
