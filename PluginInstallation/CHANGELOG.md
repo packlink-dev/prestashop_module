@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [v2.1.3](https://github.com/packlink-dev/prestashop_module/compare/v2.1.1...v2.1.2) - 2019-11-27
 ### Changed
 - Skip handling drop-off location for non-packlink services.
+- Update to the latest core v1.5.1
 
 ## [v2.1.2](https://github.com/packlink-dev/prestashop_module/compare/v2.1.1...v2.1.2) - 2019-11-18
 ### Added
