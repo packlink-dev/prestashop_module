@@ -52,13 +52,18 @@ class LoggerService extends Singleton implements ShopLoggerAdapter
      */
     public function logMessage(LogData $data)
     {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $minLogLevel = $configService->getMinLogLevel();
-        $logLevel = $data->getLogLevel();
+        try {
+            /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+            $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+            $minLogLevel = $configService->getMinLogLevel();
+            $logLevel = $data->getLogLevel();
 
-        if (($logLevel > (int)$minLogLevel) && !$configService->isDebugModeEnabled()) {
-            return;
+            if (($logLevel > (int)$minLogLevel) && !$configService->isDebugModeEnabled()) {
+                return;
+            }
+        } catch (\Exception $e) {
+            // if we cannot access configuration, log any error directly.
+            $logLevel = Logger::ERROR;
         }
 
         $message = 'PACKLINK LOG:' . ' | '
