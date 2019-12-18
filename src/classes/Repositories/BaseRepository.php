@@ -131,8 +131,12 @@ class BaseRepository implements RepositoryInterface
         $result = \Db::getInstance()->insert(static::TABLE_NAME, $record);
 
         if (!$result) {
-            $message = TranslationUtility::__('Entity %s cannot be inserted .', array($entity->getConfig()->getType()));
+            $message = TranslationUtility::__(
+                'Entity %s cannot be inserted. Error: %s',
+                array($entity->getConfig()->getType(), \Db::getInstance()->getMsgError())
+            );
             Logger::logError($message);
+
             throw new \RuntimeException($message);
         }
 
