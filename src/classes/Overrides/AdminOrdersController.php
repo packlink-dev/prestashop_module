@@ -3,11 +3,11 @@
 namespace Packlink\PrestaShop\Classes\Overrides;
 
 use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
 use Packlink\BusinessLogic\Order\OrderService;
+use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
-use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\ShopOrderService;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -38,7 +38,7 @@ class AdminOrdersController
      */
     public function insertOrderColumn(&$select, array $fields_list)
     {
-        $column = OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
+        $column = ShopOrderService::PACKLINK_ORDER_DRAFT_FIELD;
         $select .= ',a.' . $column . ' AS ' . $column;
 
         $packlinkElement = array(
@@ -77,10 +77,8 @@ class AdminOrdersController
      * @return mixed
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      * @throws \SmartyException
      */
     public function renderPdfIcons($orderId, \Context $context)
@@ -89,13 +87,14 @@ class AdminOrdersController
         if (!$this->validateOrder($order)) {
             return '';
         }
+
         $printLabelsUrl = $context->link->getAdminLink('BulkShipmentLabels');
 
-        /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
-        $orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
-        $shipmentLabels = $orderRepository->getLabelsByOrderId((int)$orderId);
-        $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
-        $status = $orderDetails ? $orderDetails->getStatus() : ShipmentStatus::STATUS_PENDING;
+        /** @var OrderShipmentDetailsService $shipmentDetailsService */
+        $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((int)$orderId);
+        $shipmentLabels = $shipmentDetails ? $shipmentDetails->getShipmentLabels() : array();
+        $status = $shipmentDetails ? $shipmentDetails->getStatus() : ShipmentStatus::STATUS_PENDING;
         /** @var OrderService $orderService */
         $orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
 
@@ -124,37 +123,33 @@ class AdminOrdersController
     /**
      * Returns template that should be rendered in order draft column within orders table.
      *
-     * @param string $reference Packlink shipment reference.
+     * @param string $orderId Order Id.
      * @param \Context $context
      *
      * @return string Rendered template output.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      * @throws \SmartyException
      */
-    public function getOrderDraft($reference, \Context $context)
+    public function getOrderDraft($orderId, \Context $context)
     {
-        if ($reference === '') {
-            return $reference;
+        if ($orderId === '') {
+            return '';
         }
 
-        /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
-        $orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
+        /** @var OrderShipmentDetailsService $shipmentDetailsService */
+        $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((int)$orderId);
 
-        try {
-            $orderDetails = $orderRepository->getOrderDetailsByReference($reference);
-        } catch (OrderNotFound $e) {
+        if ($shipmentDetails === null) {
             return '';
         }
 
         $context->smarty->assign(
             array(
                 'imgSrc' => _PS_BASE_URL_ . _MODULE_DIR_ . 'packlink/logo.png',
-                'deleted' => $orderDetails->isDeleted(),
-                'orderDraftLink' => $this->getOrderDraftUrl($reference),
+                'deleted' => $shipmentDetails->isDeleted(),
+                'orderDraftLink' => $this->getOrderDraftUrl($shipmentDetails->getReference()),
             )
         );
 

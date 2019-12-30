@@ -1,20 +1,20 @@
 {
-  "_readme": [
-    "This file locks the dependencies of your project to a known state",
-    "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
-    "This file is @generated automatically"
-  ],
-  "content-hash": "75d08cc59f5c957c4dd52eebdd867c3c",
-  "packages": [
-    {
-      "name": "iio/libmergepdf",
-      "version": "3.0.0",
-      "source": {
-        "type": "git",
-        "url": "https://github.com/hanneskod/libmergepdf.git",
-        "reference": "b6042db24d66a49f3ecd261395ec918f00763e9c"
-      },
-      "dist": {
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "75d08cc59f5c957c4dd52eebdd867c3c",
+    "packages": [
+        {
+            "name": "iio/libmergepdf",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hanneskod/libmergepdf.git",
+                "reference": "b6042db24d66a49f3ecd261395ec918f00763e9c"
+            },
+            "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/hanneskod/libmergepdf/zipball/b6042db24d66a49f3ecd261395ec918f00763e9c",
                 "reference": "b6042db24d66a49f3ecd261395ec918f00763e9c",
@@ -56,20 +56,20 @@
             ],
             "time": "2016-03-02T20:38:15+00:00"
         },
-    {
-      "name": "packlink/integration-core",
-      "version": "dev-release/v2.0.0",
-      "source": {
-        "type": "git",
-        "url": "git@github.com:logeecom/pl_module_core.git",
-        "reference": "c7377797419c70b5478c993c7cf491594c480e70"
-      },
-      "dist": {
-        "type": "zip",
-        "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/c7377797419c70b5478c993c7cf491594c480e70",
-        "reference": "c7377797419c70b5478c993c7cf491594c480e70",
-        "shasum": ""
-      },
+        {
+            "name": "packlink/integration-core",
+            "version": "dev-release/v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:logeecom/pl_module_core.git",
+                "reference": "68da20ab0f525d7452c80be9e90b76636175cd91"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/68da20ab0f525d7452c80be9e90b76636175cd91",
+                "reference": "68da20ab0f525d7452c80be9e90b76636175cd91",
+                "shasum": ""
+            },
             "require": {
                 "php": ">=5.3.29"
             },
@@ -94,7 +94,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-      "time": "2019-12-18T16:27:57+00:00"
+            "time": "2020-01-08T15:01:26+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -1246,29 +1246,29 @@
                 },
                 {
                     "name": "Symfony Community",
-                  "homepage": "https://symfony.com/contributors"
+                    "homepage": "https://symfony.com/contributors"
                 }
             ],
-          "description": "Symfony Yaml Component",
-          "homepage": "https://symfony.com",
-          "time": "2018-11-11T11:18:13+00:00"
+            "description": "Symfony Yaml Component",
+            "homepage": "https://symfony.com",
+            "time": "2018-11-11T11:18:13+00:00"
         }
     ],
-  "aliases": [],
-  "minimum-stability": "dev",
-  "stability-flags": {
-    "packlink/integration-core": 20
-  },
-  "prefer-stable": false,
-  "prefer-lowest": false,
-  "platform": {
-    "php": ">=5.3",
-    "ext-json": "*",
-    "ext-curl": "*",
-    "ext-zip": "*",
-    "ext-fileinfo": "*"
-  },
-  "platform-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "packlink/integration-core": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=5.3",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "ext-zip": "*",
+        "ext-fileinfo": "*"
+    },
+    "platform-dev": [],
     "platform-overrides": {
         "php": "5.3.29"
     }

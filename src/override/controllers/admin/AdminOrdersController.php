@@ -53,10 +53,8 @@ class AdminOrdersController extends AdminOrdersControllerCore
      * @return string Rendered template output.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      * @throws \SmartyException
      */
     public function printPDFIcons($orderId, $tr)
@@ -72,9 +70,6 @@ class AdminOrdersController extends AdminOrdersControllerCore
      * @return string Rendered template output.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      * @throws \SmartyException
      */
     public function getOrderDraft($reference)

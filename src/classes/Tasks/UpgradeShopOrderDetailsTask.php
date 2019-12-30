@@ -10,7 +10,8 @@ use Logeecom\Infrastructure\TaskExecution\Task;
 use Logeecom\Infrastructure\Utility\TimeProvider;
 use Packlink\BusinessLogic\Http\DTO\Shipment;
 use Packlink\BusinessLogic\Http\Proxy;
-use Packlink\BusinessLogic\Order\Interfaces\OrderRepository;
+use Packlink\BusinessLogic\Order\OrderService;
+use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
@@ -35,9 +36,13 @@ class UpgradeShopOrderDetailsTask extends Task
      */
     private $currentProgress;
     /**
-     * @var OrderRepository
+     * @var OrderShipmentDetailsService
      */
-    private $orderRepository;
+    private $orderShipmentDetailsService;
+    /**
+     * @var OrderService
+     */
+    private $orderService;
     /**
      * @var Proxy
      */
@@ -54,7 +59,8 @@ class UpgradeShopOrderDetailsTask extends Task
         $this->batchSize = self::DEFAULT_BATCH_SIZE;
         $this->numberOfOrders = count($this->ordersToSync);
         $this->currentProgress = self::INITIAL_PROGRESS_PERCENT;
-        $this->orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
+        $this->orderShipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        $this->orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
         $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
     }
 
@@ -87,7 +93,8 @@ class UpgradeShopOrderDetailsTask extends Task
         list($this->ordersToSync, $this->batchSize, $this->numberOfOrders, $this->currentProgress) =
             Serializer::unserialize($data);
 
-        $this->orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
+        $this->orderShipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        $this->orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
         $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
     }
 
@@ -221,7 +228,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setReference($orderId, $referenceId)
     {
         try {
-            $this->orderRepository->setReference($orderId, $referenceId);
+            $this->orderService->setReference($orderId, $referenceId);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Failed to create reference for order %d', array($orderId)),
@@ -252,7 +259,7 @@ class UpgradeShopOrderDetailsTask extends Task
         if (in_array($orderState, $validStates, true)) {
             try {
                 $labels = $this->proxy->getLabels($reference);
-                $this->orderRepository->setLabelsByReference($reference, $labels);
+                $this->orderShipmentDetailsService->setLabelsByReference($reference, $labels);
             } catch (\Exception $e) {
                 Logger::logError(
                     TranslationUtility::__('Failed to set labels for order with reference %s', array($reference)),
@@ -271,8 +278,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setTrackingInfo($reference, $shipment)
     {
         try {
-            $trackingInfo = $this->proxy->getTrackingInfo($reference);
-            $this->orderRepository->updateTrackingInfo($shipment, $trackingInfo);
+            $this->orderService->updateTrackingInfo($shipment);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__(
@@ -293,11 +299,10 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setShipmentStatusAndPrice($reference, $shipment)
     {
         try {
-            $this->orderRepository->setShippingStatusByReference(
-                $reference,
+            $this->orderService->updateShippingStatus(
+                $shipment,
                 ShipmentStatus::getStatus($shipment->status)
             );
-            $this->orderRepository->setShippingPriceByReference($reference, $shipment->price);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),
@@ -314,7 +319,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setDeleted($reference)
     {
         try {
-            $this->orderRepository->markShipmentDeleted($reference);
+            $this->orderShipmentDetailsService->markShipmentDeleted($reference);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),

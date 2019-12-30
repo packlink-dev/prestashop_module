@@ -20,7 +20,7 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
  * @property array ps_versions_compliancy
  * @property string displayName
  * @property string description
- * @property \ContextCore context
+ * @property \Context context
  * @method string display($file, $template, $cache_id = null, $compile_id = null)
  * @method unregisterHook($string)
  */
@@ -266,17 +266,10 @@ class Packlink extends CarrierModule
             return '';
         }
 
-        $orderId = (int)Tools::getValue('id_order');
-
-        $this->prepareShippingTabData($orderId);
-
-        $this->context->controller->addJS(
-            array(
-                $this->_path . 'views/js/PrestaCreateOrderDraft.js?v=' . $this->version,
-                $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
-                $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
-            ),
-            false
+        \Packlink\PrestaShop\Classes\Utility\AdminShippingTabDataProvider::prepareShippingTabData(
+            $this->context,
+            $this,
+            (int)Tools::getValue('id_order')
         );
 
         return $this->context->smarty->createTemplate(
@@ -338,9 +331,6 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      */
     public function hookActionValidateOrder($params)
     {
@@ -371,9 +361,6 @@ class Packlink extends CarrierModule
      *
      * @param $params
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
@@ -549,7 +536,7 @@ class Packlink extends CarrierModule
 
         $lang = 'en';
         $cart = $params['cart'];
-        $language = new \Language((int) $cart->id_lang);
+        $language = new \Language((int)$cart->id_lang);
 
         if (Validate::isLoadedObject($language) && in_array($language->iso_code, $supportedLanguages, true)) {
             $lang = $language->iso_code;
@@ -722,90 +709,17 @@ class Packlink extends CarrierModule
      *
      * @param bool $isDelayed
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      */
     private function createOrderDraft(\Order $order, OrderState $orderState, $isDelayed = false)
     {
-        \Packlink\PrestaShop\Classes\Bootstrap::init();
-        /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
-        $orderRepository = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Order\Interfaces\OrderRepository::CLASS_NAME
-        );
-
-        if ($this->draftShouldBeCreated($order, $orderState->id, $orderRepository)) {
-            $this->enqueueDraftTask((int)$order->id, $orderRepository, $isDelayed);
-        }
-    }
-
-    /**
-     * Checks whether draft for this order hasn't already been created, whether it has been paid and whether the
-     * shipping carrier of that order has been created by Packlink. If all these conditions are satisfied, order draft
-     * for the provided order should be created.
-     *
-     * @param \Order $order PrestaShop order object.
-     * @param int $orderStatus Current order status.
-     * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository Order repository.
-     *
-     * @return bool Returns TRUE if draft should be created, otherwise returns FALSE.
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function draftShouldBeCreated(\Order $order, $orderStatus, $orderRepository)
-    {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
-        $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
-        );
-        $carrier = new Carrier((int)$order->id_carrier);
-        $orderDetails = $orderRepository->getOrderDetailsById((int)$order->id);
-        $carrierServiceMapping = $carrierService->getMappingByCarrierReferenceId((int)$carrier->id_reference);
-
-        return $orderDetails === null
-            && $carrierServiceMapping !== null
-            && ($orderStatus === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS
-                || $orderStatus === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS);
-    }
-
-    /**
-     * Enqueues SendDraftTask for creating order draft on Packlink and storing shipment reference.
-     *
-     * @param int $orderId ID of the order.
-     * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository Order repository.
-     *
-     * @param bool $isDelayed
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function enqueueDraftTask($orderId, $orderRepository, $isDelayed = false)
-    {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Configuration::CLASS_NAME
-        );
-        /** @var \Logeecom\Infrastructure\TaskExecution\QueueService $queue */
-        $queue = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Logeecom\Infrastructure\TaskExecution\QueueService::CLASS_NAME
-        );
-
-        $orderDetails = new \Packlink\BusinessLogic\Order\Models\OrderShipmentDetails();
-        $orderDetails->setOrderId($orderId);
-        $orderRepository->saveOrderDetails($orderDetails);
-
-        if ($isDelayed) {
-            $this->doEnqueueDelayedSendDraftTask($orderId, $configService);
-        } else {
-            $this->doEnqueueSendDraftTask($orderId, $orderRepository, $queue, $configService);
+        if ($orderState->id === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS
+            || $orderState->id === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS
+        ) {
+            /** @var \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService $shipmentDraftService */
+            $shipmentDraftService = \Logeecom\Infrastructure\ServiceRegister::getService(
+                \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService::CLASS_NAME
+            );
+            $shipmentDraftService->enqueueCreateShipmentDraftTask((int)$order->id, $isDelayed);
         }
     }
 
@@ -954,258 +868,5 @@ class Packlink extends CarrierModule
             null,
             Context::getContext()->shop->id
         );
-    }
-
-    /**
-     * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository
-     * @param $orderId
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function prepareLabelsTemplate(
-        \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository,
-        $orderId
-    ) {
-        $this->context->controller->addJS(
-            $this->_path . 'views/js/PrestaPrintShipmentLabels.js?v=' . $this->version,
-            false
-        );
-
-        /** @var \Packlink\BusinessLogic\Order\OrderService $orderService */
-        $orderService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Order\OrderService::CLASS_NAME
-        );
-
-        $labels = $orderRepository->getLabelsByOrderId($orderId);
-        $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
-        $status = $orderDetails
-            ? $orderDetails->getStatus()
-            :
-            \Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus::STATUS_PENDING;
-
-        $isLabelPrinted = !empty($labels) && $labels[0]->isPrinted();
-
-        $this->context->smarty->assign(
-            array(
-                'orderId' => $orderId,
-                'isLabelPrinted' => $isLabelPrinted,
-                'date' => !empty($labels) ? $labels[0]->getDateCreated()->format('d/m/Y') : '',
-                'status' => $isLabelPrinted
-                    ? \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('Printed')
-                    : \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('Ready'),
-                'isLabelAvailable' => $orderService->isReadyToFetchShipmentLabels($status),
-                'number' => '#PLSL1',
-            )
-        );
-    }
-
-    /**
-     * Prepares Packlink shipping tab data based on the state of order details and draft task.
-     *
-     * @param int $orderId ID of the order.
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function prepareShippingTabData($orderId)
-    {
-        /* @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
-        $orderRepository = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Order\Interfaces\OrderRepository::CLASS_NAME
-        );
-        /** @var \Logeecom\Infrastructure\TaskExecution\QueueService $queue */
-        $queue = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Logeecom\Infrastructure\TaskExecution\QueueService::CLASS_NAME
-        );
-        $orderDetails = $orderRepository->getOrderDetailsById($orderId);
-
-        $shipping = null;
-        $message = '';
-        $displayDraftButton = false;
-
-        if ($orderDetails === null
-            || ($orderDetails->getReference() === null && $orderDetails->getTaskId() === null)
-        ) {
-            $message = \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__(
-                'Create order draft in Packlink PRO'
-            );
-            $displayDraftButton = true;
-        } else {
-            $draftTask = $orderDetails->getTaskId() ? $queue->find($orderDetails->getTaskId()) : null;
-
-            if ($draftTask !== null
-                && $draftTask->getStatus() === \Logeecom\Infrastructure\TaskExecution\QueueItem::FAILED) {
-                $message = \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__(
-                    'Previous attempt to create a draft failed. Error: %s',
-                    array($draftTask->getFailureDescription())
-                );
-                $displayDraftButton = true;
-            } elseif ($orderDetails->getReference() === null) {
-                $message = \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__(
-                    'Draft is currently being created in Packlink'
-                );
-            } else {
-                $shipping = $this->prepareShippingObject($orderId, $orderDetails, $orderRepository);
-            }
-        }
-
-        $printLabelsUrl = $this->context->link->getAdminLink('BulkShipmentLabels');
-
-        $this->context->smarty->assign(array(
-            'shipping' => $shipping,
-            'message' => $message,
-            'printLabelsUrl' => $printLabelsUrl,
-            'pluginBasePath' => $this->_path,
-            'orderId' => $orderId,
-            'displayDraftButton' => $displayDraftButton,
-            'createDraftUrl' => $this->context->link->getAdminLink('OrderDraft') . '&' .
-                http_build_query(
-                    array(
-                        'ajax' => true,
-                        'action' => 'createOrderDraft',
-                    )
-                ),
-        ));
-    }
-
-    /**
-     * Prepares shipping details object for Packlink shipping tab.
-     *
-     * @param int $orderId ID of the order.
-     * @param \Packlink\BusinessLogic\Order\Models\OrderShipmentDetails $orderDetails Details of the order.
-     * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository Order repository.
-     *
-     * @return object
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function prepareShippingObject(
-        $orderId,
-        $orderDetails,
-        \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository
-    ) {
-        /** @var \Logeecom\Infrastructure\Utility\TimeProvider $timeProvider */
-        $timeProvider = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Logeecom\Infrastructure\Utility\TimeProvider::CLASS_NAME
-        );
-
-        $order = new \Order($orderId);
-        $carrier = new Carrier((int)$order->id_carrier);
-
-        $this->prepareLabelsTemplate($orderRepository, $orderId);
-
-        return (object)array(
-            'name' => $carrier->name,
-            'reference' => $orderDetails->getReference(),
-            'deleted' => $orderDetails->isDeleted(),
-            'icon' => file_exists(_PS_SHIP_IMG_DIR_ . '/' . (int)$carrier->id . '.jpg') ?
-                __PS_BASE_URI__ . 'img/s/' . (int)$carrier->id . '.jpg' : '',
-            'status' => $orderDetails->getShippingStatus() !== null ? $orderDetails->getShippingStatus()
-                : '',
-            'time' => $orderDetails->getLastStatusUpdateTime() !== null
-                ? $timeProvider->serializeDate($orderDetails->getLastStatusUpdateTime(), 'd.m.Y H:i:s')
-                : '',
-            'carrier_tracking_numbers' => $orderDetails->getCarrierTrackingNumbers(),
-            'carrier_tracking_url' => $orderDetails->getCarrierTrackingUrl() !== null
-                ? $orderDetails->getCarrierTrackingUrl() : '',
-            'packlink_shipping_price' => $orderDetails->getShippingCost() !== null
-                ? $orderDetails->getShippingCost() . ' €' : '',
-            'link' => $this->getOrderDraftUrl($orderDetails->getReference()),
-        );
-    }
-
-    /**
-     * Returns link to order draft on Packlink for the provided shipment reference.
-     *
-     * @param string $reference Shipment reference.
-     *
-     * @return string Link to order draft on Packlink.
-     */
-    private function getOrderDraftUrl($reference)
-    {
-        /** @var \Packlink\BusinessLogic\Configuration $configService */
-        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Configuration::CLASS_NAME
-        );
-        $userCountry = $configService->getUserInfo() !== null
-            ? Tools::strtolower($configService->getUserInfo()->country)
-            : 'es';
-
-        return "https://pro.packlink.$userCountry/private/shipments/$reference";
-    }
-
-    /**
-     * Enqueues SendDraftTask.
-     *
-     * @param int $orderId
-     * @param \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository
-     * @param \Logeecom\Infrastructure\TaskExecution\QueueService $queue
-     * @param \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function doEnqueueSendDraftTask(
-        $orderId,
-        $orderRepository,
-        $queue,
-        $configService
-    ) {
-        $draftTask = new \Packlink\BusinessLogic\Tasks\SendDraftTask($orderId);
-
-        $queue->enqueue($configService->getDefaultQueueName(), $draftTask);
-        if ($draftTask->getExecutionId() !== null) {
-            // get again from database since it can happen that task already finished and
-            // reference has been set, so we don't delete it here.
-
-            /** @var \Packlink\BusinessLogic\Order\Models\OrderShipmentDetails $orderDetails */
-            $orderDetails = $orderRepository->getOrderDetailsById($orderId);
-            $orderDetails->setTaskId($draftTask->getExecutionId());
-            $orderRepository->saveOrderDetails($orderDetails);
-        }
-    }
-
-    /**
-     * Enqueues delayed send draft task.
-     *
-     * @param int $orderId
-     * @param \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     */
-    private function doEnqueueDelayedSendDraftTask(
-        $orderId,
-        $configService
-    ) {
-        $task = new \Packlink\PrestaShop\Classes\Tasks\DelayedSendDraftTaskEnqueuerTask($orderId);
-        $timestamp = strtotime('+5 minutes');
-        $schedule = new \Packlink\BusinessLogic\Scheduler\Models\HourlySchedule(
-            $task,
-            $configService->getDefaultQueueName()
-        );
-
-        $schedule->setMonth((int)date('m', $timestamp));
-        $schedule->setDay((int)date('d', $timestamp));
-        $schedule->setHour((int)date('H', $timestamp));
-        $schedule->setMinute((int)date('i', $timestamp));
-        $schedule->setRecurring(false);
-        $schedule->setNextSchedule();
-
-        $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
-            \Packlink\BusinessLogic\Scheduler\Models\Schedule::CLASS_NAME
-        );
-
-        $repository->save($schedule);
     }
 }

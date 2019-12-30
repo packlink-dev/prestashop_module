@@ -1,0 +1,377 @@
+<?php
+/** @noinspection PhpDocRedundantThrowsInspection */
+
+namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
+
+use Address as PrestaShopAddress;
+use Logeecom\Infrastructure\Logger\Logger;
+use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
+use Logeecom\Infrastructure\ORM\RepositoryRegistry;
+use Logeecom\Infrastructure\ServiceRegister;
+use Order as PrestaShopOrder;
+use Packlink\BusinessLogic\Configuration;
+use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
+use Packlink\BusinessLogic\Order\Objects\Address;
+use Packlink\BusinessLogic\Order\Objects\Item;
+use Packlink\BusinessLogic\Order\Objects\Order;
+use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
+use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
+use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
+use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
+
+/**
+ * Class OrderRepository
+ *
+ * @package Packlink\PrestaShop\Classes\Repositories
+ */
+class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopOrderService
+{
+    const PACKLINK_ORDER_DRAFT_FIELD = 'packlink_order_draft';
+    /**
+     * Shop order details repository.
+     *
+     * @var \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService
+     */
+    private $shipmentDetailsService;
+
+    /**
+     * Handles updated tracking info for shipment with given reference.
+     *
+     * @param string $shipmentReference
+     * @param array $trackings
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     */
+    public function handleUpdatedTrackingInfo($shipmentReference, array $trackings)
+    {
+        /** @var OrderShipmentDetails $orderDetails */
+        $orderDetails = $this->getShipmentDetailsService()->getDetailsByReference($shipmentReference);
+        $trackingNumbers = $orderDetails->getCarrierTrackingNumbers();
+        if (!empty($trackingNumbers)) {
+            $order = new PrestaShopOrder($orderDetails->getOrderId());
+            if (!\Validate::isLoadedObject($order)) {
+                throw new OrderNotFound('Order with ID ' . $orderDetails->getOrderId() . ' not found.');
+            }
+
+            $order->setWsShippingNumber($trackingNumbers[0]);
+        }
+    }
+
+    /**
+     * @inheritDoc
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \PrestaShopException
+     */
+    public function updateShipmentStatus($shipmentReference, $shippingStatus)
+    {
+        /** @var OrderShipmentDetails $orderDetails */
+        $orderDetails = $this->getShipmentDetailsService()->getDetailsByReference($shipmentReference);
+        $order = new PrestaShopOrder($orderDetails->getOrderId());
+        \Db::getInstance()->update(
+            'orders',
+            array(self::PACKLINK_ORDER_DRAFT_FIELD => pSQL($shipmentReference)),
+            "id_order = {$orderDetails->getOrderId()}"
+        );
+
+        /** @var ConfigurationService $configService */
+        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        $statusMappings = $configService->getOrderStatusMappings();
+
+        if (!array_key_exists($shippingStatus, $statusMappings)) {
+            Logger::logWarning(
+                TranslationUtility::__('Order status mapping not found.'),
+                'Integration'
+            );
+
+            return;
+        }
+
+        if ((int)$order->getCurrentState() !== (int)$statusMappings[$shippingStatus]) {
+            $order->setCurrentState((int)$statusMappings[$shippingStatus]);
+            $order->save();
+        }
+    }
+
+    /**
+     * Fetches and returns system order by its unique identifier.
+     *
+     * @param string $orderId $orderId Unique order id.
+     *
+     * @return Order Order object.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     */
+    public function getOrderAndShippingData($orderId)
+    {
+        $order = new Order();
+        try {
+            $sourceOrder = $this->checkIfOrderExists($orderId);
+        } catch (OrderNotFound $e) {
+            Logger::logWarning(TranslationUtility::__('Source order not found'), 'Integration');
+
+            return $order;
+        }
+
+        $currencyId = (int)$sourceOrder->id_currency;
+        $currency = \Currency::getCurrency($currencyId);
+
+        $order->setId($orderId);
+        $order->setCustomerId((int)$sourceOrder->id_customer);
+        $order->setCurrency($currency['iso_code']);
+        $order->setTotalPrice((float)$sourceOrder->total_paid_tax_incl);
+        $order->setBasePrice((float)$sourceOrder->total_paid_tax_excl);
+
+        $dropOffId = $this->getDropOffId($sourceOrder);
+
+        if ($dropOffId) {
+            $order->setShippingDropOffId($dropOffId);
+        }
+
+        $order->setShippingAddress($this->getAddress($sourceOrder));
+
+        $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
+        $order->setItems($this->getOrderItems($sourceOrder));
+
+        return $order;
+    }
+
+    /**
+     * Retrieves drop-off id if shop order has drop off shipping service selected.
+     *
+     * Returns null otherwise.
+     *
+     * @param PrestaShopOrder $shopOrder
+     *
+     * @return string | null
+     */
+    private function getDropOffId(PrestaShopOrder $shopOrder)
+    {
+        try {
+            $repository = RepositoryRegistry::getRepository(
+                CartCarrierDropOffMapping::getClassName()
+            );
+
+            $query = new QueryFilter();
+            $query->where('cartId', '=', (string)$shopOrder->id_cart)
+                ->where('carrierReferenceId', '=', (string)$shopOrder->id_carrier);
+
+            /** @var \Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping $mapping */
+            $mapping = $repository->selectOne($query);
+
+            if ($mapping) {
+                $dropOff = $mapping->getDropOff();
+
+                return (string)$dropOff['id'];
+            }
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns packlink address from shop address.
+     *
+     * @param PrestaShopOrder $shopOrder
+     *
+     * @return \Packlink\BusinessLogic\Order\Objects\Address
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     */
+    private function getAddress(PrestaShopOrder $shopOrder)
+    {
+        $deliveryAddressId = (int)$shopOrder->id_address_delivery;
+
+        $shippingAddress = new Address();
+        $deliveryAddress = new PrestaShopAddress($deliveryAddressId);
+        $customer = new \Customer($shopOrder->id_customer);
+        $country = new \Country($deliveryAddress->id_country);
+
+        if ($country !== null) {
+            $shippingAddress->setCountry($country->iso_code);
+        }
+
+        $shippingAddress->setZipCode($deliveryAddress->postcode);
+        $shippingAddress->setCity($deliveryAddress->city);
+        $shippingAddress->setCompany($deliveryAddress->company);
+        $shippingAddress->setPhone($deliveryAddress->phone ?: $deliveryAddress->phone_mobile);
+        $shippingAddress->setStreet1($deliveryAddress->address1);
+        $shippingAddress->setStreet2($deliveryAddress->address2);
+        $shippingAddress->setName($deliveryAddress->firstname);
+        $shippingAddress->setSurname($deliveryAddress->lastname);
+
+        if ($customer !== null) {
+            $shippingAddress->setEmail($customer->email);
+            $shippingAddress->setName($deliveryAddress->firstname ?: $customer->firstname);
+            $shippingAddress->setSurname($deliveryAddress->lastname ?: $customer->lastname);
+        }
+
+        return $shippingAddress;
+    }
+
+    /**
+     * Sets order shipping details.
+     *
+     * @param Order $order Packlink order object.
+     * @param int $carrierId ID of PrestaShop carrier.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function setOrderShippingDetails($order, $carrierId)
+    {
+        /** @var CarrierService $carrierService */
+        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
+        $carrier = new \Carrier($carrierId);
+
+        if ($carrier === null) {
+            Logger::logWarning(TranslationUtility::__('Carrier not found'), 'Integration');
+
+            return;
+        }
+
+        $shippingMethodId = $carrierService->getShippingMethodId((int)$carrier->id_reference);
+        if ($shippingMethodId !== null) {
+            $order->setShippingMethodId($shippingMethodId);
+        } else {
+            Logger::logWarning(TranslationUtility::__('Carrier service mapping not found'), 'Integration');
+        }
+    }
+
+    /**
+     * Sets order items that belong to provided order.
+     *
+     * @param PrestaShopOrder $sourceOrder PrestaShop order object.
+     *
+     * @return Item[] An array of order items.
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     */
+    private function getOrderItems(PrestaShopOrder $sourceOrder)
+    {
+        /** @var ConfigurationService $configService */
+        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        $defaultParcel = $configService->getDefaultParcel();
+
+        $sourceOrderItems = $sourceOrder->getOrderDetailList();
+        $orderItems = array();
+        /** @var array $sourceOrderItem */
+        foreach ($sourceOrderItems as $sourceOrderItem) {
+            /** @var \ProductCore $product */
+            $product = new \Product((int)$sourceOrderItem['product_id']);
+            if (!$product->is_virtual) {
+                $orderItem = $this->getOrderItem($sourceOrderItem, $defaultParcel);
+
+                $orderItem->setPrice((float)$sourceOrderItem['unit_price_tax_excl']);
+                $orderItem->setTotalPrice((float)$sourceOrderItem['unit_price_tax_incl']);
+
+                $orderItems[] = $orderItem;
+            }
+        }
+
+        return $orderItems;
+    }
+
+    /**
+     * Sets additional order item information (title, quantity, category...).
+     *
+     * @param array $sourceOrderItem PrestaShop order item.
+     *
+     * @param \Packlink\BusinessLogic\Http\DTO\ParcelInfo $defaultParcel
+     *
+     * @return \Packlink\BusinessLogic\Order\Objects\Item
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     */
+    private function getOrderItem($sourceOrderItem, $defaultParcel)
+    {
+        $orderItem = new Item();
+        $product = new \Product((int)$sourceOrderItem['product_id']);
+        $languageId = (int)\Context::getContext()->language->id;
+
+        $orderItem->setQuantity((int)$sourceOrderItem['product_quantity']);
+
+        if (!empty($product->name)) {
+            $orderItem->setTitle($product->name[$languageId]);
+        }
+
+        $category = new \Category((int)$product->id_category_default);
+        if (!empty($category->name)) {
+            $orderItem->setCategoryName($category->name[$languageId]);
+        }
+
+        $orderItem->setWeight(round((float)$product->weight ?: $defaultParcel->weight, 2));
+        $orderItem->setWidth(ceil((float)$product->width ?: $defaultParcel->width));
+        $orderItem->setLength(ceil((float)$product->depth ?: $defaultParcel->length));
+        $orderItem->setHeight(ceil((float)$product->height ?: $defaultParcel->height));
+
+        /** @var array $productCoverImage */
+        $productCoverImage = \Image::getCover($product->id);
+        if (!empty($productCoverImage)) {
+            $link = new \Link();
+            $productImageUrl = $link->getImageLink(
+                $product->link_rewrite[$languageId],
+                (int)$productCoverImage['id_image'],
+                \ImageType::getFormatedName('home')
+            );
+            $orderItem->setPictureUrl($productImageUrl);
+        }
+
+        return $orderItem;
+    }
+
+    /**
+     * Checks if order with provided ID exists in the shop and throws an exception if it doesn't.
+     *
+     * @param int $orderId Shop order ID.
+     *
+     * @return PrestaShopOrder
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
+     */
+    private function checkIfOrderExists($orderId)
+    {
+        $order = null;
+        try {
+            $order = new PrestaShopOrder($orderId);
+        } catch (\PrestaShopDatabaseException $e) {
+        } catch (\PrestaShopException $e) {
+        }
+
+        if (!\Validate::isLoadedObject($order)) {
+            throw new OrderNotFound(
+                TranslationUtility::__("Order with ID $orderId doesn't exist in the shop")
+            );
+        }
+
+        return $order;
+    }
+
+    /**
+     * Returns shop order details repository.
+     *
+     * @return OrderShipmentDetailsService
+     */
+    private function getShipmentDetailsService()
+    {
+        if ($this->shipmentDetailsService === null) {
+            $this->shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        }
+
+        return $this->shipmentDetailsService;
+    }
+}

@@ -10,8 +10,8 @@ use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\ShopOrderService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
-use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Tools;
 
 /**
@@ -360,7 +360,7 @@ class PacklinkInstaller
      */
     private function extendOrdersTable()
     {
-        $columnName = pSQL(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD);
+        $columnName = pSQL(ShopOrderService::PACKLINK_ORDER_DRAFT_FIELD);
         $tableName = _DB_PREFIX_ . 'orders';
         $checkColumnSqlStatement = 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = \'' . _DB_NAME_
             . '\' AND TABLE_NAME = \'' . pSQL($tableName)
@@ -397,7 +397,7 @@ class PacklinkInstaller
     {
         try {
             $sql = 'ALTER TABLE ' . bqSQL(_DB_PREFIX_ . 'orders')
-                . ' DROP COLUMN ' . bqSQL(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD);
+                . ' DROP COLUMN ' . bqSQL(ShopOrderService::PACKLINK_ORDER_DRAFT_FIELD);
 
             \Db::getInstance()->execute($sql);
         } catch (\PrestaShopException $e) {
