@@ -79,7 +79,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.1.3';
+        $this->version = '2.1.4';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -188,6 +188,8 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function hookDisplayBeforeCarrier($params)
     {
@@ -214,6 +216,8 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     public function hookDisplayAfterCarrier($params)
     {
@@ -290,7 +294,6 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
@@ -373,7 +376,6 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function hookActionOrderStatusUpdate($params)
     {
@@ -588,6 +590,8 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      */
     protected function getPresta16ShippingStepPage($params)
     {
@@ -1007,7 +1011,6 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function prepareShippingTabData($orderId)
     {
@@ -1083,7 +1086,6 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function prepareShippingObject(
         $orderId,
@@ -1100,7 +1102,7 @@ class Packlink extends CarrierModule
 
         $this->prepareLabelsTemplate($orderRepository, $orderId);
 
-        $shipping = (object)array(
+        return (object)array(
             'name' => $carrier->name,
             'reference' => $orderDetails->getReference(),
             'deleted' => $orderDetails->isDeleted(),
@@ -1118,8 +1120,6 @@ class Packlink extends CarrierModule
                 ? $orderDetails->getShippingCost() . ' €' : '',
             'link' => $this->getOrderDraftUrl($orderDetails->getReference()),
         );
-
-        return $shipping;
     }
 
     /**
