@@ -35,7 +35,6 @@ class CarrierService implements ShopShippingMethodService
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function add(ShippingMethod $shippingMethod)
     {
@@ -53,7 +52,7 @@ class CarrierService implements ShopShippingMethodService
 
         try {
             if ($carrier->add()) {
-                $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
+                $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
 
                 $this->setCarrierGroups($carrier);
                 $range = $this->setCarrierRange($carrier, $shippingMethod);
@@ -93,7 +92,7 @@ class CarrierService implements ShopShippingMethodService
                 try {
                     $this->setCarrierData($carrier, $shippingMethod);
                     $this->setCarrierRange($carrier, $shippingMethod);
-                    $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
+                    $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
                     $this->updateCarrierLogo($shippingMethod, $carrier);
                     $carrier->update();
                 } catch (\Exception $e) {
@@ -157,7 +156,6 @@ class CarrierService implements ShopShippingMethodService
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function addBackupShippingMethod(ShippingMethod $shippingMethod)
     {
@@ -459,7 +457,6 @@ class CarrierService implements ShopShippingMethodService
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function setCarrierRange(\Carrier $carrier, ShippingMethod $shippingMethod)
     {
@@ -504,7 +501,6 @@ class CarrierService implements ShopShippingMethodService
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getDefaultWeightRange($carrierId)
     {
@@ -608,7 +604,6 @@ class CarrierService implements ShopShippingMethodService
      * @param \Carrier $carrier PrestaShop carrier entity.
      *
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function cleanUpCarrierData(\Carrier $carrier)
     {

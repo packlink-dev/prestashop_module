@@ -253,8 +253,6 @@ class ShippingMethodsController extends PacklinkBaseController
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
 
-        $data['taxClass'] = (int)$data['taxClass'];
-
         return ShippingMethodConfiguration::fromArray($data);
     }
 
