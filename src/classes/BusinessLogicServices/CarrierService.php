@@ -460,6 +460,9 @@ class CarrierService implements ShopShippingMethodService
      */
     private function setCarrierRange(\Carrier $carrier, ShippingMethod $shippingMethod)
     {
+        // we need to remove old ones before adding new one.
+        $this->removeCarrierRanges($carrier);
+
         /** @var \Packlink\BusinessLogic\ShippingMethod\Models\FixedPricePolicy[] $policy */
         $pricingByValue = $shippingMethod->getPricingPolicy() === ShippingMethod::PRICING_POLICY_FIXED_PRICE_BY_VALUE;
         if ($pricingByValue) {
@@ -490,6 +493,33 @@ class CarrierService implements ShopShippingMethodService
         $range->id ? $range->save() : $range->add();
 
         return $range;
+    }
+
+    /**
+     * Removes carrier ranges, if any.
+     *
+     * @param \Carrier $carrier
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    private function removeCarrierRanges(\Carrier $carrier)
+    {
+        $priceRanges = \RangePrice::getRanges($carrier->id);
+        if ($priceRanges) {
+            foreach ($priceRanges as $priceRangeData) {
+                $range = new \RangePrice($priceRangeData['id_range_price']);
+                $range->delete();
+            }
+        }
+
+        $weightRanges = \RangeWeight::getRanges($carrier->id);
+        if ($weightRanges) {
+            foreach ($weightRanges as $weightRangeData) {
+                $range = new \RangeWeight($weightRangeData['id_range_weight']);
+                $range->delete();
+            }
+        }
     }
 
     /**
