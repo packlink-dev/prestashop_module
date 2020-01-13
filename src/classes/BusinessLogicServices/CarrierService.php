@@ -500,23 +500,19 @@ class CarrierService implements ShopShippingMethodService
      *
      * @param \Carrier $carrier
      *
-     * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
     private function removeCarrierRanges(\Carrier $carrier)
     {
-        $priceRanges = \RangePrice::getRanges($carrier->id);
-        if ($priceRanges) {
-            foreach ($priceRanges as $priceRangeData) {
-                $range = new \RangePrice($priceRangeData['id_range_price']);
-                $range->delete();
-            }
-        }
-
-        $weightRanges = \RangeWeight::getRanges($carrier->id);
-        if ($weightRanges) {
-            foreach ($weightRanges as $weightRangeData) {
-                $range = new \RangeWeight($weightRangeData['id_range_weight']);
+        /**
+         * @var \RangeWeight|\RangePrice $class
+         * @var string $id
+         */
+        foreach (array('\RangeWeight' => 'id_range_weight', '\RangePrice' => 'id_range_price') as $class => $id) {
+            $ranges = $class::getRanges($carrier->id) ?: array();
+            foreach ($ranges as $rangeData) {
+                /** @var \RangeWeight|\RangePrice $range */
+                $range = new $class($rangeData[$id]);
                 $range->delete();
             }
         }
@@ -643,11 +639,7 @@ class CarrierService implements ShopShippingMethodService
 
         \Db::getInstance()->delete('carrier_group', 'id_carrier=' . $carrier->id);
 
-        $ranges = \RangeWeight::getRanges($carrier->id);
-        foreach ($ranges as $range) {
-            $rangeWeight = new \RangeWeight((int)$range['id_range_weight']);
-            $rangeWeight->delete();
-        }
+        $this->removeCarrierRanges($carrier);
 
         $zones = $carrier->getZones();
         foreach ($zones as $zone) {
