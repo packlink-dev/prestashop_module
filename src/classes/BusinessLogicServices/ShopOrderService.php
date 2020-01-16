@@ -1,5 +1,4 @@
 <?php
-/** @noinspection PhpDocRedundantThrowsInspection */
 
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
@@ -18,16 +17,16 @@ use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
+use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
- * Class OrderRepository
+ * Class ShopOrderService
  *
- * @package Packlink\PrestaShop\Classes\Repositories
+ * @package Packlink\PrestaShop\Classes\BusinessLogicServices
  */
 class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopOrderService
 {
-    const PACKLINK_ORDER_DRAFT_FIELD = 'packlink_order_draft';
     /**
      * Shop order details repository.
      *
@@ -42,8 +41,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      * @param array $trackings
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      */
     public function handleUpdatedTrackingInfo($shipmentReference, array $trackings)
@@ -52,30 +49,26 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $orderDetails = $this->getShipmentDetailsService()->getDetailsByReference($shipmentReference);
         $trackingNumbers = $orderDetails->getCarrierTrackingNumbers();
         if (!empty($trackingNumbers)) {
-            $order = new PrestaShopOrder($orderDetails->getOrderId());
-            if (!\Validate::isLoadedObject($order)) {
-                throw new OrderNotFound('Order with ID ' . $orderDetails->getOrderId() . ' not found.');
-            }
-
-            $order->setWsShippingNumber($trackingNumbers[0]);
+            $repository = new OrderRepository();
+            $repository->setTrackingNumber($orderDetails->getOrderId(), $trackingNumbers[0]);
         }
     }
 
     /**
-     * @inheritDoc
+     * Sets order packlink shipping status to an order by shipment reference.
+     *
+     * @param string $shipmentReference Packlink shipment reference.
+     * @param string $shippingStatus Packlink shipping status.
+     *
+     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order for provided reference is not found.
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \PrestaShopException
      */
     public function updateShipmentStatus($shipmentReference, $shippingStatus)
     {
         /** @var OrderShipmentDetails $orderDetails */
         $orderDetails = $this->getShipmentDetailsService()->getDetailsByReference($shipmentReference);
-        $order = new PrestaShopOrder($orderDetails->getOrderId());
-        \Db::getInstance()->update(
-            'orders',
-            array(self::PACKLINK_ORDER_DRAFT_FIELD => pSQL($shipmentReference)),
-            "id_order = {$orderDetails->getOrderId()}"
-        );
+        $repository = new OrderRepository();
+        $repository->updateShipmentReference($orderDetails->getOrderId(), $shipmentReference);
 
         /** @var ConfigurationService $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
@@ -90,10 +83,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             return;
         }
 
-        if ((int)$order->getCurrentState() !== (int)$statusMappings[$shippingStatus]) {
-            $order->setCurrentState((int)$statusMappings[$shippingStatus]);
-            $order->save();
-        }
+        $repository->updateOrderState($orderDetails->getOrderId(), (int)$statusMappings[$shippingStatus]);
     }
 
     /**
@@ -107,13 +97,12 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function getOrderAndShippingData($orderId)
     {
         $order = new Order();
         try {
-            $sourceOrder = $this->checkIfOrderExists($orderId);
+            $sourceOrder = $this->getOrder($orderId);
         } catch (OrderNotFound $e) {
             Logger::logWarning(TranslationUtility::__('Source order not found'), 'Integration');
 
@@ -187,7 +176,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getAddress(PrestaShopOrder $shopOrder)
     {
@@ -258,7 +246,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getOrderItems(PrestaShopOrder $sourceOrder)
     {
@@ -296,7 +283,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getOrderItem($sourceOrderItem, $defaultParcel)
     {
@@ -336,14 +322,14 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
     }
 
     /**
-     * Checks if order with provided ID exists in the shop and throws an exception if it doesn't.
+     * Gets the order.
      *
      * @param int $orderId Shop order ID.
      *
      * @return PrestaShopOrder
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      */
-    private function checkIfOrderExists($orderId)
+    private function getOrder($orderId)
     {
         $order = null;
         try {

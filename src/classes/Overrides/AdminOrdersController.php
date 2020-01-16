@@ -7,7 +7,7 @@ use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
-use Packlink\PrestaShop\Classes\BusinessLogicServices\ShopOrderService;
+use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -38,7 +38,7 @@ class AdminOrdersController
      */
     public function insertOrderColumn(&$select, array $fields_list)
     {
-        $column = ShopOrderService::PACKLINK_ORDER_DRAFT_FIELD;
+        $column = OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
         $select .= ',a.' . $column . ' AS ' . $column;
 
         $packlinkElement = array(
