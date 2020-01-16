@@ -166,7 +166,6 @@ class UpgradeShopOrderDetailsTask extends Task
                 }
 
                 if ($shipment !== null) {
-                    $this->setLabels($order['draft_reference'], $shipment->status);
                     $this->setShipmentStatusAndPrice($order['draft_reference'], $shipment);
                     $this->setTrackingInfo($order['draft_reference'], $shipment);
                 } else {
@@ -232,34 +231,6 @@ class UpgradeShopOrderDetailsTask extends Task
         }
 
         return true;
-    }
-
-    /**
-     * Sets labels for order.
-     *
-     * @param string $reference Packlink shipment reference.
-     * @param string $orderState State of the order.
-     */
-    protected function setLabels($reference, $orderState)
-    {
-        $validStates = array(
-            'READY_TO_PRINT',
-            'READY_FOR_COLLECTION',
-            'IN_TRANSIT',
-            'DELIVERED',
-        );
-
-        if (in_array($orderState, $validStates, true)) {
-            try {
-                $labels = $this->proxy->getLabels($reference);
-                $this->orderRepository->setLabelsByReference($reference, $labels);
-            } catch (\Exception $e) {
-                Logger::logError(
-                    TranslationUtility::__('Failed to set labels for order with reference %s', array($reference)),
-                    'Integration'
-                );
-            }
-        }
     }
 
     /**
