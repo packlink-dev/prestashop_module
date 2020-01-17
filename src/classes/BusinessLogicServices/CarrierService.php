@@ -35,7 +35,6 @@ class CarrierService implements ShopShippingMethodService
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function add(ShippingMethod $shippingMethod)
     {
@@ -53,7 +52,7 @@ class CarrierService implements ShopShippingMethodService
 
         try {
             if ($carrier->add()) {
-                $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
+                $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
 
                 $this->setCarrierGroups($carrier);
                 $range = $this->setCarrierRange($carrier, $shippingMethod);
@@ -93,7 +92,7 @@ class CarrierService implements ShopShippingMethodService
                 try {
                     $this->setCarrierData($carrier, $shippingMethod);
                     $this->setCarrierRange($carrier, $shippingMethod);
-                    $carrier->setTaxRulesGroup($shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
+                    $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
                     $this->updateCarrierLogo($shippingMethod, $carrier);
                     $carrier->update();
                 } catch (\Exception $e) {
@@ -157,7 +156,6 @@ class CarrierService implements ShopShippingMethodService
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public function addBackupShippingMethod(ShippingMethod $shippingMethod)
     {
@@ -459,10 +457,12 @@ class CarrierService implements ShopShippingMethodService
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function setCarrierRange(\Carrier $carrier, ShippingMethod $shippingMethod)
     {
+        // we need to remove old ones before adding new one.
+        $this->removeCarrierRanges($carrier);
+
         /** @var \Packlink\BusinessLogic\ShippingMethod\Models\FixedPricePolicy[] $policy */
         $pricingByValue = $shippingMethod->getPricingPolicy() === ShippingMethod::PRICING_POLICY_FIXED_PRICE_BY_VALUE;
         if ($pricingByValue) {
@@ -496,6 +496,29 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
+     * Removes carrier ranges, if any.
+     *
+     * @param \Carrier $carrier
+     *
+     * @throws \PrestaShopException
+     */
+    private function removeCarrierRanges(\Carrier $carrier)
+    {
+        /**
+         * @var \RangeWeight|\RangePrice $class
+         * @var string $id
+         */
+        foreach (array('\RangeWeight' => 'id_range_weight', '\RangePrice' => 'id_range_price') as $class => $id) {
+            $ranges = $class::getRanges($carrier->id) ?: array();
+            foreach ($ranges as $rangeData) {
+                /** @var \RangeWeight|\RangePrice $range */
+                $range = new $class($rangeData[$id]);
+                $range->delete();
+            }
+        }
+    }
+
+    /**
      * Creates a default weight range.
      *
      * @param int $carrierId
@@ -504,7 +527,6 @@ class CarrierService implements ShopShippingMethodService
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function getDefaultWeightRange($carrierId)
     {
@@ -608,7 +630,6 @@ class CarrierService implements ShopShippingMethodService
      * @param \Carrier $carrier PrestaShop carrier entity.
      *
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     private function cleanUpCarrierData(\Carrier $carrier)
     {
@@ -618,11 +639,7 @@ class CarrierService implements ShopShippingMethodService
 
         \Db::getInstance()->delete('carrier_group', 'id_carrier=' . $carrier->id);
 
-        $ranges = \RangeWeight::getRanges($carrier->id);
-        foreach ($ranges as $range) {
-            $rangeWeight = new \RangeWeight((int)$range['id_range_weight']);
-            $rangeWeight->delete();
-        }
+        $this->removeCarrierRanges($carrier);
 
         $zones = $carrier->getZones();
         foreach ($zones as $zone) {

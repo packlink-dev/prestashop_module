@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
 
+## [v2.1.4](https://github.com/packlink-dev/prestashop_module/compare/v2.1.3...v2.1.4) - 2020-01-10
+### Changed
+- Fix displaying selected tax class in shipping service configuration.
+- Fix duplicated entity error in PrestaShop log.
+
 ## [v2.1.3](https://github.com/packlink-dev/prestashop_module/compare/v2.1.2...v2.1.3) - 2019-11-28
 ### Changed
 - Skip handling drop-off location for non-packlink services.
