@@ -16,9 +16,7 @@ class OrderStateMappingController extends PacklinkBaseController
     {
         /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $mappings = $configService->getOrderStatusMappings();
-
-        $mappings = $mappings ?: array();
+        $mappings = $configService->getOrderStatusMappings() ?: array();
 
         PacklinkPrestaShopUtility::dieJson($mappings);
     }

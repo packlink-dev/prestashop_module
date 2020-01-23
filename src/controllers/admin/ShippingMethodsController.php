@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection PhpRedundantCatchClauseInspection */
-
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Packlink\BusinessLogic\Controllers\AnalyticsController;

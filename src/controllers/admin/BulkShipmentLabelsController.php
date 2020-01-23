@@ -45,13 +45,7 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return bool|string File path of the final merged PDF document; FALSE on error.
      *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      * @throws \iio\libmergepdf\Exception
      */
     protected function bulkPrintLabels()
@@ -91,13 +85,7 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return array
      *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      */
     protected function prepareAllLabels($tmpDirectory)
     {

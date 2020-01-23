@@ -74,6 +74,7 @@ class OrderRepository
      * @return \Order An order instance.
      *
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound If order does not exist.
+     * @noinspection PhpUndefinedClassInspection
      */
     private function getOrder($orderId)
     {
