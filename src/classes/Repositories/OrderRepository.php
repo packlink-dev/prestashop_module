@@ -14,25 +14,6 @@ class OrderRepository
     const PACKLINK_ORDER_DRAFT_FIELD = 'packlink_order_draft';
 
     /**
-     * Sets the Packlink reference to the order.
-     *
-     * @param int $orderId
-     * @param string $reference
-     *
-     * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
-     */
-    public function updateShipmentReference($orderId, $reference)
-    {
-        $this->getOrder($orderId);
-
-        \Db::getInstance()->update(
-            'orders',
-            array(self::PACKLINK_ORDER_DRAFT_FIELD => pSQL($reference)),
-            "id_order = $orderId"
-        );
-    }
-
-    /**
      * Updates order state.
      *
      * @param int $orderId

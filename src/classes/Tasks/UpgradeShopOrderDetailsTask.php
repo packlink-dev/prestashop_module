@@ -154,7 +154,7 @@ class UpgradeShopOrderDetailsTask extends Task
             $this->reportAlive();
 
             foreach ($orders as $order) {
-                if (!$this->setReference((int)$order['id_order'], $order['draft_reference'])) {
+                if (!$this->setReference($order['id_order'], $order['draft_reference'])) {
                     continue;
                 }
 

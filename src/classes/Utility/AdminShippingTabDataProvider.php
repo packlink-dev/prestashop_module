@@ -34,7 +34,7 @@ class AdminShippingTabDataProvider
      *
      * @param \Context $context
      * @param \Module $module
-     * @param int $orderId ID of the order.
+     * @param string $orderId ID of the order.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \PrestaShopDatabaseException
@@ -87,7 +87,7 @@ class AdminShippingTabDataProvider
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private static function prepareDraftButtonSection($orderId, $shipmentDetails)
+    private static function prepareDraftButtonSection($orderId, $shipmentDetails = null)
     {
         /** @var ShipmentDraftService $shipmentDraftService */
         $shipmentDraftService = ServiceRegister::getService(ShipmentDraftService::CLASS_NAME);
@@ -112,7 +112,7 @@ class AdminShippingTabDataProvider
         }
 
         self::$context->smarty->assign(array(
-            'shipping' => !$displayDraftButton ? self::prepareShippingObject($orderId, $shipmentDetails) : '',
+            'shipping' => !$displayDraftButton ? (object)self::prepareShippingObject($orderId, $shipmentDetails) : '',
             'message' => $message,
             'displayDraftButton' => $displayDraftButton,
         ));
@@ -121,7 +121,7 @@ class AdminShippingTabDataProvider
     /**
      * Prepares shipping details object for Packlink shipping tab.
      *
-     * @param int $orderId ID of the order.
+     * @param string $orderId ID of the order.
      * @param OrderShipmentDetails $shipmentDetails Shipment details for an order.
      *
      * @return array
@@ -129,12 +129,16 @@ class AdminShippingTabDataProvider
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private static function prepareShippingObject($orderId, OrderShipmentDetails $shipmentDetails)
+    private static function prepareShippingObject($orderId, OrderShipmentDetails $shipmentDetails = null)
     {
+        if ($shipmentDetails === null) {
+            return array();
+        }
+
         /** @var TimeProvider $timeProvider */
         $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
 
-        $order = new \Order($orderId);
+        $order = new \Order((int)$orderId);
         $carrier = new \Carrier((int)$order->id_carrier);
 
         return array(

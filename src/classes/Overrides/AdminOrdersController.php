@@ -38,20 +38,17 @@ class AdminOrdersController
      */
     public function insertOrderColumn(&$select, array $fields_list)
     {
-        $column = OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
-        $select .= ',a.' . $column . ' AS ' . $column;
-
         $packlinkElement = array(
             'title' => TranslationUtility::__('Packlink PRO Shipping'),
             'align' => 'text-center',
-            'filter_key' => 'a!' . $column,
+            'filter_key' => 'a!id_order',
             'callback' => 'getOrderDraft',
         );
 
         return $this->insertElementIntoArrayAfterSpecificKey(
             $fields_list,
             'payment',
-            array($column => $packlinkElement)
+            array(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD => $packlinkElement)
         );
     }
 
@@ -71,7 +68,7 @@ class AdminOrdersController
     /**
      * Renders icons for printing PDF files.
      *
-     * @param int $orderId
+     * @param string $orderId
      * @param \Context $context
      *
      * @return mixed
@@ -83,7 +80,7 @@ class AdminOrdersController
      */
     public function renderPdfIcons($orderId, \Context $context)
     {
-        $order = new \Order($orderId);
+        $order = new \Order((int)$orderId);
         if (!$this->validateOrder($order)) {
             return '';
         }
@@ -92,7 +89,7 @@ class AdminOrdersController
 
         /** @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
-        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((int)$orderId);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId($orderId);
         $shipmentLabels = $shipmentDetails ? $shipmentDetails->getShipmentLabels() : array();
         $status = $shipmentDetails ? $shipmentDetails->getStatus() : ShipmentStatus::STATUS_PENDING;
         /** @var OrderService $orderService */
@@ -128,8 +125,6 @@ class AdminOrdersController
      *
      * @return string Rendered template output.
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \SmartyException
      */
     public function getOrderDraft($orderId, \Context $context)
     {
@@ -139,7 +134,7 @@ class AdminOrdersController
 
         /** @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
-        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((int)$orderId);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId($orderId);
 
         if ($shipmentDetails === null) {
             return '';

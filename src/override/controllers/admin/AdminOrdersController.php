@@ -47,7 +47,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
     /**
      * Renders invoice and shipment label icons.
      *
-     * @param int $orderId ID of the order.
+     * @param string $orderId ID of the order.
      * @param array $tr Table row.
      *
      * @return string Rendered template output.
@@ -65,16 +65,16 @@ class AdminOrdersController extends AdminOrdersControllerCore
     /**
      * Returns template that should be rendered in order draft column within orders table.
      *
-     * @param string $reference Packlink shipment reference.
+     * @param string $orderId ID of the order.
      *
      * @return string Rendered template output.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \SmartyException
      */
-    public function getOrderDraft($reference)
+    public function getOrderDraft($orderId)
     {
-        return $this->packlinkAdminOrderController->getOrderDraft($reference, $this->context);
+        return $this->packlinkAdminOrderController->getOrderDraft($orderId, $this->context);
     }
 
     /**

@@ -23,7 +23,7 @@ class OrderDraftController extends PacklinkBaseController
             try {
                 /** @var ShipmentDraftService $shipmentDraftService */
                 $shipmentDraftService = ServiceRegister::getService(ShipmentDraftService::CLASS_NAME);
-                $shipmentDraftService->enqueueCreateShipmentDraftTask($data['orderId']);
+                $shipmentDraftService->enqueueCreateShipmentDraftTask((string)$data['orderId']);
             } catch (\Exception $e) {
                 PacklinkPrestaShopUtility::die500(array(
                     'success' => false,

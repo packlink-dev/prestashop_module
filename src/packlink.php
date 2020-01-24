@@ -269,7 +269,7 @@ class Packlink extends CarrierModule
         \Packlink\PrestaShop\Classes\Utility\AdminShippingTabDataProvider::prepareShippingTabData(
             $this->context,
             $this,
-            (int)Tools::getValue('id_order')
+            Tools::getValue('id_order')
         );
 
         return $this->context->smarty->createTemplate(
@@ -331,6 +331,9 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+     * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapExists
+     * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapNotFound
      */
     public function hookActionValidateOrder($params)
     {
@@ -361,8 +364,10 @@ class Packlink extends CarrierModule
      *
      * @param $params
      *
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+     * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapExists
+     * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapNotFound
      */
     public function hookActionOrderStatusUpdate($params)
     {
@@ -709,6 +714,10 @@ class Packlink extends CarrierModule
      *
      * @param bool $isDelayed
      *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+     * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapExists
+     * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapNotFound
      */
     private function createOrderDraft(\Order $order, OrderState $orderState, $isDelayed = false)
     {
@@ -719,7 +728,7 @@ class Packlink extends CarrierModule
             $shipmentDraftService = \Logeecom\Infrastructure\ServiceRegister::getService(
                 \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService::CLASS_NAME
             );
-            $shipmentDraftService->enqueueCreateShipmentDraftTask((int)$order->id, $isDelayed);
+            $shipmentDraftService->enqueueCreateShipmentDraftTask($order->id, $isDelayed);
         }
     }
 

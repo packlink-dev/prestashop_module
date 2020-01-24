@@ -47,6 +47,7 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \iio\libmergepdf\Exception
+     * @throws \Packlink\BusinessLogic\OrderShipmentDetails\Exceptions\OrderShipmentDetailsNotFound
      */
     protected function bulkPrintLabels()
     {
@@ -86,6 +87,7 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      * @return array
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Packlink\BusinessLogic\OrderShipmentDetails\Exceptions\OrderShipmentDetailsNotFound
      */
     protected function prepareAllLabels($tmpDirectory)
     {
@@ -109,6 +111,7 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      * @return array An array of paths of the saved files.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Packlink\BusinessLogic\OrderShipmentDetails\Exceptions\OrderShipmentDetailsNotFound
      */
     private function saveFilesLocally(array $orderIds)
     {
@@ -119,7 +122,7 @@ class BulkShipmentLabelsController extends PacklinkBaseController
         $orderService = ServiceRegister::getService(\Packlink\BusinessLogic\Order\OrderService::CLASS_NAME);
 
         foreach ($orderIds as $orderId) {
-            $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((int)$orderId);
+            $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId($orderId);
             if ($shipmentDetails !== null) {
                 $shipmentLabels = $shipmentDetails->getShipmentLabels();
                 if (empty($shipmentLabels)) {

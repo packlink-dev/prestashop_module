@@ -68,7 +68,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         /** @var OrderShipmentDetails $orderDetails */
         $orderDetails = $this->getShipmentDetailsService()->getDetailsByReference($shipmentReference);
         $repository = new OrderRepository();
-        $repository->updateShipmentReference($orderDetails->getOrderId(), $shipmentReference);
 
         /** @var ConfigurationService $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
