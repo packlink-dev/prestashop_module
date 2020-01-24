@@ -13,8 +13,6 @@ use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
 use Packlink\BusinessLogic\Order\Objects\Address;
 use Packlink\BusinessLogic\Order\Objects\Item;
 use Packlink\BusinessLogic\Order\Objects\Order;
-use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
-use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
@@ -35,38 +33,32 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
     private $shipmentDetailsService;
 
     /**
-     * Handles updated tracking info for shipment with given reference.
+     * Handles updated tracking info for order with a given ID.
      *
-     * @param string $shipmentReference
+     * @param string $orderId
      * @param array $trackings
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      */
-    public function handleUpdatedTrackingInfo($shipmentReference, array $trackings)
+    public function handleUpdatedTrackingInfo($orderId, array $trackings)
     {
-        /** @var OrderShipmentDetails $orderDetails */
-        $orderDetails = $this->getShipmentDetailsService()->getDetailsByReference($shipmentReference);
-        $trackingNumbers = $orderDetails->getCarrierTrackingNumbers();
-        if (!empty($trackingNumbers)) {
+        if (!empty($trackings)) {
             $repository = new OrderRepository();
-            $repository->setTrackingNumber($orderDetails->getOrderId(), $trackingNumbers[0]);
+            $repository->setTrackingNumber((int)$orderId, $trackings[0]);
         }
     }
 
     /**
-     * Sets order packlink shipping status to an order by shipment reference.
+     * Sets order Packlink shipping status to an order with a given ID.
      *
-     * @param string $shipmentReference Packlink shipment reference.
+     * @param string $orderId Shop order ID.
      * @param string $shippingStatus Packlink shipping status.
      *
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound When order for provided reference is not found.
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
-    public function updateShipmentStatus($shipmentReference, $shippingStatus)
+    public function updateShipmentStatus($orderId, $shippingStatus)
     {
-        /** @var OrderShipmentDetails $orderDetails */
-        $orderDetails = $this->getShipmentDetailsService()->getDetailsByReference($shipmentReference);
         $repository = new OrderRepository();
 
         /** @var ConfigurationService $configService */
@@ -82,7 +74,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             return;
         }
 
-        $repository->updateOrderState($orderDetails->getOrderId(), (int)$statusMappings[$shippingStatus]);
+        $repository->updateOrderState((int)$orderId, (int)$statusMappings[$shippingStatus]);
     }
 
     /**
@@ -344,19 +336,5 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         }
 
         return $order;
-    }
-
-    /**
-     * Returns shop order details repository.
-     *
-     * @return OrderShipmentDetailsService
-     */
-    private function getShipmentDetailsService()
-    {
-        if ($this->shipmentDetailsService === null) {
-            $this->shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
-        }
-
-        return $this->shipmentDetailsService;
     }
 }
