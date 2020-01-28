@@ -2,6 +2,8 @@
 
 namespace Packlink\PrestaShop\Classes\Utility;
 
+use Packlink\BusinessLogic\DTO\ValidationError;
+
 /**
  * Class PacklinkPrestaShopUtility
  *
@@ -9,6 +11,22 @@ namespace Packlink\PrestaShop\Classes\Utility;
  */
 class PacklinkPrestaShopUtility
 {
+    /**
+     * Returns invalid JSON response with validation errors.
+     *
+     * @param ValidationError[] $errors
+     */
+    public static function die400WithValidationErrors($errors)
+    {
+        $result = array();
+
+        foreach ($errors as $error) {
+            $result[$error->field] = $error->message;
+        }
+
+        self::die400($result);
+    }
+
     /**
      * Die with 400 status in header.
      *
@@ -43,6 +61,22 @@ class PacklinkPrestaShopUtility
         header('HTTP/1.1 500 Internal Server Error');
 
         self::dieJson($data);
+    }
+
+    /**
+     * Converts front DTOs to array and returns a JSON response.
+     *
+     * @param \Packlink\BusinessLogic\DTO\FrontDto[] $entities
+     */
+    public static function dieFrontDtoEntities(array $entities)
+    {
+        $result = array();
+
+        foreach ($entities as $entity) {
+            $result[] = $entity->toArray();
+        }
+
+        self::dieJson($result);
     }
 
     /**

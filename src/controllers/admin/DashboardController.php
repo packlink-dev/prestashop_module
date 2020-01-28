@@ -12,11 +12,18 @@ class DashboardController extends PacklinkBaseController
 {
     /**
      * Retrieves current setup status.
+     *
+     * @throws \Packlink\BusinessLogic\DTO\Exceptions\FrontDtoNotRegisteredException
      */
     public function displayAjaxGetStatus()
     {
         $controller = new \Packlink\BusinessLogic\Controllers\DashboardController();
 
-        PacklinkPrestaShopUtility::dieJson($controller->getStatus()->toArray());
+        try {
+            $status = $controller->getStatus();
+            PacklinkPrestaShopUtility::dieJson($status->toArray());
+        } catch (\Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException $e) {
+            PacklinkPrestaShopUtility::die400WithValidationErrors($e->getValidationErrors());
+        }
     }
 }

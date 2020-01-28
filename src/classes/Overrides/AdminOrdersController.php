@@ -89,7 +89,7 @@ class AdminOrdersController
 
         /** @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
-        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId($orderId);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
         $shipmentLabels = $shipmentDetails ? $shipmentDetails->getShipmentLabels() : array();
         $status = $shipmentDetails ? $shipmentDetails->getStatus() : ShipmentStatus::STATUS_PENDING;
         /** @var OrderService $orderService */
@@ -134,7 +134,7 @@ class AdminOrdersController
 
         /** @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
-        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId($orderId);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
 
         if ($shipmentDetails === null) {
             return '';

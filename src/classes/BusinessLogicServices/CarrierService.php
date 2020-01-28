@@ -310,13 +310,25 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
+     * Generates PrestaShop public URL for logo of carrier with provided title.
+     *
+     * @param string $carrierName Name of the carrier.
+     *
+     * @return string URL to carrier logo image file.
+     */
+    public function getCarrierLogoFilePath($carrierName)
+    {
+        return _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/' . $this->getCarrierLogoRelativePath($carrierName);
+    }
+
+    /**
      * Returns path to carrier logo or default carrier logo if logo for requested carrier doesn't exist.
      *
      * @param string $carrierName Name of the carrier.
      *
      * @return string
      */
-    public function getCarrierLogoFilePath($carrierName)
+    public function getCarrierLogoRelativePath($carrierName)
     {
         /** @var ConfigurationService $configService */
         $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
@@ -615,7 +627,7 @@ class CarrierService implements ShopShippingMethodService
      */
     private function copyCarrierLogo($shippingMethodName, $carrierId)
     {
-        $source = _PS_MODULE_DIR_ . $this->getCarrierLogoFilePath($shippingMethodName);
+        $source = _PS_MODULE_DIR_ . $this->getCarrierLogoRelativePath($shippingMethodName);
 
         if (!copy($source, $this->getPrestaCarrierLogoPath($carrierId))) {
             return false;

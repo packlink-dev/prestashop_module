@@ -9,6 +9,7 @@ use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Controllers\UpdateShippingServicesTaskStatusController;
 use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Packlink\BusinessLogic\Tax\TaxClass;
 use Packlink\BusinessLogic\Utility\Php\Php55;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
@@ -45,7 +46,7 @@ class ShippingMethodsController extends PacklinkBaseController
     {
         $shippingMethods = $this->controller->getAll();
 
-        PacklinkPrestaShopUtility::dieJson($this->formatCollectionJsonResponse($shippingMethods));
+        PacklinkPrestaShopUtility::dieFrontDtoEntities($shippingMethods);
     }
 
     /**
@@ -114,7 +115,9 @@ class ShippingMethodsController extends PacklinkBaseController
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to save shipping method.')));
         }
 
-        $model->logoUrl = $this->generateCarrierLogoUrl($model->carrierName);
+        /** @var CarrierService $carrierService */
+        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
+        $model->logoUrl = $carrierService->getCarrierLogoFilePath($model->carrierName);
 
         $this->activateShippingMethod($model->id);
 
@@ -196,23 +199,14 @@ class ShippingMethodsController extends PacklinkBaseController
             $taxRules = array();
         }
 
-        $result = array(
-            array(
-                'value' => CarrierService::DEFAULT_TAX_CLASS,
-                'label' => $this->l(CarrierService::DEFAULT_TAX_CLASS_LABEL),
-            ),
-        );
-
-        if (!empty($taxRules)) {
-            foreach ($taxRules as $taxRule) {
-                $result[] = array(
-                    'value' => $taxRule['id_tax_rules_group'],
-                    'label' => $taxRule['name'],
-                );
-            }
+        $taxClasses = array();
+        try {
+            $taxClasses = $this->formatTaxClasses($taxRules);
+        } catch (\Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException $e) {
+            PacklinkPrestaShopUtility::die400WithValidationErrors($e->getValidationErrors());
         }
 
-        PacklinkPrestaShopUtility::dieJson($result);
+        PacklinkPrestaShopUtility::dieFrontDtoEntities($taxClasses);
     }
 
     private function activateShippingMethod($id)
@@ -223,23 +217,31 @@ class ShippingMethodsController extends PacklinkBaseController
     }
 
     /**
-     * Transforms
+     * Returns tax classes for the provided tax rules.
      *
-     * @param BaseDto[] $data
+     * @param $taxRules
      *
-     * @return array
+     * @return TaxClass[]
+     *
+     * @throws \Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException
      */
-    private function formatCollectionJsonResponse($data)
+    private function formatTaxClasses($taxRules)
     {
-        $collection = array();
+        $taxClasses = array(
+            TaxClass::fromArray(array(
+                'value' => CarrierService::DEFAULT_TAX_CLASS,
+                'label' => $this->l(CarrierService::DEFAULT_TAX_CLASS_LABEL),
+            )),
+        );
 
-        /** @var ShippingMethodResponse $shippingMethod */
-        foreach ($data as $shippingMethod) {
-            $shippingMethod->logoUrl = $this->generateCarrierLogoUrl($shippingMethod->carrierName);
-            $collection[] = $shippingMethod->toArray();
+        foreach ($taxRules as $taxRule) {
+            $taxClasses[] = TaxClass::fromArray(array(
+                'value' => $taxRule['id_tax_rules_group'],
+                'label' => $taxRule['name'],
+            ));
         }
 
-        return $collection;
+        return $taxClasses;
     }
 
     /**
@@ -252,20 +254,5 @@ class ShippingMethodsController extends PacklinkBaseController
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
 
         return ShippingMethodConfiguration::fromArray($data);
-    }
-
-    /**
-     * Generates PrestaShop public URL for logo of carrier with provided title.
-     *
-     * @param string $carrierName Name of the carrier.
-     *
-     * @return string URL to carrier logo image file.
-     */
-    private function generateCarrierLogoUrl($carrierName)
-    {
-        /** @var CarrierService $carrierService */
-        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
-
-        return _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/' . $carrierService->getCarrierLogoFilePath($carrierName);
     }
 }
