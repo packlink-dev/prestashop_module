@@ -66,9 +66,9 @@ class PacklinkPrestaShopUtility
     /**
      * Converts front DTOs to array and returns a JSON response.
      *
-     * @param \Packlink\BusinessLogic\DTO\FrontDto[] $entities
+     * @param \Packlink\BusinessLogic\DTO\BaseDto[] $entities
      */
-    public static function dieFrontDtoEntities(array $entities)
+    public static function dieDtoEntities(array $entities)
     {
         $result = array();
 

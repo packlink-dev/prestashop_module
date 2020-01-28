@@ -7,7 +7,6 @@ use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodConfiguration;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
 use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Controllers\UpdateShippingServicesTaskStatusController;
-use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\Tax\TaxClass;
 use Packlink\BusinessLogic\Utility\Php\Php55;
@@ -46,7 +45,7 @@ class ShippingMethodsController extends PacklinkBaseController
     {
         $shippingMethods = $this->controller->getAll();
 
-        PacklinkPrestaShopUtility::dieFrontDtoEntities($shippingMethods);
+        PacklinkPrestaShopUtility::dieDtoEntities($shippingMethods);
     }
 
     /**
@@ -206,7 +205,7 @@ class ShippingMethodsController extends PacklinkBaseController
             PacklinkPrestaShopUtility::die400WithValidationErrors($e->getValidationErrors());
         }
 
-        PacklinkPrestaShopUtility::dieFrontDtoEntities($taxClasses);
+        PacklinkPrestaShopUtility::dieDtoEntities($taxClasses);
     }
 
     private function activateShippingMethod($id)
