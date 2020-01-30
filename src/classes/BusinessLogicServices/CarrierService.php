@@ -372,7 +372,7 @@ class CarrierService implements ShopShippingMethodService
      *
      * @return string
      */
-    public function getCarrierLogoRelativePath($carrierName)
+    private function getCarrierLogoRelativePath($carrierName)
     {
         /** @var ConfigurationService $configService */
         $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);

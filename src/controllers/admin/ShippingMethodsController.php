@@ -112,10 +112,6 @@ class ShippingMethodsController extends PacklinkBaseController
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to save shipping method.')));
         }
 
-        /** @var CarrierService $carrierService */
-        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
-        $model->logoUrl = $carrierService->getCarrierLogoFilePath($model->carrierName);
-
         $this->activateShippingMethod($model->id);
 
         $model->selected = true;

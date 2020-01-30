@@ -26,13 +26,6 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopOrderService
 {
     /**
-     * Shop order details repository.
-     *
-     * @var \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService
-     */
-    private $shipmentDetailsService;
-
-    /**
      * Handles updated tracking info for order with a given ID.
      *
      * @param string $orderId
