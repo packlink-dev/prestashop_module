@@ -2,14 +2,12 @@
 
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
-use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodConfiguration;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
 use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Controllers\UpdateShippingServicesTaskStatusController;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\Tax\TaxClass;
-use Packlink\BusinessLogic\Utility\Php\Php55;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
@@ -98,7 +96,7 @@ class ShippingMethodsController extends PacklinkBaseController
      */
     public function displayAjaxSave()
     {
-        $configuration = $this->getShippingMethodConfiguration();
+        $configuration = $this->getShippingMethodConfigurationFromRequest();
 
         if (\Tools::strlen($configuration->name) > 64) {
             PacklinkPrestaShopUtility::die400(
@@ -130,61 +128,24 @@ class ShippingMethodsController extends PacklinkBaseController
      */
     public function displayAjaxGetNumberShopMethods()
     {
-        $db = Db::getInstance();
-        $query = new DbQuery();
-        $query->select('count(*) as shippingMethodsCount')
-            ->from('carrier')
-            ->where("external_module_name <> 'packlink'")
-            ->where('active = 1')
-            ->where('deleted = 0');
+        /** @var CarrierService $carrierService */
+        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
 
-        try {
-            $result = $db->executeS($query);
-        } catch (PrestaShopException $e) {
-            $result = array();
-        }
-
-        $count = !empty($result[0]['shippingMethodsCount']) ? (int)$result[0]['shippingMethodsCount'] : 0;
-
-        PacklinkPrestaShopUtility::dieJson(array('count' => $count));
+        PacklinkPrestaShopUtility::dieJson(array('count' => $carrierService->getNumberOfOtherCarriers()));
     }
 
     /**
      * Disables shop shipping methods.
-     *
-     * @throws \PrestaShopException
      */
     public function displayAjaxDisableShopShippingMethods()
     {
-        $db = Db::getInstance();
-
-        $query = new DbQuery();
-        $query->select('id_carrier')
-            ->from('carrier')
-            ->where("external_module_name <> 'packlink'")
-            ->where('active = 1')
-            ->where('deleted = 0');
-
-        try {
-            $result = $db->executeS($query);
-        } catch (PrestaShopException $e) {
-            $result = array();
-        }
-
-        if (empty($result)) {
+        /** @var CarrierService $carrierService */
+        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
+        if ($carrierService->disableOtherCarriers()) {
+            PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully disabled shipping methods.')));
+        } else {
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to disable shipping methods.')));
         }
-
-        $ids = Php55::arrayColumn($result, 'id_carrier');
-        foreach ($ids as $id) {
-            $carrier = new \Carrier((int)$id);
-            $carrier->active = false;
-            $carrier->update();
-        }
-
-        AnalyticsController::sendOtherServicesDisabledEvent();
-
-        PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully disabled shipping methods.')));
     }
 
     /**
@@ -248,7 +209,7 @@ class ShippingMethodsController extends PacklinkBaseController
      *
      * @return ShippingMethodConfiguration
      */
-    private function getShippingMethodConfiguration()
+    private function getShippingMethodConfigurationFromRequest()
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
 

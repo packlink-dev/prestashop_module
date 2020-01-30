@@ -9,6 +9,7 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
+use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\BusinessLogic\Utility\Php\Php55;
@@ -307,6 +308,49 @@ class CarrierService implements ShopShippingMethodService
         } catch (\PrestaShopException $e) {
             Logger::logError('Error marking carriers deleted. Error: ' . $e->getMessage(), 'Integration');
         }
+    }
+
+    /**
+     * Gets the number of non-Packlink carriers.
+     *
+     * @return int
+     */
+    public function getNumberOfOtherCarriers()
+    {
+        try {
+            $result = $this->getNonPacklinkCarriers('count(*) as shippingMethodsCount');
+        } catch (\PrestaShopException $e) {
+            $result = array();
+        }
+
+        return !empty($result[0]['shippingMethodsCount']) ? (int)$result[0]['shippingMethodsCount'] : 0;
+    }
+
+    /**
+     * Disables other carriers.
+     *
+     * @return bool
+     */
+    public function disableOtherCarriers()
+    {
+        try {
+            $result = $this->getNonPacklinkCarriers();
+
+            $ids = Php55::arrayColumn($result, 'id_carrier');
+            foreach ($ids as $id) {
+                $carrier = new \Carrier((int)$id);
+                $carrier->active = false;
+                $carrier->update();
+            }
+
+            AnalyticsController::sendOtherServicesDisabledEvent();
+
+            return true;
+        } catch (\PrestaShopDatabaseException $e) {
+        } catch (\PrestaShopException $e) {
+        }
+
+        return false;
     }
 
     /**
@@ -680,5 +724,27 @@ class CarrierService implements ShopShippingMethodService
         $imgDir = _PS_SHIP_IMG_DIR_;
 
         return rtrim($imgDir, '/') . '/' . $id . '.jpg';
+    }
+
+    /**
+     * Gets non-Packlink carriers.
+     *
+     * @param string $select
+     *
+     * @return array
+     *
+     * @throws \PrestaShopDatabaseException
+     */
+    private function getNonPacklinkCarriers($select = 'id_carrier')
+    {
+        $db = \Db::getInstance();
+        $query = new \DbQuery();
+        $query->select($select)
+            ->from('carrier')
+            ->where("external_module_name <> 'packlink'")
+            ->where('active = 1')
+            ->where('deleted = 0');
+
+        return $db->executeS($query) ?: array();
     }
 }
