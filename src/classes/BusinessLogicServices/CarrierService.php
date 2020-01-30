@@ -366,6 +366,28 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
+     * Updates carrier logo.
+     *
+     * @param \Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod $shippingMethod
+     * @param \Carrier $carrier
+     */
+    protected function updateCarrierLogo(ShippingMethod $shippingMethod, \Carrier $carrier)
+    {
+        $prestaLogoPath = $this->getPrestaCarrierLogoPath($carrier->id);
+        if (\Tools::file_exists_cache($prestaLogoPath)) {
+            unlink($prestaLogoPath);
+        }
+
+        if ($shippingMethod->isDisplayLogo()
+            && !$this->copyCarrierLogo($shippingMethod->getCarrierName(), (int)$carrier->id)
+        ) {
+            throw new \RuntimeException(
+                TranslationUtility::__('Failed copying carrier logo to the system')
+            );
+        }
+    }
+
+    /**
      * Returns path to carrier logo or default carrier logo if logo for requested carrier doesn't exist.
      *
      * @param string $carrierName Name of the carrier.
@@ -390,28 +412,6 @@ class CarrierService implements ShopShippingMethodService
 
         return \Tools::file_exists_cache(_PS_MODULE_DIR_ . $logoFilePath)
             ? $logoFilePath : $defaultCarrierLogoPath;
-    }
-
-    /**
-     * Updates carrier logo.
-     *
-     * @param \Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod $shippingMethod
-     * @param \Carrier $carrier
-     */
-    protected function updateCarrierLogo(ShippingMethod $shippingMethod, \Carrier $carrier)
-    {
-        $prestaLogoPath = $this->getPrestaCarrierLogoPath($carrier->id);
-        if (\Tools::file_exists_cache($prestaLogoPath)) {
-            unlink($prestaLogoPath);
-        }
-
-        if ($shippingMethod->isDisplayLogo()
-            && !$this->copyCarrierLogo($shippingMethod->getCarrierName(), (int)$carrier->id)
-        ) {
-            throw new \RuntimeException(
-                TranslationUtility::__('Failed copying carrier logo to the system')
-            );
-        }
     }
 
     /**
