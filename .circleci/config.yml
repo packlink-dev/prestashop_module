@@ -56,7 +56,7 @@ jobs:
             gsutil acl ch -u AllUsers:R gs://production-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
       - slack/notify:
           color: '#42e2f4'
-          channel: 'test-me'
+          channel: 'logeecom'
           message: 'Prestashop module has been released: version $CIRCLE_TAG'
           webhook: '${SLACK_WEBHOOK}'
 
