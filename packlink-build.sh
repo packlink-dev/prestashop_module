@@ -17,7 +17,7 @@ rm -rf views/js/core
 rm -rf views/js/location
 rm -rf vendor
 # add version to artifact
-echo "$1 > release.version"
+echo "$1" > release.version
 
 composer install --no-dev
 cd .. || exit
