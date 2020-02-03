@@ -7,7 +7,7 @@ cp -r ./src/* packlink
 
 # Ensure proper composer dependencies
 echo "\e[32mSTEP 2:\e[0m Installing composer dependencies..."
-cd packlink
+cd packlink || exit
 # remove resources that will be copied from the core in the post-install script
 rm -rf views/img/carriers/de/*
 rm -rf views/img/carriers/es/*
@@ -17,10 +17,10 @@ rm -rf views/js/core
 rm -rf views/js/location
 rm -rf vendor
 # add version to artifact
-echo $1 > release.version
+echo "$1 > release.version"
 
 composer install --no-dev
-cd ..
+cd .. || exit
 
 # Remove unnecessary files from final release archive
 echo "\e[32mSTEP 3:\e[0m Removing unnecessary files from final release archive..."
