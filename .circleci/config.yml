@@ -7,7 +7,7 @@ orbs:
 executors:
   builder:
     docker:
-      - image: circleci/php:latest
+      - image: circleci/php:7.4.2
   publisher:
     docker:
       - image: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
