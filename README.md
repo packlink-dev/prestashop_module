@@ -1,3 +1,4 @@
+[![CircleCI](https://circleci.com/gh/packlink-dev/prestashop_module.svg?style=svg&circle-token=564c0b9c6812f7355582911d3f8950ef2124eb58)](https://circleci.com/gh/packlink-dev/prestashop_module)
 ![Packlink logo](https://pro.packlink.es/public-assets/common/images/icons/packlink.svg)
 
 # Packlink PrestaShop plugin
