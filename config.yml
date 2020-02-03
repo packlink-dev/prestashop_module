@@ -1,0 +1,82 @@
+---
+version: 2.1
+
+orbs:
+    slack: circleci/slack@3.4.2
+
+executors:
+  builder:
+    docker:
+      - image: circleci/php:latest
+  publisher:
+    docker:
+      - image: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
+        auth:
+          username: _json_key
+          password: $GCLOUD_GCR_ADMIN_KEY
+
+jobs:
+  build:
+    executor: builder
+    working_directory: ~/prestashop
+    steps:
+      - checkout
+      - run:
+          name: Build Package
+          command: sh packlink-build.sh ${CIRCLE_TAG}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - artifact.zip
+  publish:
+    executor: publisher
+    working_directory: ~/prestashop
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Configure gcloud
+          command: |
+            echo ${PRESTASHOP_GCLOUD_SERVICE_KEY} | base64 -d | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${PRESTASHOP_GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${PRESTASHOP_GOOGLE_COMPUTE_ZONE}
+      - run:
+          name: Publish package to develop cdn
+          command: |
+            gsutil cp artifact.zip gs://development-cdn-assets-store-bucket/modules/prestashop/statics/latest.zip
+            gsutil acl ch -u AllUsers:R gs://development-cdn-assets-store-bucket/modules/prestashop/statics/latest.zip
+            gsutil cp artifact.zip gs://development-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gsutil acl ch -u AllUsers:R gs://development-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
+      - run:
+          name: Publish package to production cdn
+          command: |
+            gsutil cp artifact.zip gs://production-cdn-assets-store-bucket/modules/prestashop/statics/latest.zip
+            gsutil acl ch -u AllUsers:R gs://production-cdn-assets-store-bucket/modules/prestashop/statics/latest.zip
+            gsutil cp artifact.zip gs://production-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gsutil acl ch -u AllUsers:R gs://production-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
+      - slack/notify:
+          color: '#42e2f4'
+          channel: 'test-me'
+          message: 'Prestashop module has been released: version $CIRCLE_TAG'
+          webhook: '${SLACK_WEBHOOK}'
+
+
+workflows:
+  version: 2.1
+  prestashop: 
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+      - publish:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
+
