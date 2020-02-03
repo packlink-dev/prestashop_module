@@ -37,26 +37,26 @@ jobs:
       - run:
           name: Configure gcloud
           command: |
-            echo ${PRESTASHOP_GCLOUD_SERVICE_KEY} | base64 -d | gcloud auth activate-service-account --key-file=-
-            gcloud --quiet config set project ${PRESTASHOP_GOOGLE_PROJECT_ID}
-            gcloud --quiet config set compute/zone ${PRESTASHOP_GOOGLE_COMPUTE_ZONE}
+            echo ${GCLOUD_SERVICE_KEY} | base64 -d | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
       - run:
           name: Publish package to develop cdn
           command: |
-            gsutil cp artifact.zip gs://development-cdn-assets-store-bucket/modules/prestashop/statics/latest.zip
-            gsutil acl ch -u AllUsers:R gs://development-cdn-assets-store-bucket/modules/prestashop/statics/latest.zip
-            gsutil cp artifact.zip gs://development-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
-            gsutil acl ch -u AllUsers:R gs://development-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gsutil cp artifact.zip gs://${DEV_CDN_URL}/modules/prestashop/statics/latest.zip
+            gsutil acl ch -u AllUsers:R gs://${DEV_CDN_URL}/modules/prestashop/statics/latest.zip
+            gsutil cp artifact.zip gs://${DEV_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gsutil acl ch -u AllUsers:R gs://${DEV_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
       - run:
           name: Publish package to production cdn
           command: |
-            gsutil cp artifact.zip gs://production-cdn-assets-store-bucket/modules/prestashop/statics/latest.zip
-            gsutil acl ch -u AllUsers:R gs://production-cdn-assets-store-bucket/modules/prestashop/statics/latest.zip
-            gsutil cp artifact.zip gs://production-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
-            gsutil acl ch -u AllUsers:R gs://production-cdn-assets-store-bucket/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gsutil cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/latest.zip
+            gsutil acl ch -u AllUsers:R gs://${PROD_CDN_URL}/modules/prestashop/statics/latest.zip
+            gsutil cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gsutil acl ch -u AllUsers:R gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
       - slack/notify:
           color: '#42e2f4'
-          channel: 'logeecom'
+          channel: 'test-me'
           message: 'Prestashop module has been released: version $CIRCLE_TAG'
           webhook: '${SLACK_WEBHOOK}'
 
