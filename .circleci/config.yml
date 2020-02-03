@@ -63,7 +63,7 @@ jobs:
 
 workflows:
   version: 2.1
-  prestashop: 
+  prestashop_module: 
     jobs:
       - build:
           filters:
