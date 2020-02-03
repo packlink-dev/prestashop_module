@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Create deployment source
 echo "\e[32mSTEP 1:\e[0m Copying plugin source..."
@@ -7,7 +8,7 @@ cp -r ./src/* packlink
 
 # Ensure proper composer dependencies
 echo "\e[32mSTEP 2:\e[0m Installing composer dependencies..."
-cd packlink || exit
+cd packlink 
 # remove resources that will be copied from the core in the post-install script
 rm -rf views/img/carriers/de/*
 rm -rf views/img/carriers/es/*
