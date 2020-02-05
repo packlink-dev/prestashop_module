@@ -2,44 +2,25 @@
 version: 2.1
 
 orbs:
-    slack: circleci/slack@3.4.2
+  slack: circleci/slack@3.4.2
+  gcp-cli: circleci/gcp-cli@1.8.3
 
 executors:
-  builder:
+  deployer:
     docker:
       - image: circleci/php:7.4.2
-  publisher:
-    docker:
-      - image: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
-        auth:
-          username: _json_key
-          password: $GCLOUD_GCR_ADMIN_KEY
 
 jobs:
-  build:
-    executor: builder
+  build_publish:
+    executor: deployer
     working_directory: ~/prestashop
     steps:
       - checkout
+      - gcp-cli/install
+      - gcp-cli/initialize
       - run:
           name: Build Package
           command: sh packlink-build.sh ${CIRCLE_TAG}
-      - persist_to_workspace:
-          root: .
-          paths:
-            - artifact.zip
-  publish:
-    executor: publisher
-    working_directory: ~/prestashop
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: Configure gcloud
-          command: |
-            echo ${GCLOUD_SERVICE_KEY} | base64 -d | gcloud auth activate-service-account --key-file=-
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-            gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
       - run:
           name: Publish package to develop cdn
           command: |
@@ -65,18 +46,9 @@ workflows:
   version: 2.1
   prestashop_module: 
     jobs:
-      - build:
+      - build_publish:
           filters:
             branches:
               ignore: /.*/
             tags:
               only: /.*/
-      - publish:
-          requires:
-            - build
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
-
