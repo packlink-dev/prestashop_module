@@ -1,0 +1,54 @@
+---
+version: 2.1
+
+orbs:
+  slack: circleci/slack@3.4.2
+  gcp-cli: circleci/gcp-cli@1.8.3
+
+executors:
+  deployer:
+    docker:
+      - image: circleci/php:7.4.2
+
+jobs:
+  build_publish:
+    executor: deployer
+    working_directory: ~/prestashop
+    steps:
+      - checkout
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run:
+          name: Build Package
+          command: sh packlink-build.sh ${CIRCLE_TAG}
+      - run:
+          name: Publish package to develop cdn
+          command: |
+            gsutil cp artifact.zip gs://${DEV_CDN_URL}/modules/prestashop/statics/latest.zip
+            gsutil acl ch -u AllUsers:R gs://${DEV_CDN_URL}/modules/prestashop/statics/latest.zip
+            gsutil cp artifact.zip gs://${DEV_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gsutil acl ch -u AllUsers:R gs://${DEV_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
+      - run:
+          name: Publish package to production cdn
+          command: |
+            gsutil cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/latest.zip
+            gsutil acl ch -u AllUsers:R gs://${PROD_CDN_URL}/modules/prestashop/statics/latest.zip
+            gsutil cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gsutil acl ch -u AllUsers:R gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
+      - slack/notify:
+          color: '#42e2f4'
+          channel: 'logeecom'
+          message: 'Prestashop module has been released: version $CIRCLE_TAG'
+          webhook: '${SLACK_WEBHOOK}'
+
+
+workflows:
+  version: 2.1
+  prestashop_module: 
+    jobs:
+      - build_publish:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
