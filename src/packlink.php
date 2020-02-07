@@ -444,9 +444,8 @@ class Packlink extends CarrierModule
      *
      * @return string
      *
-     * @throws \PrestaShopException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      */
     public function getContent()
     {
@@ -476,6 +475,12 @@ class Packlink extends CarrierModule
             \Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerWakeup::CLASS_NAME
         );
         $wakeupService->wakeup();
+
+        /** @var \Packlink\BusinessLogic\Country\CountryService $countryService */
+        $countryService = \Logeecom\Infrastructure\ServiceRegister::getService(
+          \Packlink\BusinessLogic\Country\CountryService::CLASS_NAME
+        );
+        $supportedCountries = $countryService->getSupportedCountries();
 
         $fancyBoxUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . 'js/jquery/plugins/fancybox/jquery.fancybox.js';
         $fancyBoxUrl = str_replace(array('https:', 'http:'), '', $fancyBoxUrl);
@@ -510,6 +515,7 @@ class Packlink extends CarrierModule
         $this->context->smarty->assign(array(
             'iconPath' => $this->_path . 'views/img/flags/',
             'loginIcon' => $this->_path . 'views/img/logo-pl.svg',
+            'countries' => $supportedCountries,
         ));
 
         return $output . $this->display(__FILE__, 'login.tpl');

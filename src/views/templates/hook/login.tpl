@@ -12,10 +12,10 @@
 
     <div class="pl-register-form-wrapper">
       <div class="pl-register-btn-section-wrapper">
-        {l s='Don\'t have an account?' mod='packlink'}
+          {l s='Don\'t have an account?' mod='packlink'}
         <button type="button" id="pl-register-btn"
                 class="btn btn-primary btn-lg"><i class="material-icons">account_circle</i>
-          {l s='Register' mod='packlink'}
+            {l s='Register' mod='packlink'}
         </button>
       </div>
       <div class="pl-register-country-section-wrapper" id="pl-register-form">
@@ -23,48 +23,36 @@
           <i class="material-icons" id="pl-register-form-close-btn">close</i>
         </div>
         <div class="pl-register-country-title-wrapper">
-          {l s='Select country to start' mod='packlink'}
+            {l s='Select country to start' mod='packlink'}
         </div>
         <div class="pl-register-country-list-wrapper">
-          <a href="https://pro.packlink.es/registro" target="_blank">
-            <div class="pl-country">
-              <img src="{html_entity_decode($iconPath|escape:'html':'UTF-8')}spain.svg">
-              es
-            </div>
-          </a>
-          <a href="https://pro.packlink.de/registrieren" target="_blank">
-            <div class="pl-country">
-              <img src="{html_entity_decode($iconPath|escape:'html':'UTF-8')}germany.svg">
-              de
-            </div>
-          </a>
-          <a href="https://pro.packlink.fr/inscription" target="_blank">
-            <div class="pl-country">
-              <img src="{html_entity_decode($iconPath|escape:'html':'UTF-8')}france.svg">
-              fr
-            </div>
-          </a>
-          <a href="https://pro.packlink.it/registro" target="_blank">
-            <div class="pl-country">
-              <img src="{html_entity_decode($iconPath|escape:'html':'UTF-8')}italy.svg">
-              it
-            </div>
-          </a>
+            {foreach $countries as $country}
+              <a href="{html_entity_decode($country->registrationLink|escape:'html':'UTF-8')}" target="_blank">
+                <div class="pl-country">
+                  <img
+                          src="{html_entity_decode($iconPath|escape:'html':'UTF-8')}{html_entity_decode($country->code|escape:'html':'UTF-8')}.svg"
+                          class="pl-country-logo"
+                          alt="{l s=$country->name mod='packlink'}"
+                  >
+                  <div class="pl-country-name">{l s=$country->name mod='packlink'}</div>
+                </div>
+              </a>
+            {/foreach}
         </div>
       </div>
     </div>
     <div>
       <div class="pl-login-form-header">
         <div class="pl-login-form-title-wrapper">
-          {l s='Allow PrestaShop to connect to PacklinkPRO' mod='packlink'}
+            {l s='Allow PrestaShop to connect to PacklinkPRO' mod='packlink'}
         </div>
         <div class="pl-login-form-text-wrapper">
-          {l s='Your API key can be found under' mod='packlink'}
+            {l s='Your API key can be found under' mod='packlink'}
           pro.packlink/<strong>Settings/PacklinkPROAPIkey</strong>
         </div>
       </div>
       <div class="pl-login-form-label-wrapper">
-        {l s='Connect your account' mod='packlink'}
+          {l s='Connect your account' mod='packlink'}
       </div>
       <form method="POST">
         <div class="pl-login-form-wrapper">
@@ -82,8 +70,8 @@
 </div>
 
 <script type="application/javascript">
-  Packlink.utilityService.configureInputElements();
-  hidePrestaSpinner();
-  initRegisterForm();
-  calculateContentHeight(20);
+    Packlink.utilityService.configureInputElements();
+    hidePrestaSpinner();
+    initRegisterForm();
+    calculateContentHeight(20);
 </script>

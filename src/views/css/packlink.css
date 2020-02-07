@@ -679,7 +679,8 @@
   position: relative;
 }
 
-.pl-form-section-input input {
+.pl-form-section-input input,
+.pl-form-section-input select {
   height: 50px !important;
   box-sizing: border-box;
   background-color: white !important;
@@ -1110,8 +1111,9 @@ input[readonly][type="text"] {
   position: relative;
   display: none;
   animation: pl-fade-in .5s ease;
-  width: 300px;
+  width: 250px;
   float: right;
+  background-color: #fff;
 }
 
 .pl-register-country-title-wrapper {
@@ -1121,8 +1123,9 @@ input[readonly][type="text"] {
 
 .pl-register-country-list-wrapper {
   margin-top: 15px;
-  display: flex;
-  justify-content: space-evenly;
+  max-height: 205px;
+  overflow-x: auto;
+  text-align: justify;
 }
 
 .pl-register-country-list-wrapper a {
@@ -1130,13 +1133,25 @@ input[readonly][type="text"] {
 }
 
 .pl-country {
-  height: 45px;
+  display: flex;
+  height: 40px;
   width: 30px;
-  line-height: 30px;
+  line-height: 40px;
   border-radius: 50%;
   text-align: center;
   font-size: 14px;
   text-transform: uppercase;
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+.pl-country-logo {
+  width: 60px;
+}
+
+.pl-country-name {
+  white-space: nowrap;
+  margin-left: 15px;
 }
 
 .pl-register-form-close-btn {
