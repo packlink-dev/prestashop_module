@@ -59,17 +59,6 @@ class Packlink extends CarrierModule
         'FR' => 'https://pro.packlink.fr/conditions-generales/',
         'IT' => 'https://pro.packlink.it/termini-condizioni/',
     );
-    /**
-     * List of country names for different country codes.
-     *
-     * @var array
-     */
-    private static $countryNames = array(
-        'ES' => 'Spain',
-        'DE' => 'Germany',
-        'FR' => 'France',
-        'IT' => 'Italy',
-    );
 
     /**
      * Packlink constructor.
@@ -752,12 +741,8 @@ class Packlink extends CarrierModule
         );
         $userInfo = $configService->getUserInfo();
         $linkLanguage = 'ES';
-        $warehouseCountry = '';
         if ($userInfo !== null && array_key_exists($userInfo->country, self::$helpUrls)) {
             $linkLanguage = $userInfo->country;
-            $warehouseCountry = \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__(
-                self::$countryNames[$userInfo->country]
-            );
         }
 
         $this->context->smarty->assign(
@@ -766,6 +751,7 @@ class Packlink extends CarrierModule
                 'defaultParcelGetUrl' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
                 'defaultParcelSubmitUrl' => $this->getAction('DefaultParcel', 'submitDefaultParcel'),
                 'defaultWarehouseGetUrl' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
+                'getSupportedCountriesUrl' => $this->getAction('DefaultWarehouse', 'getSupportedCountries'),
                 'defaultWarehouseSubmitUrl' => $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse'),
                 'defaultWarehouseSearchPostalCodesUrl' => $this->getAction('DefaultWarehouse', 'searchPostalCodes'),
                 'shippingMethodsGetAllUrl' => $this->getAction('ShippingMethods', 'getAll'),
@@ -788,7 +774,6 @@ class Packlink extends CarrierModule
                 'helpLink' => self::$helpUrls[$linkLanguage],
                 'termsAndConditionsLink' => self::$termsAndConditionsUrls[$linkLanguage],
                 'pluginVersion' => $this->version,
-                'warehouseCountry' => $warehouseCountry,
             )
         );
 

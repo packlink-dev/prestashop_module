@@ -1,9 +1,11 @@
 <?php
 
 use Logeecom\Infrastructure\ServiceRegister;
+use Packlink\BusinessLogic\Country\CountryService;
 use Packlink\BusinessLogic\Location\LocationService;
 use Packlink\BusinessLogic\Warehouse\WarehouseService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
+use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -27,9 +29,26 @@ class DefaultWarehouseController extends PacklinkBaseController
     }
 
     /**
+     * Returns supported Packlink countries.
+     */
+    public function displayAjaxGetSupportedCountries()
+    {
+        /** @var CountryService $countryService */
+        $countryService = ServiceRegister::getService(CountryService::CLASS_NAME);
+
+        $supportedCountries = $countryService->getSupportedCountries();
+        foreach ($supportedCountries as $country) {
+            $country->name = TranslationUtility::__($country->name);
+        }
+
+        PacklinkPrestaShopUtility::dieDtoEntities($supportedCountries);
+    }
+
+    /**
      * Saves warehouse data.
      *
      * @throws \Packlink\BusinessLogic\DTO\Exceptions\FrontDtoNotRegisteredException
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      */
     public function displayAjaxSubmitDefaultWarehouse()
     {
@@ -55,11 +74,11 @@ class DefaultWarehouseController extends PacklinkBaseController
     {
         $input = PacklinkPrestaShopUtility::getPacklinkPostData();
 
-        if (empty($input['query'])) {
+        if (empty($input['query']) || empty($input['country'])) {
             PacklinkPrestaShopUtility::dieJson();
         }
 
-        $platformCountry = $this->getConfigService()->getUserInfo()->country;
+        $platformCountry = $input['country'];
         $result = array();
         try {
             /** @var LocationService $locationService */
