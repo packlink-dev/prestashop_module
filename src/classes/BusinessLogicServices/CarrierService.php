@@ -396,19 +396,10 @@ class CarrierService implements ShopShippingMethodService
      */
     private function getCarrierLogoRelativePath($carrierName)
     {
-        /** @var ConfigurationService $configService */
-        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
-        $userInfo = $configService->getUserInfo();
         $defaultCarrierLogoPath = 'packlink/views/img/carriers/carrier.jpg';
 
-        if ($userInfo === null) {
-            return $defaultCarrierLogoPath;
-        }
-
         $carrierImageFile = \Tools::strtolower(str_replace(' ', '-', $carrierName));
-        $logoFilePath = 'packlink/views/img/carriers/'
-            . \Tools::strtolower($userInfo->country)
-            . '/' . $carrierImageFile . '.png';
+        $logoFilePath = 'packlink/views/img/carriers/' . $carrierImageFile . '.png';
 
         return \Tools::file_exists_cache(_PS_MODULE_DIR_ . $logoFilePath)
             ? $logoFilePath : $defaultCarrierLogoPath;
