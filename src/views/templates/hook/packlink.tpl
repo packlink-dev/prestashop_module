@@ -290,7 +290,6 @@
               <div class=" pl-basic-settings-page-form-input-item">
                 <div class=" pl-form-section-input pl-text-input">
                   <select
-                          type="text"
                           class="pl-warehouse-input"
                           id="pl-default-warehouse-country"
                           tabindex="-1"
