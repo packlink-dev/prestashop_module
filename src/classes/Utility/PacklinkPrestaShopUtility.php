@@ -12,6 +12,18 @@ use Packlink\BusinessLogic\DTO\ValidationError;
 class PacklinkPrestaShopUtility
 {
     /**
+     * Translation messages for fields that are being validated.
+     *
+     * @var array
+     */
+    private static $validationMessages = array(
+        'email' => 'Field must be valid email.',
+        'phone' => 'Field must be valid phone number.',
+        'weight' => 'Weight must be a positive decimal number.',
+        'postal_code' => 'Postal code is not correct.',
+    );
+
+    /**
      * Returns invalid JSON response with validation errors.
      *
      * @param ValidationError[] $errors
@@ -21,7 +33,7 @@ class PacklinkPrestaShopUtility
         $result = array();
 
         foreach ($errors as $error) {
-            $result[$error->field] = $error->message;
+            $result[$error->field] = self::getValidationMessage($error->code, $error->field);
         }
 
         self::die400($result);
@@ -175,5 +187,26 @@ class PacklinkPrestaShopUtility
     public static function getPacklinkPostData()
     {
         return json_decode(\Tools::getValue('plPostData'), true);
+    }
+
+    /**
+     * Returns a validation message for validation error.
+     *
+     * @param string $code
+     * @param string $field
+     *
+     * @return string
+     */
+    protected static function getValidationMessage($code, $field)
+    {
+        if ($code === ValidationError::ERROR_REQUIRED_FIELD) {
+            return TranslationUtility::__('Field is required.');
+        }
+
+        if (in_array($field, array('height', 'length', 'width'), true)) {
+            return TranslationUtility::__('Field must be valid number.');
+        }
+
+        return TranslationUtility::__(self::$validationMessages[$field]);
     }
 }
