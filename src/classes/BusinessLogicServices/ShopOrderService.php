@@ -31,10 +31,9 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      * @param string $orderId
      * @param array $trackings
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      */
-    public function handleUpdatedTrackingInfo($orderId, array $trackings)
+    public function updateTrackingInfo($orderId, array $trackings)
     {
         if (!empty($trackings)) {
             $repository = new OrderRepository();
