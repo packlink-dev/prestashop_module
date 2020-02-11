@@ -23,6 +23,10 @@ function initRegisterForm() {
     let countryList = document.getElementsByClassName('pl-register-country-list-wrapper')[0],
         logoPath =  document.getElementById('pl-logo-path').value;
 
+    if (countryList.childElementCount > 0) {
+      return;
+    }
+
     for (let code in response) {
       let supportedCountry = response[code],
           linkElement = document.createElement('a'),
