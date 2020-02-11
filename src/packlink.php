@@ -465,12 +465,6 @@ class Packlink extends CarrierModule
         );
         $wakeupService->wakeup();
 
-        /** @var \Packlink\BusinessLogic\Country\CountryService $countryService */
-        $countryService = \Logeecom\Infrastructure\ServiceRegister::getService(
-          \Packlink\BusinessLogic\Country\CountryService::CLASS_NAME
-        );
-        $supportedCountries = $countryService->getSupportedCountries();
-
         $fancyBoxUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . 'js/jquery/plugins/fancybox/jquery.fancybox.js';
         $fancyBoxUrl = str_replace(array('https:', 'http:'), '', $fancyBoxUrl);
 
@@ -495,6 +489,7 @@ class Packlink extends CarrierModule
             array(
                 $this->_path . 'views/js/prestashop-ui-kit.js?v=' . $this->version,
                 $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
+                $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
                 $this->_path . 'views/js/PrestaFix.js?v=' . $this->version,
                 $this->_path . 'views/js/Login.js?v=' . $this->version,
             ),
@@ -504,7 +499,7 @@ class Packlink extends CarrierModule
         $this->context->smarty->assign(array(
             'iconPath' => $this->_path . 'views/img/flags/',
             'loginIcon' => $this->_path . 'views/img/logo-pl.svg',
-            'countries' => $supportedCountries,
+            'getCountriesUrl' => $this->getAction('DefaultWarehouse', 'getSupportedCountries'),
         ));
 
         return $output . $this->display(__FILE__, 'login.tpl');

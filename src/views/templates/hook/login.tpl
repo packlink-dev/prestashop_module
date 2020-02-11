@@ -25,19 +25,9 @@
         <div class="pl-register-country-title-wrapper">
             {l s='Select country to start' mod='packlink'}
         </div>
+        <input type="hidden" id="pl-countries-url" value="{html_entity_decode($getCountriesUrl|escape:'html':'UTF-8')}" />
+        <input type="hidden" id="pl-logo-path" value="{html_entity_decode($iconPath|escape:'html':'UTF-8')}" />
         <div class="pl-register-country-list-wrapper">
-            {foreach $countries as $country}
-              <a href="{html_entity_decode($country->registrationLink|escape:'html':'UTF-8')}" target="_blank">
-                <div class="pl-country">
-                  <img
-                          src="{html_entity_decode($iconPath|escape:'html':'UTF-8')}{html_entity_decode($country->code|escape:'html':'UTF-8')}.svg"
-                          class="pl-country-logo"
-                          alt="{l s=$country->name mod='packlink'}"
-                  >
-                  <div class="pl-country-name">{l s=$country->name mod='packlink'}</div>
-                </div>
-              </a>
-            {/foreach}
         </div>
       </div>
     </div>
