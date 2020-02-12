@@ -43,6 +43,7 @@ class Packlink extends CarrierModule
      * @var array
      */
     private static $helpUrls = array(
+        'EN' => 'https://support-pro.packlink.com/hc/en-gb/sections/202755109-Prestashop',
         'ES' => 'https://support-pro.packlink.com/hc/es-es/sections/202755109-Prestashop',
         'DE' => 'https://support-pro.packlink.com/hc/de/sections/202755109-Prestashop',
         'FR' => 'https://support-pro.packlink.com/hc/fr-fr/sections/202755109-Prestashop',
@@ -54,6 +55,7 @@ class Packlink extends CarrierModule
      * @var array
      */
     private static $termsAndConditionsUrls = array(
+        'EN' => 'https://support-pro.packlink.com/hc/en-gb/articles/360010011480',
         'ES' => 'https://pro.packlink.es/terminos-y-condiciones/',
         'DE' => 'https://pro.packlink.de/agb/',
         'FR' => 'https://pro.packlink.fr/conditions-generales/',
@@ -735,8 +737,8 @@ class Packlink extends CarrierModule
             \Packlink\BusinessLogic\Configuration::CLASS_NAME
         );
         $userInfo = $configService->getUserInfo();
-        $linkLanguage = 'ES';
-        if ($userInfo !== null && array_key_exists($userInfo->country, self::$helpUrls)) {
+        $linkLanguage = 'EN';
+        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'FR', 'IT'), true)) {
             $linkLanguage = $userInfo->country;
         }
 
