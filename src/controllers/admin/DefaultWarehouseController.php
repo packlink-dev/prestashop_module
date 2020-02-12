@@ -60,12 +60,12 @@ class DefaultWarehouseController extends PacklinkBaseController
         $warehouseService = ServiceRegister::getService(WarehouseService::CLASS_NAME);
 
         try {
-            $warehouseService->setWarehouse($data);
+            $warehouse = $warehouseService->updateWarehouseData($data);
+
+            PacklinkPrestaShopUtility::dieJson($warehouse->toArray());
         } catch (\Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException $e) {
             PacklinkPrestaShopUtility::die400WithValidationErrors($e->getValidationErrors());
         }
-
-        PacklinkPrestaShopUtility::dieJson($data);
     }
 
     /**
