@@ -204,11 +204,13 @@ class AdminShippingTabDataProvider
     {
         /** @var Configuration $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        $userInfo = $configService->getUserInfo();
 
-        $userCountry = $configService->getUserInfo() !== null
-            ? \Tools::strtolower($configService->getUserInfo()->country)
-            : 'es';
+        $userDomain = 'com';
+        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'))) {
+            $userDomain = strtolower($userInfo->country);
+        }
 
-        return "https://pro.packlink.$userCountry/private/shipments/$reference";
+        return "https://pro.packlink.$userDomain/private/shipments/$reference";
     }
 }
