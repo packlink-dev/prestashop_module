@@ -169,7 +169,7 @@ class AdminOrdersController
         $userInfo = $configService->getUserInfo();
 
         $userDomain = 'com';
-        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'))) {
+        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'), true)) {
             $userDomain = strtolower($userInfo->country);
         }
 
