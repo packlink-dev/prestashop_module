@@ -3,6 +3,7 @@
 namespace Packlink\PrestaShop\Classes\Overrides;
 
 use Logeecom\Infrastructure\ServiceRegister;
+use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
@@ -163,13 +164,16 @@ class AdminOrdersController
      */
     private function getOrderDraftUrl($reference)
     {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = ServiceRegister::getService(\Packlink\BusinessLogic\Configuration::CLASS_NAME);
-        $userCountry = $configService->getUserInfo() !== null
-            ? \Tools::strtolower($configService->getUserInfo()->country)
-            : 'es';
+        /** @var Configuration $configService */
+        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        $userInfo = $configService->getUserInfo();
 
-        return "https://pro.packlink.$userCountry/private/shipments/$reference";
+        $userDomain = 'com';
+        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'))) {
+            $userDomain = strtolower($userInfo->country);
+        }
+
+        return "https://pro.packlink.$userDomain/private/shipments/$reference";
     }
 
     /**
