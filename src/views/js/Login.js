@@ -19,6 +19,9 @@ function initRegisterForm() {
     ajaxService.get(supportedCountriesUrl, populateCountryList);
   };
 
+  /**
+   * Populates the list of supported countries on login form.
+   */
   let populateCountryList = function (response) {
     let countryList = document.getElementsByClassName('pl-register-country-list-wrapper')[0],
         logoPath =  document.getElementById('pl-logo-path').value;

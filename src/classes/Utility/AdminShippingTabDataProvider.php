@@ -11,6 +11,8 @@ use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShipmentDraft\Objects\ShipmentDraftStatus;
 use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
+use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 
 /**
@@ -37,6 +39,7 @@ class AdminShippingTabDataProvider
      * @param string $orderId ID of the order.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
@@ -84,6 +87,8 @@ class AdminShippingTabDataProvider
      * @param int $orderId ID of the order.
      * @param OrderShipmentDetails|null $shipmentDetails Shipping details for an order.
      *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
@@ -126,6 +131,8 @@ class AdminShippingTabDataProvider
      *
      * @return array
      *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
@@ -139,14 +146,20 @@ class AdminShippingTabDataProvider
         $timeProvider = ServiceRegister::getService(TimeProvider::CLASS_NAME);
 
         $order = new \Order((int)$orderId);
-        $carrier = new \Carrier((int)$order->id_carrier);
+
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
+        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
+        /** @var ShippingMethodService $shippingMethodService */
+        $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
+
+        $shippingMethodId = $carrierService->getShippingMethodId((int)$order->id_carrier);
+        $shippingMethod = $shippingMethodService->getShippingMethod($shippingMethodId);
 
         return array(
-            'name' => $carrier->name,
+            'name' => $shippingMethod ? $shippingMethod->getTitle() : '',
             'reference' => $shipmentDetails->getReference(),
             'deleted' => $shipmentDetails->isDeleted(),
-            'icon' => file_exists(_PS_SHIP_IMG_DIR_ . '/' . (int)$carrier->id . '.jpg') ?
-                __PS_BASE_URI__ . 'img/s/' . (int)$carrier->id . '.jpg' : '',
+            'icon' => $shippingMethod ? $shippingMethod->getLogoUrl() : '',
             'status' => $shipmentDetails->getShippingStatus() ?: '',
             'time' => $shipmentDetails->getLastStatusUpdateTime() !== null
                 ? $timeProvider->serializeDate($shipmentDetails->getLastStatusUpdateTime(), 'd.m.Y H:i:s')
@@ -204,11 +217,13 @@ class AdminShippingTabDataProvider
     {
         /** @var Configuration $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        $userInfo = $configService->getUserInfo();
 
-        $userCountry = $configService->getUserInfo() !== null
-            ? \Tools::strtolower($configService->getUserInfo()->country)
-            : 'es';
+        $userDomain = 'com';
+        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'))) {
+            $userDomain = strtolower($userInfo->country);
+        }
 
-        return "https://pro.packlink.$userCountry/private/shipments/$reference";
+        return "https://pro.packlink.$userDomain/private/shipments/$reference";
     }
 }
