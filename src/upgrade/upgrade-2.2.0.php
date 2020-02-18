@@ -4,10 +4,12 @@ use Logeecom\Infrastructure\Configuration\Configuration;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
+use Logeecom\Infrastructure\TaskExecution\QueueService;
 use Packlink\BusinessLogic\Scheduler\Models\HourlySchedule;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
 use Packlink\BusinessLogic\Scheduler\ScheduleCheckTask;
 use Packlink\BusinessLogic\Tasks\TaskCleanupTask;
+use Packlink\BusinessLogic\Tasks\UpdateShippingServicesTask;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
@@ -26,7 +28,7 @@ if (!defined('_PS_VERSION_')) {
  * @return boolean
  *
  * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
- * @throws \PrestaShopException
+ * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
  */
 function upgrade_module_2_2_0($module)
 {
@@ -37,6 +39,7 @@ function upgrade_module_2_2_0($module)
 
     clearCompletedSchedulers();
     migrateShopOrderDetailEntities();
+    updateServices();
     removeOrdersColumn();
 
     $module->enable();
@@ -96,6 +99,22 @@ function migrateShopOrderDetailEntities()
             $orderShipmentDetails->setOrderId((string)$orderShipmentData['orderId']);
             $orderShipmentDetailsRepository->update($orderShipmentDetails);
         }
+    }
+}
+
+/**
+ * Updates Packlink services.
+ *
+ * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+ */
+function updateServices()
+{
+    /** @var \Logeecom\Infrastructure\TaskExecution\QueueService $queueService */
+    $queueService = ServiceRegister::getService(QueueService::CLASS_NAME);
+    /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+    $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+    if ($queueService->findLatestByType('UpdateShippingServicesTask') !== null) {
+        $queueService->enqueue($configService->getDefaultQueueName(), new UpdateShippingServicesTask());
     }
 }
 
