@@ -724,7 +724,7 @@ class Packlink extends CarrierModule
             $shipmentDraftService = \Logeecom\Infrastructure\ServiceRegister::getService(
                 \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService::CLASS_NAME
             );
-            $shipmentDraftService->enqueueCreateShipmentDraftTask($order->id, $isDelayed);
+            $shipmentDraftService->enqueueCreateShipmentDraftTask((string)$order->id, $isDelayed);
         }
     }
 

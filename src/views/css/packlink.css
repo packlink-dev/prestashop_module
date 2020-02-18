@@ -680,7 +680,7 @@
 }
 
 .pl-form-section-input input,
-.pl-form-section-input select {
+.pl-form-section-input #pl-default-warehouse-country {
   height: 50px !important;
   box-sizing: border-box;
   background-color: white !important;
@@ -689,6 +689,10 @@
   padding: 20px 0 0 15px !important;
   font-size: 14px;
   color: #5d5d5d !important;
+}
+
+.pl-form-section-input #pl-default-warehouse-country {
+  font-size: 12px;
 }
 
 .pl-form-section-input input:focus {
