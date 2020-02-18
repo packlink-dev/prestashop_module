@@ -332,6 +332,11 @@ class Packlink extends CarrierModule
 
         /** @var \Order $order */
         $order = $params['order'];
+
+        if (!$this->isOrderShippedByPacklink($order)) {
+            return;
+        }
+
         $isDelayed = false;
 
         if (\Packlink\PrestaShop\Classes\Utility\CarrierUtility::isDropOff((int)$order->id_carrier)) {
@@ -359,6 +364,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapExists
      * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapNotFound
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
     public function hookActionOrderStatusUpdate($params)
     {
@@ -370,6 +376,7 @@ class Packlink extends CarrierModule
         // since it has already been handled by hook for validating order.
         if ((int)$order->current_state !== self::PRESTASHOP_ORDER_CREATED_STATUS
             && array_key_exists('newOrderStatus', $params)
+            && $this->isOrderShippedByPacklink($order)
         ) {
             $this->createOrderDraft($order, $params['newOrderStatus']);
         }
@@ -676,6 +683,26 @@ class Packlink extends CarrierModule
         }
 
         return true;
+    }
+
+    /**
+     * Returns whether the order is shipped by Packlink service or not.
+     *
+     * @param \Order $order
+     *
+     * @return bool
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function isOrderShippedByPacklink(\Order $order)
+    {
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
+        $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
+        );
+
+        return $carrierService->getShippingMethodId($order->id_carrier) !== null;
     }
 
     /**
