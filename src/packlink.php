@@ -332,6 +332,7 @@ class Packlink extends CarrierModule
 
         /** @var \Order $order */
         $order = $params['order'];
+
         $isDelayed = false;
 
         if (\Packlink\PrestaShop\Classes\Utility\CarrierUtility::isDropOff((int)$order->id_carrier)) {
@@ -355,10 +356,13 @@ class Packlink extends CarrierModule
      *
      * @param $params
      *
+     * @throws PrestaShopDatabaseException
+     * @throws PrestaShopException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapExists
      * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapNotFound
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
     public function hookActionOrderStatusUpdate($params)
     {
@@ -679,6 +683,26 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Returns whether the order is shipped by Packlink service or not.
+     *
+     * @param \Order $order
+     *
+     * @return bool
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function isOrderShippedByPacklink(\Order $order)
+    {
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
+        $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
+        );
+
+        return $carrierService->getShippingMethodId($order->id_carrier) !== null;
+    }
+
+    /**
      * Checks if Packlink authorization token, default parcel and default warehouse have been set in the shop.
      *
      * @return bool Returns TRUE if module has been fully configured, otherwise returns FALSE.
@@ -710,11 +734,27 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapExists
      * @throws \Packlink\BusinessLogic\ShipmentDraft\Exceptions\DraftTaskMapNotFound
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
     private function createOrderDraft(\Order $order, OrderState $orderState, $isDelayed = false)
     {
-        if ($orderState->id === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS
-            || $orderState->id === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+        /** @var \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService $orderShipmentDetailsService */
+        $orderShipmentDetailsService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService::CLASS_NAME
+        );
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
+        $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
+        );
+        $carrier = new Carrier((int)$order->id_carrier);
+        $orderDetails = $orderShipmentDetailsService->getDetailsByOrderId((string)$order->id);
+        $carrierServiceMapping = $carrierService->getMappingByCarrierReferenceId((int)$carrier->id_reference);
+
+        if ($orderDetails === null
+            && $carrierServiceMapping !== null
+            && ($orderState->id === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS
+                || $orderState->id === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS)
         ) {
             /** @var \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService $shipmentDraftService */
             $shipmentDraftService = \Logeecom\Infrastructure\ServiceRegister::getService(
