@@ -441,6 +441,7 @@ class Packlink extends CarrierModule
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+     * @throws \PrestaShopException
      */
     public function getContent()
     {
@@ -683,26 +684,6 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Returns whether the order is shipped by Packlink service or not.
-     *
-     * @param \Order $order
-     *
-     * @return bool
-     *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     */
-    private function isOrderShippedByPacklink(\Order $order)
-    {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
-        $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
-        );
-
-        return $carrierService->getShippingMethodId($order->id_carrier) !== null;
-    }
-
-    /**
      * Checks if Packlink authorization token, default parcel and default warehouse have been set in the shop.
      *
      * @return bool Returns TRUE if module has been fully configured, otherwise returns FALSE.
@@ -738,6 +719,28 @@ class Packlink extends CarrierModule
      */
     private function createOrderDraft(\Order $order, OrderState $orderState, $isDelayed = false)
     {
+        if ($this->shouldCreateDraft($order, $orderState)) {
+            /** @var \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService $shipmentDraftService */
+            $shipmentDraftService = \Logeecom\Infrastructure\ServiceRegister::getService(
+                \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService::CLASS_NAME
+            );
+            $shipmentDraftService->enqueueCreateShipmentDraftTask($order->id, $isDelayed);
+        }
+    }
+
+    /**
+     * Returns whether Packlink draft should be created.
+     *
+     * @param \Order $order
+     * @param \OrderState $orderState
+     *
+     * @return bool
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function shouldCreateDraft(\Order $order, OrderState $orderState)
+    {
         \Packlink\PrestaShop\Classes\Bootstrap::init();
         /** @var \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService $orderShipmentDetailsService */
         $orderShipmentDetailsService = \Logeecom\Infrastructure\ServiceRegister::getService(
@@ -751,17 +754,10 @@ class Packlink extends CarrierModule
         $orderDetails = $orderShipmentDetailsService->getDetailsByOrderId((string)$order->id);
         $carrierServiceMapping = $carrierService->getMappingByCarrierReferenceId((int)$carrier->id_reference);
 
-        if ($orderDetails === null
+        return $orderDetails === null
             && $carrierServiceMapping !== null
             && ($orderState->id === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS
-                || $orderState->id === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS)
-        ) {
-            /** @var \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService $shipmentDraftService */
-            $shipmentDraftService = \Logeecom\Infrastructure\ServiceRegister::getService(
-                \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService::CLASS_NAME
-            );
-            $shipmentDraftService->enqueueCreateShipmentDraftTask($order->id, $isDelayed);
-        }
+                || $orderState->id === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS);
     }
 
     /**
