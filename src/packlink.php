@@ -674,7 +674,7 @@ class Packlink extends CarrierModule
             \Packlink\PrestaShop\Classes\Utility\AddressUitlity::createDropOffAddress($order, $dropOff);
         } catch (\Exception $e) {
             \Logeecom\Infrastructure\Logger\Logger::logError(
-                "Failed to created drop-off for order [{$order->id}] becauese: {$e->getMessage()}."
+                "Failed to create drop-off for order [{$order->id}] because: {$e->getMessage()}."
             );
 
             return false;
