@@ -693,6 +693,7 @@
 
 .pl-form-section-input #pl-default-warehouse-country {
   font-size: 12px;
+  padding-left: 11px !important;
 }
 
 .pl-form-section-input input:focus {
