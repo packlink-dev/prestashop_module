@@ -23,6 +23,7 @@ class DefaultWarehouseController extends PacklinkBaseController
         /** @var WarehouseService $warehouseService */
         $warehouseService = ServiceRegister::getService(WarehouseService::CLASS_NAME);
 
+        /** @var \Packlink\BusinessLogic\Warehouse\Warehouse $warehouse */
         $warehouse = $warehouseService->getWarehouse(true);
 
         PacklinkPrestaShopUtility::dieJson($warehouse->toArray());

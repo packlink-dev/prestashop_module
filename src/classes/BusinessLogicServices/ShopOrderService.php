@@ -9,6 +9,8 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Order as PrestaShopOrder;
 use Packlink\BusinessLogic\Configuration;
+use Packlink\BusinessLogic\Http\DTO\Shipment;
+use Packlink\BusinessLogic\Http\DTO\Tracking;
 use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
 use Packlink\BusinessLogic\Order\Objects\Address;
 use Packlink\BusinessLogic\Order\Objects\Item;
@@ -28,16 +30,17 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
     /**
      * Handles updated tracking info for order with a given ID.
      *
-     * @param string $orderId
-     * @param array $trackings
+     * @param string $orderId Shop order ID.
+     * @param Shipment $shipment Shipment object containing tracking codes and tracking url.
+     * @param Tracking[] $trackingHistory Shipment tracking history.
      *
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound
      */
-    public function updateTrackingInfo($orderId, array $trackings)
+    public function updateTrackingInfo($orderId, Shipment $shipment, array $trackingHistory)
     {
-        if (!empty($trackings)) {
+        if (!empty($shipment->trackingCodes)) {
             $repository = new OrderRepository();
-            $repository->setTrackingNumber((int)$orderId, $trackings[0]);
+            $repository->setTrackingNumber((int)$orderId, $shipment->trackingCodes[0]);
         }
     }
 

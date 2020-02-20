@@ -44,7 +44,7 @@ class OrderRepository
     public function setTrackingNumber($orderId, $trackingNumber)
     {
         $order = $this->getOrder($orderId);
-        $order->setWsShippingNumber($trackingNumber[0]);
+        $order->setWsShippingNumber($trackingNumber);
     }
 
     /**
@@ -55,7 +55,6 @@ class OrderRepository
      * @return \Order An order instance.
      *
      * @throws \Packlink\BusinessLogic\Order\Exceptions\OrderNotFound If order does not exist.
-     * @noinspection PhpUndefinedClassInspection
      */
     private function getOrder($orderId)
     {

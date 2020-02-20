@@ -110,7 +110,6 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return array An array of paths of the saved files.
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Packlink\BusinessLogic\OrderShipmentDetails\Exceptions\OrderShipmentDetailsNotFound
      */
     private function saveFilesLocally(array $orderIds)
@@ -128,12 +127,9 @@ class BulkShipmentLabelsController extends PacklinkBaseController
                 if (empty($shipmentLabels)) {
                     $shipmentLabels = $orderService->getShipmentLabels($shipmentDetails->getReference());
                     $shipmentDetailsService->setLabelsByReference($shipmentDetails->getReference(), $shipmentLabels);
-                    $shipmentDetails->setShipmentLabels($shipmentLabels);
                 }
 
-                $labels = $shipmentDetails->getShipmentLabels();
-
-                foreach ($labels as $label) {
+                foreach ($shipmentLabels as $label) {
                     $shipmentDetailsService->markLabelPrinted($shipmentDetails->getReference(), $label->getLink());
 
                     $path = $this->savePDF($label->getLink());

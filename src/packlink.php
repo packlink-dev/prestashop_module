@@ -286,7 +286,7 @@ class Packlink extends CarrierModule
         \Packlink\PrestaShop\Classes\Bootstrap::init();
 
         /** @var \Order $order */
-        $order = $params['order'] ?: $params['objOrder'];
+        $order = array_key_exists('order', $params) ? $params['order'] : $params['objOrder'];
         $cartId = $order->id_cart;
         $carrierId = $order->id_carrier;
         if (\Packlink\PrestaShop\Classes\Utility\CarrierUtility::isDropOff((int)$carrierId)
