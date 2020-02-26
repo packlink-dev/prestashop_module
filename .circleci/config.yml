@@ -36,11 +36,15 @@ jobs:
             gsutil cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
             gsutil acl ch -u AllUsers:R gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
       - slack/notify:
-          color: '#42e2f4'
+          color: '#00FF00'
           channel: 'logeecom'
-          message: 'Prestashop module has been released: version $CIRCLE_TAG'
+          message: 'A new version has been released: ${CIRCLE_TAG}'
           webhook: '${SLACK_WEBHOOK}'
-
+      - slack/notify:
+          color: '#00FF00'
+          channel: 'releases'
+          message: 'A new version has been released: ${CIRCLE_TAG}'
+          webhook: '${SLACK_WEBHOOK}'
 
 workflows:
   version: 2.1
