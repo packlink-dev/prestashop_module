@@ -23,6 +23,12 @@ class LoggerService extends Singleton implements ShopLoggerAdapter
     const PRESTASHOP_WARNING = 2;
     const PRESTASHOP_ERROR = 3;
     /**
+     * Singleton instance of this class.
+     *
+     * @var static
+     */
+    protected static $instance;
+    /**
      * Log level names for corresponding log level codes.
      *
      * @var array

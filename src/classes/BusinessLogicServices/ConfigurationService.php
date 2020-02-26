@@ -24,6 +24,12 @@ class ConfigurationService extends Configuration
      */
     const ASYNC_CALL_METHOD = 'GET';
     /**
+     * Singleton instance of this class.
+     *
+     * @var static
+     */
+    protected static $instance;
+    /**
      * @var string
      */
     private $moduleVersion;
