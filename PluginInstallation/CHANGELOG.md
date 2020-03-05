@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
 
+## [v2.2.0](https://github.com/packlink-dev/prestashop_module/compare/v2.1.5...v2.2.0) - 2020-03-06
+### Changed
+- Updated to the Packlink Integrations Core v2.0.0 (system improvements and code optimization).
+
+### Added
+- Added task cleanup.
+- Packlink now supports more countries.
+
+## [v2.1.5](https://github.com/packlink-dev/prestashop_module/compare/v2.1.4...v2.1.5) - 2020-01-10
+### Changed
+- Fix minor bugs and warnings
+
 ## [v2.1.4](https://github.com/packlink-dev/prestashop_module/compare/v2.1.3...v2.1.4) - 2020-01-10
 ### Changed
 - Fix displaying selected tax class in shipping service configuration.

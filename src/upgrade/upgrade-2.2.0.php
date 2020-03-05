@@ -5,15 +5,15 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Logeecom\Infrastructure\TaskExecution\QueueService;
+use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Scheduler\Models\HourlySchedule;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
 use Packlink\BusinessLogic\Scheduler\ScheduleCheckTask;
+use Packlink\BusinessLogic\ShipmentDraft\Models\OrderSendDraftTaskMap;
 use Packlink\BusinessLogic\Tasks\TaskCleanupTask;
 use Packlink\BusinessLogic\Tasks\UpdateShippingServicesTask;
 use Packlink\PrestaShop\Classes\Bootstrap;
-use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
-use Packlink\BusinessLogic\ShipmentDraft\Models\OrderSendDraftTaskMap;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 
 if (!defined('_PS_VERSION_')) {
@@ -29,6 +29,8 @@ if (!defined('_PS_VERSION_')) {
  *
  * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
  * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
+ * @throws \PrestaShopException
+ * @noinspection PhpUnused
  */
 function upgrade_module_2_2_0($module)
 {
@@ -81,7 +83,11 @@ function migrateShopOrderDetailEntities()
         ->from(bqSQL(BaseRepository::TABLE_NAME))
         ->where('`type` = "OrderShipmentDetails"');
 
-    $records = \Db::getInstance()->executeS($query);
+    try {
+        $records = \Db::getInstance()->executeS($query);
+    } catch (PrestaShopDatabaseException $e) {
+    }
+
     if (!empty($records)) {
         $orderShipmentDetailsRepository = RepositoryRegistry::getRepository(OrderShipmentDetails::getClassName());
         $orderSendDraftRepository = RepositoryRegistry::getRepository(OrderSendDraftTaskMap::getClassName());
@@ -130,9 +136,7 @@ function removeOrdersColumn()
             . ' DROP COLUMN ' . bqSQL(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD);
 
         \Db::getInstance()->execute($sql);
-    } catch (\PrestaShopException $e) {
-        $this->tryLogError('Error removing orders table column. Error: ' . $e->getMessage());
-
+    } catch (\Exception $e) {
         return false;
     }
 

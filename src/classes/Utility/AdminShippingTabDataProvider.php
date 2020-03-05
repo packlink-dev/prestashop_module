@@ -221,7 +221,7 @@ class AdminShippingTabDataProvider
 
         $userDomain = 'com';
         if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'))) {
-            $userDomain = strtolower($userInfo->country);
+            $userDomain = \Tools::strtolower($userInfo->country);
         }
 
         return "https://pro.packlink.$userDomain/private/shipments/$reference";

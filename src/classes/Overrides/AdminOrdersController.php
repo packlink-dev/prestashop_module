@@ -36,6 +36,7 @@ class AdminOrdersController
      * @param array $fields_list
      *
      * @return array
+     * @noinspection PhpUnusedParameterInspection
      */
     public function insertOrderColumn(&$select, array $fields_list)
     {
@@ -126,6 +127,7 @@ class AdminOrdersController
      *
      * @return string Rendered template output.
      *
+     * @throws \SmartyException
      */
     public function getOrderDraft($orderId, \Context $context)
     {
@@ -170,7 +172,7 @@ class AdminOrdersController
 
         $userDomain = 'com';
         if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'), true)) {
-            $userDomain = strtolower($userInfo->country);
+            $userDomain = \Tools::strtolower($userInfo->country);
         }
 
         return "https://pro.packlink.$userDomain/private/shipments/$reference";
