@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
 
-## [v2.2.0](https://github.com/packlink-dev/prestashop_module/compare/v2.1.5...v2.2.0) - 2020-03-06
+## [v2.2.0](https://github.com/packlink-dev/prestashop_module/compare/v2.1.5...v2.2.0) - 2020-04-03
 ### Changed
 - Updated to the Packlink Integrations Core v2.0.0 (system improvements and code optimization).
 
