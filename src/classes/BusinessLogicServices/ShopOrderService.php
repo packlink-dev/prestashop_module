@@ -94,7 +94,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $order->setBasePrice((float)$sourceOrder->total_paid_tax_excl);
 
             $dropOffId = $this->getDropOffId($sourceOrder);
-
             if ($dropOffId) {
                 $order->setShippingDropOffId($dropOffId);
             }
@@ -132,14 +131,16 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
 
             /** @var \Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping $mapping */
             $mapping = $repository->selectOne($query);
-
             if ($mapping) {
                 $dropOff = $mapping->getDropOff();
 
                 return (string)$dropOff['id'];
             }
         } catch (\Exception $e) {
-            return null;
+            Logger::logWarning(
+                'Error when fetching the drop-off information. Error: ' . $e->getMessage(),
+                'Integration'
+            );
         }
 
         return null;
@@ -161,10 +162,9 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
 
         $shippingAddress = new Address();
         $deliveryAddress = new PrestaShopAddress($deliveryAddressId);
-        $customer = new \Customer($shopOrder->id_customer);
         $country = new \Country($deliveryAddress->id_country);
 
-        if ($country !== null) {
+        if (\Validate::isLoadedObject($country)) {
             $shippingAddress->setCountry($country->iso_code);
         }
 
@@ -177,7 +177,8 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $shippingAddress->setName($deliveryAddress->firstname);
         $shippingAddress->setSurname($deliveryAddress->lastname);
 
-        if ($customer !== null) {
+        $customer = new \Customer($shopOrder->id_customer);
+        if (\Validate::isLoadedObject($customer)) {
             $shippingAddress->setEmail($customer->email);
             $shippingAddress->setName($deliveryAddress->firstname ?: $customer->firstname);
             $shippingAddress->setSurname($deliveryAddress->lastname ?: $customer->lastname);
@@ -201,7 +202,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
         $carrier = new \Carrier($carrierId);
 
-        if ($carrier === null) {
+        if (!\Validate::isLoadedObject($carrierService)) {
             Logger::logWarning(TranslationUtility::__('Carrier not found'), 'Integration');
 
             return;
@@ -317,9 +318,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         }
 
         if (!\Validate::isLoadedObject($order)) {
-            throw new OrderNotFound(
-                TranslationUtility::__("Order with ID $orderId doesn't exist in the shop")
-            );
+            throw new OrderNotFound(TranslationUtility::__("Order with ID $orderId doesn't exist in the shop"));
         }
 
         return $order;
