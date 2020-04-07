@@ -317,10 +317,12 @@ class CarrierService implements ShopShippingMethodService
      */
     public function getNumberOfOtherCarriers()
     {
+        $result = array();
+
         try {
             $result = $this->getNonPacklinkCarriers('count(*) as shippingMethodsCount');
         } catch (\PrestaShopException $e) {
-            $result = array();
+            Logger::logError('Error searching for non-Packlink carriers. Error: ' . $e->getMessage(), 'Integration');
         }
 
         return !empty($result[0]['shippingMethodsCount']) ? (int)$result[0]['shippingMethodsCount'] : 0;

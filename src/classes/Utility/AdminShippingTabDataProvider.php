@@ -5,7 +5,6 @@ namespace Packlink\PrestaShop\Classes\Utility;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Logeecom\Infrastructure\Utility\TimeProvider;
-use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
@@ -168,7 +167,7 @@ class AdminShippingTabDataProvider
             'carrier_tracking_url' => $shipmentDetails->getCarrierTrackingUrl() ?: '',
             'packlink_shipping_price' => $shipmentDetails->getShippingCost() !== null
                 ? $shipmentDetails->getShippingCost() . ' €' : '',
-            'link' => self::getOrderDraftUrl($shipmentDetails->getReference()),
+            'link' => $shipmentDetails->getShipmentUrl(),
         );
     }
 
@@ -204,26 +203,5 @@ class AdminShippingTabDataProvider
                 'number' => '#PLSL1',
             )
         );
-    }
-
-    /**
-     * Returns link to order draft on Packlink for the provided shipment reference.
-     *
-     * @param string $reference Shipment reference.
-     *
-     * @return string Link to order draft on Packlink.
-     */
-    private static function getOrderDraftUrl($reference)
-    {
-        /** @var Configuration $configService */
-        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $userInfo = $configService->getUserInfo();
-
-        $userDomain = 'com';
-        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'))) {
-            $userDomain = \Tools::strtolower($userInfo->country);
-        }
-
-        return "https://pro.packlink.$userDomain/private/shipments/$reference";
     }
 }

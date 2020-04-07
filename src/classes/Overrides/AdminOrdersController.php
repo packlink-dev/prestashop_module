@@ -3,7 +3,6 @@
 namespace Packlink\PrestaShop\Classes\Overrides;
 
 use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
@@ -75,7 +74,6 @@ class AdminOrdersController
      *
      * @return mixed
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      * @throws \SmartyException
@@ -147,7 +145,7 @@ class AdminOrdersController
             array(
                 'imgSrc' => _PS_BASE_URL_ . _MODULE_DIR_ . 'packlink/logo.png',
                 'deleted' => $shipmentDetails->isDeleted(),
-                'orderDraftLink' => $this->getOrderDraftUrl($shipmentDetails->getReference()),
+                'orderDraftLink' => $shipmentDetails->getShipmentUrl(),
             )
         );
 
@@ -155,27 +153,6 @@ class AdminOrdersController
             _PS_MODULE_DIR_ . self::PACKLINK_ORDER_DRAFT_TEMPLATE,
             $context->smarty
         )->fetch();
-    }
-
-    /**
-     * Returns link to order draft on Packlink for the provided shipment reference.
-     *
-     * @param string $reference Shipment reference.
-     *
-     * @return string Link to order draft on Packlink.
-     */
-    private function getOrderDraftUrl($reference)
-    {
-        /** @var Configuration $configService */
-        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $userInfo = $configService->getUserInfo();
-
-        $userDomain = 'com';
-        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'IT', 'FR'), true)) {
-            $userDomain = \Tools::strtolower($userInfo->country);
-        }
-
-        return "https://pro.packlink.$userDomain/private/shipments/$reference";
     }
 
     /**

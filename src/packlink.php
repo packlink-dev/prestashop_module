@@ -772,9 +772,15 @@ class Packlink extends CarrierModule
         $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
             \Packlink\BusinessLogic\Configuration::CLASS_NAME
         );
+        /** @var \Packlink\BusinessLogic\Country\CountryService $countryService */
+        $countryService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Country\CountryService::CLASS_NAME
+        );
+
         $userInfo = $configService->getUserInfo();
         $linkLanguage = 'EN';
-        if ($userInfo !== null && in_array($userInfo->country, array('ES', 'DE', 'FR', 'IT'), true)) {
+
+        if ($userInfo !== null && $countryService->isBaseCountry($userInfo->country)) {
             $linkLanguage = $userInfo->country;
         }
 

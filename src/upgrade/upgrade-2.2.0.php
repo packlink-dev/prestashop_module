@@ -5,6 +5,7 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Logeecom\Infrastructure\TaskExecution\QueueService;
+use Packlink\BusinessLogic\Country\CountryService;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Scheduler\Models\HourlySchedule;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
@@ -89,6 +90,19 @@ function migrateShopOrderDetailEntities()
     }
 
     if (!empty($records)) {
+        /** @var Configuration $configService */
+        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        /** @var CountryService $countryService */
+        $countryService = ServiceRegister::getService(CountryService::CLASS_NAME);
+
+        $userInfo = $configService->getUserInfo();
+        $userDomain = 'com';
+        if ($userInfo !== null && $countryService->isBaseCountry($userInfo->country)) {
+            $userDomain = \Tools::strtolower($userInfo->country);
+        }
+
+        $baseShipmentUrl = "https://pro.packlink.$userDomain/private/shipments/";
+
         $orderShipmentDetailsRepository = RepositoryRegistry::getRepository(OrderShipmentDetails::getClassName());
         $orderSendDraftRepository = RepositoryRegistry::getRepository(OrderSendDraftTaskMap::getClassName());
 
@@ -103,6 +117,8 @@ function migrateShopOrderDetailEntities()
             unset($orderShipmentData['taskId']);
             $orderShipmentDetails = OrderShipmentDetails::fromArray($orderShipmentData);
             $orderShipmentDetails->setOrderId((string)$orderShipmentData['orderId']);
+            $orderShipmentDetails->setShipmentUrl($baseShipmentUrl . $orderShipmentDetails->getReference());
+
             $orderShipmentDetailsRepository->update($orderShipmentDetails);
         }
     }

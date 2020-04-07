@@ -60,16 +60,11 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
         $statusMappings = $configService->getOrderStatusMappings();
 
-        if (!array_key_exists($shippingStatus, $statusMappings)) {
-            Logger::logWarning(
-                TranslationUtility::__('Order status mapping not found.'),
-                'Integration'
-            );
-
-            return;
+        if (array_key_exists($shippingStatus, $statusMappings)) {
+            $repository->updateOrderState((int)$orderId, (int)$statusMappings[$shippingStatus]);
+        } else {
+            Logger::logWarning(TranslationUtility::__('Order status mapping not found.'), 'Integration');
         }
-
-        $repository->updateOrderState((int)$orderId, (int)$statusMappings[$shippingStatus]);
     }
 
     /**
@@ -89,31 +84,28 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $order = new Order();
         try {
             $sourceOrder = $this->getOrder($orderId);
+            $currencyId = (int)$sourceOrder->id_currency;
+            $currency = \Currency::getCurrency($currencyId);
+
+            $order->setId($orderId);
+            $order->setCustomerId((int)$sourceOrder->id_customer);
+            $order->setCurrency($currency['iso_code']);
+            $order->setTotalPrice((float)$sourceOrder->total_paid_tax_incl);
+            $order->setBasePrice((float)$sourceOrder->total_paid_tax_excl);
+
+            $dropOffId = $this->getDropOffId($sourceOrder);
+
+            if ($dropOffId) {
+                $order->setShippingDropOffId($dropOffId);
+            }
+
+            $order->setShippingAddress($this->getAddress($sourceOrder));
+
+            $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
+            $order->setItems($this->getOrderItems($sourceOrder));
         } catch (OrderNotFound $e) {
             Logger::logWarning(TranslationUtility::__('Source order not found'), 'Integration');
-
-            return $order;
         }
-
-        $currencyId = (int)$sourceOrder->id_currency;
-        $currency = \Currency::getCurrency($currencyId);
-
-        $order->setId($orderId);
-        $order->setCustomerId((int)$sourceOrder->id_customer);
-        $order->setCurrency($currency['iso_code']);
-        $order->setTotalPrice((float)$sourceOrder->total_paid_tax_incl);
-        $order->setBasePrice((float)$sourceOrder->total_paid_tax_excl);
-
-        $dropOffId = $this->getDropOffId($sourceOrder);
-
-        if ($dropOffId) {
-            $order->setShippingDropOffId($dropOffId);
-        }
-
-        $order->setShippingAddress($this->getAddress($sourceOrder));
-
-        $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
-        $order->setItems($this->getOrderItems($sourceOrder));
 
         return $order;
     }
