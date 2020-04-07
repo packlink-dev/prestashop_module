@@ -9,6 +9,7 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
+use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\BusinessLogic\Utility\Php\Php55;
@@ -310,30 +311,60 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
-     * Returns path to carrier logo or default carrier logo if logo for requested carrier doesn't exist.
+     * Gets the number of non-Packlink carriers.
+     *
+     * @return int
+     */
+    public function getNumberOfOtherCarriers()
+    {
+        $result = array();
+
+        try {
+            $result = $this->getNonPacklinkCarriers('count(*) as shippingMethodsCount');
+        } catch (\PrestaShopException $e) {
+            Logger::logError('Error searching for non-Packlink carriers. Error: ' . $e->getMessage(), 'Integration');
+        }
+
+        return !empty($result[0]['shippingMethodsCount']) ? (int)$result[0]['shippingMethodsCount'] : 0;
+    }
+
+    /**
+     * Disables other carriers.
+     *
+     * @return bool
+     */
+    public function disableOtherCarriers()
+    {
+        try {
+            $result = $this->getNonPacklinkCarriers();
+
+            $ids = Php55::arrayColumn($result, 'id_carrier');
+            foreach ($ids as $id) {
+                $carrier = new \Carrier((int)$id);
+                $carrier->active = false;
+                $carrier->update();
+            }
+
+            AnalyticsController::sendOtherServicesDisabledEvent();
+
+            return true;
+        } catch (\PrestaShopDatabaseException $e) {
+        } catch (\PrestaShopException $e) {
+        }
+
+        return false;
+    }
+
+    /**
+     * Generates PrestaShop public URL for logo of carrier with provided title.
      *
      * @param string $carrierName Name of the carrier.
      *
-     * @return string
+     * @return string URL to carrier logo image file.
      */
     public function getCarrierLogoFilePath($carrierName)
     {
-        /** @var ConfigurationService $configService */
-        $configService = ServiceRegister::getService(ConfigurationInterface::CLASS_NAME);
-        $userInfo = $configService->getUserInfo();
-        $defaultCarrierLogoPath = 'packlink/views/img/carriers/carrier.jpg';
-
-        if ($userInfo === null) {
-            return $defaultCarrierLogoPath;
-        }
-
-        $carrierImageFile = \Tools::strtolower(str_replace(' ', '-', $carrierName));
-        $logoFilePath = 'packlink/views/img/carriers/'
-            . \Tools::strtolower($userInfo->country)
-            . '/' . $carrierImageFile . '.png';
-
-        return \Tools::file_exists_cache(_PS_MODULE_DIR_ . $logoFilePath)
-            ? $logoFilePath : $defaultCarrierLogoPath;
+        return _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/' . $this->getCarrierLogoRelativePath($carrierName);
     }
 
     /**
@@ -356,6 +387,24 @@ class CarrierService implements ShopShippingMethodService
                 TranslationUtility::__('Failed copying carrier logo to the system')
             );
         }
+    }
+
+    /**
+     * Returns path to carrier logo or default carrier logo if logo for requested carrier doesn't exist.
+     *
+     * @param string $carrierName Name of the carrier.
+     *
+     * @return string
+     */
+    private function getCarrierLogoRelativePath($carrierName)
+    {
+        $defaultCarrierLogoPath = 'packlink/views/img/carriers/carrier.jpg';
+
+        $carrierImageFile = \Tools::strtolower(str_replace(' ', '-', $carrierName));
+        $logoFilePath = 'packlink/views/img/carriers/' . $carrierImageFile . '.png';
+
+        return \Tools::file_exists_cache(_PS_MODULE_DIR_ . $logoFilePath)
+            ? $logoFilePath : $defaultCarrierLogoPath;
     }
 
     /**
@@ -615,7 +664,7 @@ class CarrierService implements ShopShippingMethodService
      */
     private function copyCarrierLogo($shippingMethodName, $carrierId)
     {
-        $source = _PS_MODULE_DIR_ . $this->getCarrierLogoFilePath($shippingMethodName);
+        $source = _PS_MODULE_DIR_ . $this->getCarrierLogoRelativePath($shippingMethodName);
 
         if (!copy($source, $this->getPrestaCarrierLogoPath($carrierId))) {
             return false;
@@ -668,5 +717,27 @@ class CarrierService implements ShopShippingMethodService
         $imgDir = _PS_SHIP_IMG_DIR_;
 
         return rtrim($imgDir, '/') . '/' . $id . '.jpg';
+    }
+
+    /**
+     * Gets non-Packlink carriers.
+     *
+     * @param string $select
+     *
+     * @return array
+     *
+     * @throws \PrestaShopDatabaseException
+     */
+    private function getNonPacklinkCarriers($select = 'id_carrier')
+    {
+        $db = \Db::getInstance();
+        $query = new \DbQuery();
+        $query->select($select)
+            ->from('carrier')
+            ->where("external_module_name <> 'packlink'")
+            ->where('active = 1')
+            ->where('deleted = 0');
+
+        return $db->executeS($query) ?: array();
     }
 }

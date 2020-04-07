@@ -2,6 +2,8 @@
 
 namespace Packlink\PrestaShop\Classes\Utility;
 
+use Packlink\BusinessLogic\DTO\ValidationError;
+
 /**
  * Class PacklinkPrestaShopUtility
  *
@@ -9,6 +11,34 @@ namespace Packlink\PrestaShop\Classes\Utility;
  */
 class PacklinkPrestaShopUtility
 {
+    /**
+     * Translation messages for fields that are being validated.
+     *
+     * @var array
+     */
+    private static $validationMessages = array(
+        'email' => 'Field must be valid email.',
+        'phone' => 'Field must be valid phone number.',
+        'weight' => 'Weight must be a positive decimal number.',
+        'postal_code' => 'Postal code is not correct.',
+    );
+
+    /**
+     * Returns invalid JSON response with validation errors.
+     *
+     * @param ValidationError[] $errors
+     */
+    public static function die400WithValidationErrors($errors)
+    {
+        $result = array();
+
+        foreach ($errors as $error) {
+            $result[$error->field] = self::getValidationMessage($error->code, $error->field);
+        }
+
+        self::die400($result);
+    }
+
     /**
      * Die with 400 status in header.
      *
@@ -43,6 +73,22 @@ class PacklinkPrestaShopUtility
         header('HTTP/1.1 500 Internal Server Error');
 
         self::dieJson($data);
+    }
+
+    /**
+     * Converts front DTOs to array and returns a JSON response.
+     *
+     * @param \Packlink\BusinessLogic\DTO\BaseDto[] $entities
+     */
+    public static function dieDtoEntities(array $entities)
+    {
+        $result = array();
+
+        foreach ($entities as $entity) {
+            $result[] = $entity->toArray();
+        }
+
+        self::dieJson($result);
     }
 
     /**
@@ -141,5 +187,26 @@ class PacklinkPrestaShopUtility
     public static function getPacklinkPostData()
     {
         return json_decode(\Tools::getValue('plPostData'), true);
+    }
+
+    /**
+     * Returns a validation message for validation error.
+     *
+     * @param string $code
+     * @param string $field
+     *
+     * @return string
+     */
+    protected static function getValidationMessage($code, $field)
+    {
+        if ($code === ValidationError::ERROR_REQUIRED_FIELD) {
+            return TranslationUtility::__('Field is required.');
+        }
+
+        if (in_array($field, array('height', 'length', 'width'), true)) {
+            return TranslationUtility::__('Field must be valid number.');
+        }
+
+        return TranslationUtility::__(self::$validationMessages[$field]);
     }
 }

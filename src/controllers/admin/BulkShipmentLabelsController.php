@@ -1,11 +1,8 @@
 <?php
 
 use Logeecom\Infrastructure\Logger\Logger;
-use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
-use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
-use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
+use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
@@ -48,14 +45,9 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return bool|string File path of the final merged PDF document; FALSE on error.
      *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      * @throws \iio\libmergepdf\Exception
+     * @throws \Packlink\BusinessLogic\OrderShipmentDetails\Exceptions\OrderShipmentDetailsNotFound
      */
     protected function bulkPrintLabels()
     {
@@ -94,13 +86,8 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return array
      *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
+     * @throws \Packlink\BusinessLogic\OrderShipmentDetails\Exceptions\OrderShipmentDetailsNotFound
      */
     protected function prepareAllLabels($tmpDirectory)
     {
@@ -123,46 +110,33 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      *
      * @return array An array of paths of the saved files.
      *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
+     * @throws \Packlink\BusinessLogic\OrderShipmentDetails\Exceptions\OrderShipmentDetailsNotFound
      */
     private function saveFilesLocally(array $orderIds)
     {
         $result = array();
-        $orderDetailsRepository = RepositoryRegistry::getRepository(OrderShipmentDetails::getClassName());
-        /** @var OrderRepository $orderRepository */
-        $orderRepository = ServiceRegister::getService(OrderRepositoryInterface::CLASS_NAME);
+        /** @var OrderShipmentDetailsService $shipmentDetailsService */
+        $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
         /** @var \Packlink\BusinessLogic\Order\OrderService $orderService */
         $orderService = ServiceRegister::getService(\Packlink\BusinessLogic\Order\OrderService::CLASS_NAME);
 
         foreach ($orderIds as $orderId) {
-            $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
-            if ($orderDetails !== null) {
-                $shipmentLabels = $orderDetails->getShipmentLabels();
+            $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId($orderId);
+            if ($shipmentDetails !== null) {
+                $shipmentLabels = $shipmentDetails->getShipmentLabels();
                 if (empty($shipmentLabels)) {
-                    $shipmentLabels = $orderService->getShipmentLabels($orderDetails->getReference());
-                    $orderDetails->setShipmentLabels($shipmentLabels);
+                    $shipmentLabels = $orderService->getShipmentLabels($shipmentDetails->getReference());
+                    $shipmentDetailsService->setLabelsByReference($shipmentDetails->getReference(), $shipmentLabels);
                 }
 
-                $labels = $orderDetails->getShipmentLabels();
-
-                foreach ($labels as $label) {
-                    if (!$label->isPrinted()) {
-                        $label->setPrinted(true);
-                    }
+                foreach ($shipmentLabels as $label) {
+                    $shipmentDetailsService->markLabelPrinted($shipmentDetails->getReference(), $label->getLink());
 
                     $path = $this->savePDF($label->getLink());
                     if (!empty($path)) {
                         $result[] = $path;
                     }
                 }
-
-                $orderDetailsRepository->update($orderDetails);
             } else {
                 Logger::logWarning(TranslationUtility::__('Order details not found'), 'Integration');
             }

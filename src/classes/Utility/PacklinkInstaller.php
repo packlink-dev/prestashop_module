@@ -11,7 +11,6 @@ use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
-use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Tools;
 
 /**
@@ -71,7 +70,7 @@ class PacklinkInstaller
     public function initializePlugin()
     {
         Bootstrap::init();
-        if (!$this->createBaseTable() || !$this->extendOrdersTable()) {
+        if (!$this->createBaseTable()) {
             return false;
         }
 
@@ -114,8 +113,6 @@ class PacklinkInstaller
     public function uninstall()
     {
         Bootstrap::init();
-
-        $this->removeOrdersColumn();
 
         try {
             /** @var CarrierService $carrierService */
@@ -351,62 +348,6 @@ class PacklinkInstaller
         }
 
         return false;
-    }
-
-    /**
-     * Adds packlink column to orders table.
-     *
-     * @return bool
-     */
-    private function extendOrdersTable()
-    {
-        $columnName = pSQL(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD);
-        $tableName = _DB_PREFIX_ . 'orders';
-        $checkColumnSqlStatement = 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = \'' . _DB_NAME_
-            . '\' AND TABLE_NAME = \'' . pSQL($tableName)
-            . '\' AND COLUMN_NAME = \'' . pSQL($columnName) . '\'';
-        try {
-            $result = \Db::getInstance()->executeS($checkColumnSqlStatement);
-        } catch (\PrestaShopException $e) {
-            Logger::logError('Error getting schema information. Error: ' . $e->getMessage(), 'Integration');
-
-            return false;
-        }
-
-        if (is_array($result) && count($result) === 0) {
-            $alterTableSqlStatement = 'ALTER TABLE ' . bqSQL($tableName)
-                . ' ADD ' . bqSQL($columnName) . ' VARCHAR(100) DEFAULT NULL';
-            try {
-                return (bool)\Db::getInstance()->execute($alterTableSqlStatement);
-            } catch (\PrestaShopException $e) {
-                Logger::logError('Error extending orders table. Error: ' . $e->getMessage(), 'Integration');
-
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Removes Orders table extended column.
-     *
-     * @return bool
-     */
-    private function removeOrdersColumn()
-    {
-        try {
-            $sql = 'ALTER TABLE ' . bqSQL(_DB_PREFIX_ . 'orders')
-                . ' DROP COLUMN ' . bqSQL(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD);
-
-            \Db::getInstance()->execute($sql);
-        } catch (\PrestaShopException $e) {
-            $this->tryLogError('Error removing orders table column. Error: ' . $e->getMessage());
-
-            return false;
-        }
-
-        return true;
     }
 
     /**

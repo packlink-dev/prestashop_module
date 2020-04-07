@@ -1,17 +1,13 @@
 <?php
 
-/** @noinspection PhpRedundantCatchClauseInspection */
-
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
-use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodConfiguration;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
 use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Controllers\UpdateShippingServicesTaskStatusController;
-use Packlink\BusinessLogic\Http\DTO\BaseDto;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
-use Packlink\BusinessLogic\Utility\Php\Php55;
+use Packlink\BusinessLogic\Tax\TaxClass;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
@@ -47,7 +43,7 @@ class ShippingMethodsController extends PacklinkBaseController
     {
         $shippingMethods = $this->controller->getAll();
 
-        PacklinkPrestaShopUtility::dieJson($this->formatCollectionJsonResponse($shippingMethods));
+        PacklinkPrestaShopUtility::dieDtoEntities($shippingMethods);
     }
 
     /**
@@ -100,7 +96,7 @@ class ShippingMethodsController extends PacklinkBaseController
      */
     public function displayAjaxSave()
     {
-        $configuration = $this->getShippingMethodConfiguration();
+        $configuration = $this->getShippingMethodConfigurationFromRequest();
 
         if (\Tools::strlen($configuration->name) > 64) {
             PacklinkPrestaShopUtility::die400(
@@ -116,8 +112,6 @@ class ShippingMethodsController extends PacklinkBaseController
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to save shipping method.')));
         }
 
-        $model->logoUrl = $this->generateCarrierLogoUrl($model->carrierName);
-
         $this->activateShippingMethod($model->id);
 
         $model->selected = true;
@@ -130,61 +124,24 @@ class ShippingMethodsController extends PacklinkBaseController
      */
     public function displayAjaxGetNumberShopMethods()
     {
-        $db = Db::getInstance();
-        $query = new DbQuery();
-        $query->select('count(*) as shippingMethodsCount')
-            ->from('carrier')
-            ->where("external_module_name <> 'packlink'")
-            ->where('active = 1')
-            ->where('deleted = 0');
+        /** @var CarrierService $carrierService */
+        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
 
-        try {
-            $result = $db->executeS($query);
-        } catch (PrestaShopException $e) {
-            $result = array();
-        }
-
-        $count = !empty($result[0]['shippingMethodsCount']) ? (int)$result[0]['shippingMethodsCount'] : 0;
-
-        PacklinkPrestaShopUtility::dieJson(array('count' => $count));
+        PacklinkPrestaShopUtility::dieJson(array('count' => $carrierService->getNumberOfOtherCarriers()));
     }
 
     /**
      * Disables shop shipping methods.
-     *
-     * @throws \PrestaShopException
      */
     public function displayAjaxDisableShopShippingMethods()
     {
-        $db = Db::getInstance();
-
-        $query = new DbQuery();
-        $query->select('id_carrier')
-            ->from('carrier')
-            ->where("external_module_name <> 'packlink'")
-            ->where('active = 1')
-            ->where('deleted = 0');
-
-        try {
-            $result = $db->executeS($query);
-        } catch (PrestaShopException $e) {
-            $result = array();
-        }
-
-        if (empty($result)) {
+        /** @var CarrierService $carrierService */
+        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
+        if ($carrierService->disableOtherCarriers()) {
+            PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully disabled shipping methods.')));
+        } else {
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to disable shipping methods.')));
         }
-
-        $ids = Php55::arrayColumn($result, 'id_carrier');
-        foreach ($ids as $id) {
-            $carrier = new \Carrier((int)$id);
-            $carrier->active = false;
-            $carrier->update();
-        }
-
-        AnalyticsController::sendOtherServicesDisabledEvent();
-
-        PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully disabled shipping methods.')));
     }
 
     /**
@@ -198,23 +155,14 @@ class ShippingMethodsController extends PacklinkBaseController
             $taxRules = array();
         }
 
-        $result = array(
-            array(
-                'value' => CarrierService::DEFAULT_TAX_CLASS,
-                'label' => $this->l(CarrierService::DEFAULT_TAX_CLASS_LABEL),
-            ),
-        );
-
-        if (!empty($taxRules)) {
-            foreach ($taxRules as $taxRule) {
-                $result[] = array(
-                    'value' => $taxRule['id_tax_rules_group'],
-                    'label' => $taxRule['name'],
-                );
-            }
+        $taxClasses = array();
+        try {
+            $taxClasses = $this->formatTaxClasses($taxRules);
+        } catch (\Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException $e) {
+            PacklinkPrestaShopUtility::die400WithValidationErrors($e->getValidationErrors());
         }
 
-        PacklinkPrestaShopUtility::dieJson($result);
+        PacklinkPrestaShopUtility::dieDtoEntities($taxClasses);
     }
 
     private function activateShippingMethod($id)
@@ -225,23 +173,31 @@ class ShippingMethodsController extends PacklinkBaseController
     }
 
     /**
-     * Transforms
+     * Returns tax classes for the provided tax rules.
      *
-     * @param BaseDto[] $data
+     * @param $taxRules
      *
-     * @return array
+     * @return TaxClass[]
+     *
+     * @throws \Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException
      */
-    private function formatCollectionJsonResponse($data)
+    private function formatTaxClasses($taxRules)
     {
-        $collection = array();
+        $taxClasses = array(
+            TaxClass::fromArray(array(
+                'value' => CarrierService::DEFAULT_TAX_CLASS,
+                'label' => $this->l(CarrierService::DEFAULT_TAX_CLASS_LABEL),
+            )),
+        );
 
-        /** @var ShippingMethodResponse $shippingMethod */
-        foreach ($data as $shippingMethod) {
-            $shippingMethod->logoUrl = $this->generateCarrierLogoUrl($shippingMethod->carrierName);
-            $collection[] = $shippingMethod->toArray();
+        foreach ($taxRules as $taxRule) {
+            $taxClasses[] = TaxClass::fromArray(array(
+                'value' => $taxRule['id_tax_rules_group'],
+                'label' => $taxRule['name'],
+            ));
         }
 
-        return $collection;
+        return $taxClasses;
     }
 
     /**
@@ -249,25 +205,10 @@ class ShippingMethodsController extends PacklinkBaseController
      *
      * @return ShippingMethodConfiguration
      */
-    private function getShippingMethodConfiguration()
+    private function getShippingMethodConfigurationFromRequest()
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
 
         return ShippingMethodConfiguration::fromArray($data);
-    }
-
-    /**
-     * Generates PrestaShop public URL for logo of carrier with provided title.
-     *
-     * @param string $carrierName Name of the carrier.
-     *
-     * @return string URL to carrier logo image file.
-     */
-    private function generateCarrierLogoUrl($carrierName)
-    {
-        /** @var CarrierService $carrierService */
-        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
-
-        return _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/' . $carrierService->getCarrierLogoFilePath($carrierName);
     }
 }

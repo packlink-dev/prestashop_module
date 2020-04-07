@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-  "content-hash": "20a434429fcac9d6ea36332a0495f7c1",
+    "content-hash": "51699dcf7aef45881ad64b4f8bca96e6",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -57,19 +57,19 @@
             "time": "2016-03-02T20:38:15+00:00"
         },
         {
-            "name": "packlink/integration-core",
-          "version": "v1.5.1",
-            "source": {
-                "type": "git",
-              "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-              "reference": "a957371a098d4d5500a4c9b07572bed4562e3c66"
-            },
-            "dist": {
-                "type": "zip",
-              "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/a957371a098d4d5500a4c9b07572bed4562e3c66",
-              "reference": "a957371a098d4d5500a4c9b07572bed4562e3c66",
-                "shasum": ""
-            },
+          "name": "packlink/integration-core",
+          "version": "v2.0.3",
+          "source": {
+            "type": "git",
+            "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
+            "reference": "027b62b18e1f4abc1efd8294872969569896ae5b"
+          },
+          "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/027b62b18e1f4abc1efd8294872969569896ae5b",
+            "reference": "027b62b18e1f4abc1efd8294872969569896ae5b",
+            "shasum": ""
+          },
             "require": {
                 "php": ">=5.3.29"
             },
@@ -94,7 +94,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-          "time": "2019-11-28T11:46:01+00:00"
+          "time": "2020-04-07T12:13:34+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -226,6 +226,7 @@
                 "fpdi",
                 "pdf"
             ],
+            "abandoned": true,
             "time": "2017-05-11T14:57:54+00:00"
         }
     ],
@@ -335,33 +336,33 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "1.9.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "f6811d96d97bdf400077a0cc100ae56aa32b9203"
+                "reference": "451c3cd1418cf640de218914901e51b064abb093"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/f6811d96d97bdf400077a0cc100ae56aa32b9203",
-                "reference": "f6811d96d97bdf400077a0cc100ae56aa32b9203",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/451c3cd1418cf640de218914901e51b064abb093",
+                "reference": "451c3cd1418cf640de218914901e51b064abb093",
                 "shasum": ""
             },
             "require": {
                 "doctrine/instantiator": "^1.0.2",
                 "php": "^5.3|^7.0",
                 "phpdocumentor/reflection-docblock": "^2.0|^3.0.2|^4.0|^5.0",
-                "sebastian/comparator": "^1.1|^2.0|^3.0",
-                "sebastian/recursion-context": "^1.0|^2.0|^3.0"
+                "sebastian/comparator": "^1.2.3|^2.0|^3.0|^4.0",
+                "sebastian/recursion-context": "^1.0|^2.0|^3.0|^4.0"
             },
             "require-dev": {
-                "phpspec/phpspec": "^2.5|^3.2",
+                "phpspec/phpspec": "^2.5 || ^3.2",
                 "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.5 || ^7.1"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.8.x-dev"
+                    "dev-master": "1.10.x-dev"
                 }
             },
             "autoload": {
@@ -394,7 +395,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2019-10-03T11:07:50+00:00"
+            "time": "2020-03-05T15:02:03+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -1151,12 +1152,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "550ebaac289296ce228a706d0867afc34687e3f4"
+                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/550ebaac289296ce228a706d0867afc34687e3f4",
-                "reference": "550ebaac289296ce228a706d0867afc34687e3f4",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
+                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
                 "shasum": ""
             },
             "require": {
@@ -1168,7 +1169,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.15-dev"
                 }
             },
             "autoload": {
@@ -1201,7 +1202,7 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2019-08-06T08:03:45+00:00"
+            "time": "2020-02-27T09:26:54+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -1256,7 +1257,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-  "stability-flags": [],
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -3,8 +3,8 @@
 namespace Packlink\PrestaShop\Classes\Overrides;
 
 use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Order\Exceptions\OrderNotFound;
 use Packlink\BusinessLogic\Order\OrderService;
+use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
@@ -35,23 +35,21 @@ class AdminOrdersController
      * @param array $fields_list
      *
      * @return array
+     * @noinspection PhpUnusedParameterInspection
      */
     public function insertOrderColumn(&$select, array $fields_list)
     {
-        $column = OrderRepository::PACKLINK_ORDER_DRAFT_FIELD;
-        $select .= ',a.' . $column . ' AS ' . $column;
-
         $packlinkElement = array(
             'title' => TranslationUtility::__('Packlink PRO Shipping'),
             'align' => 'text-center',
-            'filter_key' => 'a!' . $column,
+            'filter_key' => 'a!id_order',
             'callback' => 'getOrderDraft',
         );
 
         return $this->insertElementIntoArrayAfterSpecificKey(
             $fields_list,
             'payment',
-            array($column => $packlinkElement)
+            array(OrderRepository::PACKLINK_ORDER_DRAFT_FIELD => $packlinkElement)
         );
     }
 
@@ -71,31 +69,29 @@ class AdminOrdersController
     /**
      * Renders icons for printing PDF files.
      *
-     * @param int $orderId
+     * @param string $orderId
      * @param \Context $context
      *
      * @return mixed
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      * @throws \SmartyException
      */
     public function renderPdfIcons($orderId, \Context $context)
     {
-        $order = new \Order($orderId);
+        $order = new \Order((int)$orderId);
         if (!$this->validateOrder($order)) {
             return '';
         }
+
         $printLabelsUrl = $context->link->getAdminLink('BulkShipmentLabels');
 
-        /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
-        $orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
-        $shipmentLabels = $orderRepository->getLabelsByOrderId((int)$orderId);
-        $orderDetails = $orderRepository->getOrderDetailsById((int)$orderId);
-        $status = $orderDetails ? $orderDetails->getStatus() : ShipmentStatus::STATUS_PENDING;
+        /** @var OrderShipmentDetailsService $shipmentDetailsService */
+        $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
+        $shipmentLabels = $shipmentDetails ? $shipmentDetails->getShipmentLabels() : array();
+        $status = $shipmentDetails ? $shipmentDetails->getStatus() : ShipmentStatus::STATUS_PENDING;
         /** @var OrderService $orderService */
         $orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
 
@@ -124,37 +120,32 @@ class AdminOrdersController
     /**
      * Returns template that should be rendered in order draft column within orders table.
      *
-     * @param string $reference Packlink shipment reference.
+     * @param string $orderId Order Id.
      * @param \Context $context
      *
      * @return string Rendered template output.
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
      * @throws \SmartyException
      */
-    public function getOrderDraft($reference, \Context $context)
+    public function getOrderDraft($orderId, \Context $context)
     {
-        if ($reference === '') {
-            return $reference;
+        if ($orderId === '') {
+            return '';
         }
 
-        /** @var \Packlink\PrestaShop\Classes\Repositories\OrderRepository $orderRepository */
-        $orderRepository = ServiceRegister::getService(OrderRepository::CLASS_NAME);
+        /** @var OrderShipmentDetailsService $shipmentDetailsService */
+        $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
 
-        try {
-            $orderDetails = $orderRepository->getOrderDetailsByReference($reference);
-        } catch (OrderNotFound $e) {
+        if ($shipmentDetails === null) {
             return '';
         }
 
         $context->smarty->assign(
             array(
                 'imgSrc' => _PS_BASE_URL_ . _MODULE_DIR_ . 'packlink/logo.png',
-                'deleted' => $orderDetails->isDeleted(),
-                'orderDraftLink' => $this->getOrderDraftUrl($reference),
+                'deleted' => $shipmentDetails->isDeleted(),
+                'orderDraftLink' => $shipmentDetails->getShipmentUrl(),
             )
         );
 
@@ -162,24 +153,6 @@ class AdminOrdersController
             _PS_MODULE_DIR_ . self::PACKLINK_ORDER_DRAFT_TEMPLATE,
             $context->smarty
         )->fetch();
-    }
-
-    /**
-     * Returns link to order draft on Packlink for the provided shipment reference.
-     *
-     * @param string $reference Shipment reference.
-     *
-     * @return string Link to order draft on Packlink.
-     */
-    private function getOrderDraftUrl($reference)
-    {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = ServiceRegister::getService(\Packlink\BusinessLogic\Configuration::CLASS_NAME);
-        $userCountry = $configService->getUserInfo() !== null
-            ? \Tools::strtolower($configService->getUserInfo()->country)
-            : 'es';
-
-        return "https://pro.packlink.$userCountry/private/shipments/$reference";
     }
 
     /**

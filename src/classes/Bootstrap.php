@@ -18,18 +18,19 @@ use Logeecom\Infrastructure\TaskExecution\Process;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Packlink\BusinessLogic\BootstrapComponent;
 use Packlink\BusinessLogic\Configuration;
-use Packlink\BusinessLogic\Order\Interfaces\OrderRepository as OrderRepositoryInterface;
-use Packlink\BusinessLogic\Order\Models\OrderShipmentDetails;
+use Packlink\BusinessLogic\Order\Interfaces\ShopOrderService as ShopOrderServiceInterface;
+use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
+use Packlink\BusinessLogic\ShipmentDraft\Models\OrderSendDraftTaskMap;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\ShopOrderService;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
 use Packlink\PrestaShop\Classes\InfrastructureServices\LoggerService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
-use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Repositories\QueueItemRepository;
 
 /**
@@ -82,9 +83,9 @@ class Bootstrap extends BootstrapComponent
         );
 
         ServiceRegister::registerService(
-            OrderRepositoryInterface::CLASS_NAME,
+            ShopOrderServiceInterface::CLASS_NAME,
             function () {
-                return new OrderRepository();
+                return new ShopOrderService();
             }
         );
     }
@@ -108,5 +109,6 @@ class Bootstrap extends BootstrapComponent
             BaseRepository::getClassName()
         );
         RepositoryRegistry::registerRepository(LogData::CLASS_NAME, BaseRepository::getClassName());
+        RepositoryRegistry::registerRepository(OrderSendDraftTaskMap::CLASS_NAME, BaseRepository::getClassName());
     }
 }

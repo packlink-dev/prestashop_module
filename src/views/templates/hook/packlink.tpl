@@ -289,15 +289,13 @@
             <div class="row">
               <div class=" pl-basic-settings-page-form-input-item">
                 <div class=" pl-form-section-input pl-text-input">
-                  <input
-                          type="text"
+                  <select
                           class="pl-warehouse-input"
                           id="pl-default-warehouse-country"
-                          value="{$warehouseCountry}"
-                          readonly
                           tabindex="-1"
-                  />
-                  <span class="pl-text-input-label">{l s='Country' mod='packlink'}</span>
+                  >
+                  </select>
+                  <span class="pl-text-input-label selected">{l s='Country' mod='packlink'}</span>
                 </div>
               </div>
             </div>
@@ -1064,6 +1062,7 @@
             defaultParcelGetUrl: "{$defaultParcelGetUrl}",
             defaultParcelSubmitUrl: "{$defaultParcelSubmitUrl}",
             defaultWarehouseGetUrl: "{$defaultWarehouseGetUrl}",
+            getSupportedCountriesUrl: "{$getSupportedCountriesUrl}",
             defaultWarehouseSubmitUrl: "{$defaultWarehouseSubmitUrl}",
             defaultWarehouseSearchPostalCodesUrl: "{$defaultWarehouseSearchPostalCodesUrl}",
             shippingMethodsGetStatusUrl: "{$shippingMethodsGetStatusUrl}",

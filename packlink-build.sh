@@ -8,17 +8,14 @@ cp -r ./src/* packlink
 
 # Ensure proper composer dependencies
 echo "\e[32mSTEP 2:\e[0m Installing composer dependencies..."
-cd packlink 
+cd packlink
 # remove resources that will be copied from the core in the post-install script
-rm -rf views/img/carriers/de/*
-rm -rf views/img/carriers/es/*
-rm -rf views/img/carriers/fr/*
-rm -rf views/img/carriers/it/*
+find views/img/carriers/* ! -name carrier.jpg -delete
 rm -rf views/js/core
 rm -rf views/js/location
 rm -rf vendor
 # add version to artifact
-echo "$1" > release.version
+echo "$1" >release.version
 
 composer install --no-dev
 cd .. || exit
@@ -49,4 +46,4 @@ php "$PWD/lib/autoindex/index.php" "$PWD/packlink" >/dev/null
 
 # Create plugin archive
 echo "\e[32mSTEP 6:\e[0m Creating new archive... artifact.zip"
-zip -r -q  artifact.zip ./packlink
+zip -r -q artifact.zip ./packlink
