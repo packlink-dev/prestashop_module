@@ -202,7 +202,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
         $carrier = new \Carrier($carrierId);
 
-        if (!\Validate::isLoadedObject($carrierService)) {
+        if (!\Validate::isLoadedObject($carrier)) {
             Logger::logWarning(TranslationUtility::__('Carrier not found'), 'Integration');
 
             return;
