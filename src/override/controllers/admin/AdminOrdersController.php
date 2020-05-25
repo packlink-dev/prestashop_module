@@ -71,6 +71,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \SmartyException
+     * @throws \PrestaShopException
      */
     public function getOrderDraft($orderId)
     {
@@ -89,5 +90,10 @@ class AdminOrdersController extends AdminOrdersControllerCore
         $this->fields_list = $this->packlinkAdminOrderController->insertOrderColumn($this->_select, $this->fields_list);
 
         $this->packlinkAdminOrderController->addBulkActions($this->bulk_actions);
+    }
+
+    private function addPacklinkHiddenFields()
+    {
+
     }
 }

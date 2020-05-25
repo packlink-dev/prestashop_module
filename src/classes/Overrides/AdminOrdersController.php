@@ -110,6 +110,13 @@ class AdminOrdersController
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/core/AjaxService.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/OrderOverviewDraft.js',
+            )
+        );
+
+        $context->controller->addCSS(
+            array(
+                _PS_MODULE_DIR_ . 'packlink/views/css/packlink-order-overview.css',
             )
         );
 
@@ -128,6 +135,7 @@ class AdminOrdersController
      * @return string Rendered template output.
      *
      * @throws \SmartyException
+     * @throws \PrestaShopException
      */
     public function getOrderDraft($orderId, \Context $context)
     {
@@ -152,6 +160,8 @@ class AdminOrdersController
                 'draftStatus' => $status,
                 'deleted' => $draftCreated ? $shipmentDetails->isDeleted() : false,
                 'orderDraftLink' => $draftCreated ? $shipmentDetails->getShipmentUrl() : '#',
+                'draftStatusUrl' => $this->getAjaxControllerUrl($context, 'OrderDraft', 'getDraftStatus'),
+                'createDraftUrl' => $this->getAjaxControllerUrl($context, 'OrderDraft', 'createOrderDraft'),
             )
         );
 
@@ -159,6 +169,28 @@ class AdminOrdersController
             _PS_MODULE_DIR_ . self::PACKLINK_ORDER_DRAFT_TEMPLATE,
             $context->smarty
         )->fetch();
+    }
+
+    /**
+     * Returns URL endpoint of ajax controller action.
+     *
+     * @param \Context $context
+     * @param string $controller
+     * @param string $action
+     *
+     * @return string
+     *
+     * @throws \PrestaShopException
+     */
+    private function getAjaxControllerUrl(\Context $context, $controller, $action)
+    {
+        return $context->link->getAdminLink($controller) . '&' .
+            http_build_query(
+                array(
+                    'ajax' => true,
+                    'action' => $action,
+                )
+            );
     }
 
     /**
