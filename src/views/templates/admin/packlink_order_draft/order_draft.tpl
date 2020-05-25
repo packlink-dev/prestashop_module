@@ -19,13 +19,13 @@
             <span>{l s='View on Packlink' mod='packlink'}</span>
           </a>
 
-{elseif $draftStatus === Logeecom\Infrastructure\TaskExecution\QueueItem::QUEUED}
+          {elseif $draftStatus === Logeecom\Infrastructure\TaskExecution\QueueItem::QUEUED}
 
           <span class="pl-draft-in-progress" data-pl-order-id="">
               {l s='Draft is currently being created.' mod='packlink'}
             </span>
 
-{else}
+          {else}
 
           <a
                   class="pl-create-draft-button btn btn-default"
