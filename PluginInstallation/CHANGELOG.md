@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
 
+## [v2.2.2](https://github.com/packlink-dev/prestashop_module/compare/v2.2.1...v2.2.2) - 2020-06-02
+### Added
+- Compatibility with one page checkout plugin.
+
 ## [v2.2.1](https://github.com/packlink-dev/prestashop_module/compare/v2.2.0...v2.2.1) - 2020-04-29
 ### Changed
 - Fixed bug in selecting carrier services
