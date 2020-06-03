@@ -2,14 +2,12 @@
 <span class="btn-group-action">
     <span class="btn-group">
         {* Generate HTML code for printing Delivery Icon with link *}
-        {if $draftStatus === Logeecom\Infrastructure\TaskExecution\QueueItem::COMPLETED }
+        {if $draftStatus === 'completed' }
           <a class="btn btn-default pl-draft-button
           {if $deleted } pl-draft-button-disabled"
         {else}" href="{html_entity_decode($orderDraftLink|escape:'html':'UTF-8')}" target="_blank"
         {/if}
           >
-
-
           <img
                   class="pl-image"
                   src="{html_entity_decode($imgSrc|escape:'html':'UTF-8')}"
@@ -17,11 +15,7 @@
           >
           <span>{l s='View on Packlink' mod='packlink'}</span>
           </a>
-
-          {elseif $draftStatus === Logeecom\Infrastructure\TaskExecution\QueueItem::QUEUED }
-
-
-
+          {elseif $draftStatus === 'queued' }
           <span
                   class="pl-draft-in-progress"
                   data-order-id="{html_entity_decode($orderId|escape:'html':'UTF-8')}"
@@ -29,13 +23,7 @@
           >
               {l s='Draft is currently being created.' mod='packlink'}
           </span>
-
-
-
 {else}
-
-
-
           <a
                   class="btn btn-default pl-create-draft-button"
                   data-order-id="{html_entity_decode($orderId|escape:'html':'UTF-8')}"
