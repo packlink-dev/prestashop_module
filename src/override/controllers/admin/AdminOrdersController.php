@@ -91,9 +91,4 @@ class AdminOrdersController extends AdminOrdersControllerCore
 
         $this->packlinkAdminOrderController->addBulkActions($this->bulk_actions);
     }
-
-    private function addPacklinkHiddenFields()
-    {
-
-    }
 }
