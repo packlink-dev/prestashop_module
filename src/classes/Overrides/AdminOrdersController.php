@@ -3,8 +3,10 @@
 namespace Packlink\PrestaShop\Classes\Overrides;
 
 use Logeecom\Infrastructure\ServiceRegister;
+use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
+use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
@@ -108,6 +110,13 @@ class AdminOrdersController
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/core/AjaxService.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/OrderOverviewDraft.js',
+            )
+        );
+
+        $context->controller->addCSS(
+            array(
+                _PS_MODULE_DIR_ . 'packlink/views/css/packlink-order-overview.css',
             )
         );
 
@@ -126,6 +135,7 @@ class AdminOrdersController
      * @return string Rendered template output.
      *
      * @throws \SmartyException
+     * @throws \PrestaShopException
      */
     public function getOrderDraft($orderId, \Context $context)
     {
@@ -135,17 +145,23 @@ class AdminOrdersController
 
         /** @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
-        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
+        /** @var ShipmentDraftService $draftService */
+        $draftService = ServiceRegister::getService(ShipmentDraftService::CLASS_NAME);
 
-        if ($shipmentDetails === null) {
-            return '';
-        }
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
+        $draftStatus = $draftService->getDraftStatus((string)$orderId);
+        $status = $draftStatus->status === QueueItem::IN_PROGRESS ? QueueItem::QUEUED : $draftStatus->status;
+        $draftCreated = $status === QueueItem::COMPLETED && $shipmentDetails;
 
         $context->smarty->assign(
             array(
+                'orderId' => $orderId,
                 'imgSrc' => _PS_BASE_URL_ . _MODULE_DIR_ . 'packlink/logo.png',
-                'deleted' => $shipmentDetails->isDeleted(),
-                'orderDraftLink' => $shipmentDetails->getShipmentUrl(),
+                'draftStatus' => $status,
+                'deleted' => $draftCreated ? $shipmentDetails->isDeleted() : false,
+                'orderDraftLink' => $draftCreated ? $shipmentDetails->getShipmentUrl() : '#',
+                'draftStatusUrl' => $this->getAjaxControllerUrl($context, 'OrderDraft', 'getDraftStatus'),
+                'createDraftUrl' => $this->getAjaxControllerUrl($context, 'OrderDraft', 'createOrderDraft'),
             )
         );
 
@@ -153,6 +169,28 @@ class AdminOrdersController
             _PS_MODULE_DIR_ . self::PACKLINK_ORDER_DRAFT_TEMPLATE,
             $context->smarty
         )->fetch();
+    }
+
+    /**
+     * Returns URL endpoint of ajax controller action.
+     *
+     * @param \Context $context
+     * @param string $controller
+     * @param string $action
+     *
+     * @return string
+     *
+     * @throws \PrestaShopException
+     */
+    private function getAjaxControllerUrl(\Context $context, $controller, $action)
+    {
+        return $context->link->getAdminLink($controller) . '&' .
+            http_build_query(
+                array(
+                    'ajax' => true,
+                    'action' => $action,
+                )
+            );
     }
 
     /**
