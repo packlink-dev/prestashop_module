@@ -1,0 +1,23 @@
+.btn.pl-draft-button,
+.btn.pl-create-draft-button {
+  padding: 5px 15px;
+  text-align: left;
+  min-width: 177px;
+}
+
+.btn.pl-draft-button.pl-draft-button-disabled,
+.btn.pl-draft-button.pl-draft-button-disabled:hover {
+  background-color: #f2f2f2;
+  border-color: #999;
+  color: #999;
+  cursor: default;
+}
+
+.pl-image {
+  width: 25px;
+}
+
+.pl-create-draft-template,
+.pl-draft-button-template {
+  display: none !important;
+}

@@ -71,6 +71,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \SmartyException
+     * @throws \PrestaShopException
      */
     public function getOrderDraft($orderId)
     {
