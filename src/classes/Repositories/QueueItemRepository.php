@@ -6,6 +6,7 @@ use Logeecom\Infrastructure\ORM\Interfaces\QueueItemRepository as QueueItemRepos
 use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\TaskExecution\Exceptions\QueueItemSaveException;
+use Logeecom\Infrastructure\TaskExecution\Interfaces\Priority;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 
 class QueueItemRepository extends BaseRepository implements QueueItemRepositoryInterface
@@ -20,14 +21,19 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
      *      - Queue must be without already running queue items
      *      - For one queue only one (oldest queued) item should be returned
      *
+     * @param int $priority Queue item priority.
      * @param int $limit Result set limit. By default max 10 earliest queue items will be returned
      *
      * @return QueueItem[] Found queue item list
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \PrestaShopException
      */
-    public function findOldestQueuedItems($limit = 10)
+    public function findOldestQueuedItems($priority, $limit = 10)
     {
+        if ($priority !== Priority::NORMAL) {
+            return array();
+        }
+
         $queuedItems = array();
 
         try {
