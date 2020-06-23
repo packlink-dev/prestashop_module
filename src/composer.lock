@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "242957d138f54613ad23cbbf74053f64",
+    "content-hash": "1f0bf689599502a745021f8d7d21cbb4",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -62,12 +62,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:logeecom/pl_module_core.git",
-                "reference": "90d2792a475757223e07e1f7594c18f04e1fe9e2"
+                "reference": "df05b45e47a08adedb02c75bb2691a58f3eff204"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/90d2792a475757223e07e1f7594c18f04e1fe9e2",
-                "reference": "90d2792a475757223e07e1f7594c18f04e1fe9e2",
+                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/df05b45e47a08adedb02c75bb2691a58f3eff204",
+                "reference": "df05b45e47a08adedb02c75bb2691a58f3eff204",
                 "shasum": ""
             },
             "require": {
@@ -94,7 +94,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2020-06-18T11:40:27+00:00"
+            "time": "2020-06-23T11:03:42+00:00"
         },
         {
             "name": "setasign/fpdf",
