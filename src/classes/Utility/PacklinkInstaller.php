@@ -300,6 +300,7 @@ class PacklinkInstaller
                  `index_5` VARCHAR(255),
                  `index_6` VARCHAR(255),
                  `index_7` VARCHAR(255),
+                 `index_8` VARCHAR(255),
                  `data` LONGTEXT NOT NULL,
                  PRIMARY KEY(`id`)
             )
@@ -309,6 +310,26 @@ class PacklinkInstaller
             return \Db::getInstance()->execute($sql);
         } catch (\PrestaShopException $e) {
             Logger::logError('Error creating base database table. Error: ' . $e->getMessage(), 'Integration');
+        }
+
+        return false;
+    }
+
+    /**
+     * Adds additional index column to the Packlink entity table.
+     *
+     * @return bool Result of create table query.
+     */
+    public function addAdditionalIndex()
+    {
+        $sql = 'ALTER TABLE '
+            . bqSQL(_DB_PREFIX_ . BaseRepository::TABLE_NAME)
+            . ' ADD `index_8` VARCHAR(255)';
+
+        try {
+            return \Db::getInstance()->execute($sql);
+        } catch (\PrestaShopException $e) {
+            Logger::logError('Error adding additional index column. Error: ' . $e->getMessage(), 'Integration');
         }
 
         return false;
