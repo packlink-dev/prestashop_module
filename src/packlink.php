@@ -1,6 +1,30 @@
 <?php
+/**
+ * 2020 Packlink
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Apache License 2.0
+ * that is bundled with this package in the file LICENSE.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ * @author    Packlink <support@packlink.com>
+ * @copyright 2020 Packlink Shipping S.L
+ * @license   http://www.apache.org/licenses/LICENSE-2.0.txt  Apache License 2.0
+ */
 
 /** @noinspection PhpUnusedParameterInspection */
+
+use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollection;
+use PrestaShop\PrestaShop\Core\Grid\Action\Row\RowActionCollection;
+use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
+use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
+use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
+use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
+use PrestaShop\PrestaShop\Core\Grid\Query\OrderQueryBuilder;
+use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\ButtonBulkAction;
+use PrestaShop\PrestaShop\Core\Grid\Record\RecordCollection;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -377,6 +401,147 @@ class Packlink extends CarrierModule
         ) {
             $this->createOrderDraft($order, $params['newOrderStatus']);
         }
+    }
+
+    public function hookActionAdminControllerSetMedia($params)
+    {
+        if ($this->context->controller->php_self === 'AdminOrders') {
+            $this->context->controller->addCSS(
+                array(
+                    $this->_path . 'views/css/packlink.css?v=' . $this->version,
+                    $this->_path . 'views/css/packlink-order-overview.css?v=' . $this->version,
+                ),
+                'all',
+                null,
+                false
+            );
+
+            $this->context->controller->addJS(
+                array(
+                    $this->_path . 'views/js/OrderOverviewDraft.js?v=' . $this->version,
+                    $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
+                    $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
+                ),
+                false
+            );
+        }
+    }
+
+    /**
+     * Hook that is triggered when order status is updated on backend.
+     *
+     * @param array $params
+     */
+    public function hookActionOrderGridDefinitionModifier($params)
+    {
+        /** @var GridDefinitionInterface $definition */
+        $definition = $params['definition'];
+
+        /** @var ColumnCollection */
+        $columns = $definition->getColumns();
+        /** @var FilterCollection $filters */
+        $filters = $definition->getFilters();
+        /** @var BulkActionCollection $bulkActions */
+        $bulkActions = $definition->getBulkActions();
+
+        $draftColumn = new ActionColumn('packlink_draft');
+        $draftColumn->setName('Packlink PRO draft')
+            ->setOptions(array(
+                'actions' => (new RowActionCollection()),
+            ));
+
+        $labelColumn = new ActionColumn('packlink_label');
+        $labelColumn->setName('Packlink PRO label')
+            ->setOptions(array(
+                'actions' => (new RowActionCollection()),
+            ));
+
+        $bulkAction = new ButtonBulkAction('packlink_bulk_print_labels');$bulkAction->setName('Print Packlink PRO shipping labels')
+        ->setOptions(array(
+            'class' => 'open_tabs',
+            'attributes' => array(
+                'data-route' => 'admin_orders_view',
+                'data-route-param-name' => 'orderId',
+                'data-tabs-blocked-message' => $this->trans(
+                    'It looks like you have exceeded the number of tabs allowed. Check your browser settings to open multiple tabs.',
+                    array(),
+                    'Admin.Orderscustomers.Feature'
+                ),
+            ),
+        ));
+
+        $columns->addAfter('payment', $draftColumn);
+        $columns->addBefore('actions', $labelColumn);
+        $bulkActions->add($bulkAction);
+
+        $definition->setColumns($columns);
+        $definition->setBulkActions($bulkActions);
+    }
+
+    public function hookActionOrderGridPresenterModifier($params)
+    {
+        $records = $params['presented_grid']['data']['records']->all();
+
+        foreach ($records as &$record) {
+            // Logic for displaying draft status.
+        }
+
+        $params['presented_grid']['data']['records'] = new RecordCollection($records);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return string
+     *
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    public function hookDisplayAdminOrderTabLink($params)
+    {
+        return $this->render($this->getModuleTemplatePath() . 'packlink_shipping_tab/shipping_tab.html.twig');
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return string
+     *
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    public function hookDisplayAdminOrderTabContent($params)
+    {
+        return $this->render($this->getModuleTemplatePath() . 'packlink_shipping_content/shipping_content.html.twig');
+    }
+
+    /**
+     * Render a twig template.
+     *
+     * @param string $template
+     * @param array $params
+     *
+     * @return string
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    private function render($template, $params = array())
+    {
+        /** @var Twig_Environment $twig */
+        $twig = $this->get('twig');
+
+        return $twig->render($template, $params);
+    }
+
+    /**
+     * Get path to this module's template directory
+     */
+    private function getModuleTemplatePath()
+    {
+        return sprintf('@Modules/%s/views/templates/admin/', $this->name);
     }
 
     /**

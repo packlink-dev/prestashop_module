@@ -1,0 +1,97 @@
+<div class="tab-pane d-print-block fade" id="packlinkShippingTabContent" role="tabpanel" aria-labelledby="packlinkShippingTab">
+    <p id="pl-label-printed" hidden="">Printed</p>
+    <p id="pl-label-ready" hidden="">Ready</p>
+    <p id="pl-print-labels-url" hidden="">
+        http://testshops.rs/prestashop/admin743e8adpg/index.php?controller=BulkShipmentLabels&amp;token=5de93bae08559a3a51f6f090157c3b23
+    </p>
+    <div class="tab-pane active" id="packlink-shipping">
+        <h4>Shipment labels</h4>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>
+                        <span class="title_box ">Date</span>
+                    </th>
+                    <th>
+                        <span class="title_box ">Number</span>
+                    </th>
+                    <th>
+                        <span class="title_box ">Status</span>
+                    </th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>06/07/2020</td>
+                    <td>
+                        <a href="" title="Print" data-order="25" data-label-printed="1" onclick="plPrintLabelOnOrderDetailsPage(this)">
+                            #PLSL1
+                        </a>
+                    </td>
+                    <td>Printed</td>
+                    <td class="text-right">
+                        <a class="btn btn-default" href="" title="Print" data-order="25" data-label-printed="1" onclick="plPrintLabelOnOrderDetailsPage(this)">
+                            <i class="material-icons">print</i>
+                            Print label
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <h4 style="margin-top: 15px;">Shipment details</h4>
+        <table class="table" id="shipping_table">
+            <thead>
+            <tr>
+                <th>
+                    <span class="title_box">Carrier logo</span>
+                </th>
+                <th>
+                    <span class="title_box">Carrier</span>
+                </th>
+                <th>
+                    <span class="title_box">Carrier tracking numbers</span>
+                </th>
+                <th>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <img src="http://testshops.rs/prestashop/modules/packlink/views/img/carriers/dpd.png" alt="DPD - 4 DAYS delivery" style="width: 85px;">
+                </td>
+                <td>
+                    DPD - 4 DAYS delivery
+                </td>
+                <td>
+                    09446410914081
+                </td>
+                <td style="text-align: right;">
+                    <a class="btn btn-default" href="https://tracking.dpd.de/parcelstatus?query=[[trackingNumber]]&amp;locale=de_DE" title="Track it!" target="_blank">
+                        Track it!
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <dl style="margin-top: 15px;">
+            <dt>Status</dt>
+            <dd style="margin-bottom: 10px">
+                <span style="color: grey">
+                    <i class="icon-calendar"></i> 06.07.2020 09:02:37
+                </span> - <b>readyForShipping</b>
+            </dd>
+            <dt>Packlink reference number</dt>
+            <dd style="margin-bottom: 10px">DE2020PRO0001471369</dd>
+            <dt>Packlink shipping price</dt>
+            <dd style="margin-bottom: 10px">3.69 €</dd>
+        </dl>
+        <a class="btn btn-default" href="https://pro.packlink.de/private/shipments/DE2020PRO0001471369" title="View on Packlink PRO" target="_blank">
+            <i class="material-icons">remove_red_eye</i>
+            View on Packlink PRO
+        </a>
+    </div>
+</div>

@@ -181,8 +181,16 @@ class PacklinkInstaller
      */
     public function removeHooks()
     {
+        $hooks = array_merge(self::$hooks, array(
+            'actionAdminControllerSetMedia',
+            'actionOrderGridDefinitionModifier',
+            'actionOrderGridPresenterModifier',
+            'displayAdminOrderTabLink',
+            'displayAdminOrderTabContent',
+        ));
+
         $result = true;
-        foreach (self::$hooks as $hook) {
+        foreach ($hooks as $hook) {
             $result = $result && $this->module->unregisterHook($hook);
         }
 
@@ -402,7 +410,16 @@ class PacklinkInstaller
     private function addHooks()
     {
         $result = true;
-        foreach (self::$hooks as $hook) {
+
+        $hooks = array_merge(self::$hooks, array(
+            'actionAdminControllerSetMedia',
+            'actionOrderGridDefinitionModifier',
+            'actionOrderGridPresenterModifier',
+            'displayAdminOrderTabLink',
+            'displayAdminOrderTabContent',
+        ));
+
+        foreach ($hooks as $hook) {
             $result = $result && $this->module->registerHook($hook);
         }
 
