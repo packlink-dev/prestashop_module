@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f219e7063c6868c9873c976113db68d7",
+    "content-hash": "43f475d28e9b98cdb971196788dede16",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -58,16 +58,16 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "2.1.2",
+            "version": "2.1.3",
             "source": {
                 "type": "git",
                 "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "647cf3fa2648404ab65545f6ca1b11500e8c2405"
+                "reference": "645d1641ba013b9cfaf3abb99b4ee828b41eb9c3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/647cf3fa2648404ab65545f6ca1b11500e8c2405",
-                "reference": "647cf3fa2648404ab65545f6ca1b11500e8c2405",
+                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/645d1641ba013b9cfaf3abb99b4ee828b41eb9c3",
+                "reference": "645d1641ba013b9cfaf3abb99b4ee828b41eb9c3",
                 "shasum": ""
             },
             "require": {
@@ -94,7 +94,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2020-06-25T11:02:12+00:00"
+            "time": "2020-06-29T07:52:43+00:00"
         },
         {
             "name": "setasign/fpdf",

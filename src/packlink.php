@@ -356,10 +356,11 @@ class Packlink extends CarrierModule
 
         /** @var \Order $order */
         $order = $params['order'];
+        $carrier = new \Carrier($order->id_carrier);
 
         $isDelayed = false;
 
-        if (\Packlink\PrestaShop\Classes\Utility\CarrierUtility::isDropOff((int)$order->id_carrier)) {
+        if (\Packlink\PrestaShop\Classes\Utility\CarrierUtility::isDropOff((int)$carrier->id_reference)) {
             $isDropOffSelected = \Packlink\PrestaShop\Classes\Utility\CheckoutUtility::isDropOffSelected(
                 (string)$order->id_cart,
                 (string)$order->id_carrier
