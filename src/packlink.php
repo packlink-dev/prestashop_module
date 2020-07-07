@@ -1,30 +1,6 @@
 <?php
-/**
- * 2020 Packlink
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Apache License 2.0
- * that is bundled with this package in the file LICENSE.
- * It is also available through the world-wide-web at this URL:
- * http://www.apache.org/licenses/LICENSE-2.0.txt
- *
- * @author    Packlink <support@packlink.com>
- * @copyright 2020 Packlink Shipping S.L
- * @license   http://www.apache.org/licenses/LICENSE-2.0.txt  Apache License 2.0
- */
 
 /** @noinspection PhpUnusedParameterInspection */
-
-use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollection;
-use PrestaShop\PrestaShop\Core\Grid\Action\Row\RowActionCollection;
-use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
-use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn;
-use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
-use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
-use PrestaShop\PrestaShop\Core\Grid\Query\OrderQueryBuilder;
-use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\ButtonBulkAction;
-use PrestaShop\PrestaShop\Core\Grid\Record\RecordCollection;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -94,7 +70,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.2.4';
+        $this->version = '2.2.5';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -404,6 +380,11 @@ class Packlink extends CarrierModule
         }
     }
 
+    /**
+     * Adds Packlink styles and scripts to the order overview page.
+     *
+     * @param array $params
+     */
     public function hookActionAdminControllerSetMedia($params)
     {
         if ($this->context->controller->php_self === 'AdminOrders') {
@@ -422,6 +403,9 @@ class Packlink extends CarrierModule
                     $this->_path . 'views/js/OrderOverviewDraft.js?v=' . $this->version,
                     $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
                     $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
+                    $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
+                    $this->_path . 'views/js/PrestaPrintShipmentLabels.js?v=' . $this->version,
+                    $this->_path . 'views/js/PrestaCreateOrderDraft.js?v=' . $this->version,
                 ),
                 false
             );
@@ -429,68 +413,101 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Hook that is triggered when order status is updated on backend.
+     * Hook that is triggered the grid definition for orders is created.
      *
      * @param array $params
      */
     public function hookActionOrderGridDefinitionModifier($params)
     {
-        /** @var GridDefinitionInterface $definition */
-        $definition = $params['definition'];
+        if ($this->isUserLoggedToPacklink()) {
+            /** @var \PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface $definition */
+            $definition = $params['definition'];
 
-        /** @var ColumnCollection */
-        $columns = $definition->getColumns();
-        /** @var FilterCollection $filters */
-        $filters = $definition->getFilters();
-        /** @var BulkActionCollection $bulkActions */
-        $bulkActions = $definition->getBulkActions();
+            /** @var \PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection */
+            $columns = $definition->getColumns();
+            /** @var \PrestaShop\PrestaShop\Core\Grid\Action\Bulk\BulkActionCollection $bulkActions */
+            $bulkActions = $definition->getBulkActions();
 
-        $draftColumn = new ActionColumn('packlink_draft');
-        $draftColumn->setName('Packlink PRO draft')
-            ->setOptions(array(
-                'actions' => (new RowActionCollection()),
-            ));
+            $draftColumn = new \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn('packlink_draft');
+            $draftColumn->setName($this->trans('Packlink PRO Shipping'))
+                ->setOptions(array(
+                    'actions' => (new \PrestaShop\PrestaShop\Core\Grid\Action\Row\RowActionCollection()),
+                ));
 
-        $labelColumn = new ActionColumn('packlink_label');
-        $labelColumn->setName('Packlink PRO label')
-            ->setOptions(array(
-                'actions' => (new RowActionCollection()),
-            ));
+            $labelColumn = new \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn('packlink_label');
+            $labelColumn->setName($this->trans('Shipment labels'))
+                ->setOptions(array(
+                    'actions' => (new \PrestaShop\PrestaShop\Core\Grid\Action\Row\RowActionCollection()),
+                ));
 
-        $bulkAction = new ButtonBulkAction('packlink_bulk_print_labels');$bulkAction->setName('Print Packlink PRO shipping labels')
-        ->setOptions(array(
-            'class' => 'open_tabs',
-            'attributes' => array(
-                'data-route' => 'admin_orders_view',
-                'data-route-param-name' => 'orderId',
-                'data-tabs-blocked-message' => $this->trans(
-                    'It looks like you have exceeded the number of tabs allowed. Check your browser settings to open multiple tabs.',
-                    array(),
-                    'Admin.Orderscustomers.Feature'
-                ),
-            ),
-        ));
+            $bulkAction = new \PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\ButtonBulkAction('packlink_bulk_print_labels');
+            $bulkAction->setName($this->trans('Print Packlink PRO shipment labels'))
+                ->setOptions(array(
+                    'class' => 'open_tabs',
+                    'attributes' => array(
+                        'data-route-param-name' => 'orderId',
+                    ),
+                ));
 
-        $columns->addAfter('payment', $draftColumn);
-        $columns->addBefore('actions', $labelColumn);
-        $bulkActions->add($bulkAction);
+            $columns->addAfter('payment', $draftColumn);
+            $columns->addBefore('actions', $labelColumn);
+            $bulkActions->add($bulkAction);
 
-        $definition->setColumns($columns);
-        $definition->setBulkActions($bulkActions);
-    }
-
-    public function hookActionOrderGridPresenterModifier($params)
-    {
-        $records = $params['presented_grid']['data']['records']->all();
-
-        foreach ($records as &$record) {
-            // Logic for displaying draft status.
+            $definition->setColumns($columns);
+            $definition->setBulkActions($bulkActions);
         }
-
-        $params['presented_grid']['data']['records'] = new RecordCollection($records);
     }
 
     /**
+     * Hook that is triggered the grid definition for orders is being presented to the user.
+     *
+     * @param array $params
+     *
+     * @throws \PrestaShopException
+     */
+    public function hookActionOrderGridPresenterModifier($params)
+    {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        /** @var \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService $shipmentDetailsService */
+        $shipmentDetailsService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService::CLASS_NAME
+        );
+        /** @var \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService $draftService */
+        $draftService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService::CLASS_NAME
+        );
+        /** @var \Packlink\BusinessLogic\Order\OrderService $orderService */
+        $orderService = \Logeecom\Infrastructure\ServiceRegister::getService(\Packlink\BusinessLogic\Order\OrderService::CLASS_NAME);
+
+        $params['presented_grid']['data']['draftStatusUrl'] = $this->getAjaxControllerUrl('OrderDraft', 'getDraftStatus');
+        $params['presented_grid']['data']['createDraftUrl'] = $this->getAjaxControllerUrl('OrderDraft', 'createOrderDraft');
+        $params['presented_grid']['data']['printLabelsUrl'] = $this->context->link->getAdminLink('BulkShipmentLabels');
+        $params['presented_grid']['data']['packlinkLogo'] = _PS_BASE_URL_ . _MODULE_DIR_ . 'packlink/logo.png';
+
+        $records = $params['presented_grid']['data']['records']->all();
+        foreach ($records as &$record) {
+            $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$record['id_order']);
+            $draftStatus = $draftService->getDraftStatus((string)$record['id_order']);
+            $status = $draftStatus->status === \Logeecom\Infrastructure\TaskExecution\QueueItem::IN_PROGRESS
+                ? \Logeecom\Infrastructure\TaskExecution\QueueItem::QUEUED
+                : $draftStatus->status;
+            $draftCreated = $status === \Logeecom\Infrastructure\TaskExecution\QueueItem::COMPLETED && $shipmentDetails;
+            $shipmentLabels = $shipmentDetails ? $shipmentDetails->getShipmentLabels() : array();
+
+            $record['draftStatus'] = $status;
+            $record['draftDeleted'] = $draftCreated ? $shipmentDetails->isDeleted() : false;
+            $record['isLabelAvailable'] = $shipmentDetails ? $orderService->isReadyToFetchShipmentLabels($shipmentDetails->getStatus()) : false;
+            $record['isLabelPrinted'] = !empty($shipmentLabels) && $shipmentLabels[0]->isPrinted();
+            $record['draftLink'] = $draftCreated ? $shipmentDetails->getShipmentUrl() : '#';
+        }
+
+        $params['presented_grid']['data']['records'] = new \PrestaShop\PrestaShop\Core\Grid\Record\RecordCollection($records);
+    }
+
+    /**
+     * Displays order tab link.
+     *
      * @param array $params
      *
      * @return string
@@ -501,48 +518,42 @@ class Packlink extends CarrierModule
      */
     public function hookDisplayAdminOrderTabLink($params)
     {
-        return $this->render($this->getModuleTemplatePath() . 'packlink_shipping_tab/shipping_tab.html.twig');
+        if ($this->isUserLoggedToPacklink()) {
+            return $this->render($this->getModuleTemplatePath() . 'packlink_shipping_tab/shipping_tab.html.twig');
+        }
+
+        return '';
     }
 
     /**
+     * Displays order tab content.
+     *
      * @param array $params
      *
      * @return string
      *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
      * @throws \Twig\Error\LoaderError
      * @throws \Twig\Error\RuntimeError
      * @throws \Twig\Error\SyntaxError
      */
     public function hookDisplayAdminOrderTabContent($params)
     {
-        return $this->render($this->getModuleTemplatePath() . 'packlink_shipping_content/shipping_content.html.twig');
-    }
+        if ($this->isUserLoggedToPacklink()) {
+            return $this->render(
+                $this->getModuleTemplatePath() . 'packlink_shipping_content/shipping_content.html.twig',
+                \Packlink\PrestaShop\Classes\Utility\AdminShippingTabDataProvider::getShippingContentData(
+                    $this->context,
+                    $this,
+                    (string)$params['id_order']
+                )
+            );
+        }
 
-    /**
-     * Render a twig template.
-     *
-     * @param string $template
-     * @param array $params
-     *
-     * @return string
-     * @throws \Twig\Error\LoaderError
-     * @throws \Twig\Error\RuntimeError
-     * @throws \Twig\Error\SyntaxError
-     */
-    private function render($template, $params = array())
-    {
-        /** @var Twig_Environment $twig */
-        $twig = $this->get('twig');
-
-        return $twig->render($template, $params);
-    }
-
-    /**
-     * Get path to this module's template directory
-     */
-    private function getModuleTemplatePath()
-    {
-        return sprintf('@Modules/%s/views/templates/admin/', $this->name);
+        return '';
     }
 
     /**
@@ -847,6 +858,73 @@ class Packlink extends CarrierModule
         }
 
         return true;
+    }
+
+    /**
+     * Returns URL endpoint of ajax controller action.
+     *
+     * @param string $controller
+     * @param string $action
+     *
+     * @return string
+     *
+     * @throws \PrestaShopException
+     */
+    private function getAjaxControllerUrl($controller, $action)
+    {
+        return $this->context->link->getAdminLink($controller) . '&' .
+            http_build_query(
+                array(
+                    'ajax' => true,
+                    'action' => $action,
+                )
+            );
+    }
+
+    /**
+     * Returns whether the user has logged in with his/her auth token.
+     *
+     * @return bool
+     */
+    private function isUserLoggedToPacklink()
+    {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Configuration::CLASS_NAME
+        );
+
+        $authToken = $configService->getAuthorizationToken();
+
+        return !empty($authToken);
+    }
+
+    /**
+     * Render a twig template.
+     *
+     * @param string $template
+     * @param array $params
+     *
+     * @return string
+     * @throws \Twig\Error\LoaderError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\SyntaxError
+     */
+    private function render($template, $params = array())
+    {
+        /** @var Twig_Environment $twig */
+        $twig = $this->get('twig');
+
+        return $twig->render($template, $params);
+    }
+
+    /**
+     * Get path to this module's template directory
+     */
+    private function getModuleTemplatePath()
+    {
+        return sprintf('@Modules/%s/views/templates/admin/', $this->name);
     }
 
     /**

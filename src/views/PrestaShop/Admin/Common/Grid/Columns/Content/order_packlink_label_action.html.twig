@@ -1,3 +1,18 @@
-<a class="btn tooltip-link js-link-row-action dropdown-item inline-dropdown-item" href="#" data-confirm-message="" data-toggle="pstooltip" data-placement="top" data-original-title="Print" data-clickable-row="">
-    <i class="material-icons">label</i>
-</a>
+{% if record.isLabelAvailable %}
+    <a class="btn tooltip-link js-link-row-action dropdown-item inline-dropdown-item shipment-label"
+       href=""
+       data-order="{{ record.id_order }}"
+       onclick="plPrintLabelOnOrdersPage(this)"
+       {% if record.isLabelPrinted %}
+       title="{{ 'Printed'|trans }}" style="color: #c3c3c3"
+       {% else %}
+       title="{{ 'Ready'|trans }}"
+       {% endif %}
+    >
+    <i class="material-icons"
+       {% if record.isLabelPrinted %}
+       style="color: #c3c3c3"
+       {% endif %}
+    >label</i>
+    </a>
+{% endif %}

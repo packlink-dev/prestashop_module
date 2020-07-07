@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
+### Added
+- Added compatibility with PrestaShop version 1.7.7.
 
 ## [v2.2.4](https://github.com/packlink-dev/prestashop_module/compare/v2.2.3...v2.2.4) - 2020-06-29
 ### Added
