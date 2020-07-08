@@ -24,7 +24,7 @@ class CachingUtility
      */
     protected static $cartTotal;
     /**
-     * @var \Packlink\BusinessLogic\Http\DTO\Warehouse
+     * @var \Packlink\BusinessLogic\Warehouse\Warehouse
      */
     protected static $wareHouse;
     /**
@@ -55,10 +55,6 @@ class CachingUtility
      * @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService
      */
     protected static $carrierService;
-    /**
-     * @var array
-     */
-    protected static $carrierServiceCache = array();
 
     /**
      * Caches Carrier.
@@ -127,7 +123,7 @@ class CachingUtility
     /**
      * Retrieves default warehouse.
      *
-     * @return \Packlink\BusinessLogic\Http\DTO\Warehouse
+     * @return \Packlink\BusinessLogic\Warehouse\Warehouse
      */
     public static function getDefaultWarehouse()
     {
@@ -162,7 +158,6 @@ class CachingUtility
      * @return \Country
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
-     * @throws \PrestaShop\PrestaShop\Adapter\CoreException
      */
     public static function getCountry($id)
     {
@@ -187,7 +182,7 @@ class CachingUtility
 
             foreach ($products as $product) {
                 $package = new Package(
-                    (float)$product['weight'] ?: (float)$defaultParcel->weight,
+                    (float)$product['weight_attribute'] ?: (float)$product['weight'] ?: (float)$defaultParcel->weight,
                     ceil((float)$product['width']) ?: (int)$defaultParcel->width,
                     ceil((float)$product['height']) ?: (int)$defaultParcel->height,
                     ceil((float)$product['depth']) ?: (int)$defaultParcel->length
