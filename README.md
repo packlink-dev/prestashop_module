@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/packlink-dev/prestashop_module.svg?style=svg&circle-token=564c0b9c6812f7355582911d3f8950ef2124eb58)](https://circleci.com/gh/packlink-dev/prestashop_module)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/81d3f90f5e29432e8d6af8e218bbc98d)](https://www.codacy.com/gh/packlink-dev/prestashop_module?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=packlink-dev/prestashop_module&amp;utm_campaign=Badge_Grade)
 
 ![Packlink logo](https://pro.packlink.es/public-assets/common/images/icons/packlink.svg)
 
