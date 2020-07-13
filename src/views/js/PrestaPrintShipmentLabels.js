@@ -120,11 +120,10 @@ function sendBulkAction(form, action) {
 
 function bulkPrintSelectedLabels(selectedOrders) {
   let labels = document.getElementsByClassName('shipment-label'),
-      labelPrintedText = document.getElementById('pl-label-printed');
+      labelPrintedText = document.getElementById('pl-label-printed'),
+      printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
 
   if (selectedOrders.length > 0 && labels !== undefined && labels.length > 0) {
-    let printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
-
     for (let i = 0; i < labels.length; i++) {
       let childNodes = labels[i].childNodes,
           iconElement = childNodes[1];
@@ -136,9 +135,9 @@ function bulkPrintSelectedLabels(selectedOrders) {
         iconElement.style.color = '#c3c3c3';
       }
     }
-
-    plOpenPdfTab(printLabelsUrl, selectedOrders);
   }
+
+  plOpenPdfTab(printLabelsUrl, selectedOrders);
 }
 
 function plOpenPdfTab(printLabelsUrl, selectedOrders) {
