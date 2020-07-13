@@ -76,6 +76,8 @@ function bulkPrintLabels() {
   });
 
   bulkPrintSelectedLabels(selectedOrders);
+
+  event.stopPropagation();
 }
 
 /**
