@@ -13,7 +13,7 @@
           <span id="pl-message" class="pl-message"></span>
         </div>
         <div class="col-xs-7">
-          <div class="btn btn-primary pull-right" id="pl-dropoff-button">
+          <div class="btn btn-primary button button-primary pull-right" id="pl-dropoff-button">
           </div>
         </div>
       </div>

@@ -13,7 +13,11 @@
           <span id="pl-message" class="pl-message"></span>
         </div>
         <div class="col-xs-6">
-          <button type="button" class="btn btn-primary float-xs-right pl-17-button" id="pl-dropoff-button">
+          <button
+                  type="button"
+                  class="btn btn-primary button button-primary float-xs-right pl-17-button"
+                  id="pl-dropoff-button"
+          >
           </button>
         </div>
       </div>
