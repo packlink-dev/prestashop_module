@@ -236,7 +236,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $orderItems = array();
         /** @var array $sourceOrderItem */
         foreach ($sourceOrderItems as $sourceOrderItem) {
-            /** @var \ProductCore $product */
             $product = new \Product((int)$sourceOrderItem['product_id']);
             if (!$product->is_virtual) {
                 $orderItem = $this->getOrderItem($sourceOrderItem, $defaultParcel);
@@ -280,7 +279,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $orderItem->setCategoryName($category->name[$languageId]);
         }
 
-        $orderItem->setWeight(round((float)$product->weight ?: $defaultParcel->weight, 2));
+        $orderItem->setWeight(round($sourceOrderItem['product_weight'] ?: (float)$product->weight ?: $defaultParcel->weight, 2));
         $orderItem->setWidth(ceil((float)$product->width ?: $defaultParcel->width));
         $orderItem->setLength(ceil((float)$product->depth ?: $defaultParcel->length));
         $orderItem->setHeight(ceil((float)$product->height ?: $defaultParcel->height));
@@ -289,6 +288,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $productCoverImage = \Image::getCover($product->id);
         if (!empty($productCoverImage)) {
             $link = new \Link();
+            /** @noinspection PhpDeprecationInspection */
             $productImageUrl = $link->getImageLink(
                 $product->link_rewrite[$languageId],
                 (int)$productCoverImage['id_image'],
