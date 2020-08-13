@@ -329,11 +329,11 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
-     * Disables other carriers.
+     * Disables shop shipping services/carriers.
      *
-     * @return bool
+     * @return boolean TRUE if operation succeeded; otherwise, false.
      */
-    public function disableOtherCarriers()
+    public function disableShopServices()
     {
         try {
             $result = $this->getNonPacklinkCarriers();

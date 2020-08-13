@@ -93,6 +93,8 @@ class ShippingMethodsController extends PacklinkBaseController
 
     /**
      * Handles saving shipping method.
+     *
+     * @throws \Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException
      */
     public function displayAjaxSave()
     {
@@ -137,7 +139,7 @@ class ShippingMethodsController extends PacklinkBaseController
     {
         /** @var CarrierService $carrierService */
         $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
-        if ($carrierService->disableOtherCarriers()) {
+        if ($carrierService->disableShopServices()) {
             PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully disabled shipping methods.')));
         } else {
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to disable shipping methods.')));
@@ -204,6 +206,8 @@ class ShippingMethodsController extends PacklinkBaseController
      * Retrieves shipping configuration.
      *
      * @return ShippingMethodConfiguration
+     *
+     * @throws \Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException
      */
     private function getShippingMethodConfigurationFromRequest()
     {

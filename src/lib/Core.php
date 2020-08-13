@@ -12,12 +12,15 @@ class Core
     public static function postUpdate()
     {
         $from = __DIR__ . '/../vendor/packlink/integration-core/src/BusinessLogic/Resources';
-        $to = __DIR__ . '/../views';
+        $to = __DIR__ . '/../views/packlink';
 
-        self::copyDirectory($from . '/img/carriers', $to . '/img/carriers');
-        self::copyDirectory($from . '/js', $to . '/js/core');
+        self::copyDirectory($from . '/images', $to . '/img');
+        self::copyDirectory($from . '/js', $to . '/js');
         self::copyDirectory($from . '/LocationPicker/js', $to . '/js/location');
+        self::copyDirectory($from . '/css', $to . '/css');
         self::copyDirectory($from . '/LocationPicker/css', $to . '/css');
+        self::copyDirectory($from . '/templates', $to . '/templates');
+        self::copyDirectory($from . '/lang', $to . '/lang');
     }
 
     /**
