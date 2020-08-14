@@ -1,7 +1,6 @@
 <?php
 
-use Logeecom\Infrastructure\Configuration\Configuration;
-use Logeecom\Infrastructure\ServiceRegister;
+use Packlink\BusinessLogic\Controllers\OrderStatusMappingController;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /** @noinspection PhpIncludeInspection */
@@ -9,16 +8,27 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
 
 class OrderStateMappingController extends PacklinkBaseController
 {
+    /** @var OrderStatusMappingController */
+    private $baseController;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->baseController = new OrderStatusMappingController();
+    }
+
     /**
      * Retrieves order status mappings.
      */
-    public function displayAjaxGetMappings()
+    public function displayAjaxGetMappingsAndStatuses()
     {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $mappings = $configService->getOrderStatusMappings() ?: array();
-
-        PacklinkPrestaShopUtility::dieJson($mappings);
+        PacklinkPrestaShopUtility::dieJson(array(
+            'systemName' => $this->getConfigService()->getIntegrationName(),
+            'mappings' => $this->baseController->getMappings(),
+            'packlinkStatuses' => $this->baseController->getPacklinkStatuses(),
+            'orderStatuses' => $this->getSystemOrderStatuses(),
+        ));
     }
 
     /**
@@ -27,17 +37,15 @@ class OrderStateMappingController extends PacklinkBaseController
     public function displayAjaxSaveMappings()
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $configService->setOrderStatusMappings($data);
+        $this->baseController->setMappings($data);
 
-        PacklinkPrestaShopUtility::dieJson();
+        PacklinkPrestaShopUtility::dieJson(array('success' => true));
     }
 
     /**
      * Retrieves all order statuses that are present in Prestashop.
      */
-    public function displayAjaxGetSystemOrderStatuses()
+    private function getSystemOrderStatuses()
     {
         $result = array();
         $states = OrderState::getOrderStates($this->context->language->id);

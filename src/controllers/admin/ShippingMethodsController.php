@@ -47,6 +47,35 @@ class ShippingMethodsController extends PacklinkBaseController
     }
 
     /**
+     * Retrieves active shipping methods.
+     */
+    public function displayAjaxGetActive()
+    {
+        $shippingMethods = $this->controller->getActive();
+
+        PacklinkPrestaShopUtility::dieDtoEntities($shippingMethods);
+    }
+
+    /**
+     * Returns a single shipping method identified by the provided ID.
+     */
+    public function displayAjaxGetShippingMethod()
+    {
+        $id = Tools::getValue('id');
+
+        if (empty($id)) {
+            PacklinkPrestaShopUtility::die404(array('message' => 'Not found'));
+        }
+
+        $shippingMethod = $this->controller->getShippingMethod($id);
+        if ($shippingMethod === null) {
+            PacklinkPrestaShopUtility::die404(array('message' => 'Not found'));
+        }
+
+        PacklinkPrestaShopUtility::dieJson($shippingMethod->toArray());
+    }
+
+    /**
      * Retrieves all shipping methods.
      */
     public function displayAjaxGetTaskStatus()

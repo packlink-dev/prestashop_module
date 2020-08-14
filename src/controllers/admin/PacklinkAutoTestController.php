@@ -1,11 +1,8 @@
 <?php
 
-use Logeecom\Infrastructure\AutoTest\AutoTestLogger;
-use Logeecom\Infrastructure\AutoTest\AutoTestService;
-use Logeecom\Infrastructure\Exceptions\StorageNotAccessibleException;
+use Packlink\BusinessLogic\Controllers\AutoTestController;
 use Packlink\PrestaShop\Classes\InfrastructureServices\LoggerService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
-use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -15,6 +12,9 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
  */
 class PacklinkAutoTestController extends PacklinkBaseController
 {
+    /** @var AutoTestController */
+    private $autoTestController;
+
     /**
      * PacklinkAutoTestController constructor.
      *
@@ -24,6 +24,7 @@ class PacklinkAutoTestController extends PacklinkBaseController
     {
         parent::__construct();
 
+        $this->autoTestController = new AutoTestController();
         $this->page_header_toolbar_title = $this->l('PacklinkPRO module auto-test', 'packlink');
         $this->meta_title = $this->page_header_toolbar_title;
     }
@@ -74,10 +75,11 @@ class PacklinkAutoTestController extends PacklinkBaseController
         );
         $this->addJS(
             array(
-                $path . 'views/js/core/UtilityService.js?v=' . $this->module->version,
-                $path . 'views/js/core/TemplateService.js?v=' . $this->module->version,
-                $path . 'views/js/core/AjaxService.js?v=' . $this->module->version,
-                $path . 'views/js/core/AutoTestController.js?v=' . $this->module->version,
+                $path . 'views/packlink/js/UtilityService.js?v=' . $this->module->version,
+                $path . 'views/packlink/js/TemplateService.js?v=' . $this->module->version,
+                $path . 'views/packlink/js/AjaxService.js?v=' . $this->module->version,
+                $path . 'views/packlink/js/ResponseService.js?v=' . $this->module->version,
+                $path . 'views/packlink/js/AutoTestController.js?v=' . $this->module->version,
                 $path . 'views/js/PrestaFix.js?v=' . $this->module->version,
             ),
             false
@@ -105,22 +107,12 @@ class PacklinkAutoTestController extends PacklinkBaseController
 
     /**
      * Runs the auto-test and returns the queue item ID.
-     *
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      */
     protected function start()
     {
-        $service = new AutoTestService();
-        try {
-            PacklinkPrestaShopUtility::dieJson(array('success' => true, 'itemId' => $service->startAutoTest()));
-        } catch (StorageNotAccessibleException $e) {
-            PacklinkPrestaShopUtility::dieJson(
-                array(
-                    'success' => false,
-                    'error' => TranslationUtility::__('Database not accessible.'),
-                )
-            );
-        }
+        $status = $this->autoTestController->start();
+
+        PacklinkPrestaShopUtility::dieJson($status);
     }
 
     /**
@@ -132,24 +124,17 @@ class PacklinkAutoTestController extends PacklinkBaseController
      */
     protected function checkStatus()
     {
-        $service = new AutoTestService();
-        $status = $service->getAutoTestTaskStatus(Tools::getValue('queueItemId', 0));
+        $status = $this->autoTestController->checkStatus(Tools::getValue('queueItemId', 0));
 
-        if ($status->finished) {
-            $service->stopAutoTestMode(
+        if ($status['finished']) {
+            $this->autoTestController->stop(
                 function () {
                     return LoggerService::getInstance();
                 }
             );
         }
 
-        PacklinkPrestaShopUtility::dieJson(
-            array(
-                'finished' => $status->finished,
-                'error' => TranslationUtility::__($status->error),
-                'logs' => AutoTestLogger::getInstance()->getLogsArray(),
-            )
-        );
+        PacklinkPrestaShopUtility::dieJson($status);
     }
 
     /**
@@ -163,29 +148,7 @@ class PacklinkAutoTestController extends PacklinkBaseController
             define('JSON_PRETTY_PRINT', 128);
         }
 
-        $data = json_encode(AutoTestLogger::getInstance()->getLogsArray(), JSON_PRETTY_PRINT);
+        $data = json_encode($this->autoTestController->getLogs(), JSON_PRETTY_PRINT);
         PacklinkPrestaShopUtility::dieFileFromString($data, 'auto-test-logs.json');
-    }
-
-    /**
-     * Retrieves ajax action.
-     *
-     * @param string $controller
-     * @param string $action
-     * @param bool $ajax
-     *
-     * @return string
-     *
-     * @throws \PrestaShopException
-     */
-    private function getAction($controller, $action, $ajax = true)
-    {
-        return $this->context->link->getAdminLink($controller) . '&' .
-            http_build_query(
-                array(
-                    'ajax' => $ajax,
-                    'action' => $action,
-                )
-            );
     }
 }

@@ -1,11 +1,9 @@
 <?php
 
-use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Country\CountryService;
-use Packlink\BusinessLogic\Location\LocationService;
-use Packlink\BusinessLogic\Warehouse\WarehouseService;
+use Packlink\BusinessLogic\Controllers\LocationsController;
+use Packlink\BusinessLogic\Controllers\WarehouseController;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
-use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
+use Packlink\BusinessLogic\Controllers\RegistrationRegionsController as CountryController;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -15,18 +13,35 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
  */
 class DefaultWarehouseController extends PacklinkBaseController
 {
+    /** @var WarehouseController */
+    private $warehouseController;
+    /** @var LocationsController */
+    private $locationsController;
+    /** @var CountryController */
+    private $countryController;
+
+    /**
+     * DefaultWarehouseController constructor.
+     *
+     * @throws \PrestaShopException
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->warehouseController = new WarehouseController();
+        $this->locationsController = new LocationsController();
+        $this->countryController = new CountryController();
+    }
+
     /**
      * Retrieves default warehouse data.
      */
     public function displayAjaxGetDefaultWarehouse()
     {
-        /** @var WarehouseService $warehouseService */
-        $warehouseService = ServiceRegister::getService(WarehouseService::CLASS_NAME);
+        $warehouse = $this->warehouseController->getWarehouse();
 
-        /** @var \Packlink\BusinessLogic\Warehouse\Warehouse $warehouse */
-        $warehouse = $warehouseService->getWarehouse(true);
-
-        PacklinkPrestaShopUtility::dieJson($warehouse->toArray());
+        PacklinkPrestaShopUtility::dieJson($warehouse ? $warehouse->toArray() : array());
     }
 
     /**
@@ -34,15 +49,9 @@ class DefaultWarehouseController extends PacklinkBaseController
      */
     public function displayAjaxGetSupportedCountries()
     {
-        /** @var CountryService $countryService */
-        $countryService = ServiceRegister::getService(CountryService::CLASS_NAME);
+        $countries = $this->countryController->getRegions();
 
-        $supportedCountries = $countryService->getSupportedCountries();
-        foreach ($supportedCountries as $country) {
-            $country->name = TranslationUtility::__($country->name);
-        }
-
-        PacklinkPrestaShopUtility::dieDtoEntities($supportedCountries);
+        PacklinkPrestaShopUtility::dieDtoEntities($countries);
     }
 
     /**
@@ -57,11 +66,8 @@ class DefaultWarehouseController extends PacklinkBaseController
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
         $data['default'] = true;
 
-        /** @var WarehouseService $warehouseService */
-        $warehouseService = ServiceRegister::getService(WarehouseService::CLASS_NAME);
-
         try {
-            $warehouse = $warehouseService->updateWarehouseData($data);
+            $warehouse = $this->warehouseController->updateWarehouse($data);
 
             PacklinkPrestaShopUtility::dieJson($warehouse->toArray());
         } catch (\Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException $e) {
@@ -80,21 +86,10 @@ class DefaultWarehouseController extends PacklinkBaseController
             PacklinkPrestaShopUtility::dieJson();
         }
 
-        $platformCountry = $input['country'];
-        $result = array();
         try {
-            /** @var LocationService $locationService */
-            $locationService = ServiceRegister::getService(LocationService::CLASS_NAME);
-            $result = $locationService->searchLocations($platformCountry, $input['query']);
+            PacklinkPrestaShopUtility::dieDtoEntities($this->locationsController->searchLocations($input));
         } catch (\Exception $e) {
             PacklinkPrestaShopUtility::dieJson();
         }
-
-        $arrayResult = array();
-        foreach ($result as $item) {
-            $arrayResult[] = $item->toArray();
-        }
-
-        PacklinkPrestaShopUtility::dieJson($arrayResult);
     }
 }
