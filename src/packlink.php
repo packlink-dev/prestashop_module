@@ -37,30 +37,6 @@ class Packlink extends CarrierModule
      * @var int
      */
     public $id_carrier;
-    /**
-     * List of help URLs for different country codes.
-     *
-     * @var array
-     */
-    private static $helpUrls = array(
-        'EN' => 'https://support-pro.packlink.com/hc/en-gb/sections/202755109-Prestashop',
-        'ES' => 'https://support-pro.packlink.com/hc/es-es/sections/202755109-Prestashop',
-        'DE' => 'https://support-pro.packlink.com/hc/de/sections/202755109-Prestashop',
-        'FR' => 'https://support-pro.packlink.com/hc/fr-fr/sections/202755109-Prestashop',
-        'IT' => 'https://support-pro.packlink.com/hc/it/sections/202755109-Prestashop',
-    );
-    /**
-     * List of terms and conditions URLs for different country codes.
-     *
-     * @var array
-     */
-    private static $termsAndConditionsUrls = array(
-        'EN' => 'https://support-pro.packlink.com/hc/en-gb/articles/360010011480',
-        'ES' => 'https://pro.packlink.es/terminos-y-condiciones/',
-        'DE' => 'https://pro.packlink.de/agb/',
-        'FR' => 'https://pro.packlink.fr/conditions-generales/',
-        'IT' => 'https://pro.packlink.it/termini-condizioni/',
-    );
 
     /**
      * Packlink constructor.
@@ -440,32 +416,11 @@ class Packlink extends CarrierModule
      *
      * @return string
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \PrestaShopException
      */
     public function getContent()
     {
         \Packlink\PrestaShop\Classes\Bootstrap::init();
-
-        $output = '';
-
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Configuration::CLASS_NAME
-        );
-        $apiToken = $configService->getAuthorizationToken();
-        $loggedIn = false;
-
-        if (!$apiToken && Tools::isSubmit('api_key')) {
-            $loggedIn = $this->login();
-
-            if (!$loggedIn) {
-                $output .= $this->displayError(
-                    \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('API key was incorrect.')
-                );
-            }
-        }
 
         /** @var \Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerWakeup $wakeupService */
         $wakeupService = \Logeecom\Infrastructure\ServiceRegister::getService(
@@ -473,44 +428,196 @@ class Packlink extends CarrierModule
         );
         $wakeupService->wakeup();
 
-        $fancyBoxUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . 'js/jquery/plugins/fancybox/jquery.fancybox.js';
-        $fancyBoxUrl = str_replace(array('https:', 'http:'), '', $fancyBoxUrl);
+        $this->loadStyles();
+        $this->loadScripts();
 
         $this->context->smarty->assign(array(
-            'fancyBoxPath' => $fancyBoxUrl,
+            'lang' => $this->getTranslations(),
+            'templates' => $this->getTemplates(),
+            'urls' => $this->getUrls(),
+            'baseResourcesUrl' => $this->getPathUri() . 'views/packlink',
         ));
 
-        if ($apiToken || $loggedIn) {
-            return $this->renderConfigForm();
-        }
+        return $this->display(__FILE__, 'index.tpl');
+    }
 
+    /**
+     * Loads Packlink stylesheets.
+     */
+    private function loadStyles()
+    {
         $this->context->controller->addCSS(
             array(
-                $this->_path . 'views/css/packlink.css?v=' . $this->version,
-                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css?v=' . $this->version,
+                'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined',
+                $this->getPathUri() . 'views/packlink/css/app.css?v=' . $this->version,
+                $this->getPathUri() . 'views/css/packlink-core-override.css?v=' . $this->version,
             ),
             'all',
             null,
             false
         );
+    }
+
+    /**
+     * Loads Packlink scripts.
+     */
+    private function loadScripts()
+    {
         $this->context->controller->addJS(
             array(
-                $this->_path . 'views/js/prestashop-ui-kit.js?v=' . $this->version,
-                $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
-                $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
-                $this->_path . 'views/js/PrestaFix.js?v=' . $this->version,
-                $this->_path . 'views/js/Login.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/PrestaFix.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/UtilityService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/TemplateService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/AjaxService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/TranslationService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/ValidationService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/GridResizerService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/ShippingServicesRenderer.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/AutoTestController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/ConfigurationController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/DefaultParcelController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/DefaultWarehouseController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/EditServiceController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/LoginController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/ModalService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/MyShippingServicesController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/OnboardingOverviewController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/OnboardingStateController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/OnboardingWelcomeController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/OrderStatusMappingController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/PageControllerFactory.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/PickShippingServiceController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/PricePolicyController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/RegisterController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/RegisterModalController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/ResponseService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/ServiceCountriesModalController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/StateController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/SystemInfoController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/packlink/js/StateUUIDService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/PrestaAjaxService.js?v=' . $this->version,
             ),
             false
         );
+    }
 
-        $this->context->smarty->assign(array(
-            'iconPath' => $this->_path . 'views/img/flags/',
-            'loginIcon' => $this->_path . 'views/img/logo-pl.svg',
-            'getCountriesUrl' => $this->getAction('DefaultWarehouse', 'getSupportedCountries'),
-        ));
+    /**
+     * Returns Packlink module translations in the default and the current system language.
+     *
+     * @return array
+     */
+    private function getTranslations()
+    {
+        $baseDir = $this->getLocalPath() . 'views/packlink/lang/';
+        $locale = strtolower($this->context->language->iso_code);
 
-        return $output . $this->display(__FILE__, 'login.tpl');
+        $currentLangFilename = $baseDir . $locale . '.json';
+        $currentLang = file_exists($currentLangFilename) ? file_get_contents($currentLangFilename) : '';
+
+        return array(
+            'default' => file_get_contents($baseDir . 'en.json'),
+            'current' => $currentLang,
+        );
+    }
+
+    /**
+     * Returns Packlink module templates.
+     *
+     * @return array
+     */
+    private function getTemplates()
+    {
+        $baseDir = $this->getLocalPath() . 'views/packlink/templates/';
+
+        return array(
+            'configuration' => json_encode(file_get_contents($baseDir . 'configuration.html')),
+            'countries-selection-modal' => json_encode(file_get_contents($baseDir . 'countries-selection-modal.html')),
+            'default-parcel' => json_encode(file_get_contents($baseDir . 'default-parcel.html')),
+            'default-warehouse' => json_encode(file_get_contents($baseDir . 'default-warehouse.html')),
+            'disable-carriers-modal' => json_encode(file_get_contents($baseDir . 'disable-carriers-modal.html')),
+            'edit-shipping-service' => json_encode(file_get_contents($baseDir . 'edit-shipping-service.html')),
+            'login' => json_encode(file_get_contents($baseDir . 'login.html')),
+            'my-shipping-services' => json_encode(file_get_contents($baseDir . 'my-shipping-services.html')),
+            'onboarding-overview' => json_encode(file_get_contents($baseDir . 'onboarding-overview.html')),
+            'onboarding-welcome' => json_encode(file_get_contents($baseDir . 'onboarding-welcome.html')),
+            'order-status-mapping' => json_encode(file_get_contents($baseDir . 'order-status-mapping.html')),
+            'pick-shipping-services' => json_encode(file_get_contents($baseDir . 'pick-shipping-services.html')),
+            'pricing-policies-list' => json_encode(file_get_contents($baseDir . 'pricing-policies-list.html')),
+            'pricing-policy-modal' => json_encode(file_get_contents($baseDir . 'pricing-policy-modal.html')),
+            'register' => json_encode(file_get_contents($baseDir . 'register.html')),
+            'register-modal' => json_encode(file_get_contents($baseDir . 'register-modal.html')),
+            'shipping-services-header' => json_encode(file_get_contents($baseDir . 'shipping-services-header.html')),
+            'shipping-services-list' => json_encode(file_get_contents($baseDir . 'shipping-services-list.html')),
+            'shipping-services-table' => json_encode(file_get_contents($baseDir . 'shipping-services-table.html')),
+            'system-info-modal' => json_encode(file_get_contents($baseDir . 'system-info-modal.html')),
+        );
+    }
+
+    /**
+     * Returns Packlink module controller URLs.
+     *
+     * @return array
+     *
+     * @throws \PrestaShopException
+     */
+    private function getUrls()
+    {
+        return array(
+            'login' => array(
+                'submit' => $this->getAction('Login', 'login'),
+                'listOfCountriesUrl' => $this->getAction('RegistrationRegions', 'getRegions'),
+            ),
+            'register' => array(
+                'getRegistrationData' => $this->getAction('Registration', 'getRegisterData'),
+                'submit' => $this->getAction('Registration', 'register'),
+            ),
+            'onboardingState' => array(
+                'getState' => $this->getAction('Onboarding', 'getCurrentState'),
+            ),
+            'onboardingOverview' => array(
+                'defaultParcelGet' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
+                'defaultWarehouseGet' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
+            ),
+            'defaultParcel' => array(
+                'getUrl' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
+                'submitUrl' => $this->getAction('DefaultParcel', 'submitDefaultParcel'),
+            ),
+            'defaultWarehouse' => array(
+                'getUrl' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
+                'getSupportedCountriesUrl' => $this->getAction('DefaultWarehouse', 'getSupportedCountries'),
+                'submitUrl' => $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse'),
+                'searchPostalCodesUrl' => $this->getAction('DefaultWarehouse', 'searchPostalCodes'),
+            ),
+            'configuration' => array(
+                'getDataUrl' => $this->getAction('Configuration', 'getData'),
+            ),
+            'systemInfo' => array(
+                'getStatusUrl' => $this->getAction('Debug', 'getStatus'),
+                'setStatusUrl' => $this->getAction('Debug', 'setStatus'),
+            ),
+            'orderStatusMapping' => array(
+                'getMappingAndStatusesUrl' => $this->getAction('OrderStateMapping', 'getMappingsAndStatuses'),
+                'setUrl' => $this->getAction('OrderStateMapping', 'saveMappings'),
+            ),
+            'myShippingServices' => array(
+                'getServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
+                'deleteServiceUrl' => $this->getAction('ShippingMethods', 'deactivate'),
+            ),
+            'pickShippingService' => array(
+                'getActiveServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
+                'getServicesUrl' => $this->getAction('ShippingMethods', 'getAll'),
+                'getTaskStatusUrl' => $this->getAction('ShippingMethods', 'getTaskStatus'),
+                'startAutoConfigureUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
+                'disableCarriersUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
+            ),
+            'editService' => array(
+                'getServiceUrl' => $this->getAction('ShippingMethods', 'getShippingMethod'),
+                'saveServiceUrl' => $this->getAction('ShippingMethods', 'save'),
+                'getTaxClassesUrl' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
+                'getCountriesListUrl' => $this->getAction('ShippingZones', 'getShippingZones'),
+            ),
+            'stateUrl' => $this->getAction('ModuleState', 'getCurrentState'),
+        );
     }
 
     /**
@@ -759,114 +866,6 @@ class Packlink extends CarrierModule
             && $carrierServiceMapping !== null
             && ($orderState->id === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS
                 || $orderState->id === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS);
-    }
-
-    /**
-     * Renders configuration page.
-     *
-     * @return string
-     * @throws \PrestaShopException
-     */
-    private function renderConfigForm()
-    {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Configuration::CLASS_NAME
-        );
-        /** @var \Packlink\BusinessLogic\Country\CountryService $countryService */
-        $countryService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Country\CountryService::CLASS_NAME
-        );
-
-        $userInfo = $configService->getUserInfo();
-        $linkLanguage = 'EN';
-
-        if ($userInfo !== null && $countryService->isBaseCountry($userInfo->country)) {
-            $linkLanguage = $userInfo->country;
-        }
-
-        $this->context->smarty->assign(
-            array(
-                'dashboardGetStatusUrl' => $this->getAction('Dashboard', 'getStatus'),
-                'defaultParcelGetUrl' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
-                'defaultParcelSubmitUrl' => $this->getAction('DefaultParcel', 'submitDefaultParcel'),
-                'defaultWarehouseGetUrl' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
-                'getSupportedCountriesUrl' => $this->getAction('DefaultWarehouse', 'getSupportedCountries'),
-                'defaultWarehouseSubmitUrl' => $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse'),
-                'defaultWarehouseSearchPostalCodesUrl' => $this->getAction('DefaultWarehouse', 'searchPostalCodes'),
-                'shippingMethodsGetAllUrl' => $this->getAction('ShippingMethods', 'getAll'),
-                'shippingMethodsGetStatusUrl' => $this->getAction('ShippingMethods', 'getTaskStatus'),
-                'shippingMethodsActivateUrl' => $this->getAction('ShippingMethods', 'activate'),
-                'shippingMethodsDeactivateUrl' => $this->getAction('ShippingMethods', 'deactivate'),
-                'shippingMethodsSaveUrl' => $this->getAction('ShippingMethods', 'save'),
-                'getSystemOrderStatusesUrl' => $this->getAction('OrderStateMapping', 'getSystemOrderStatuses'),
-                'orderStatusMappingsGetUrl' => $this->getAction('OrderStateMapping', 'getMappings'),
-                'orderStatusMappingsSaveUrl' => $this->getAction('OrderStateMapping', 'saveMappings'),
-                'debugGetStatusUrl' => $this->getAction('Debug', 'getStatus'),
-                'debugSetStatusUrl' => $this->getAction('Debug', 'setStatus'),
-                'getSystemInfoUrl' => $this->getAction('Debug', 'getSystemInfo', false),
-                'shopShippingMethodCountGetUrl' => $this->getAction('ShippingMethods', 'getNumberShopMethods'),
-                'shopShippingMethodsDisableUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
-                'shippingMethodsGetTaxClassesUrl' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
-                'autoConfigureStartUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
-                'dashboardIcon' => $this->_path . 'views/img/dashboard.png',
-                'dashboardLogo' => $this->_path . 'views/img/logo-pl.svg',
-                'helpLink' => self::$helpUrls[$linkLanguage],
-                'termsAndConditionsLink' => self::$termsAndConditionsUrls[$linkLanguage],
-                'pluginVersion' => $this->version,
-            )
-        );
-
-        $this->context->controller->addCSS(
-            array(
-                $this->_path . 'views/css/packlink.css?v=' . $this->version,
-                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css?v=' . $this->version,
-            ),
-            'all',
-            null,
-            false
-        );
-
-        $this->context->controller->addJS(
-            array(
-                $this->_path . 'views/js/prestashop-ui-kit.js?v=' . $this->version,
-                $this->_path . 'views/js/core/StateController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/TemplateService.js?v=' . $this->version,
-                $this->_path . 'views/js/core/SidebarController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/PageControllerFactory.js?v=' . $this->version,
-                $this->_path . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/ShippingMethodsController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
-                $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
-                $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
-                $this->_path . 'views/js/PrestaFix.js?v=' . $this->version,
-                $this->_path . 'views/js/core/OrderStateMappingController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/FooterController.js?v=' . $this->version,
-            ),
-            false
-        );
-
-        return $this->display(__FILE__, 'packlink.tpl');
-    }
-
-    /**
-     * Performs login.
-     *
-     * @return bool
-     *
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     */
-    private function login()
-    {
-        $apiToken = Tools::getValue('api_key', null);
-        /** @var \Packlink\BusinessLogic\User\UserAccountService $userAccountService */
-        $userAccountService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\User\UserAccountService::CLASS_NAME
-        );
-
-        return $userAccountService->login($apiToken);
     }
 
     /**

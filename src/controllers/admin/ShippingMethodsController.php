@@ -137,6 +137,10 @@ class ShippingMethodsController extends PacklinkBaseController
             );
         }
 
+        if ($configuration->pricingPolicies === null) {
+            $configuration->pricingPolicies = array();
+        }
+
         /** @var ShippingMethodResponse $model */
         $model = $this->controller->save($configuration);
         if ($model === null) {

@@ -14,7 +14,7 @@ class Core
         $from = __DIR__ . '/../vendor/packlink/integration-core/src/BusinessLogic/Resources';
         $to = __DIR__ . '/../views/packlink';
 
-        self::copyDirectory($from . '/images', $to . '/img');
+        self::copyDirectory($from . '/images', $to . '/images');
         self::copyDirectory($from . '/js', $to . '/js');
         self::copyDirectory($from . '/LocationPicker/js', $to . '/js/location');
         self::copyDirectory($from . '/css', $to . '/css');

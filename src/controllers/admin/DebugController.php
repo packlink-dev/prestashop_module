@@ -30,7 +30,7 @@ class DebugController extends PacklinkBaseController
     {
         PacklinkPrestaShopUtility::dieJson(array(
             'status' => $this->baseController->getStatus(),
-            'downloadUrl' => $this->getAction('Debug', 'getSystemInfo', false),
+            'downloadUrl' => $this->getAction('Debug', 'getSystemInfo'),
         ));
     }
 

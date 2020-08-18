@@ -108,9 +108,11 @@ class AdminOrdersController
         $context->controller->addJS(
             array(
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js',
-                _PS_MODULE_DIR_ . 'packlink/views/js/core/AjaxService.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/OrderOverviewDraft.js',
+                _PS_MODULE_DIR_ . 'packlink/views/packlink/js/AjaxService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/packlink/js/ResponseService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/packlink/js/StateUUIDService.js',
             )
         );
 

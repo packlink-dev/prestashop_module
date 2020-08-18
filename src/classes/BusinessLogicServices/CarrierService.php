@@ -12,6 +12,7 @@ use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
+use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\BusinessLogic\Utility\Php\Php55;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
@@ -56,10 +57,9 @@ class CarrierService implements ShopShippingMethodService
                 $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
 
                 $this->setCarrierGroups($carrier);
-                $ranges = $this->setCarrierRanges($carrier, $shippingMethod);
-                foreach ($ranges as $range) {
-                    $this->setCarrierZones($carrier, $range, $shippingMethod);
-                }
+                $ranges = $this->setCarrierRanges($carrier);
+                $this->deleteCarrierZones($carrier);
+                $this->setCarrierZones($carrier, $shippingMethod, $ranges);
 
                 $this->updateCarrierLogo($shippingMethod, $carrier);
                 $this->saveCarrierServiceMapping((int)$carrier->id, $shippingMethod->getId());
@@ -81,12 +81,13 @@ class CarrierService implements ShopShippingMethodService
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopException
      */
     public function update(ShippingMethod $shippingMethod)
     {
         $referenceId = $this->getCarrierReferenceId($shippingMethod->getId());
         if ($referenceId === null) {
-            Logger::logWarning(TranslationUtility::__('Carrier service mapping not found'), 'Integration');
+            $this->add($shippingMethod);
         } else {
             /** @var \Carrier $carrier PrestaShop carrier object. */
             $carrier = \Carrier::getCarrierByReference($referenceId);
@@ -94,10 +95,9 @@ class CarrierService implements ShopShippingMethodService
             if ($carrier) {
                 try {
                     $this->setCarrierData($carrier, $shippingMethod);
-                    $ranges = $this->setCarrierRanges($carrier, $shippingMethod);
-                    foreach ($ranges as $range) {
-                        $this->setCarrierZones($carrier, $range, $shippingMethod);
-                    }
+                    $ranges = $this->setCarrierRanges($carrier);
+                    $this->deleteCarrierZones($carrier);
+                    $this->setCarrierZones($carrier, $shippingMethod, $ranges);
 
                     $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
                     $this->updateCarrierLogo($shippingMethod, $carrier);
@@ -166,6 +166,10 @@ class CarrierService implements ShopShippingMethodService
      */
     public function addBackupShippingMethod(ShippingMethod $shippingMethod)
     {
+        /** @var ShippingMethodService $shippingMethodService */
+        $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
+        $shippingMethod = $shippingMethodService->getShippingMethod($shippingMethod->getId());
+
         $carrier = new \Carrier();
         $this->setCarrierData($carrier, $shippingMethod);
         $carrier->name = 'shipping cost';
@@ -175,7 +179,7 @@ class CarrierService implements ShopShippingMethodService
         }
 
         $this->setCarrierGroups($carrier);
-        $ranges = $this->setCarrierRanges($carrier, $shippingMethod);
+        $ranges = $this->setCarrierRanges($carrier);
         foreach ($ranges as $range) {
             $this->setBackupCarrierZones($carrier, $range, $shippingMethod);
         }
@@ -409,7 +413,7 @@ class CarrierService implements ShopShippingMethodService
         $defaultCarrierLogoPath = 'packlink/views/img/carrier.jpg';
 
         $carrierImageFile = \Tools::strtolower(str_replace(' ', '-', $carrierName));
-        $logoFilePath = 'packlink/views/packlink/img/carriers/' . $carrierImageFile . '.png';
+        $logoFilePath = 'packlink/views/packlink/images/carriers/' . $carrierImageFile . '.png';
 
         return \Tools::file_exists_cache(_PS_MODULE_DIR_ . $logoFilePath)
             ? $logoFilePath : $defaultCarrierLogoPath;
@@ -502,28 +506,22 @@ class CarrierService implements ShopShippingMethodService
      *
      * @param \Carrier $carrier PrestaShop carrier object.
      *
-     * @param \Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod $shippingMethod
-     *
      * @return \ObjectModel[] Array of PrestaShop range objects.
      *
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function setCarrierRanges(\Carrier $carrier, ShippingMethod $shippingMethod)
+    private function setCarrierRanges(\Carrier $carrier)
     {
         // we need to remove old ones before adding new one.
         $this->removeCarrierRanges($carrier);
 
-        return $this->setRanges($shippingMethod, $carrier);
+        return $this->setRanges($carrier);
     }
 
     /**
-     * Sets shipping ranges for a given shipping method and its pricing policies.
-     * Since PrestaShop doesn't allow range overlapping, this method will create one range
-     * per price and/or per weight that will contain ranges of all pricing policies per that parameter.
-     * If there are no valid ranges for price or for weight, the default weight range will be set for the carrier.
+     * Sets shipping ranges for a given shipping method.
      *
-     * @param ShippingMethod $shippingMethod
      * @param \Carrier $carrier
      *
      * @return \ObjectModel[]
@@ -531,103 +529,12 @@ class CarrierService implements ShopShippingMethodService
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private function setRanges(ShippingMethod $shippingMethod, \Carrier $carrier)
+    private function setRanges(\Carrier $carrier)
     {
-        $policies = $shippingMethod->getPricingPolicies();
-
-        $minPrice = null;
-        $minWeight = null;
-        $maxPrice = null;
-        $maxWeight = null;
-        $ranges = array();
-
-        foreach ($policies as $policy) {
-            if (($minPrice === null && $policy->fromPrice !== null)
-                || ($minPrice !== null && $policy->fromPrice !== null && $policy->fromPrice < $minPrice)
-            ) {
-                $minPrice = $policy->fromPrice;
-            }
-
-            if (($minWeight === null && $policy->fromWeight !== null)
-                || ($minWeight !== null && $policy->fromWeight !== null && $policy->fromWeight < $minWeight)
-            ) {
-                $minWeight = $policy->fromWeight;
-            }
-
-            if (($maxPrice === null && $policy->toPrice !== null)
-                || ($maxPrice !== null && $policy->toPrice !== null && $policy->toPrice > $maxPrice)
-            ) {
-                $maxPrice = $policy->toPrice;
-            }
-
-            if (($maxWeight === null && $policy->toWeight !== null)
-                || ($maxWeight !== null && $policy->toWeight !== null && $policy->toWeight > $maxWeight)
-            ) {
-                $maxWeight = $policy->toWeight;
-            }
-        }
-
-        if ($minPrice !== null && $maxPrice !== null) {
-            $ranges[] = $this->addPriceRange($carrier, $minPrice, $maxPrice);
-        }
-
-        if ($minWeight !== null && $maxWeight !== null) {
-            $ranges[] = $this->addWeightRange($carrier, $minWeight, $maxWeight);
-        }
-
-        if ($minPrice === null && $maxPrice === null && $minWeight === null && $maxWeight === null) {
-            $ranges[] = $this->addDefaultWeightRange($carrier->id);
-        }
-
-        return $ranges;
-    }
-
-    /**
-     * Adds and returns a price range for a given policy and carrier.
-     *
-     * @param \Carrier $carrier
-     * @param float $fromPrice
-     * @param float $toPrice
-     *
-     * @return \RangePrice
-     *
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function addPriceRange($carrier, $fromPrice, $toPrice)
-    {
-        $range = new \RangePrice();
-
-        $range->id_carrier = $carrier->id;
-        $range->delimiter1 = $fromPrice;
-        $range->delimiter2 = $toPrice;
-        $range->add();
-
-        return $range;
-    }
-
-    /**
-     * dds and returns a weight range for a given policy and carrier.
-     *
-     * @param \Carrier $carrier
-     * @param float $fromPrice
-     * @param float $toPrice
-     *
-     * @return \RangeWeight
-     *
-     * @throws \PrestaShopDatabaseException
-     * @throws \PrestaShopException
-     */
-    private function addWeightRange($carrier, $fromPrice, $toPrice)
-    {
-        $range = new \RangeWeight();
-
-        $range->id_carrier = $carrier->id;
-        $range->delimiter1 = $fromPrice;
-        $range->delimiter2 = $toPrice;
-        $range->add();
-
-        return $range;
+        return array(
+            $this->addDefaultWeightRange($carrier->id),
+            $this->addDefaultPriceRange($carrier->id),
+        );
     }
 
     /**
@@ -675,6 +582,26 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
+     * Creates a default price range.
+     *
+     * @param int $carrierId
+     *
+     * @return \RangePrice
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    private function addDefaultPriceRange($carrierId)
+    {
+        $rangeWeight = new \RangePrice();
+        $rangeWeight->id_carrier = $carrierId;
+        $rangeWeight->delimiter1 = '0';
+        $rangeWeight->delimiter2 = '10000';
+        $rangeWeight->add();
+
+        return $rangeWeight;
+    }
+
+    /**
      * Sets zones for backup carrier by adding default shipping cost of the first carrier for delivery price.
      *
      * @param \Carrier $carrier PrestaShop carrier entity.
@@ -688,18 +615,19 @@ class CarrierService implements ShopShippingMethodService
             $defaultCost = min($defaultCost, $shippingService->basePrice);
         }
 
-        $this->setCarrierZones($carrier, $range, $shippingMethod, $defaultCost);
+        $this->deleteCarrierZones($carrier);
+        $this->setCarrierZones($carrier, $shippingMethod, array($range));
     }
 
     /**
      * Sets carrier zones.
      *
      * @param \Carrier $carrier PrestaShop carrier object.
-     * @param \ObjectModel $range PrestaShop prince/weight range.
-     * @param \Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod $shippingMethod
+     * @param ShippingMethod $shippingMethod
+     * @param \ObjectModel[] $ranges PrestaShop prince/weight ranges.
      * @param float $price Delivery price.
      */
-    private function setCarrierZones(\Carrier $carrier, \ObjectModel $range, ShippingMethod $shippingMethod, $price = 0.0)
+    private function setCarrierZones(\Carrier $carrier, ShippingMethod $shippingMethod, $ranges, $price = 0.0)
     {
         $zones = \Zone::getZones(true);
         foreach ($zones as $zone) {
@@ -708,16 +636,32 @@ class CarrierService implements ShopShippingMethodService
             ) {
                 $carrier->addZone((int)$zone['id_zone']);
                 $priceList = array();
-                $priceList[] = array(
-                    'id_carrier' => (int)$carrier->id,
-                    'id_zone' => (int)$zone['id_zone'],
-                    'id_range_price' => $range instanceof \RangePrice ? (int)$range->id : null,
-                    'id_range_weight' =>$range instanceof \RangeWeight ? (int)$range->id : null,
-                    'price' => $price,
-                );
+                foreach ($ranges as $range) {
+                    $priceList[] = array(
+                        'id_carrier' => (int)$carrier->id,
+                        'id_zone' => (int)$zone['id_zone'],
+                        'id_range_price' => $range instanceof \RangePrice ? (int)$range->id : null,
+                        'id_range_weight' =>$range instanceof \RangeWeight ? (int)$range->id : null,
+                        'price' => $price,
+                    );
+                }
 
                 $carrier->addDeliveryPrice($priceList);
             }
+        }
+    }
+
+    /**
+     * Deletes existing shipping zones for the provided carrier.
+     *
+     * @param \Carrier $carrier
+     */
+    private function deleteCarrierZones(\Carrier $carrier)
+    {
+        /** @var \Zone[] $zones */
+        $zones = $carrier->getZones();
+        foreach ($zones as $zone) {
+            $carrier->deleteZone($zone['id_zone']);
         }
     }
 

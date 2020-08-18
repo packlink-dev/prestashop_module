@@ -4,7 +4,6 @@ namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
 use Packlink\BusinessLogic\Registration\RegistrationInfoService as RegistrationInfoServiceInterface;
 use Packlink\BusinessLogic\Registration\RegistrationInfo;
-use PrestaShop\PrestaShop\Adapter\Entity\ShopUrl;
 
 /**
  * Class RegistrationInfoService
@@ -36,7 +35,7 @@ class RegistrationInfoService implements RegistrationInfoServiceInterface
 
         $result['email'] = \Context::getContext()->employee->email;
         $result['phone']  =  '';
-        $result['source'] = ShopUrl::getMainShopDomain() . \Context::getContext()->shop->physical_uri;
+        $result['source'] = \ShopUrlCore::getMainShopDomain() . \Context::getContext()->shop->physical_uri;
 
         return $result;
     }

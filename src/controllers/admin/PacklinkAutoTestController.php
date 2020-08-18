@@ -80,6 +80,7 @@ class PacklinkAutoTestController extends PacklinkBaseController
                 $path . 'views/packlink/js/AjaxService.js?v=' . $this->module->version,
                 $path . 'views/packlink/js/ResponseService.js?v=' . $this->module->version,
                 $path . 'views/packlink/js/AutoTestController.js?v=' . $this->module->version,
+                $path . 'views/packlink/js/StateUUIDService.js?v=' . $this->module->version,
                 $path . 'views/js/PrestaFix.js?v=' . $this->module->version,
             ),
             false

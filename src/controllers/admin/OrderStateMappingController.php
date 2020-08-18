@@ -1,6 +1,7 @@
 <?php
 
 use Packlink\BusinessLogic\Controllers\OrderStatusMappingController;
+use Packlink\BusinessLogic\Language\Translator;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /** @noinspection PhpIncludeInspection */
@@ -47,13 +48,16 @@ class OrderStateMappingController extends PacklinkBaseController
      */
     private function getSystemOrderStatuses()
     {
-        $result = array();
+        $result = array(
+            '' => Translator::translate( 'orderStatusMapping.none' ),
+        );
+
         $states = OrderState::getOrderStates($this->context->language->id);
 
         foreach ($states as $state) {
-            $result[] = array('code' => $state['id_order_state'], 'label' => $state['name']);
+            $result[$state['id_order_state']] =  $state['name'];
         }
 
-        PacklinkPrestaShopUtility::dieJson($result);
+        return $result;
     }
 }

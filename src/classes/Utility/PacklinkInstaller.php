@@ -50,6 +50,13 @@ class PacklinkInstaller
         'OrderDraft',
         'PacklinkAutoTest',
         'PacklinkAutoConfigure',
+        'Configuration',
+        'Login',
+        'ModuleState',
+        'Onboarding',
+        'Registration',
+        'RegistrationRegions',
+        'ShippingZones',
     );
 
     /**
