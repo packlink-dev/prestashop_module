@@ -508,16 +508,63 @@ class Packlink extends CarrierModule
      */
     private function getTranslations()
     {
+        return array(
+            'default' => $this->getDefaultTranslations(),
+            'current' => $this->getCurrentTranslations(),
+        );
+    }
+
+    /**
+     * Returns JSON encoded module page translations in the default language, along with some module-specific translations.
+     *
+     * @return string
+     */
+    private function getDefaultTranslations()
+    {
+        $baseDir = $this->getLocalPath() . 'views/packlink/lang/';
+        $defaultTranslations = json_decode(file_get_contents($baseDir . 'en.json'), true);
+
+        $defaultTranslations['shippingServices']['serviceCountriesTitle'] = 'Availability by destination zone';
+        $defaultTranslations['shippingServices']['serviceCountriesDescription'] = 'Select the availability for the zones that are supported for your shipping service.';
+        $defaultTranslations['shippingServices']['openCountries'] = 'See zones';
+        $defaultTranslations['shippingServices']['allCountriesSelected'] = 'All zones selected';
+        $defaultTranslations['shippingServices']['oneCountrySelected'] = 'One zone selected';
+        $defaultTranslations['shippingServices']['selectedCountries'] = '%s zones selected.';
+        $defaultTranslations['shippingServices']['selectAllCountries'] = 'All selected zones';
+        $defaultTranslations['shippingServices']['selectCountriesHeader'] = 'Zones supported for your shipping service';
+        $defaultTranslations['shippingServices']['selectCountriesSubheader'] = 'Select availability of at least one zone and add as many required';
+        $defaultTranslations['shippingServices']['atLeastOneCountry'] = 'At least one zone must be selected.';
+
+        return json_encode($defaultTranslations);
+    }
+
+    /**
+     * Returns JSON encoded module page translations in the current system language, along with some module-specific translations.
+     *
+     * @return string
+     */
+    private function getCurrentTranslations()
+    {
         $baseDir = $this->getLocalPath() . 'views/packlink/lang/';
         $locale = strtolower($this->context->language->iso_code);
 
         $currentLangFilename = $baseDir . $locale . '.json';
-        $currentLang = file_exists($currentLangFilename) ? file_get_contents($currentLangFilename) : '';
+        $currentTranslations = file_exists($currentLangFilename) ? json_decode(file_get_contents($currentLangFilename), true) : array();
 
-        return array(
-            'default' => file_get_contents($baseDir . 'en.json'),
-            'current' => $currentLang,
-        );
+        if (!empty($currentTranslations)) {
+            $currentTranslations['shippingServices']['serviceCountriesTitle'] = $this->l('Availability by destination zone');
+            $currentTranslations['shippingServices']['serviceCountriesDescription'] = $this->l('Select the availability for the zones that are supported for your shipping service.');
+            $currentTranslations['shippingServices']['openCountries'] = $this->l('See zones');
+            $currentTranslations['shippingServices']['allCountriesSelected'] = $this->l('All zones selected');
+            $currentTranslations['shippingServices']['oneCountrySelected'] = $this->l('One zone selected');
+            $currentTranslations['shippingServices']['selectedCountries'] = $this->l('%s zones selected.');
+            $currentTranslations['shippingServices']['selectAllCountries'] = $this->l('All selected zones');
+            $currentTranslations['shippingServices']['selectCountriesHeader'] = $this->l('Zones supported for your shipping service');
+            $currentTranslations['shippingServices']['selectCountriesSubheader'] = $this->l('Select availability of at least one zone and add as many required');
+            $currentTranslations['shippingServices']['atLeastOneCountry'] = $this->l('At least one zone must be selected.');
+        }
+
+        return json_encode($currentTranslations);
     }
 
     /**
