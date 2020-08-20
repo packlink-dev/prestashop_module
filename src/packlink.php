@@ -431,6 +431,8 @@ class Packlink extends CarrierModule
         $this->loadStyles();
         $this->loadScripts();
 
+        \Packlink\BusinessLogic\Configuration::setCurrentLanguage($this->context->language->iso_code);
+
         $this->context->smarty->assign(array(
             'lang' => $this->getTranslations(),
             'templates' => $this->getTemplates(),
