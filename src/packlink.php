@@ -654,7 +654,7 @@ class Packlink extends CarrierModule
             ),
             'pickShippingService' => array(
                 'getActiveServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
-                'getServicesUrl' => $this->getAction('ShippingMethods', 'getAll'),
+                'getServicesUrl' => $this->getAction('ShippingMethods', 'getInactive'),
                 'getTaskStatusUrl' => $this->getAction('ShippingMethods', 'getTaskStatus'),
                 'startAutoConfigureUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
                 'disableCarriersUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
@@ -747,8 +747,11 @@ class Packlink extends CarrierModule
             array('configuration' => json_encode($configuration))
         );
 
+        $stylesPath = $this->_path . 'views/css/packlink-shipping-methods.css?v=' . $this->version;
+        $output = "<link rel=\"stylesheet\" href=\"{$stylesPath}\"/>\n";
+
         $shippingServicePath = $this->_path . 'views/js/ShippingService16.js?v=' . $this->version;
-        $output = "<script src=\"{$shippingServicePath}\"></script>\n";
+        $output .= "<script src=\"{$shippingServicePath}\"></script>\n";
 
         $output .= $this->getCheckoutFilesLinks();
 
@@ -762,11 +765,17 @@ class Packlink extends CarrierModule
      */
     protected function getCheckoutFilesLinks()
     {
-        $ajaxPath = $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version;
+        $ajaxPath = $this->getPathUri() . 'views/packlink/js/AjaxService.js?v=' . $this->version;
         $output = "<script src=\"{$ajaxPath}\"></script>\n";
 
-        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version;
-        $output .= "<script src=\"{$ajaxPath}\"></script>\n";
+        $responsePath = $this->getPathUri() . 'views/packlink/js/ResponseService.js?v=' . $this->version;
+        $output .= "<script src=\"{$responsePath}\"></script>\n";
+
+        $stateUuidPath = $this->getPathUri() . 'views/packlink/js/StateUUIDService.js?v=' . $this->version;
+        $output .= "<script src=\"{$stateUuidPath}\"></script>\n";
+
+        $prestaAjaxPath = $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version;
+        $output .= "<script src=\"{$prestaAjaxPath}\"></script>\n";
 
         $stylePath = $this->_path . 'views/css/checkout.css?v=' . $this->version;
         $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>\n";
@@ -787,13 +796,13 @@ class Packlink extends CarrierModule
      */
     protected function getLocationPickerFilesLinks()
     {
-        $locationPickerLibrary = $this->_path . 'views/js/location/LocationPicker.js?v=' . $this->version;
+        $locationPickerLibrary = $this->_path . 'views/packlink/js/location/LocationPicker.js?v=' . $this->version;
         $output = "<script src=\"{$locationPickerLibrary}\"></script>\n";
 
-        $locationPickerTrans = $this->_path . 'views/js/location/Translations.js?v=' . $this->version;
+        $locationPickerTrans = $this->_path . 'views/packlink/js/location/Translations.js?v=' . $this->version;
         $output .= "<script src=\"{$locationPickerTrans}\"></script>\n";
 
-        $locationPickerCSS = $this->_path . 'views/css/locationPicker.css?v=' . $this->version;
+        $locationPickerCSS = $this->_path . 'views/packlink/css/locationPicker.css?v=' . $this->version;
         $output .= "<link rel=\"stylesheet\" href=\"{$locationPickerCSS}\"/>\n";
 
         return $output;

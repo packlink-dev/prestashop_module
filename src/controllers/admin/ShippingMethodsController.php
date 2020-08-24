@@ -57,6 +57,16 @@ class ShippingMethodsController extends PacklinkBaseController
     }
 
     /**
+     * Retrieves inactive shipping methods.
+     */
+    public function displayAjaxGetInactive()
+    {
+        $shippingMethods = $this->controller->getInactive();
+
+        PacklinkPrestaShopUtility::dieDtoEntities($shippingMethods);
+    }
+
+    /**
      * Returns a single shipping method identified by the provided ID.
      */
     public function displayAjaxGetShippingMethod()
