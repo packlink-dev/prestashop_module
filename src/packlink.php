@@ -438,6 +438,7 @@ class Packlink extends CarrierModule
             'templates' => $this->getTemplates(),
             'urls' => $this->getUrls(),
             'baseResourcesUrl' => $this->getPathUri() . 'views/packlink',
+            'gridResizerScript' => $this->getPathUri() . 'views/packlink/js/GridResizerService.js?v=' . $this->version,
         ));
 
         return $this->display(__FILE__, 'index.tpl');
@@ -473,7 +474,6 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/packlink/js/AjaxService.js?v=' . $this->version,
                 $this->getPathUri() . 'views/packlink/js/TranslationService.js?v=' . $this->version,
                 $this->getPathUri() . 'views/packlink/js/ValidationService.js?v=' . $this->version,
-                $this->getPathUri() . 'views/packlink/js/GridResizerService.js?v=' . $this->version,
                 $this->getPathUri() . 'views/packlink/js/ShippingServicesRenderer.js?v=' . $this->version,
                 $this->getPathUri() . 'views/packlink/js/AutoTestController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/packlink/js/ConfigurationController.js?v=' . $this->version,
