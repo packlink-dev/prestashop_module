@@ -28,10 +28,6 @@ class BaseRepository implements RepositoryInterface
      */
     const TABLE_NAME = 'packlink_entity';
     /**
-     * Number of indexes in Packlink entity table.
-     */
-    const NUMBER_OF_INDEXES = 7;
-    /**
      * @var string
      */
     protected $entityClass;
@@ -441,7 +437,7 @@ class BaseRepository implements RepositoryInterface
      *
      * @return array Prepared record for inserting or updating.
      */
-    private function prepareDataForInsertOrUpdate(Entity $entity, array $indexes)
+    protected function prepareDataForInsertOrUpdate(Entity $entity, array $indexes)
     {
         $record = array('data' => pSQL($this->serializeEntity($entity), true));
 
@@ -459,7 +455,7 @@ class BaseRepository implements RepositoryInterface
      *
      * @return string Serialized entity
      */
-    private function serializeEntity(Entity $entity)
+    protected function serializeEntity(Entity $entity)
     {
         return json_encode($entity->toArray());
     }
