@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
 
+## [v2.2.6](https://github.com/packlink-dev/prestashop_module/compare/v2.2.5...v2.2.6) - 2020-08-25
+### Changed
+- Fixed issue with migration script.
+
 ## [v2.2.5](https://github.com/packlink-dev/prestashop_module/compare/v2.2.4...v2.2.5) - 2020-07-14
 ### Changed
 - Fixed issue with the variant weight handling.

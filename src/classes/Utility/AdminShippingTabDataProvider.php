@@ -151,8 +151,14 @@ class AdminShippingTabDataProvider
         /** @var ShippingMethodService $shippingMethodService */
         $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
 
-        $shippingMethodId = $carrierService->getShippingMethodId((int)$order->id_carrier);
-        $shippingMethod = $shippingMethodService->getShippingMethod($shippingMethodId);
+        $carrier = new \Carrier($order->id_carrier);
+
+        $shippingMethodId = $carrierService->getShippingMethodId((int)$carrier->id_reference);
+        $shippingMethod = null;
+
+        if ($shippingMethodId) {
+            $shippingMethod = $shippingMethodService->getShippingMethod($shippingMethodId);
+        }
 
         return array(
             'name' => $shippingMethod ? $shippingMethod->getTitle() : '',

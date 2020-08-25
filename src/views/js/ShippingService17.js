@@ -69,15 +69,18 @@ var Packlink = window.Packlink || {};
             dropoffElement = document.getElementById('pl-dropoff').cloneNode(true);
 
             let point = dropoff.parentElement;
-            while (!point.classList || !point.classList.contains('delivery-option')) {
+            while (!point.classList
+                || !(point.classList.contains('delivery-option') || point.classList.contains('checkout-delivery-line'))
+            ) {
                 point = point.parentElement;
             }
+
             point.after(dropoffElement);
 
             let button = dropoffElement.querySelector('#pl-dropoff-button');
             button.addEventListener('click', clickedCallback);
             button.title = btnMsg;
-            button.innerHTML = btnMsg;
+            button.innerHTML = '<span>' + btnMsg + '</span>';
         }
 
         /**

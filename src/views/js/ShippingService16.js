@@ -63,14 +63,17 @@ var Packlink = window.Packlink || {};
             dropoffElement.classList.add('pl-drop-off-inserted');
 
             let point = dropoff.parentElement;
-            while (!point.classList || !point.classList.contains('delivery_option')) {
+            while (!point.classList
+                || !(point.classList.contains('delivery-option') || point.classList.contains('checkout-delivery-line'))
+            ) {
                 point = point.parentElement;
             }
+
             point.after(dropoffElement);
 
             let button = dropoffElement.querySelector('#pl-dropoff-button');
             button.addEventListener('click', clickedCallback);
-            button.innerHTML = btnMsg;
+            button.innerHTML = '<span>' + btnMsg + '</span>';
             button.title = btnMsg;
         }
 
