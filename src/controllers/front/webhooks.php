@@ -2,6 +2,7 @@
 
 use Packlink\BusinessLogic\WebHook\WebHookEventHandler;
 use Packlink\PrestaShop\Classes\Bootstrap;
+use Packlink\PrestaShop\Classes\Utility\EmployeeUtility;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /** @noinspection AutoloadingIssuesInspection */
@@ -26,6 +27,10 @@ class PacklinkWebhooksModuleFrontController extends ModuleFrontController
      */
     public function initContent()
     {
+        if (version_compare(_PS_VERSION_, '1.7.0.0', '<')) {
+            EmployeeUtility::impersonate();
+        }
+
         $input = \Tools::file_get_contents('php://input');
 
         $webhookHandler = WebHookEventHandler::getInstance();
