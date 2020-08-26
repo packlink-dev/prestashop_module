@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
 
+## [v2.2.7](https://github.com/packlink-dev/prestashop_module/compare/v2.2.6...v2.2.7) - 2020-08-26
+### Changed
+- Fix issue with order update in PS 1.6 when advanced stock management is enabled.
+
 ## [v2.2.6](https://github.com/packlink-dev/prestashop_module/compare/v2.2.5...v2.2.6) - 2020-08-25
 ### Changed
 - Fixed issue with migration script.
