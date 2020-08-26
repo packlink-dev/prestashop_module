@@ -11,3 +11,7 @@
   width: 22px;
   height: 22px;
 }
+
+.pl-half-width .material-icons {
+  padding-top: 5px !important;
+}
