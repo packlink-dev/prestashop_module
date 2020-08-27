@@ -2,6 +2,7 @@
 
 namespace Packlink\PrestaShop\Classes\Repositories;
 
+use Logeecom\Infrastructure\ORM\Entity;
 use Logeecom\Infrastructure\ORM\Interfaces\QueueItemRepository as QueueItemRepositoryInterface;
 use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
@@ -81,6 +82,38 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
         }
 
         return $savedItemId ?: $itemId;
+    }
+
+    /**
+     * Prepares data for inserting a new record or updating an existing one.
+     *
+     * @param Entity $entity Packlink entity object.
+     * @param array $indexes Array of index values.
+     *
+     * @return array Prepared record for inserting or updating.
+     */
+    protected function prepareDataForInsertOrUpdate(Entity $entity, array $indexes)
+    {
+        // This workaround is necessary because the queue item used to require seven indexes.
+        // The core has introduced the eight index for task priority.
+        // The migration script that adds column for the eight index is added in version 2.2.4.
+        // But update scripts (prior to the version 2.2.4) save queue items. This means that those
+        // update scripts will fail (they are trying to save a queue item with eight index columns
+        // before the column is created. The priority is not used in the Prestashop integration,
+        // therefore we can ignore its column allowing us to save the queue item in prior update
+        // scripts.
+
+        $record = array('data' => pSQL($this->serializeEntity($entity), true));
+
+        foreach ($indexes as $index => $value) {
+            if ($index > 7) {
+                break;
+            }
+
+            $record['index_' . $index] = $value !== null ? pSQL($value, true) : null;
+        }
+
+        return $record;
     }
 
     /**

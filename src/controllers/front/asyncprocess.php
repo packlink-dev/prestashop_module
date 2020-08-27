@@ -7,6 +7,7 @@ use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\AsyncProcessStarterService;
 use Logeecom\Infrastructure\TaskExecution\Interfaces\AsyncProcessService;
 use Packlink\PrestaShop\Classes\Bootstrap;
+use Packlink\PrestaShop\Classes\Utility\EmployeeUtility;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /** @noinspection AutoloadingIssuesInspection */
@@ -31,6 +32,11 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
      */
     public function initContent()
     {
+        if (version_compare(_PS_VERSION_, '1.7.0.0', '<')) {
+            EmployeeUtility::impersonate();
+        }
+
+
         $guid = trim(Tools::getValue('guid'));
         $autoTest = Tools::getValue('auto-test');
 
