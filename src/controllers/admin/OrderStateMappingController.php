@@ -3,6 +3,7 @@
 use Packlink\BusinessLogic\Controllers\OrderStatusMappingController;
 use Packlink\BusinessLogic\Language\Translator;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
+use Packlink\BusinessLogic\Configuration;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -24,6 +25,8 @@ class OrderStateMappingController extends PacklinkBaseController
      */
     public function displayAjaxGetMappingsAndStatuses()
     {
+        Configuration::setCurrentLanguage($this->context->language->iso_code);
+
         PacklinkPrestaShopUtility::dieJson(array(
             'systemName' => $this->getConfigService()->getIntegrationName(),
             'mappings' => $this->baseController->getMappings(),
@@ -50,7 +53,7 @@ class OrderStateMappingController extends PacklinkBaseController
     {
         $result = array('' => Translator::translate('orderStatusMapping.none'));
 
-        $states = OrderState::getOrderStates($this->context->language->id);
+        $states = OrderStateCore::getOrderStates($this->context->language->id);
 
         foreach ($states as $state) {
             $result[$state['id_order_state']] =  $state['name'];
