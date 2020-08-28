@@ -6,11 +6,9 @@ use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingPricePolicy;
-use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
-use Logeecom\Infrastructure\Configuration\Configuration;
 use Packlink\PrestaShop\Classes\Utility\PacklinkInstaller;
 
 if (!defined('_PS_VERSION_')) {
@@ -41,7 +39,6 @@ function upgrade_module_2_3_0($module)
 
         Bootstrap::init();
 
-        updateOrderStatusMappings();
         transformShippingMethods();
     } catch (\Exception $e) {
         Logger::logError('Error updating to version 2.3.0. Error: ' . $e->getMessage(), 'Integration');
@@ -71,22 +68,6 @@ function getNewControllers()
         'RegistrationRegions',
         'ShippingZones',
     );
-}
-
-/**
- * Adds a new entry to the order status mappings configuration.
- */
-function updateOrderStatusMappings()
-{
-    // Update order status mappings.
-    $configuration = ServiceRegister::getService(Configuration::CLASS_NAME);
-
-    $statuses = $configuration->getOrderStatusMappings();
-    if (empty($statuses[ShipmentStatus::STATUS_CANCELLED])) {
-        $statuses[ShipmentStatus::STATUS_CANCELLED] = 6;
-    }
-
-    $configuration->setOrderStatusMappings($statuses);
 }
 
 /**

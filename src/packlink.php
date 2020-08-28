@@ -437,6 +437,7 @@ class Packlink extends CarrierModule
             'lang' => $this->getTranslations(),
             'templates' => $this->getTemplates(),
             'urls' => $this->getUrls(),
+            'stateUrl' => $this->getAction('ModuleState', 'getCurrentState'),
             'baseResourcesUrl' => $this->getPathUri() . 'views/packlink',
             'gridResizerScript' => $this->getPathUri() . 'views/packlink/js/GridResizerService.js?v=' . $this->version,
         ));
@@ -453,7 +454,6 @@ class Packlink extends CarrierModule
             array(
                 'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined',
                 $this->getPathUri() . 'views/packlink/css/app.css?v=' . $this->version,
-                $this->getPathUri() . 'views/css/packlink-core-override.css?v=' . $this->version,
             ),
             'all',
             null,
@@ -579,26 +579,54 @@ class Packlink extends CarrierModule
         $baseDir = $this->getLocalPath() . 'views/packlink/templates/';
 
         return array(
-            'configuration' => json_encode(file_get_contents($baseDir . 'configuration.html')),
-            'countries-selection-modal' => json_encode(file_get_contents($baseDir . 'countries-selection-modal.html')),
-            'default-parcel' => json_encode(file_get_contents($baseDir . 'default-parcel.html')),
-            'default-warehouse' => json_encode(file_get_contents($baseDir . 'default-warehouse.html')),
-            'disable-carriers-modal' => json_encode(file_get_contents($baseDir . 'disable-carriers-modal.html')),
-            'edit-shipping-service' => json_encode(file_get_contents($baseDir . 'edit-shipping-service.html')),
-            'login' => json_encode(file_get_contents($baseDir . 'login.html')),
-            'my-shipping-services' => json_encode(file_get_contents($baseDir . 'my-shipping-services.html')),
-            'onboarding-overview' => json_encode(file_get_contents($baseDir . 'onboarding-overview.html')),
-            'onboarding-welcome' => json_encode(file_get_contents($baseDir . 'onboarding-welcome.html')),
-            'order-status-mapping' => json_encode(file_get_contents($baseDir . 'order-status-mapping.html')),
-            'pick-shipping-services' => json_encode(file_get_contents($baseDir . 'pick-shipping-services.html')),
-            'pricing-policies-list' => json_encode(file_get_contents($baseDir . 'pricing-policies-list.html')),
-            'pricing-policy-modal' => json_encode(file_get_contents($baseDir . 'pricing-policy-modal.html')),
-            'register' => json_encode(file_get_contents($baseDir . 'register.html')),
-            'register-modal' => json_encode(file_get_contents($baseDir . 'register-modal.html')),
-            'shipping-services-header' => json_encode(file_get_contents($baseDir . 'shipping-services-header.html')),
-            'shipping-services-list' => json_encode(file_get_contents($baseDir . 'shipping-services-list.html')),
-            'shipping-services-table' => json_encode(file_get_contents($baseDir . 'shipping-services-table.html')),
-            'system-info-modal' => json_encode(file_get_contents($baseDir . 'system-info-modal.html')),
+            'pl-login-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'login.html'),
+            ),
+            'pl-register-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'register.html'),
+            ),
+            'pl-register-modal' => file_get_contents($baseDir . 'register-modal.html'),
+            'pl-onboarding-welcome-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'onboarding-welcome.html'),
+            ),
+            'pl-onboarding-overview-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'onboarding-overview.html'),
+            ),
+            'pl-default-parcel-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'default-parcel.html'),
+            ),
+            'pl-default-warehouse-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'default-warehouse.html'),
+            ),
+            'pl-configuration-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'configuration.html'),
+                'pl-header-section' => '',
+            ),
+            'pl-order-status-mapping-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'order-status-mapping.html'),
+                'pl-header-section' => '',
+            ),
+            'pl-system-info-modal' => file_get_contents($baseDir . 'system-info-modal.html'),
+            'pl-my-shipping-services-page' => array(
+                'pl-main-page-holder' => file_get_contents($baseDir . 'my-shipping-services.html'),
+                'pl-header-section' => file_get_contents($baseDir . 'shipping-services-header.html'),
+                'pl-shipping-services-table' => file_get_contents($baseDir . 'shipping-services-table.html'),
+                'pl-shipping-services-list' => file_get_contents($baseDir . 'shipping-services-list.html'),
+            ),
+            'pl-disable-carriers-modal' => file_get_contents($baseDir . 'disable-carriers-modal.html'),
+            'pl-pick-service-page' => array(
+                'pl-header-section' => '',
+                'pl-main-page-holder' => file_get_contents($baseDir . 'pick-shipping-services.html'),
+                'pl-shipping-services-table' => file_get_contents($baseDir . 'shipping-services-table.html'),
+                'pl-shipping-services-list' => file_get_contents($baseDir . 'shipping-services-list.html'),
+            ),
+            'pl-edit-service-page' => array(
+                'pl-header-section' => '',
+                'pl-main-page-holder' => file_get_contents($baseDir . 'edit-shipping-service.html'),
+                'pl-pricing-policies' => file_get_contents($baseDir . 'pricing-policies-list.html'),
+            ),
+            'pl-pricing-policy-modal' => file_get_contents($baseDir . 'pricing-policy-modal.html'),
+            'pl-countries-selection-modal' => file_get_contents($baseDir . 'countries-selection-modal.html'),
         );
     }
 
@@ -615,23 +643,25 @@ class Packlink extends CarrierModule
             'login' => array(
                 'submit' => $this->getAction('Login', 'login'),
                 'listOfCountriesUrl' => $this->getAction('RegistrationRegions', 'getRegions'),
+                'logoPath' => '', // Not used. Logos are retrieved based on the base resource url.
             ),
             'register' => array(
                 'getRegistrationData' => $this->getAction('Registration', 'getRegisterData'),
                 'submit' => $this->getAction('Registration', 'register'),
             ),
-            'onboardingState' => array(
+            'onboarding-state' => array(
                 'getState' => $this->getAction('Onboarding', 'getCurrentState'),
             ),
-            'onboardingOverview' => array(
+            'onboarding-welcome' => array(),
+            'onboarding-overview' => array(
                 'defaultParcelGet' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
                 'defaultWarehouseGet' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
             ),
-            'defaultParcel' => array(
+            'default-parcel' => array(
                 'getUrl' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
                 'submitUrl' => $this->getAction('DefaultParcel', 'submitDefaultParcel'),
             ),
-            'defaultWarehouse' => array(
+            'default-warehouse' => array(
                 'getUrl' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
                 'getSupportedCountriesUrl' => $this->getAction('DefaultWarehouse', 'getSupportedCountries'),
                 'submitUrl' => $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse'),
@@ -640,32 +670,34 @@ class Packlink extends CarrierModule
             'configuration' => array(
                 'getDataUrl' => $this->getAction('Configuration', 'getData'),
             ),
-            'systemInfo' => array(
+            'system-info' => array(
                 'getStatusUrl' => $this->getAction('Debug', 'getStatus'),
                 'setStatusUrl' => $this->getAction('Debug', 'setStatus'),
             ),
-            'orderStatusMapping' => array(
+            'order-status-mapping' => array(
                 'getMappingAndStatusesUrl' => $this->getAction('OrderStateMapping', 'getMappingsAndStatuses'),
                 'setUrl' => $this->getAction('OrderStateMapping', 'saveMappings'),
             ),
-            'myShippingServices' => array(
+            'my-shipping-services' => array(
                 'getServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
                 'deleteServiceUrl' => $this->getAction('ShippingMethods', 'deactivate'),
             ),
-            'pickShippingService' => array(
+            'pick-shipping-service' => array(
                 'getActiveServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
                 'getServicesUrl' => $this->getAction('ShippingMethods', 'getInactive'),
                 'getTaskStatusUrl' => $this->getAction('ShippingMethods', 'getTaskStatus'),
                 'startAutoConfigureUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
                 'disableCarriersUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
             ),
-            'editService' => array(
+            'edit-service' => array(
                 'getServiceUrl' => $this->getAction('ShippingMethods', 'getShippingMethod'),
                 'saveServiceUrl' => $this->getAction('ShippingMethods', 'save'),
                 'getTaxClassesUrl' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
                 'getCountriesListUrl' => $this->getAction('ShippingZones', 'getShippingZones'),
+                'hasTaxConfiguratio' => true,
+                'hasCountryConfiguration' => true,
+                'canDisplayCarrierLogos' => true,
             ),
-            'stateUrl' => $this->getAction('ModuleState', 'getCurrentState'),
         );
     }
 

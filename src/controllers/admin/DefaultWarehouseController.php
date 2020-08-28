@@ -13,33 +13,14 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
  */
 class DefaultWarehouseController extends PacklinkBaseController
 {
-    /** @var WarehouseController */
-    private $warehouseController;
-    /** @var LocationsController */
-    private $locationsController;
-    /** @var CountryController */
-    private $countryController;
-
-    /**
-     * DefaultWarehouseController constructor.
-     *
-     * @throws \PrestaShopException
-     */
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->warehouseController = new WarehouseController();
-        $this->locationsController = new LocationsController();
-        $this->countryController = new CountryController();
-    }
-
     /**
      * Retrieves default warehouse data.
      */
     public function displayAjaxGetDefaultWarehouse()
     {
-        $warehouse = $this->warehouseController->getWarehouse();
+        $warehouseController = new WarehouseController();
+
+        $warehouse = $warehouseController->getWarehouse();
 
         PacklinkPrestaShopUtility::dieJson($warehouse ? $warehouse->toArray() : array());
     }
@@ -49,7 +30,9 @@ class DefaultWarehouseController extends PacklinkBaseController
      */
     public function displayAjaxGetSupportedCountries()
     {
-        $countries = $this->countryController->getRegions();
+        $countryController = new CountryController();
+
+        $countries = $countryController->getRegions();
 
         PacklinkPrestaShopUtility::dieDtoEntities($countries);
     }
@@ -65,9 +48,10 @@ class DefaultWarehouseController extends PacklinkBaseController
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
         $data['default'] = true;
+        $warehouseController = new WarehouseController();
 
         try {
-            $warehouse = $this->warehouseController->updateWarehouse($data);
+            $warehouse = $warehouseController->updateWarehouse($data);
 
             PacklinkPrestaShopUtility::dieJson($warehouse->toArray());
         } catch (\Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException $e) {
@@ -86,8 +70,10 @@ class DefaultWarehouseController extends PacklinkBaseController
             PacklinkPrestaShopUtility::dieJson();
         }
 
+        $locationsController = new LocationsController();
+
         try {
-            PacklinkPrestaShopUtility::dieDtoEntities($this->locationsController->searchLocations($input));
+            PacklinkPrestaShopUtility::dieDtoEntities($locationsController->searchLocations($input));
         } catch (\Exception $e) {
             PacklinkPrestaShopUtility::dieJson();
         }

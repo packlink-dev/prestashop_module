@@ -12,6 +12,13 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
 class RegistrationController extends PacklinkBaseController
 {
     /**
+     * Array that identifies e-commerce.
+     *
+     * @var string[]
+     */
+    protected static $ecommerceIdentifiers = array('Prestashop');
+
+    /**
      * @var BaseRegistrationController
      */
     private $baseController;
@@ -22,13 +29,6 @@ class RegistrationController extends PacklinkBaseController
 
         $this->baseController = new BaseRegistrationController();
     }
-
-    /**
-     * Array that identifies e-commerce.
-     *
-     * @var string[]
-     */
-    protected static $ecommerceIdentifiers = array('Prestashop');
 
     /**
      * Returns registration data.

@@ -159,8 +159,6 @@ class ShippingMethodsController extends PacklinkBaseController
 
         $this->activateShippingMethod($model->id);
 
-        $model->selected = true;
-
         PacklinkPrestaShopUtility::dieJson($model->toArray());
     }
 

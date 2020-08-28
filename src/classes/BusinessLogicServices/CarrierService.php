@@ -58,7 +58,6 @@ class CarrierService implements ShopShippingMethodService
 
                 $this->setCarrierGroups($carrier);
                 $ranges = $this->setCarrierRanges($carrier);
-                $this->deleteCarrierZones($carrier);
                 $this->setCarrierZones($carrier, $shippingMethod, $ranges);
 
                 $this->updateCarrierLogo($shippingMethod, $carrier);
@@ -96,7 +95,6 @@ class CarrierService implements ShopShippingMethodService
                 try {
                     $this->setCarrierData($carrier, $shippingMethod);
                     $ranges = $this->setCarrierRanges($carrier);
-                    $this->deleteCarrierZones($carrier);
                     $this->setCarrierZones($carrier, $shippingMethod, $ranges);
 
                     $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
@@ -180,9 +178,7 @@ class CarrierService implements ShopShippingMethodService
 
         $this->setCarrierGroups($carrier);
         $ranges = $this->setCarrierRanges($carrier);
-        foreach ($ranges as $range) {
-            $this->setBackupCarrierZones($carrier, $range, $shippingMethod);
-        }
+        $this->setBackupCarrierZones($carrier, $shippingMethod, $ranges);
 
         if (!$this->copyCarrierLogo($carrier->name, (int)$carrier->id)) {
             throw new \RuntimeException(
@@ -605,10 +601,10 @@ class CarrierService implements ShopShippingMethodService
      * Sets zones for backup carrier by adding default shipping cost of the first carrier for delivery price.
      *
      * @param \Carrier $carrier PrestaShop carrier entity.
-     * @param \ObjectModel $range PrestaShop prince/weight range.
+     * @param \ObjectModel[] $ranges PrestaShop prince/weight ranges.
      * @param ShippingMethod $shippingMethod Packlink shipping method entity.
      */
-    private function setBackupCarrierZones(\Carrier $carrier, \ObjectModel $range, ShippingMethod $shippingMethod)
+    private function setBackupCarrierZones(\Carrier $carrier, ShippingMethod $shippingMethod, $ranges)
     {
         $defaultCost = PHP_INT_MAX;
         foreach ($shippingMethod->getShippingServices() as $shippingService) {
@@ -616,7 +612,7 @@ class CarrierService implements ShopShippingMethodService
         }
 
         $this->deleteCarrierZones($carrier);
-        $this->setCarrierZones($carrier, $shippingMethod, array($range));
+        $this->setCarrierZones($carrier, $shippingMethod, $ranges, $defaultCost);
     }
 
     /**
@@ -629,6 +625,8 @@ class CarrierService implements ShopShippingMethodService
      */
     private function setCarrierZones(\Carrier $carrier, ShippingMethod $shippingMethod, $ranges, $price = 0.0)
     {
+        $this->deleteCarrierZones($carrier);
+
         $zones = \Zone::getZones(true);
         foreach ($zones as $zone) {
             if ($shippingMethod->isShipToAllCountries()
