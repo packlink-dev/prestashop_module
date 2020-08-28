@@ -168,5 +168,5 @@ function getTransformedPricingPolicies(array $method)
  */
 function getLogoUrl($method)
 {
-    return str_replace('/views/img/', '/views/packlink/images/', $method['logoUrl']);
+    return str_replace('/views/img/', '/views/img/core/images/', $method['logoUrl']);
 }

@@ -74,9 +74,9 @@ class AdminShippingTabDataProvider
             array(
                 self::$module->getPathUri() . 'views/js/PrestaCreateOrderDraft.js?v=' . self::$module->version,
                 self::$module->getPathUri() . 'views/js/PrestaAjaxService.js?v=' . self::$module->version,
-                self::$module->getPathUri() . 'views/packlink/js/AjaxService.js?v=' . self::$module->version,
-                self::$module->getPathUri() . 'views/packlink/js/ResponseService.js?v=' . self::$module->version,
-                self::$module->getPathUri() . 'views/packlink/js/StateUUIDService.js?v=' . self::$module->version,
+                self::$module->getPathUri() . 'views/js/core/AjaxService.js?v=' . self::$module->version,
+                self::$module->getPathUri() . 'views/js/core/ResponseService.js?v=' . self::$module->version,
+                self::$module->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . self::$module->version,
             ),
             false
         );

@@ -48,9 +48,7 @@ class OrderStateMappingController extends PacklinkBaseController
      */
     private function getSystemOrderStatuses()
     {
-        $result = array(
-            '' => Translator::translate( 'orderStatusMapping.none' ),
-        );
+        $result = array('' => Translator::translate('orderStatusMapping.none'));
 
         $states = OrderState::getOrderStates($this->context->language->id);
 

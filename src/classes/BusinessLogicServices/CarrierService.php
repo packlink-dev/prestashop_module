@@ -409,7 +409,7 @@ class CarrierService implements ShopShippingMethodService
         $defaultCarrierLogoPath = 'packlink/views/img/carrier.jpg';
 
         $carrierImageFile = \Tools::strtolower(str_replace(' ', '-', $carrierName));
-        $logoFilePath = 'packlink/views/packlink/images/carriers/' . $carrierImageFile . '.png';
+        $logoFilePath = 'packlink/views/img/core/images/carriers/' . $carrierImageFile . '.png';
 
         return \Tools::file_exists_cache(_PS_MODULE_DIR_ . $logoFilePath)
             ? $logoFilePath : $defaultCarrierLogoPath;

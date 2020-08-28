@@ -49,18 +49,18 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         Packlink.translations = {
-            default: {$lang['default']},
-            current: {$lang['current']}
+            default: {$lang['default']|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3},
+            current: {$lang['current']|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}
         };
 
-        let pageConfiguration = {json_encode($urls)};
+        let pageConfiguration = {json_encode($urls)|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3};
 
         Packlink.state = new Packlink.StateController(
             {
-                baseResourcesUrl: "{$baseResourcesUrl}",
-                stateUrl: "{$stateUrl}",
+                baseResourcesUrl: "{$baseResourcesUrl|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}",
+                stateUrl: "{$stateUrl|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}",
                 pageConfiguration: pageConfiguration,
-                templates: {json_encode($templates)}
+                templates: {json_encode($templates)|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}
             }
         );
 

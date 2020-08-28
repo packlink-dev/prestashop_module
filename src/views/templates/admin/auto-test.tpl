@@ -47,15 +47,15 @@
         </div>
       </div>
 
-      <a href="{$downloadLogUrl}" value="auto-test-log.json" download>
+      <a href="{$downloadLogUrl|escape:'html':'UTF-8'}" value="auto-test-log.json" download>
         <button type="button" name="download-log"
                 class="btn btn-info btn-lg">{l s='Download test log' mod='packlink'}</button>
       </a>
-      <a href="{$systemInfoUrl}" value="packlink-debug-data.zip" download>
+      <a href="{$systemInfoUrl|escape:'html':'UTF-8'}" value="packlink-debug-data.zip" download>
         <button type="button" name="download-system-info-file"
                 class="btn btn-info btn-lg">{l s='Download system info file' mod='packlink'}</button>
       </a>
-      <a href="{$moduleUrl}">
+      <a href="{$moduleUrl|escape:'html':'UTF-8'}">
         <button type="button" name="open-module"
                 class="btn btn-success btn-lg">{l s='Open PacklinkPRO module' mod='packlink'}</button>
       </a>
@@ -66,5 +66,8 @@
 
 <script type="application/javascript">
     hidePrestaSpinner();
-    Packlink.AutoTestController("{$startTestUrl}", "{$checkStatusUrl}");
+    Packlink.AutoTestController(
+        "{$startTestUrl|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}",
+        "{$checkStatusUrl|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}"
+    );
 </script>

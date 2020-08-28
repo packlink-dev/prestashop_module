@@ -32,7 +32,7 @@
                           href=""
                           title="{l s='Print' mod='packlink'}"
                           data-order="{$orderId|escape:'html':'UTF-8'}"
-                          data-label-printed="{$isLabelPrinted}"
+                          data-label-printed="{$isLabelPrinted|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}"
                           onclick="plPrintLabelOnOrderDetailsPage(this)">
                       {$number|escape:'html':'UTF-8'}
                   </a>
@@ -43,7 +43,7 @@
                      href=""
                      title="{l s='Print' mod='packlink'}"
                      data-order="{$orderId|escape:'html':'UTF-8'}"
-                     data-label-printed="{$isLabelPrinted}"
+                     data-label-printed="{$isLabelPrinted|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}"
                      onclick="plPrintLabelOnOrderDetailsPage(this)">
                     <i class="icon-print"></i>
                       {l s='Print label' mod='packlink'}

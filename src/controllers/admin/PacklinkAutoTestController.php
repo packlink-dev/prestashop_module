@@ -75,12 +75,12 @@ class PacklinkAutoTestController extends PacklinkBaseController
         );
         $this->addJS(
             array(
-                $path . 'views/packlink/js/UtilityService.js?v=' . $this->module->version,
-                $path . 'views/packlink/js/TemplateService.js?v=' . $this->module->version,
-                $path . 'views/packlink/js/AjaxService.js?v=' . $this->module->version,
-                $path . 'views/packlink/js/ResponseService.js?v=' . $this->module->version,
-                $path . 'views/packlink/js/AutoTestController.js?v=' . $this->module->version,
-                $path . 'views/packlink/js/StateUUIDService.js?v=' . $this->module->version,
+                $path . 'views/js/core/UtilityService.js?v=' . $this->module->version,
+                $path . 'views/js/core/TemplateService.js?v=' . $this->module->version,
+                $path . 'views/js/core/AjaxService.js?v=' . $this->module->version,
+                $path . 'views/js/core/ResponseService.js?v=' . $this->module->version,
+                $path . 'views/js/core/AutoTestController.js?v=' . $this->module->version,
+                $path . 'views/js/core/StateUUIDService.js?v=' . $this->module->version,
                 $path . 'views/js/PrestaFix.js?v=' . $this->module->version,
             ),
             false

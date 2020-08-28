@@ -279,7 +279,8 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $orderItem->setCategoryName($category->name[$languageId]);
         }
 
-        $orderItem->setWeight(round($sourceOrderItem['product_weight'] ?: (float)$product->weight ?: $defaultParcel->weight, 2));
+        $weight = $sourceOrderItem['product_weight'] ?: (float)$product->weight ?: $defaultParcel->weight;
+        $orderItem->setWeight(round($weight, 2));
         $orderItem->setWidth(ceil((float)$product->width ?: $defaultParcel->width));
         $orderItem->setLength(ceil((float)$product->depth ?: $defaultParcel->length));
         $orderItem->setHeight(ceil((float)$product->height ?: $defaultParcel->height));
