@@ -12,7 +12,6 @@ use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\Controllers\AnalyticsController;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
-use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\BusinessLogic\Utility\Php\Php55;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
@@ -164,10 +163,6 @@ class CarrierService implements ShopShippingMethodService
      */
     public function addBackupShippingMethod(ShippingMethod $shippingMethod)
     {
-        /** @var ShippingMethodService $shippingMethodService */
-        $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
-        $shippingMethod = $shippingMethodService->getShippingMethod($shippingMethod->getId());
-
         $carrier = new \Carrier();
         $this->setCarrierData($carrier, $shippingMethod);
         $carrier->name = 'shipping cost';
