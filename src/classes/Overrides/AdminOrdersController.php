@@ -44,6 +44,7 @@ class AdminOrdersController
             'align' => 'text-center',
             'filter_key' => 'a!id_order',
             'callback' => 'getOrderDraft',
+            'remove_onclick' => true,
         );
 
         return $this->insertElementIntoArrayAfterSpecificKey(
@@ -105,12 +106,12 @@ class AdminOrdersController
 
         $context->controller->addJS(
             array(
-                _PS_MODULE_DIR_ . 'views/js/PrestaPrintShipmentLabels.js',
-                _PS_MODULE_DIR_ . 'views/js/PrestaAjaxService.js',
-                _PS_MODULE_DIR_ . 'views/js/OrderOverviewDraft.js',
-                _PS_MODULE_DIR_ . 'views/js/core/AjaxService.js',
-                _PS_MODULE_DIR_ . 'views/js/core/ResponseService.js',
-                _PS_MODULE_DIR_ . 'views/js/core/StateUUIDService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/OrderOverviewDraft.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/core/AjaxService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/core/ResponseService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/core/StateUUIDService.js',
             )
         );
 

@@ -5,7 +5,7 @@
     {html_entity_decode($printLabelsUrl|escape:'html':'UTF-8')}
 </p>
 <div class="tab-pane" id="packlink-shipping">
-    {if $shipping neq null and $shipping->reference neq ''}
+    {if $shipping neq null and isset($shipping->reference)}
         {if $isLabelAvailable}
           <h4>{l s='Shipment labels' mod='packlink'}</h4>
           <div class="table-responsive">
