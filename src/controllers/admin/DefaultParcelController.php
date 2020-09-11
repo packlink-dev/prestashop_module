@@ -1,7 +1,7 @@
 <?php
 
-use Packlink\BusinessLogic\Http\DTO\ParcelInfo;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
+use Packlink\BusinessLogic\Controllers\DefaultParcelController as BaseParcelController;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -11,22 +11,30 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
  */
 class DefaultParcelController extends PacklinkBaseController
 {
+    /** @var BaseParcelController */
+    private $parcelController;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->parcelController = new BaseParcelController();
+    }
+
     /**
      * Retrieves default parcel.
      */
     public function displayAjaxGetDefaultParcel()
     {
-        $parcel = $this->getConfigService()->getDefaultParcel();
+        $parcel = $this->parcelController->getDefaultParcel();
 
-        if (!$parcel) {
-            PacklinkPrestaShopUtility::dieJson();
-        }
-
-        PacklinkPrestaShopUtility::dieJson($parcel->toArray());
+        PacklinkPrestaShopUtility::dieJson($parcel ? $parcel->toArray() : array());
     }
 
     /**
      * Saves default parcel.
+     *
+     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      */
     public function displayAjaxSubmitDefaultParcel()
     {
@@ -34,9 +42,9 @@ class DefaultParcelController extends PacklinkBaseController
         $data['default'] = true;
 
         try {
-            $parcelInfo = ParcelInfo::fromArray($data);
-            $this->getConfigService()->setDefaultParcel($parcelInfo);
-            PacklinkPrestaShopUtility::dieJson($parcelInfo->toArray());
+            $this->parcelController->setDefaultParcel($data);
+
+            $this->displayAjaxGetDefaultParcel();
         } catch (\Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException $e) {
             PacklinkPrestaShopUtility::die400WithValidationErrors($e->getValidationErrors());
         }

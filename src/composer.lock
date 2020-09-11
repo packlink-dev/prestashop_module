@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "43f475d28e9b98cdb971196788dede16",
+    "content-hash": "73e068fd9809ba76b222c087e6e2a5db",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -58,23 +58,25 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "2.1.3",
+            "version": "3.0.2",
             "source": {
                 "type": "git",
                 "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "645d1641ba013b9cfaf3abb99b4ee828b41eb9c3"
+                "reference": "75cf6a0a7d2f3f269c9ec0fc3407a533a122af49"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/645d1641ba013b9cfaf3abb99b4ee828b41eb9c3",
-                "reference": "645d1641ba013b9cfaf3abb99b4ee828b41eb9c3",
+                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/75cf6a0a7d2f3f269c9ec0fc3407a533a122af49",
+                "reference": "75cf6a0a7d2f3f269c9ec0fc3407a533a122af49",
                 "shasum": ""
             },
             "require": {
+                "ext-json": "*",
                 "php": ">=5.3.29"
             },
             "require-dev": {
                 "codacy/coverage": "dev-master",
+                "leafo/scssphp": "0.0.12",
                 "phpunit/phpunit": "^4.8"
             },
             "type": "library",
@@ -90,11 +92,19 @@
                     "Logeecom\\Tests\\BusinessLogic\\": "tests/BusinessLogic"
                 }
             },
+            "scripts": {
+                "post-update-cmd": [
+                    "php cssCompile.php"
+                ],
+                "post-install-cmd": [
+                    "php cssCompile.php"
+                ]
+            },
             "license": [
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2020-06-29T07:52:43+00:00"
+            "time": "2020-09-10T11:25:01+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -336,7 +346,7 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "dev-master",
+            "version": "v1.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
@@ -598,16 +608,16 @@
         },
         {
             "name": "phpunit/php-token-stream",
-            "version": "1.4.x-dev",
+            "version": "1.4.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-token-stream.git",
-                "reference": "58bd196ce8bc49389307b3787934a5117db80fea"
+                "reference": "1ce90ba27c42e4e44e6d8458241466380b51fa16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/58bd196ce8bc49389307b3787934a5117db80fea",
-                "reference": "58bd196ce8bc49389307b3787934a5117db80fea",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/1ce90ba27c42e4e44e6d8458241466380b51fa16",
+                "reference": "1ce90ba27c42e4e44e6d8458241466380b51fa16",
                 "shasum": ""
             },
             "require": {
@@ -643,7 +653,8 @@
             "keywords": [
                 "tokenizer"
             ],
-            "time": "2017-12-04T15:11:28+00:00"
+            "abandoned": true,
+            "time": "2017-12-04T08:55:13+00:00"
         },
         {
             "name": "phpunit/phpunit",
@@ -1152,12 +1163,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14"
+                "reference": "1c302646f6efc070cd46856e600e5e0684d6b454"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
-                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/1c302646f6efc070cd46856e600e5e0684d6b454",
+                "reference": "1c302646f6efc070cd46856e600e5e0684d6b454",
                 "shasum": ""
             },
             "require": {
@@ -1169,7 +1180,11 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.15-dev"
+                    "dev-master": "1.18-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
                 }
             },
             "autoload": {
@@ -1202,7 +1217,21 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2020-02-27T09:26:54+00:00"
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-07-14T12:35:20+00:00"
         },
         {
             "name": "symfony/yaml",

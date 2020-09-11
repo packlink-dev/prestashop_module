@@ -87,7 +87,7 @@ class AdminOrdersController extends AdminOrdersControllerCore
 
         $this->packlinkAdminOrderController = new \Packlink\PrestaShop\Classes\Overrides\AdminOrdersController();
 
-        $this->fields_list = $this->packlinkAdminOrderController->insertOrderColumn($this->_select, $this->fields_list);
+        $this->fields_list = $this->packlinkAdminOrderController->insertOrderColumn($this->fields_list);
 
         $this->packlinkAdminOrderController->addBulkActions($this->bulk_actions);
     }

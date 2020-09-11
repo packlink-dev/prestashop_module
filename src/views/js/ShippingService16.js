@@ -64,8 +64,8 @@ var Packlink = window.Packlink || {};
 
             let point = dropoff.parentElement;
             while (!point.classList
-                || !(point.classList.contains('delivery-option') || point.classList.contains('checkout-delivery-line'))
-            ) {
+                || !(point.classList.contains('delivery-option') || point.classList.contains('delivery_option') || point.classList.contains('checkout-delivery-line'))
+                ) {
                 point = point.parentElement;
             }
 
@@ -125,7 +125,7 @@ var Packlink = window.Packlink || {};
          */
         function changeBtnText(btnMsg) {
             let button = dropoffElement.querySelector('#pl-dropoff-button');
-            button.innerHTML = btnMsg;
+            button.innerHTML = '<span>' + btnMsg + '</span>';
             button.title = btnMsg;
         }
 

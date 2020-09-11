@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
+### Changed
+- Changed the look of the module page with new design.
+- Changed shipping method pricing policies.
+
+## [v3.0.0](https://github.com/packlink-dev/prestashop_module/compare/v2.2.7...v3.0.0) - 2020-09-10
+### Changed
+- New design and new pricing policy.
 
 ## [v2.2.7](https://github.com/packlink-dev/prestashop_module/compare/v2.2.6...v2.2.7) - 2020-08-26
 ### Changed

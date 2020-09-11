@@ -8,3 +8,13 @@ vendor
 *.zip
 !PluginInstallation/**/*.zip
 src/tests/autoload.php
+!src/views/packlink/.gitkeep
+src/views/js/core
+src/views/js/location
+src/views/css/app.css
+src/views/css/locationPicker.css
+src/views/css/README.md
+src/views/templates/core
+src/views/img/core/images/*
+!src/views/img/core/images/.gitkeep
+src/views/lang/*
