@@ -22,23 +22,15 @@ function calculateContentHeight(offset) {
     offset = 0;
   }
 
-  let localOffset = offset;
+  let content = document.getElementById('pl-page');
+  let localOffset = offset + content.offsetTop + 20;
 
   let footer = document.getElementById('footer');
   if (footer) {
     localOffset += footer.clientHeight;
   }
 
-  let alerts = document.getElementsByClassName('alert');
-
-  for (let alert of alerts) {
-    if (alert.clientHeight) {
-      localOffset += 71;
-    }
-  }
-
-  let content = document.getElementById('pl-main-page-holder');
-  content.style.height = `calc(100% - ${localOffset}px`;
+  content.style.height = `calc(100vh - ${localOffset}px`;
 
   setTimeout(calculateContentHeight, 250, offset);
 }

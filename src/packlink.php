@@ -37,30 +37,6 @@ class Packlink extends CarrierModule
      * @var int
      */
     public $id_carrier;
-    /**
-     * List of help URLs for different country codes.
-     *
-     * @var array
-     */
-    private static $helpUrls = array(
-        'EN' => 'https://support-pro.packlink.com/hc/en-gb/sections/202755109-Prestashop',
-        'ES' => 'https://support-pro.packlink.com/hc/es-es/sections/202755109-Prestashop',
-        'DE' => 'https://support-pro.packlink.com/hc/de/sections/202755109-Prestashop',
-        'FR' => 'https://support-pro.packlink.com/hc/fr-fr/sections/202755109-Prestashop',
-        'IT' => 'https://support-pro.packlink.com/hc/it/sections/202755109-Prestashop',
-    );
-    /**
-     * List of terms and conditions URLs for different country codes.
-     *
-     * @var array
-     */
-    private static $termsAndConditionsUrls = array(
-        'EN' => 'https://support-pro.packlink.com/hc/en-gb/articles/360010011480',
-        'ES' => 'https://pro.packlink.es/terminos-y-condiciones/',
-        'DE' => 'https://pro.packlink.de/agb/',
-        'FR' => 'https://pro.packlink.fr/conditions-generales/',
-        'IT' => 'https://pro.packlink.it/termini-condizioni/',
-    );
 
     /**
      * Packlink constructor.
@@ -70,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '2.2.7';
+        $this->version = '3.0.0';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -440,32 +416,11 @@ class Packlink extends CarrierModule
      *
      * @return string
      *
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
      * @throws \PrestaShopException
      */
     public function getContent()
     {
         \Packlink\PrestaShop\Classes\Bootstrap::init();
-
-        $output = '';
-
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Configuration::CLASS_NAME
-        );
-        $apiToken = $configService->getAuthorizationToken();
-        $loggedIn = false;
-
-        if (!$apiToken && Tools::isSubmit('api_key')) {
-            $loggedIn = $this->login();
-
-            if (!$loggedIn) {
-                $output .= $this->displayError(
-                    \Packlink\PrestaShop\Classes\Utility\TranslationUtility::__('API key was incorrect.')
-                );
-            }
-        }
 
         /** @var \Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerWakeup $wakeupService */
         $wakeupService = \Logeecom\Infrastructure\ServiceRegister::getService(
@@ -473,44 +428,298 @@ class Packlink extends CarrierModule
         );
         $wakeupService->wakeup();
 
-        $fancyBoxUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . 'js/jquery/plugins/fancybox/jquery.fancybox.js';
-        $fancyBoxUrl = str_replace(array('https:', 'http:'), '', $fancyBoxUrl);
+        $this->loadStyles();
+        $this->loadScripts();
+
+        \Packlink\BusinessLogic\Configuration::setCurrentLanguage($this->context->language->iso_code);
 
         $this->context->smarty->assign(array(
-            'fancyBoxPath' => $fancyBoxUrl,
+            'lang' => $this->getTranslations(),
+            'templates' => $this->getTemplates(),
+            'urls' => $this->getUrls(),
+            'stateUrl' => $this->getAction('ModuleState', 'getCurrentState'),
+            'baseResourcesUrl' => $this->getPathUri() . 'views/img/core',
+            'gridResizerScript' => $this->getPathUri() . 'views/js/core/GridResizerService.js?v=' . $this->version,
         ));
 
-        if ($apiToken || $loggedIn) {
-            return $this->renderConfigForm();
-        }
+        return $this->display(__FILE__, 'index.tpl');
+    }
 
+    /**
+     * Loads Packlink stylesheets.
+     */
+    private function loadStyles()
+    {
         $this->context->controller->addCSS(
             array(
-                $this->_path . 'views/css/packlink.css?v=' . $this->version,
-                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css?v=' . $this->version,
+                'https://fonts.googleapis.com/icon?family=Material+Icons+Outlined',
+                $this->getPathUri() . 'views/css/app.css?v=' . $this->version,
             ),
             'all',
             null,
             false
         );
+    }
+
+    /**
+     * Loads Packlink scripts.
+     */
+    private function loadScripts()
+    {
         $this->context->controller->addJS(
             array(
-                $this->_path . 'views/js/prestashop-ui-kit.js?v=' . $this->version,
-                $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
-                $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
-                $this->_path . 'views/js/PrestaFix.js?v=' . $this->version,
-                $this->_path . 'views/js/Login.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/PrestaFix.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/UtilityService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/TemplateService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/AjaxService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/TranslationService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/ValidationService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/ShippingServicesRenderer.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/AutoTestController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/ConfigurationController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/EditServiceController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/LoginController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/ModalService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/MyShippingServicesController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/OnboardingOverviewController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/OnboardingStateController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/OnboardingWelcomeController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/OrderStatusMappingController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/PageControllerFactory.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/PickShippingServiceController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/PricePolicyController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/RegisterController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/RegisterModalController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/ResponseService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/ServiceCountriesModalController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/StateController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/SystemInfoController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/PrestaAjaxService.js?v=' . $this->version,
             ),
             false
         );
+    }
 
-        $this->context->smarty->assign(array(
-            'iconPath' => $this->_path . 'views/img/flags/',
-            'loginIcon' => $this->_path . 'views/img/logo-pl.svg',
-            'getCountriesUrl' => $this->getAction('DefaultWarehouse', 'getSupportedCountries'),
-        ));
+    /**
+     * Returns Packlink module translations in the default and the current system language.
+     *
+     * @return array
+     */
+    private function getTranslations()
+    {
+        return array(
+            'default' => $this->getDefaultTranslations(),
+            'current' => $this->getCurrentTranslations(),
+        );
+    }
 
-        return $output . $this->display(__FILE__, 'login.tpl');
+    /**
+     * Returns JSON encoded module page translations in the default language and some module-specific translations.
+     *
+     * @return string
+     */
+    private function getDefaultTranslations()
+    {
+        $baseDir = $this->getLocalPath() . 'views/lang/';
+        $defaultTranslations = json_decode(Tools::file_get_contents($baseDir . 'en.json'), true);
+
+        $zonesDescription = 'Select the availability for the zones that are supported for your shipping service.';
+        $selectOneZone = 'Select availability of at least one zone and add as many required';
+
+        $defaultTranslations['shippingServices']['serviceCountriesTitle'] = 'Availability by destination zone';
+        $defaultTranslations['shippingServices']['serviceCountriesDescription'] = $zonesDescription;
+        $defaultTranslations['shippingServices']['openCountries'] = 'See zones';
+        $defaultTranslations['shippingServices']['allCountriesSelected'] = 'All zones selected';
+        $defaultTranslations['shippingServices']['oneCountrySelected'] = 'One zone selected';
+        $defaultTranslations['shippingServices']['selectedCountries'] = '%s zones selected.';
+        $defaultTranslations['shippingServices']['selectAllCountries'] = 'All selected zones';
+        $defaultTranslations['shippingServices']['selectCountriesHeader'] = 'Zones supported for your shipping service';
+        $defaultTranslations['shippingServices']['selectCountriesSubheader'] = $selectOneZone;
+        $defaultTranslations['shippingServices']['atLeastOneCountry'] = 'At least one zone must be selected.';
+
+        return json_encode($defaultTranslations);
+    }
+
+    /**
+     * Returns JSON encoded module page translations in the current language and some module-specific translations.
+     *
+     * @return string
+     */
+    private function getCurrentTranslations()
+    {
+        $baseDir = $this->getLocalPath() . 'views/lang/';
+        $locale = Tools::strtolower($this->context->language->iso_code);
+
+        $currentLangFilename = $baseDir . $locale . '.json';
+        $currentTranslations = file_exists($currentLangFilename)
+            ? json_decode(Tools::file_get_contents($currentLangFilename), true)
+            : array();
+
+        if (!empty($currentTranslations)) {
+            $currentTranslations['shippingServices']['serviceCountriesTitle'] = $this->l(
+                'Availability by destination zone'
+            );
+            $currentTranslations['shippingServices']['serviceCountriesDescription'] = $this->l(
+                'Select the availability for the zones that are supported for your shipping service.'
+            );
+            $currentTranslations['shippingServices']['openCountries'] = $this->l('See zones');
+            $currentTranslations['shippingServices']['allCountriesSelected'] = $this->l('All zones selected');
+            $currentTranslations['shippingServices']['oneCountrySelected'] = $this->l('One zone selected');
+            $currentTranslations['shippingServices']['selectedCountries'] = $this->l('%s zones selected.');
+            $currentTranslations['shippingServices']['selectAllCountries'] = $this->l('All selected zones');
+            $currentTranslations['shippingServices']['selectCountriesHeader'] = $this->l(
+                'Zones supported for your shipping service'
+            );
+            $currentTranslations['shippingServices']['selectCountriesSubheader'] = $this->l(
+                'Select availability of at least one zone and add as many required'
+            );
+            $currentTranslations['shippingServices']['atLeastOneCountry'] = $this->l(
+                'At least one zone must be selected.'
+            );
+        }
+
+        return json_encode($currentTranslations);
+    }
+
+    /**
+     * Returns Packlink module templates.
+     *
+     * @return array
+     */
+    private function getTemplates()
+    {
+        $baseDir = $this->getLocalPath() . 'views/templates/core/';
+
+        return array(
+            'pl-login-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'login.html'),
+            ),
+            'pl-register-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'register.html'),
+            ),
+            'pl-register-modal' => Tools::file_get_contents($baseDir . 'register-modal.html'),
+            'pl-onboarding-welcome-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'onboarding-welcome.html'),
+            ),
+            'pl-onboarding-overview-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'onboarding-overview.html'),
+            ),
+            'pl-default-parcel-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'default-parcel.html'),
+            ),
+            'pl-default-warehouse-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'default-warehouse.html'),
+            ),
+            'pl-configuration-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'configuration.html'),
+                'pl-header-section' => '',
+            ),
+            'pl-order-status-mapping-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'order-status-mapping.html'),
+                'pl-header-section' => '',
+            ),
+            'pl-system-info-modal' => Tools::file_get_contents($baseDir . 'system-info-modal.html'),
+            'pl-my-shipping-services-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'my-shipping-services.html'),
+                'pl-header-section' => Tools::file_get_contents($baseDir . 'shipping-services-header.html'),
+                'pl-shipping-services-table' => Tools::file_get_contents($baseDir . 'shipping-services-table.html'),
+                'pl-shipping-services-list' => Tools::file_get_contents($baseDir . 'shipping-services-list.html'),
+            ),
+            'pl-disable-carriers-modal' => Tools::file_get_contents($baseDir . 'disable-carriers-modal.html'),
+            'pl-pick-service-page' => array(
+                'pl-header-section' => '',
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'pick-shipping-services.html'),
+                'pl-shipping-services-table' => Tools::file_get_contents($baseDir . 'shipping-services-table.html'),
+                'pl-shipping-services-list' => Tools::file_get_contents($baseDir . 'shipping-services-list.html'),
+            ),
+            'pl-edit-service-page' => array(
+                'pl-header-section' => '',
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'edit-shipping-service.html'),
+                'pl-pricing-policies' => Tools::file_get_contents($baseDir . 'pricing-policies-list.html'),
+            ),
+            'pl-pricing-policy-modal' => Tools::file_get_contents($baseDir . 'pricing-policy-modal.html'),
+            'pl-countries-selection-modal' => Tools::file_get_contents($baseDir . 'countries-selection-modal.html'),
+        );
+    }
+
+    /**
+     * Returns Packlink module controller URLs.
+     *
+     * @return array
+     *
+     * @throws \PrestaShopException
+     */
+    private function getUrls()
+    {
+        return array(
+            'login' => array(
+                'submit' => $this->getAction('Login', 'login'),
+                'listOfCountriesUrl' => $this->getAction('RegistrationRegions', 'getRegions'),
+                'logoPath' => '', // Not used. Logos are retrieved based on the base resource url.
+            ),
+            'register' => array(
+                'getRegistrationData' => $this->getAction('Registration', 'getRegisterData'),
+                'submit' => $this->getAction('Registration', 'register'),
+            ),
+            'onboarding-state' => array(
+                'getState' => $this->getAction('Onboarding', 'getCurrentState'),
+            ),
+            'onboarding-welcome' => array(),
+            'onboarding-overview' => array(
+                'defaultParcelGet' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
+                'defaultWarehouseGet' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
+            ),
+            'default-parcel' => array(
+                'getUrl' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
+                'submitUrl' => $this->getAction('DefaultParcel', 'submitDefaultParcel'),
+            ),
+            'default-warehouse' => array(
+                'getUrl' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
+                'getSupportedCountriesUrl' => $this->getAction(
+                    'DefaultWarehouse',
+                    'getSupportedCountries'
+                ),
+                'submitUrl' => $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse'),
+                'searchPostalCodesUrl' => $this->getAction('DefaultWarehouse', 'searchPostalCodes'),
+            ),
+            'configuration' => array(
+                'getDataUrl' => $this->getAction('Configuration', 'getData'),
+            ),
+            'system-info' => array(
+                'getStatusUrl' => $this->getAction('Debug', 'getStatus'),
+                'setStatusUrl' => $this->getAction('Debug', 'setStatus'),
+            ),
+            'order-status-mapping' => array(
+                'getMappingAndStatusesUrl' => $this->getAction(
+                    'OrderStateMapping',
+                    'getMappingsAndStatuses'
+                ),
+                'setUrl' => $this->getAction('OrderStateMapping', 'saveMappings'),
+            ),
+            'my-shipping-services' => array(
+                'getServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
+                'deleteServiceUrl' => $this->getAction('ShippingMethods', 'deactivate'),
+            ),
+            'pick-shipping-service' => array(
+                'getActiveServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
+                'getServicesUrl' => $this->getAction('ShippingMethods', 'getInactive'),
+                'getTaskStatusUrl' => $this->getAction('ShippingMethods', 'getTaskStatus'),
+                'startAutoConfigureUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
+                'disableCarriersUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
+            ),
+            'edit-service' => array(
+                'getServiceUrl' => $this->getAction('ShippingMethods', 'getShippingMethod'),
+                'saveServiceUrl' => $this->getAction('ShippingMethods', 'save'),
+                'getTaxClassesUrl' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
+                'getCountriesListUrl' => $this->getAction('ShippingZones', 'getShippingZones'),
+                'hasTaxConfiguratio' => true,
+                'hasCountryConfiguration' => true,
+                'canDisplayCarrierLogos' => true,
+            ),
+        );
     }
 
     /**
@@ -591,8 +800,11 @@ class Packlink extends CarrierModule
             array('configuration' => json_encode($configuration))
         );
 
+        $stylesPath = $this->_path . 'views/css/packlink-shipping-methods.css?v=' . $this->version;
+        $output = "<link rel=\"stylesheet\" href=\"{$stylesPath}\"/>\n";
+
         $shippingServicePath = $this->_path . 'views/js/ShippingService16.js?v=' . $this->version;
-        $output = "<script src=\"{$shippingServicePath}\"></script>\n";
+        $output .= "<script src=\"{$shippingServicePath}\"></script>\n";
 
         $output .= $this->getCheckoutFilesLinks();
 
@@ -606,11 +818,17 @@ class Packlink extends CarrierModule
      */
     protected function getCheckoutFilesLinks()
     {
-        $ajaxPath = $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version;
+        $ajaxPath = $this->getPathUri() . 'views/js/core/AjaxService.js?v=' . $this->version;
         $output = "<script src=\"{$ajaxPath}\"></script>\n";
 
-        $ajaxPath = $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version;
-        $output .= "<script src=\"{$ajaxPath}\"></script>\n";
+        $responsePath = $this->getPathUri() . 'views/js/core/ResponseService.js?v=' . $this->version;
+        $output .= "<script src=\"{$responsePath}\"></script>\n";
+
+        $stateUuidPath = $this->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . $this->version;
+        $output .= "<script src=\"{$stateUuidPath}\"></script>\n";
+
+        $prestaAjaxPath = $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version;
+        $output .= "<script src=\"{$prestaAjaxPath}\"></script>\n";
 
         $stylePath = $this->_path . 'views/css/checkout.css?v=' . $this->version;
         $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>\n";
@@ -759,114 +977,6 @@ class Packlink extends CarrierModule
             && $carrierServiceMapping !== null
             && ($orderState->id === self::PRESTASHOP_PAYMENT_ACCEPTED_STATUS
                 || $orderState->id === self::PRESTASHOP_PROCESSING_IN_PROGRESS_STATUS);
-    }
-
-    /**
-     * Renders configuration page.
-     *
-     * @return string
-     * @throws \PrestaShopException
-     */
-    private function renderConfigForm()
-    {
-        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Configuration::CLASS_NAME
-        );
-        /** @var \Packlink\BusinessLogic\Country\CountryService $countryService */
-        $countryService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\Country\CountryService::CLASS_NAME
-        );
-
-        $userInfo = $configService->getUserInfo();
-        $linkLanguage = 'EN';
-
-        if ($userInfo !== null && $countryService->isBaseCountry($userInfo->country)) {
-            $linkLanguage = $userInfo->country;
-        }
-
-        $this->context->smarty->assign(
-            array(
-                'dashboardGetStatusUrl' => $this->getAction('Dashboard', 'getStatus'),
-                'defaultParcelGetUrl' => $this->getAction('DefaultParcel', 'getDefaultParcel'),
-                'defaultParcelSubmitUrl' => $this->getAction('DefaultParcel', 'submitDefaultParcel'),
-                'defaultWarehouseGetUrl' => $this->getAction('DefaultWarehouse', 'getDefaultWarehouse'),
-                'getSupportedCountriesUrl' => $this->getAction('DefaultWarehouse', 'getSupportedCountries'),
-                'defaultWarehouseSubmitUrl' => $this->getAction('DefaultWarehouse', 'submitDefaultWarehouse'),
-                'defaultWarehouseSearchPostalCodesUrl' => $this->getAction('DefaultWarehouse', 'searchPostalCodes'),
-                'shippingMethodsGetAllUrl' => $this->getAction('ShippingMethods', 'getAll'),
-                'shippingMethodsGetStatusUrl' => $this->getAction('ShippingMethods', 'getTaskStatus'),
-                'shippingMethodsActivateUrl' => $this->getAction('ShippingMethods', 'activate'),
-                'shippingMethodsDeactivateUrl' => $this->getAction('ShippingMethods', 'deactivate'),
-                'shippingMethodsSaveUrl' => $this->getAction('ShippingMethods', 'save'),
-                'getSystemOrderStatusesUrl' => $this->getAction('OrderStateMapping', 'getSystemOrderStatuses'),
-                'orderStatusMappingsGetUrl' => $this->getAction('OrderStateMapping', 'getMappings'),
-                'orderStatusMappingsSaveUrl' => $this->getAction('OrderStateMapping', 'saveMappings'),
-                'debugGetStatusUrl' => $this->getAction('Debug', 'getStatus'),
-                'debugSetStatusUrl' => $this->getAction('Debug', 'setStatus'),
-                'getSystemInfoUrl' => $this->getAction('Debug', 'getSystemInfo', false),
-                'shopShippingMethodCountGetUrl' => $this->getAction('ShippingMethods', 'getNumberShopMethods'),
-                'shopShippingMethodsDisableUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
-                'shippingMethodsGetTaxClassesUrl' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
-                'autoConfigureStartUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
-                'dashboardIcon' => $this->_path . 'views/img/dashboard.png',
-                'dashboardLogo' => $this->_path . 'views/img/logo-pl.svg',
-                'helpLink' => self::$helpUrls[$linkLanguage],
-                'termsAndConditionsLink' => self::$termsAndConditionsUrls[$linkLanguage],
-                'pluginVersion' => $this->version,
-            )
-        );
-
-        $this->context->controller->addCSS(
-            array(
-                $this->_path . 'views/css/packlink.css?v=' . $this->version,
-                $this->_path . 'views/css/bootstrap-prestashop-ui-kit.css?v=' . $this->version,
-            ),
-            'all',
-            null,
-            false
-        );
-
-        $this->context->controller->addJS(
-            array(
-                $this->_path . 'views/js/prestashop-ui-kit.js?v=' . $this->version,
-                $this->_path . 'views/js/core/StateController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/TemplateService.js?v=' . $this->version,
-                $this->_path . 'views/js/core/SidebarController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/PageControllerFactory.js?v=' . $this->version,
-                $this->_path . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/ShippingMethodsController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
-                $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
-                $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
-                $this->_path . 'views/js/PrestaFix.js?v=' . $this->version,
-                $this->_path . 'views/js/core/OrderStateMappingController.js?v=' . $this->version,
-                $this->_path . 'views/js/core/FooterController.js?v=' . $this->version,
-            ),
-            false
-        );
-
-        return $this->display(__FILE__, 'packlink.tpl');
-    }
-
-    /**
-     * Performs login.
-     *
-     * @return bool
-     *
-     * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
-     */
-    private function login()
-    {
-        $apiToken = Tools::getValue('api_key', null);
-        /** @var \Packlink\BusinessLogic\User\UserAccountService $userAccountService */
-        $userAccountService = \Logeecom\Infrastructure\ServiceRegister::getService(
-            \Packlink\BusinessLogic\User\UserAccountService::CLASS_NAME
-        );
-
-        return $userAccountService->login($apiToken);
     }
 
     /**

@@ -1,11 +1,9 @@
 <?php
 
-use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Country\CountryService;
-use Packlink\BusinessLogic\Location\LocationService;
-use Packlink\BusinessLogic\Warehouse\WarehouseService;
+use Packlink\BusinessLogic\Controllers\LocationsController;
+use Packlink\BusinessLogic\Controllers\WarehouseController;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
-use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
+use Packlink\BusinessLogic\Controllers\RegistrationRegionsController as CountryController;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -20,13 +18,11 @@ class DefaultWarehouseController extends PacklinkBaseController
      */
     public function displayAjaxGetDefaultWarehouse()
     {
-        /** @var WarehouseService $warehouseService */
-        $warehouseService = ServiceRegister::getService(WarehouseService::CLASS_NAME);
+        $warehouseController = new WarehouseController();
 
-        /** @var \Packlink\BusinessLogic\Warehouse\Warehouse $warehouse */
-        $warehouse = $warehouseService->getWarehouse(true);
+        $warehouse = $warehouseController->getWarehouse();
 
-        PacklinkPrestaShopUtility::dieJson($warehouse->toArray());
+        PacklinkPrestaShopUtility::dieJson($warehouse ? $warehouse->toArray() : array());
     }
 
     /**
@@ -34,15 +30,11 @@ class DefaultWarehouseController extends PacklinkBaseController
      */
     public function displayAjaxGetSupportedCountries()
     {
-        /** @var CountryService $countryService */
-        $countryService = ServiceRegister::getService(CountryService::CLASS_NAME);
+        $countryController = new CountryController();
 
-        $supportedCountries = $countryService->getSupportedCountries();
-        foreach ($supportedCountries as $country) {
-            $country->name = TranslationUtility::__($country->name);
-        }
+        $countries = $countryController->getRegions();
 
-        PacklinkPrestaShopUtility::dieDtoEntities($supportedCountries);
+        PacklinkPrestaShopUtility::dieDtoEntities($countries);
     }
 
     /**
@@ -56,12 +48,10 @@ class DefaultWarehouseController extends PacklinkBaseController
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
         $data['default'] = true;
-
-        /** @var WarehouseService $warehouseService */
-        $warehouseService = ServiceRegister::getService(WarehouseService::CLASS_NAME);
+        $warehouseController = new WarehouseController();
 
         try {
-            $warehouse = $warehouseService->updateWarehouseData($data);
+            $warehouse = $warehouseController->updateWarehouse($data);
 
             PacklinkPrestaShopUtility::dieJson($warehouse->toArray());
         } catch (\Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException $e) {
@@ -80,21 +70,12 @@ class DefaultWarehouseController extends PacklinkBaseController
             PacklinkPrestaShopUtility::dieJson();
         }
 
-        $platformCountry = $input['country'];
-        $result = array();
+        $locationsController = new LocationsController();
+
         try {
-            /** @var LocationService $locationService */
-            $locationService = ServiceRegister::getService(LocationService::CLASS_NAME);
-            $result = $locationService->searchLocations($platformCountry, $input['query']);
+            PacklinkPrestaShopUtility::dieDtoEntities($locationsController->searchLocations($input));
         } catch (\Exception $e) {
             PacklinkPrestaShopUtility::dieJson();
         }
-
-        $arrayResult = array();
-        foreach ($result as $item) {
-            $arrayResult[] = $item->toArray();
-        }
-
-        PacklinkPrestaShopUtility::dieJson($arrayResult);
     }
 }

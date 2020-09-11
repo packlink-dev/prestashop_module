@@ -33,19 +33,18 @@ class AdminOrdersController
     /**
      * Inserts the Packlink order grid column.
      *
-     * @param string $select
      * @param array $fields_list
      *
      * @return array
-     * @noinspection PhpUnusedParameterInspection
      */
-    public function insertOrderColumn(&$select, array $fields_list)
+    public function insertOrderColumn(array $fields_list)
     {
         $packlinkElement = array(
             'title' => TranslationUtility::__('Packlink PRO Shipping'),
             'align' => 'text-center',
             'filter_key' => 'a!id_order',
             'callback' => 'getOrderDraft',
+            'remove_onclick' => true,
         );
 
         return $this->insertElementIntoArrayAfterSpecificKey(
@@ -108,9 +107,11 @@ class AdminOrdersController
         $context->controller->addJS(
             array(
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js',
-                _PS_MODULE_DIR_ . 'packlink/views/js/core/AjaxService.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/OrderOverviewDraft.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/core/AjaxService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/core/ResponseService.js',
+                _PS_MODULE_DIR_ . 'packlink/views/js/core/StateUUIDService.js',
             )
         );
 

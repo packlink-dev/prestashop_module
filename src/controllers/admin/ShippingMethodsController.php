@@ -47,6 +47,45 @@ class ShippingMethodsController extends PacklinkBaseController
     }
 
     /**
+     * Retrieves active shipping methods.
+     */
+    public function displayAjaxGetActive()
+    {
+        $shippingMethods = $this->controller->getActive();
+
+        PacklinkPrestaShopUtility::dieDtoEntities($shippingMethods);
+    }
+
+    /**
+     * Retrieves inactive shipping methods.
+     */
+    public function displayAjaxGetInactive()
+    {
+        $shippingMethods = $this->controller->getInactive();
+
+        PacklinkPrestaShopUtility::dieDtoEntities($shippingMethods);
+    }
+
+    /**
+     * Returns a single shipping method identified by the provided ID.
+     */
+    public function displayAjaxGetShippingMethod()
+    {
+        $id = Tools::getValue('id');
+
+        if (empty($id)) {
+            PacklinkPrestaShopUtility::die404(array('message' => 'Not found'));
+        }
+
+        $shippingMethod = $this->controller->getShippingMethod($id);
+        if ($shippingMethod === null) {
+            PacklinkPrestaShopUtility::die404(array('message' => 'Not found'));
+        }
+
+        PacklinkPrestaShopUtility::dieJson($shippingMethod->toArray());
+    }
+
+    /**
      * Retrieves all shipping methods.
      */
     public function displayAjaxGetTaskStatus()
@@ -93,6 +132,8 @@ class ShippingMethodsController extends PacklinkBaseController
 
     /**
      * Handles saving shipping method.
+     *
+     * @throws \Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException
      */
     public function displayAjaxSave()
     {
@@ -106,6 +147,10 @@ class ShippingMethodsController extends PacklinkBaseController
             );
         }
 
+        if ($configuration->pricingPolicies === null) {
+            $configuration->pricingPolicies = array();
+        }
+
         /** @var ShippingMethodResponse $model */
         $model = $this->controller->save($configuration);
         if ($model === null) {
@@ -113,8 +158,6 @@ class ShippingMethodsController extends PacklinkBaseController
         }
 
         $this->activateShippingMethod($model->id);
-
-        $model->selected = true;
 
         PacklinkPrestaShopUtility::dieJson($model->toArray());
     }
@@ -137,7 +180,7 @@ class ShippingMethodsController extends PacklinkBaseController
     {
         /** @var CarrierService $carrierService */
         $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
-        if ($carrierService->disableOtherCarriers()) {
+        if ($carrierService->disableShopServices()) {
             PacklinkPrestaShopUtility::dieJson(array('message' => $this->l('Successfully disabled shipping methods.')));
         } else {
             PacklinkPrestaShopUtility::die400(array('message' => $this->l('Failed to disable shipping methods.')));
@@ -204,6 +247,8 @@ class ShippingMethodsController extends PacklinkBaseController
      * Retrieves shipping configuration.
      *
      * @return ShippingMethodConfiguration
+     *
+     * @throws \Packlink\BusinessLogic\DTO\Exceptions\FrontDtoValidationException
      */
     private function getShippingMethodConfigurationFromRequest()
     {

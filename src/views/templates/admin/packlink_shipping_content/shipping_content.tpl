@@ -5,7 +5,7 @@
     {html_entity_decode($printLabelsUrl|escape:'html':'UTF-8')}
 </p>
 <div class="tab-pane" id="packlink-shipping">
-    {if $shipping neq null and $shipping->reference neq ''}
+    {if $shipping neq null and isset($shipping->reference)}
         {if $isLabelAvailable}
           <h4>{l s='Shipment labels' mod='packlink'}</h4>
           <div class="table-responsive">
@@ -32,7 +32,7 @@
                           href=""
                           title="{l s='Print' mod='packlink'}"
                           data-order="{$orderId|escape:'html':'UTF-8'}"
-                          data-label-printed="{$isLabelPrinted}"
+                          data-label-printed="{$isLabelPrinted|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}"
                           onclick="plPrintLabelOnOrderDetailsPage(this)">
                       {$number|escape:'html':'UTF-8'}
                   </a>
@@ -43,7 +43,7 @@
                      href=""
                      title="{l s='Print' mod='packlink'}"
                      data-order="{$orderId|escape:'html':'UTF-8'}"
-                     data-label-printed="{$isLabelPrinted}"
+                     data-label-printed="{$isLabelPrinted|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}"
                      onclick="plPrintLabelOnOrderDetailsPage(this)">
                     <i class="icon-print"></i>
                       {l s='Print label' mod='packlink'}

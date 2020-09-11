@@ -44,6 +44,28 @@ class PacklinkBaseController extends ModuleAdminController
     }
 
     /**
+     * Retrieves ajax action.
+     *
+     * @param string $controller
+     * @param string $action
+     * @param bool $ajax
+     *
+     * @return string
+     *
+     * @throws \PrestaShopException
+     */
+    protected function getAction($controller, $action, $ajax = true)
+    {
+        return $this->context->link->getAdminLink($controller) . '&' .
+            http_build_query(
+                array(
+                    'ajax' => $ajax,
+                    'action' => $action,
+                )
+            );
+    }
+
+    /**
      * @noinspection SenselessProxyMethodInspection
      *
      * Added to suppress warning.
