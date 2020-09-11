@@ -64,8 +64,8 @@ var Packlink = window.Packlink || {};
 
             let point = dropoff.parentElement;
             while (!point.classList
-                || !(point.classList.contains('delivery_option') || point.classList.contains('checkout_delivery_line'))
-            ) {
+                || !(point.classList.contains('delivery-option') || point.classList.contains('delivery_option') || point.classList.contains('checkout-delivery-line'))
+                ) {
                 point = point.parentElement;
             }
 
