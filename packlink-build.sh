@@ -10,9 +10,20 @@ cp -r ./src/* packlink
 echo "\e[32mSTEP 2:\e[0m Installing composer dependencies..."
 cd packlink
 # remove resources that will be copied from the core in the post-install script
-find views/img/carriers/* ! -name carrier.jpg -delete
 rm -rf views/js/core
 rm -rf views/js/location
+rm -rf views/css/app.css
+rm -rf views/css/locationPicker.css
+rm -rf views/css/README.md
+rm -rf views/templates/core
+rm -rf views/templates/lang
+rm -rf views/img/core/images/carriers
+rm -rf views/img/core/images/flags
+rm -rf views/img/core/images/checklist.png
+rm -rf views/img/core/images/logo.png
+rm -rf views/img/core/images/logo.svg
+rm -rf views/img/core/images/logo-pl.svg
+rm -rf views/img/core/images/service-truck.png
 rm -rf vendor
 # add version to artifact
 echo "$1" >release.version
@@ -36,6 +47,9 @@ rm -rf packlink/vendor/packlink/integration-core/tests
 rm -rf packlink/vendor/packlink/integration-core/generic_tests
 rm -rf packlink/vendor/packlink/integration-core/README.md
 rm -rf packlink/vendor/setasign/fpdf/tutorial/
+rm -rf packlink/views/lang/toCSV.php
+rm -rf packlink/views/lang/fromCSV.php
+rm -rf packlink/views/lang/translations.csv
 
 echo "\e[32mSTEP 4:\e[0m Adding PrestaShop mandatory licence header to files..."
 php "$PWD/src/lib/autoLicence.php" "$PWD/packlink"
