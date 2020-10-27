@@ -9,6 +9,9 @@ executors:
   deployer:
     docker:
       - image: circleci/php:7.4.2
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_TOKEN
 
 jobs:
   build_publish:
@@ -44,6 +47,10 @@ workflows:
   prestashop_module: 
     jobs:
       - build_publish:
+          context:
+            - packlink-dockerhub
+            - packlink-gcr-publish
+            - packlink-github
           filters:
             branches:
               ignore: /.*/
