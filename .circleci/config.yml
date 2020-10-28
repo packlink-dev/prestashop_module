@@ -49,7 +49,7 @@ workflows:
       - build_publish:
           context:
             - packlink-dockerhub
-            - packlink-gcr-publish
+            - packlink-cdn-publish
             - packlink-github
           filters:
             branches:
