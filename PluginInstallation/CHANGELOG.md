@@ -3,9 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [v3.0.3](https://github.com/packlink-dev/prestashop_module/compare/v3.0.2...v3.0.3) - 2020-11-09
+## [v3.0.3](https://github.com/packlink-dev/prestashop_module/compare/v3.0.2...v3.0.3) - 2020-11-10
 ### Changed
 - Update to the latest core version 3.0.6.
+- Fix issue with image URL in update script for version 2.3.0.
 
 ## [v3.0.2](https://github.com/packlink-dev/prestashop_module/compare/v3.0.1...v3.0.2) - 2020-10-21
 ### Changed
