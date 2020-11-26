@@ -3,7 +3,7 @@
 use Packlink\BusinessLogic\Controllers\LocationsController;
 use Packlink\BusinessLogic\Controllers\WarehouseController;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
-use Packlink\BusinessLogic\Controllers\RegistrationRegionsController as CountryController;
+use Packlink\BusinessLogic\Configuration;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -27,12 +27,15 @@ class DefaultWarehouseController extends PacklinkBaseController
 
     /**
      * Returns supported Packlink countries.
+     *
+     * @noinspection PhpParamsInspection
      */
     public function displayAjaxGetSupportedCountries()
     {
-        $countryController = new CountryController();
+        $warehouseController = new WarehouseController();
 
-        $countries = $countryController->getRegions();
+        Configuration::setCurrentLanguage($this->context->language->iso_code);
+        $countries = $warehouseController->getWarehouseCountries();
 
         PacklinkPrestaShopUtility::dieDtoEntities($countries);
     }
