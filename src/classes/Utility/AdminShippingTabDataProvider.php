@@ -57,18 +57,7 @@ class AdminShippingTabDataProvider
             self::prepareLabelsTemplate($shipmentDetails);
         }
 
-        self::$context->smarty->assign(array(
-            'printLabelsUrl' => self::$context->link->getAdminLink('BulkShipmentLabels'),
-            'pluginBasePath' => self::$module->getPathUri(),
-            'orderId' => $orderId,
-            'createDraftUrl' => self::$context->link->getAdminLink('OrderDraft') . '&' .
-                http_build_query(
-                    array(
-                        'ajax' => true,
-                        'action' => 'createOrderDraft',
-                    )
-                ),
-        ));
+        self::$context->smarty->assign(self::getLinks($orderId));
 
         self::$context->controller->addJS(
             array(
@@ -79,6 +68,36 @@ class AdminShippingTabDataProvider
                 self::$module->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . self::$module->version,
             ),
             false
+        );
+    }
+
+    /**
+     * Returns shipping content data for the order with provided ID.
+     *
+     * @param \Context $context
+     * @param \Module $module
+     * @param int $orderId
+     *
+     * @return array
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    public static function getShippingContentData(\Context $context, \Module $module, $orderId)
+    {
+        self::$context = $context;
+        self::$module = $module;
+
+        /* @var OrderShipmentDetailsService $shipmentDetailsService */
+        $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId($orderId);
+
+        return array_merge(
+            self::getLinks($orderId),
+            self::getDraftParams($orderId, $shipmentDetails),
+            self::getShippingDetails($orderId, $shipmentDetails),
+            $shipmentDetails ? self::getLabelParams($shipmentDetails) : array()
         );
     }
 
@@ -95,37 +114,11 @@ class AdminShippingTabDataProvider
      */
     private static function prepareDraftButtonSection($orderId, $shipmentDetails = null)
     {
-        /** @var ShipmentDraftService $shipmentDraftService */
-        $shipmentDraftService = ServiceRegister::getService(ShipmentDraftService::CLASS_NAME);
-
-        $draftStatus = $shipmentDraftService->getDraftStatus($orderId);
-        $displayDraftButton = true;
-
-        switch ($draftStatus->status) {
-            case ShipmentDraftStatus::NOT_QUEUED:
-                $message = TranslationUtility::__('Create order draft in Packlink PRO');
-                break;
-            case QueueItem::FAILED:
-                $message = TranslationUtility::__(
-                    'Previous attempt to create a draft failed. Error: %s',
-                    array($draftStatus->message)
-                );
-                break;
-            default:
-                $message = TranslationUtility::__('Draft is currently being created in Packlink');
-                $displayDraftButton = false;
-                break;
-        }
-
-        self::$context->smarty->assign(array(
-            'shipping' => !$displayDraftButton ? (object)self::prepareShippingObject($orderId, $shipmentDetails) : '',
-            'message' => $message,
-            'displayDraftButton' => $displayDraftButton,
-        ));
+        self::$context->smarty->assign(self::getDraftParams($orderId, $shipmentDetails));
     }
 
     /**
-     * Prepares shipping details object for Packlink shipping tab.
+     * Returns shipping details for Packlink shipping tab.
      *
      * @param string $orderId ID of the order.
      * @param OrderShipmentDetails $shipmentDetails Shipment details for an order.
@@ -137,10 +130,12 @@ class AdminShippingTabDataProvider
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
      */
-    private static function prepareShippingObject($orderId, OrderShipmentDetails $shipmentDetails = null)
+    private static function getShippingDetails($orderId, OrderShipmentDetails $shipmentDetails = null)
     {
         if ($shipmentDetails === null) {
-            return array();
+            return array(
+                'reference' => ''
+            );
         }
 
         /** @var TimeProvider $timeProvider */
@@ -191,6 +186,87 @@ class AdminShippingTabDataProvider
             false
         );
 
+        self::$context->smarty->assign(self::getLabelParams($shipmentDetails));
+    }
+
+    /**
+     * Returns links for shipment details page.
+     *
+     * @param int $orderId
+     *
+     * @return array
+     *
+     * @throws \PrestaShopException
+     */
+    private static function getLinks($orderId)
+    {
+        return array(
+            'printLabelsUrl' => self::$context->link->getAdminLink('BulkShipmentLabels'),
+            'pluginBasePath' => self::$module->getPathUri(),
+            'orderId' => $orderId,
+            'createDraftUrl' => self::$context->link->getAdminLink('OrderDraft') . '&' .
+                http_build_query(
+                    array(
+                        'ajax' => true,
+                        'action' => 'createOrderDraft',
+                    )
+                ),
+        );
+    }
+
+    /**
+     * Returns order shipment draft parameters.
+     *
+     * @param int $orderId
+     * @param \Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails $shipmentDetails
+     *
+     * @return array
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    private static function getDraftParams($orderId, $shipmentDetails = null)
+    {
+        /** @var ShipmentDraftService $shipmentDraftService */
+        $shipmentDraftService = ServiceRegister::getService(ShipmentDraftService::CLASS_NAME);
+
+        $draftStatus = $shipmentDraftService->getDraftStatus($orderId);
+        $displayDraftButton = true;
+
+        switch ($draftStatus->status) {
+            case ShipmentDraftStatus::NOT_QUEUED:
+                $message = TranslationUtility::__('Create order draft in Packlink PRO');
+                break;
+            case QueueItem::FAILED:
+                $message = TranslationUtility::__(
+                    'Previous attempt to create a draft failed. Error: %s',
+                    array($draftStatus->message)
+                );
+                break;
+            default:
+                $message = TranslationUtility::__('Draft is currently being created in Packlink');
+                $displayDraftButton = false;
+                break;
+        }
+
+        return array(
+            'shipping' => !$displayDraftButton ? (object)self::getShippingDetails($orderId, $shipmentDetails) : '',
+            'message' => $message,
+            'displayDraftButton' => $displayDraftButton,
+        );
+    }
+
+    /**
+     * Returns order shipment label parameters.
+     *
+     * @param \Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails $shipmentDetails
+     *
+     * @return array
+     */
+    private static function getLabelParams(OrderShipmentDetails $shipmentDetails)
+    {
         /** @var OrderService $orderService */
         $orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
 
@@ -199,17 +275,15 @@ class AdminShippingTabDataProvider
 
         $isLabelPrinted = !empty($labels) && $labels[0]->isPrinted();
 
-        self::$context->smarty->assign(
-            array(
-                'orderId' => $shipmentDetails->getOrderId(),
-                'isLabelPrinted' => $isLabelPrinted,
-                'date' => !empty($labels) ? $labels[0]->getDateCreated()->format('d/m/Y') : '',
-                'status' => TranslationUtility::__(
-                    $isLabelPrinted ? 'Printed' : 'Ready'
-                ),
-                'isLabelAvailable' => !empty($labels) || $orderService->isReadyToFetchShipmentLabels($status),
-                'number' => '#PLSL1',
-            )
+        return array(
+            'orderId' => $shipmentDetails->getOrderId(),
+            'isLabelPrinted' => $isLabelPrinted,
+            'date' => !empty($labels) ? $labels[0]->getDateCreated()->format('d/m/Y') : '',
+            'status' => TranslationUtility::__(
+                $isLabelPrinted ? 'Printed' : 'Ready'
+            ),
+            'isLabelAvailable' => !empty($labels) || $orderService->isReadyToFetchShipmentLabels($status),
+            'number' => '#PLSL1',
         );
     }
 }

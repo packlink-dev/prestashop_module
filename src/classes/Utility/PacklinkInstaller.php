@@ -157,6 +157,24 @@ class PacklinkInstaller
     }
 
     /**
+     * Registers additional hooks for versions 1.7.7 and above.
+     *
+     * @return bool
+     */
+    public function updateHooks()
+    {
+        $result = true;
+
+        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+            foreach ($this->getAdditionalHooks() as $hook) {
+                $result = $result && $this->module->registerHook($hook);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Adds Packlink menu item to shipping tab group.
      *
      * @return bool Returns TRUE if tab has been successfully added, otherwise returns FALSE.
@@ -188,8 +206,13 @@ class PacklinkInstaller
      */
     public function removeHooks()
     {
+        $hooks = self::$hooks;
+        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+            $hooks = array_merge($hooks, $this->getAdditionalHooks());
+        }
+
         $result = true;
-        foreach (self::$hooks as $hook) {
+        foreach ($hooks as $hook) {
             $result = $result && $this->module->unregisterHook($hook);
         }
 
@@ -408,12 +431,33 @@ class PacklinkInstaller
      */
     private function addHooks()
     {
+        $hooks = self::$hooks;
+        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+            $hooks = array_merge($hooks, $this->getAdditionalHooks());
+        }
+
         $result = true;
-        foreach (self::$hooks as $hook) {
+
+        foreach ($hooks as $hook) {
             $result = $result && $this->module->registerHook($hook);
         }
 
         return $result;
+    }
+
+    /**
+     * Returns the list of hooks used for PrestaShop versions 1.7.7 and above.
+     *
+     * @return array
+     */
+    private function getAdditionalHooks() {
+        return array(
+            'actionAdminControllerSetMedia',
+            'actionOrderGridDefinitionModifier',
+            'actionOrderGridPresenterModifier',
+            'displayAdminOrderTabLink',
+            'displayAdminOrderTabContent',
+        );
     }
 
     /**

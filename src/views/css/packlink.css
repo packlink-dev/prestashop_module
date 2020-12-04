@@ -1484,6 +1484,25 @@ input[readonly][type="text"] {
   background-color: #2095F2 !important;
 }
 
+#packlinkShippingTabContent .table {
+  margin: 0;
+  border: none;
+}
+
+#packlinkShippingTabContent .btn {
+  border: 1px solid #dedede;
+  background-color: #ffffff;
+  font-weight: 100;
+  font-size: 12px;
+  color: #363a41;
+}
+
+#packlinkShippingTabContent .btn:hover {
+  background-color: #2cadf1;
+  color: #ffffff !important;
+  cursor: pointer !important;
+}
+
 html,
 body {
   height: 100%;
