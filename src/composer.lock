@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ba6fa5dd96a050e93e1b1f1d88bb6a26",
+    "content-hash": "ef86d023d9bdc2eefc19f9a1f3a45cca",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -1300,5 +1300,5 @@
     "platform-overrides": {
         "php": "5.3.29"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }

@@ -4,9 +4,9 @@
        data-order="{{ record.id_order }}"
        onclick="plPrintLabelOnOrdersPage(this)"
        {% if record.isLabelPrinted %}
-       title="{{ 'Printed'|trans }}" style="color: #c3c3c3"
+       title="{{ 'Printed'|trans({}, 'Modules.Packlink.Admin') }}" style="color: #c3c3c3"
        {% else %}
-       title="{{ 'Ready'|trans }}"
+       title="{{ 'Ready'|trans({}, 'Modules.Packlink.Admin') }}"
        {% endif %}
     >
     <i class="material-icons"

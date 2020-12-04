@@ -9,7 +9,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * Updates module to version 2.2.5.
+ * Updates module to version 3.0.5.
  *
  * @param \Packlink $module
  *
@@ -17,7 +17,7 @@ if (!defined('_PS_VERSION_')) {
  *
  * @noinspection PhpUnused
  */
-function upgrade_module_2_2_5($module)
+function upgrade_module_3_0_5($module)
 {
     $installer = new PacklinkInstaller($module);
 
@@ -25,7 +25,7 @@ function upgrade_module_2_2_5($module)
         return false;
     }
 
-    Logger::logDebug(TranslationUtility::__('Upgrade to plugin v2.2.5 has started.'), 'Integration');
+    Logger::logDebug(TranslationUtility::__('Upgrade to plugin v3.0.5 has started.'), 'Integration');
 
     return $installer->updateHooks();
 }

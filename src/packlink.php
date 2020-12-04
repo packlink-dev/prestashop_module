@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.0.4';
+        $this->version = '3.0.5';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -144,6 +144,16 @@ class Packlink extends CarrierModule
         $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($this);
 
         return $installer->uninstall() && parent::uninstall() && $installer->removeHooks();
+    }
+
+    /**
+     * Hook for the new translation system in PrestaShop 1.7.7.
+     *
+     * @return bool
+     */
+    public function isUsingNewTranslationSystem()
+    {
+        return version_compare(_PS_VERSION_, '1.7.7.0', '>=');
     }
 
     /**
@@ -378,6 +388,8 @@ class Packlink extends CarrierModule
                 array(
                     $this->_path . 'views/js/OrderOverviewDraft.js?v=' . $this->version,
                     $this->_path . 'views/js/core/UtilityService.js?v=' . $this->version,
+                    $this->_path . 'views/js/core/ResponseService.js?v=' . $this->version,
+                    $this->_path . 'views/js/core/StateUUIDService.js?v=' . $this->version,
                     $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
                     $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
                     $this->_path . 'views/js/PrestaPrintShipmentLabels.js?v=' . $this->version,

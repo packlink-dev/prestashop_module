@@ -165,10 +165,8 @@ class PacklinkInstaller
     {
         $result = true;
 
-        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
-            foreach ($this->getAdditionalHooks() as $hook) {
-                $result = $result && $this->module->registerHook($hook);
-            }
+        foreach ($this->getAdditionalHooks() as $hook) {
+            $result = $result && $this->module->registerHook($hook);
         }
 
         return $result;
@@ -207,9 +205,7 @@ class PacklinkInstaller
     public function removeHooks()
     {
         $hooks = self::$hooks;
-        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
-            $hooks = array_merge($hooks, $this->getAdditionalHooks());
-        }
+        $hooks = array_merge($hooks, $this->getAdditionalHooks());
 
         $result = true;
         foreach ($hooks as $hook) {
@@ -432,9 +428,7 @@ class PacklinkInstaller
     private function addHooks()
     {
         $hooks = self::$hooks;
-        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
-            $hooks = array_merge($hooks, $this->getAdditionalHooks());
-        }
+        $hooks = array_merge($hooks, $this->getAdditionalHooks());
 
         $result = true;
 

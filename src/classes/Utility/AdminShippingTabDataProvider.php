@@ -5,6 +5,8 @@ namespace Packlink\PrestaShop\Classes\Utility;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Logeecom\Infrastructure\Utility\TimeProvider;
+use Packlink\BusinessLogic\Configuration;
+use Packlink\BusinessLogic\Language\Translator;
 use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
@@ -47,6 +49,8 @@ class AdminShippingTabDataProvider
         self::$context = $context;
         self::$module = $module;
 
+        Configuration::setCurrentLanguage($context->language->iso_code);
+
         /* @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
 
@@ -86,6 +90,8 @@ class AdminShippingTabDataProvider
      */
     public static function getShippingContentData(\Context $context, \Module $module, $orderId)
     {
+        Configuration::setCurrentLanguage($context->language->iso_code);
+
         self::$context = $context;
         self::$module = $module;
 
@@ -237,16 +243,16 @@ class AdminShippingTabDataProvider
 
         switch ($draftStatus->status) {
             case ShipmentDraftStatus::NOT_QUEUED:
-                $message = TranslationUtility::__('Create order draft in Packlink PRO');
+                $message = Translator::translate('orderListAndDetails.createOrderDraft');
                 break;
             case QueueItem::FAILED:
-                $message = TranslationUtility::__(
-                    'Previous attempt to create a draft failed. Error: %s',
+                $message = Translator::translate(
+                    'orderListAndDetails.draftCreateFailed',
                     array($draftStatus->message)
                 );
                 break;
             default:
-                $message = TranslationUtility::__('Draft is currently being created in Packlink');
+                $message = Translator::translate('orderListAndDetails.draftIsBeingCreated');
                 $displayDraftButton = false;
                 break;
         }
@@ -279,8 +285,8 @@ class AdminShippingTabDataProvider
             'orderId' => $shipmentDetails->getOrderId(),
             'isLabelPrinted' => $isLabelPrinted,
             'date' => !empty($labels) ? $labels[0]->getDateCreated()->format('d/m/Y') : '',
-            'status' => TranslationUtility::__(
-                $isLabelPrinted ? 'Printed' : 'Ready'
+            'status' => Translator::translate(
+                $isLabelPrinted ? 'orderListAndDetails.printed' : 'orderListAndDetails.ready'
             ),
             'isLabelAvailable' => !empty($labels) || $orderService->isReadyToFetchShipmentLabels($status),
             'number' => '#PLSL1',
