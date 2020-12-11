@@ -22,6 +22,17 @@
   min-width: 177px;
 }
 
+.btn.pl-label-button {
+  padding: 5px 15px;
+  border: 1px solid;
+  min-width: 110px;
+  text-align: left;
+}
+
+.pl-no-label {
+  text-align: center;
+}
+
 .btn.pl-draft-button.pl-draft-button-disabled,
 .btn.pl-draft-button.pl-draft-button-disabled:hover {
   background-color: #f2f2f2;

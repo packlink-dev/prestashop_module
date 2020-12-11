@@ -423,7 +423,7 @@ class Packlink extends CarrierModule
                 ));
 
             $labelColumn = new \PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ActionColumn('packlink_label');
-            $labelColumn->setName($this->trans('Shipment labels'))
+            $labelColumn->setName($this->trans('Packlink label'))
                 ->setOptions(array(
                     'actions' => (new \PrestaShop\PrestaShop\Core\Grid\Action\Row\RowActionCollection()),
                 ));
