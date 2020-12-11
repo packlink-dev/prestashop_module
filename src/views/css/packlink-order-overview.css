@@ -23,10 +23,12 @@
 }
 
 .btn.pl-label-button {
-  padding: 5px 15px;
+  padding: 5px 12px;
   border: 1px solid;
-  min-width: 110px;
+  min-width: 90px;
+  font-weight: 300;
   text-align: left;
+  font-size: 12px;
 }
 
 .pl-no-label {
