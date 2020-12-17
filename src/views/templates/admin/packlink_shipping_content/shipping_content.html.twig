@@ -1,0 +1,175 @@
+<div class="tab-pane d-print-block fade" id="packlinkShippingTabContent" role="tabpanel" aria-labelledby="packlinkShippingTab">
+    <p id="pl-label-printed" hidden>{{ 'Printed'|trans({}, 'Modules.Packlink.Admin') }}</p>
+    <p id="pl-label-ready" hidden>{{ 'Ready'|trans({}, 'Modules.Packlink.Admin') }}</p>
+    <p id="pl-print-labels-url" hidden>
+        {{ printLabelsUrl }}
+    </p>
+    <div class="tab-pane" id="packlink-shipping">
+        {% if shipping is not empty and shipping.reference != '' %}
+            {% if isLabelAvailable %}
+                <h4>{{ 'Shipment labels'|trans({}, 'Modules.Packlink.Admin') }}</h4>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>
+                                <span class="title_box ">{{ 'Date'|trans({}, 'Modules.Packlink.Admin') }}</span>
+                            </th>
+                            <th>
+                                <span class="title_box ">{{ 'Number'|trans({}, 'Modules.Packlink.Admin') }}</span>
+                            </th>
+                            <th>
+                                <span class="title_box ">{{ 'Status'|trans({}, 'Modules.Packlink.Admin') }}</span>
+                            </th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>{{ date }}</td>
+                            <td>
+                                <a
+                                        href=""
+                                        title="{{ 'Print'|trans({}, 'Modules.Packlink.Admin') }}"
+                                        data-order="{{ orderId }}"
+                                        data-label-printed="{{ isLabelPrinted }}"
+                                        onclick="plPrintLabelOnOrderDetailsPage(this)">
+                                    {{ number }}
+                                </a>
+                            </td>
+                            <td>{{ status }}</td>
+                            <td class="text-right">
+                                <a class="btn btn-default"
+                                   href=""
+                                   title="{{ 'Print'|trans({}, 'Modules.Packlink.Admin') }}"
+                                   data-order="{{ orderId }}"
+                                   data-label-printed="{{ isLabelPrinted }}"
+                                   onclick="plPrintLabelOnOrderDetailsPage(this)">
+                                    <i class="material-icons">print</i>
+                                    {{ 'Print label'|trans({}, 'Modules.Packlink.Admin') }}
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            {% if shipping.name != '' %}
+                <h4 style="margin-top: 15px;">{{ 'Shipment details'|trans({}, 'Modules.Packlink.Admin') }}</h4>
+                <table class="table" id="shipping_table">
+                    <thead>
+                    <tr>
+                        <th>
+                            <span class="title_box">{{ 'Carrier logo'|trans({}, 'Modules.Packlink.Admin') }}</span>
+                        </th>
+                        <th>
+                            <span class="title_box">{{ 'Carrier'|trans({}, 'Modules.Packlink.Admin') }}</span>
+                        </th>
+                        <th>
+                            <span class="title_box">{{ 'Carrier tracking numbers'|trans({}, 'Modules.Packlink.Admin') }}</span>
+                        </th>
+                        <th>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            {% if shipping.icon != '' %}
+                                <img
+                                        src="{{ shipping.icon }}"
+                                        alt="{{ shipping.name }}"
+                                        style="width: 85px;"
+                                />
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ shipping.name }}
+                        </td>
+                        <td>
+                            {% for key, tracking_number in shipping.carrier_tracking_numbers %}
+                                {{ tracking_number }}
+                                {% if key != shipping.carrier_tracking_numbers|length - 1 %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td style="text-align: right;">
+                            {% if shipping.carrier_tracking_numbers is not empty %}
+                                <a
+                                        class="btn btn-default"
+                                        href="{{ shipping.carrier_tracking_url }}"
+                                        title="{{ 'Track it!'|trans({}, 'Modules.Packlink.Admin') }}"
+                                        target="_blank"
+                                >
+                                    {{ 'Track it!'|trans({}, 'Modules.Packlink.Admin') }}
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            {% endif %}
+            <dl style="margin-top: 15px;">
+                {% if shipping.status is not empty %}
+                    <dt>{{ 'Status'|trans({}, 'Modules.Packlink.Admin') }}</dt>
+                    <dd style="margin-bottom: 10px">
+                <span style="color: grey">
+                    <i class="material-icons">calendar_today</i> {{ shipping.time }}
+                </span> - <b>{{ shipping.status }}</b>
+                    </dd>
+                {% endif %}
+                {% if shipping.reference is not empty %}
+                    <dt>{{ 'Packlink reference number'|trans({}, 'Modules.Packlink.Admin') }}</dt>
+                    <dd style="margin-bottom: 10px">{{ shipping.reference }}</dd>
+                {% endif %}
+                {% if shipping.packlink_shipping_price is not empty %}
+                    <dt>{{ 'Packlink shipping price'|trans({}, 'Modules.Packlink.Admin') }}</dt>
+                    <dd style="margin-bottom: 10px">{{ shipping.packlink_shipping_price }}</dd>
+                {% endif %}
+            </dl>
+            {% if shipping.link is not empty and not shipping.deleted %}
+                <a
+                        class="btn btn-default"
+                        href="{{ shipping.link }}"
+                        title="{{ 'View on Packlink PRO'|trans({}, 'Modules.Packlink.Admin') }}"
+                        target="_blank"
+                >
+                    <i class="material-icons">remove_red_eye</i>
+                    {{ 'View on Packlink PRO'|trans({}, 'Modules.Packlink.Admin') }}
+                </a>
+            {% endif %}
+        {% else %}
+            <div class="table-responsive">
+                <table class="table">
+                    <tbody>
+                    <tr>
+                        <td style="border:none; width: 180px;">
+                            <img alt="{{ 'Packlink PRO Shipping'|trans({}, 'Modules.Packlink.Admin') }}"
+                                 src="{{ pluginBasePath }}views/img/logo-pl.svg"
+                                 width="150px;"
+                            >
+                        </td>
+                        <td style="border:none;">
+              <span style="font-weight: normal;">
+                  {{ message }}
+              </span>
+                        </td>
+                        {% if displayDraftButton %}
+                            <td style="border:none;text-align:right;">
+                                <button
+                                        type="button"
+                                        class="btn btn-default"
+                                        data-order="{{ orderId }}"
+                                        data-create-draft-url="{{ createDraftUrl }}"
+                                        onclick="plCreateOrderDraft(this)"
+                                >
+                                    <i class="material-icons">add_circle</i> {{ 'Create Draft'|trans({}, 'Modules.Packlink.Admin') }}
+                                </button>
+                            </td>
+                        {% endif %}
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>

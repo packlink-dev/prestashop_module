@@ -1,0 +1,23 @@
+{% if record.isLabelAvailable %}
+    <a class="btn btn-default pl-label-button"
+       href=""
+       data-order="{{ record.id_order }}"
+       onclick="plPrintLabelOnOrdersPage(this)"
+       {% if record.isLabelPrinted %}
+       style="color: #c3c3c3"
+       {% endif %}
+    >
+        <i class="material-icons">label</i>
+        <span>
+        {% if record.isLabelPrinted %}
+            {{ 'Printed'|trans({}, 'Modules.Packlink.Admin') }}
+        {% else %}
+            {{ 'Print'|trans({}, 'Modules.Packlink.Admin') }}
+        {% endif %}
+        </span>
+    </a>
+{% else %}
+    <div class="pl-no-label">
+        <span>-</span>
+    </div>
+{% endif %}

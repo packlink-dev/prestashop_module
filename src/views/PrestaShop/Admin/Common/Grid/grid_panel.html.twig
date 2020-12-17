@@ -1,0 +1,38 @@
+{% extends 'PrestaShopBundle:Admin/Common/Grid:grid_panel.html.twig' %}
+
+{% block grid_panel_extra_content %}
+    {% if grid.data.createDraftUrl is defined %}
+        <input type="hidden" class="pl-create-endpoint" value="{{ grid.data.createDraftUrl }}"/>
+        <input type="hidden" class="pl-draft-status" value="{{ grid.data.draftStatusUrl }}"/>
+        <p id="pl-label-printed" hidden>{{ 'Printed'|trans({}, 'Modules.Packlink.Admin') }}</p>
+        <p id="pl-label-ready" hidden>{{ 'Ready'|trans({}, 'Modules.Packlink.Admin') }}</p>
+        <p id="pl-disable-popup" hidden>
+            {{ 'Please disable pop-up blocker on this page in order to bulk open shipment labels'|trans({}, 'Modules.Packlink.Admin') }}
+        </p>
+        <p id="pl-print-labels-url" hidden>
+            {{ grid.data.printLabelsUrl }}
+        </p>
+        <input type="hidden" class="pl-draft-in-progress-message"
+               value="{{ 'Draft is currently being created.'|trans({}, 'Modules.Packlink.Admin') }}"/>
+        <input type="hidden" class="pl-draft-failed-message"
+               value="{{ 'Previous attempt to create a draft failed.'|trans({}, 'Modules.Packlink.Admin') }}"/>
+
+        <a class="btn btn-default pl-create-draft-button pl-create-draft-template">
+            <img
+                    class="pl-image"
+                    src="{{ grid.data.packlinkLogo }}"
+                    alt="{{ 'Packlink order draft'|trans({}, 'Modules.Packlink.Admin') }}"
+            >
+            <span></span>
+        </a>
+
+        <a class="btn btn-default pl-draft-button pl-draft-button-template" target="_blank">
+            <img
+                    class="pl-image"
+                    src="{{ grid.data.packlinkLogo }}"
+                    alt="{{ 'Packlink order draft'|trans({}, 'Modules.Packlink.Admin') }}"
+            >
+            <span>{{ 'View on Packlink'|trans({}, 'Modules.Packlink.Admin') }}</span>
+        </a>
+    {% endif %}
+{% endblock %}

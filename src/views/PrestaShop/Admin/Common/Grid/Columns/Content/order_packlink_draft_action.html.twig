@@ -1,0 +1,41 @@
+<span class="btn-group-action pl-grid-draft-container">
+    <span class="btn-group">
+        {% if record.draftStatus == 'completed' %}
+            <a class="btn btn-default pl-draft-button
+          {% if record.draftDeleted %}
+          pl-draft-button-disabled"
+        {% else %}"
+            href="{{ record.draftLink }}"
+            target="_blank"
+        {% endif %}
+          >
+          <img
+                class="pl-image"
+                src="{{ grid.data.packlinkLogo }}"
+                alt="{{ 'Packlink order draft'|trans({}, 'Modules.Packlink.Admin') }}"
+        >
+            <span>{{ 'View on Packlink'|trans({}, 'Modules.Packlink.Admin') }}</span>
+            </a>
+        {%  elseif record.draftStatus == 'queued' %}
+            <span
+                    class="pl-draft-in-progress"
+                    data-order-id="{{ record.id_order }}"
+                    data-draft-status-url="{html_entity_decode($draftStatusUrl|escape:'html':'UTF-8')}"
+            >
+              {{ 'Draft is currently being created.'|trans({}, 'Modules.Packlink.Admin') }}
+          </span>
+        {% else %}
+            <a
+                    class="btn btn-default pl-create-draft-button"
+                    data-order-id="{{ record.id_order }}"
+            >
+              <img
+                      class="pl-image"
+                      src="{{ grid.data.packlinkLogo }}"
+                      alt="{{ 'Packlink order draft'|trans({}, 'Modules.Packlink.Admin') }}"
+              >
+              <span>{{ 'Send with Packlink'|trans({}, 'Modules.Packlink.Admin') }}</span>
+          </a>
+        {% endif %}
+    </span>
+</span>

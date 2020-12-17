@@ -1,5 +1,12 @@
 var Packlink = window.Packlink || {};
 
+document.addEventListener('DOMContentLoaded', function () {
+  let bulkPrintAction = document.getElementById('order_grid_bulk_action_packlink_bulk_print_labels');
+  if (bulkPrintAction) {
+    bulkPrintAction.addEventListener('click', bulkPrintLabels);
+  }
+});
+
 /**
  * Sets shipment label on orders page to have been printed.
  *
@@ -15,7 +22,7 @@ function plPrintLabelOnOrdersPage(element) {
   }
 
   let printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
-  plOpenPdfTab(printLabelsUrl, ['orders[]=' + element.getAttribute('data-order')]);
+  plOpenPdfTab(printLabelsUrl, [element.getAttribute('data-order')]);
 }
 
 /**
@@ -34,7 +41,7 @@ function plPrintLabelOnOrderDetailsPage(element) {
   }
 
   let printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
-  plOpenPdfTab(printLabelsUrl, ['orders[]=' + element.getAttribute('data-order')]);
+  plOpenPdfTab(printLabelsUrl, [element.getAttribute('data-order')]);
 }
 
 /**
@@ -58,6 +65,21 @@ function ajaxLabelPrint(element) {
   );
 }
 
+function bulkPrintLabels() {
+  let orders = document.getElementsByName('order_orders_bulk[]'),
+      selectedOrders = [];
+
+  orders.forEach(function (order) {
+    if (order.checked) {
+      selectedOrders.push(parseInt(order.value));
+    }
+  });
+
+  bulkPrintSelectedLabels(selectedOrders);
+
+  event.stopPropagation();
+}
+
 /**
  * Overrides default send bulk action function.
  *
@@ -67,33 +89,15 @@ function ajaxLabelPrint(element) {
 function sendBulkAction(form, action) {
   if (action === 'submitBulkprintShipmentLabelsorder') {
     let orders = document.getElementsByName('orderBox[]'),
-        labels = document.getElementsByClassName('shipment-label'),
-        labelPrintedText = document.getElementById('pl-label-printed'),
         selectedOrders = [];
 
     orders.forEach(function (order) {
       if (order.checked) {
-        selectedOrders.push('orders[]=' + parseInt(order.defaultValue));
+        selectedOrders.push(parseInt(order.defaultValue));
       }
     });
 
-    if (selectedOrders.length > 0 && labels !== undefined && labels.length > 0) {
-      let printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
-
-      for (let i = 0; i < labels.length; i++) {
-        let childNodes = labels[i].childNodes,
-            iconElement = childNodes[1];
-
-        if (selectedOrders.includes(parseInt(labels[i].dataset.order))
-            && iconElement.style.color !== 'grey'
-        ) {
-          labels[i].title = labelPrintedText ? labelPrintedText.innerText : 'Printed';
-          iconElement.style.color = 'grey';
-        }
-      }
-
-      plOpenPdfTab(printLabelsUrl, selectedOrders);
-    }
+    bulkPrintSelectedLabels(selectedOrders);
   } else {
     // Default function behaviour.
     String.prototype.splice = function (index, remove, string) {
@@ -114,12 +118,37 @@ function sendBulkAction(form, action) {
   }
 }
 
+function bulkPrintSelectedLabels(selectedOrders) {
+  let labels = document.getElementsByClassName('shipment-label'),
+      labelPrintedText = document.getElementById('pl-label-printed'),
+      printLabelsUrl = document.getElementById('pl-print-labels-url').innerText;
+
+  if (selectedOrders.length > 0 && labels !== undefined && labels.length > 0) {
+    for (let i = 0; i < labels.length; i++) {
+      let childNodes = labels[i].childNodes,
+          iconElement = childNodes[1];
+
+      if (selectedOrders.includes(parseInt(labels[i].dataset.order))
+          && iconElement.style.color !== '#c3c3c3'
+      ) {
+        labels[i].title = labelPrintedText ? labelPrintedText.innerText : 'Printed';
+        iconElement.style.color = '#c3c3c3';
+      }
+    }
+  }
+
+  plOpenPdfTab(printLabelsUrl, selectedOrders);
+}
+
 function plOpenPdfTab(printLabelsUrl, selectedOrders) {
-  let disablePopupText = document.getElementById('pl-disable-popup');
-  let pdfTab = window.open(
-      printLabelsUrl + '&' + selectedOrders.join('&'),
-      '_blank'
-  );
+  let disablePopupText = document.getElementById('pl-disable-popup'),
+      url = new URL(printLabelsUrl);
+
+  for (let selectedOrder of selectedOrders) {
+    url.searchParams.append('orders[]', selectedOrder);
+  }
+
+  let pdfTab = window.open(url.href, '_blank');
 
   if (!pdfTab || pdfTab.closed) {
     alert(disablePopupText

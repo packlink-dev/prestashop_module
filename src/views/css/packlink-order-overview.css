@@ -1,8 +1,38 @@
+.grid-actions-header-text {
+  text-align: center;
+}
+
+.pl-grid-draft-container .btn {
+  border: 1px solid #dedede;
+  font-weight: 100;
+  font-size: 12px;
+  color: #363a41;
+}
+
+.pl-grid-draft-container .btn:hover {
+  background-color: #2cadf1;
+  color: #ffffff !important;
+  cursor: pointer !important;
+}
+
 .btn.pl-draft-button,
 .btn.pl-create-draft-button {
   padding: 5px 15px;
   text-align: left;
   min-width: 177px;
+}
+
+.btn.pl-label-button {
+  padding: 5px 12px;
+  border: 1px solid;
+  min-width: 90px;
+  font-weight: 300;
+  text-align: left;
+  font-size: 12px;
+}
+
+.pl-no-label {
+  text-align: center;
 }
 
 .btn.pl-draft-button.pl-draft-button-disabled,
