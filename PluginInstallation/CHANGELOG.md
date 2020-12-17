@@ -3,9 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
+## [3.1.0](https://github.com/packlink-dev/prestashop_module/compare/v3.0.4...v3.1.0)
 ### Added
 - Added compatibility with PrestaShop version 1.7.7.
+- Added postal code transformer service that transforms postal code into supported postal code format for GB, NL, US and PT countries.
+- Added new warehouse countries.
 
 ## [v3.0.4](https://github.com/packlink-dev/prestashop_module/compare/v3.0.2...v3.0.4) - 2020-11-10
 ### Changed
