@@ -444,7 +444,8 @@ class PacklinkInstaller
      *
      * @return array
      */
-    private function getAdditionalHooks() {
+    private function getAdditionalHooks()
+    {
         return array(
             'actionAdminControllerSetMedia',
             'actionOrderGridDefinitionModifier',
