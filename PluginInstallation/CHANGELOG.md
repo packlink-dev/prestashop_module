@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
+### Changed
+- Changed the extended template for hidden fields on order overview page
+
 ## [3.1.1](https://github.com/packlink-dev/prestashop_module/compare/v3.1.0...v3.1.1)
 ### Added
 - Added a migration script that converts all string values within the default parcel to number.
