@@ -903,7 +903,7 @@ class Packlink extends CarrierModule
                 'saveServiceUrl' => $this->getAction('ShippingMethods', 'save'),
                 'getTaxClassesUrl' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
                 'getCountriesListUrl' => $this->getAction('ShippingZones', 'getShippingZones'),
-                'hasTaxConfiguratio' => true,
+                'hasTaxConfiguration' => true,
                 'hasCountryConfiguration' => true,
                 'canDisplayCarrierLogos' => true,
             ),
