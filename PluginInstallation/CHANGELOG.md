@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Changed
 - Changed the extended template for hidden fields on order overview page
 
+## [3.1.2](https://github.com/packlink-dev/prestashop_module/compare/v3.1.0...v3.1.1)
+### Added
+- Change the extended template for hidden fields on order overview page.
+- Add tax configuration to services.
+
 ## [3.1.1](https://github.com/packlink-dev/prestashop_module/compare/v3.1.0...v3.1.1)
 ### Added
 - Added a migration script that converts all string values within the default parcel to number.
