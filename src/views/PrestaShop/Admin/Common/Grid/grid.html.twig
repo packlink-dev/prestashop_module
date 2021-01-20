@@ -1,6 +1,6 @@
-{% extends 'PrestaShopBundle:Admin/Common/Grid:grid_panel.html.twig' %}
+{% extends 'PrestaShopBundle:Admin/Common/Grid:grid.html.twig' %}
 
-{% block grid_panel_extra_content %}
+{% block grid_extra_content %}
     {% if grid.data.createDraftUrl is defined %}
         <input type="hidden" class="pl-create-endpoint" value="{{ grid.data.createDraftUrl }}"/>
         <input type="hidden" class="pl-draft-status" value="{{ grid.data.draftStatusUrl }}"/>
