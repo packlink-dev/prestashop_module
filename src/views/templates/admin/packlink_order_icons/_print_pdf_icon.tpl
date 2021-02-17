@@ -18,7 +18,7 @@
       {/if}
 
       {if $isLabelAvailable}
-        <a class="btn btn-default _blank shipment-label" href=""
+        <a class="btn btn-default _blank shipment-label"
            data-order="{$orderId|escape:'html':'UTF-8'}"
            onclick="plPrintLabelOnOrdersPage(this)"
                 {if $isLabelPrinted}

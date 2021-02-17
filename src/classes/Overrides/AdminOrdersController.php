@@ -87,6 +87,12 @@ class AdminOrdersController
         }
 
         $printLabelsUrl = $context->link->getAdminLink('BulkShipmentLabels');
+        if (strpos($printLabelsUrl, _PS_BASE_URL_) === false) {
+            $admin = explode(DIRECTORY_SEPARATOR,_PS_ADMIN_DIR_);
+            $adminArray = array_slice($admin, -1);
+            $adminFolder = array_pop($adminArray);
+            $printLabelsUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . $adminFolder . '/' . $printLabelsUrl;
+        }
 
         /** @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
