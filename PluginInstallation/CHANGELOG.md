@@ -5,7 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
 
-## [3.1.2](https://github.com/packlink-dev/prestashop_module/compare/v3.1.0...v3.1.1)
+## [3.1.3](https://github.com/packlink-dev/prestashop_module/compare/v3.1.2...v3.1.3)
+### Changed
+- Fix shipping labels printing in PrestaShop 1.6.
+
+## [3.1.2](https://github.com/packlink-dev/prestashop_module/compare/v3.1.1...v3.1.2)
 ### Changed
 - Changed the extended template for hidden fields on the order overview page.
 ### Added
