@@ -206,8 +206,16 @@ class AdminShippingTabDataProvider
      */
     private static function getLinks($orderId)
     {
+        $printLabelsUrl = self::$context->link->getAdminLink('BulkShipmentLabels');
+        if (strpos($printLabelsUrl, _PS_BASE_URL_) === false) {
+            $admin = explode(DIRECTORY_SEPARATOR,_PS_ADMIN_DIR_);
+            $adminArray = array_slice($admin, -1);
+            $adminFolder = array_pop($adminArray);
+            $printLabelsUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . $adminFolder . '/' . $printLabelsUrl;
+        }
+
         return array(
-            'printLabelsUrl' => self::$context->link->getAdminLink('BulkShipmentLabels'),
+            'printLabelsUrl' => $printLabelsUrl,
             'pluginBasePath' => self::$module->getPathUri(),
             'orderId' => $orderId,
             'createDraftUrl' => self::$context->link->getAdminLink('OrderDraft') . '&' .

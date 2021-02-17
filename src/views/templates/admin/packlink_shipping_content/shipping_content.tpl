@@ -29,7 +29,6 @@
                 <td>{$date|escape:'html':'UTF-8'}</td>
                 <td>
                   <a
-                          href=""
                           title="{l s='Print' mod='packlink'}"
                           data-order="{$orderId|escape:'html':'UTF-8'}"
                           data-label-printed="{$isLabelPrinted|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}"
