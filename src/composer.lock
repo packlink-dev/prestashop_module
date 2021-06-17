@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b6bac4d96ed7d6db7523ab40a7346a01",
+    "content-hash": "725b5ec410fa1392e4a3db3956f3fc3b",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -58,16 +58,16 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "v3.1.1",
+            "version": "dev-feature/multi-currency-support",
             "source": {
                 "type": "git",
-                "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "c3955dae544adc7ffd8502f86e2ca462bbbdd2ae"
+                "url": "git@github.com:logeecom/pl_module_core",
+                "reference": "89a2d9b0b6f38d379194ca6bb66f82f91abdcb35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/c3955dae544adc7ffd8502f86e2ca462bbbdd2ae",
-                "reference": "c3955dae544adc7ffd8502f86e2ca462bbbdd2ae",
+                "url": "https://api.github.com/repos/logeecom/pl_module_core/zipball/89a2d9b0b6f38d379194ca6bb66f82f91abdcb35",
+                "reference": "89a2d9b0b6f38d379194ca6bb66f82f91abdcb35",
                 "shasum": ""
             },
             "require": {
@@ -83,13 +83,15 @@
             "autoload": {
                 "psr-4": {
                     "Logeecom\\Infrastructure\\": "src/Infrastructure",
-                    "Packlink\\BusinessLogic\\": "src/BusinessLogic"
+                    "Packlink\\BusinessLogic\\": "src/BusinessLogic",
+                    "Packlink\\Brands\\": "src/Brands"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
                     "Logeecom\\Tests\\Infrastructure\\": "tests/Infrastructure",
-                    "Logeecom\\Tests\\BusinessLogic\\": "tests/BusinessLogic"
+                    "Logeecom\\Tests\\BusinessLogic\\": "tests/BusinessLogic",
+                    "Logeecom\\Tests\\Brands\\": "tests/Brands"
                 }
             },
             "scripts": {
@@ -104,7 +106,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2021-03-30T09:54:57+00:00"
+            "time": "2021-06-17T15:06:53+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -1286,7 +1288,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "packlink/integration-core": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
