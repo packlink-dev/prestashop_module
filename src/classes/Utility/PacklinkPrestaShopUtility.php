@@ -78,7 +78,7 @@ class PacklinkPrestaShopUtility
     /**
      * Converts front DTOs to array and returns a JSON response.
      *
-     * @param \Packlink\BusinessLogic\DTO\BaseDto[] $entities
+     * @param \Logeecom\Infrastructure\Data\DataTransferObject[] $entities
      */
     public static function dieDtoEntities(array $entities)
     {
