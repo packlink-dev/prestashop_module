@@ -49,7 +49,7 @@ class AdminShippingTabDataProvider
         self::$context = $context;
         self::$module = $module;
 
-        Configuration::setCurrentLanguage($context->language->iso_code);
+        Configuration::setUICountryCode($context->language->iso_code);
 
         /* @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
@@ -90,7 +90,7 @@ class AdminShippingTabDataProvider
      */
     public static function getShippingContentData(\Context $context, \Module $module, $orderId)
     {
-        Configuration::setCurrentLanguage($context->language->iso_code);
+        Configuration::setUICountryCode($context->language->iso_code);
 
         self::$context = $context;
         self::$module = $module;

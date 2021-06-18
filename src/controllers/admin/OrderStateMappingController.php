@@ -25,7 +25,7 @@ class OrderStateMappingController extends PacklinkBaseController
      */
     public function displayAjaxGetMappingsAndStatuses()
     {
-        Configuration::setCurrentLanguage($this->context->language->iso_code);
+        Configuration::setUICountryCode($this->context->language->iso_code);
 
         PacklinkPrestaShopUtility::dieJson(array(
             'systemName' => $this->getConfigService()->getIntegrationName(),

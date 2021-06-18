@@ -16,8 +16,11 @@ use Logeecom\Infrastructure\Serializer\Serializer;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\Process;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
+use Packlink\Brands\Packlink\PacklinkConfigurationService;
 use Packlink\BusinessLogic\BootstrapComponent;
+use Packlink\BusinessLogic\Brand\BrandConfigurationService;
 use Packlink\BusinessLogic\Configuration;
+use Packlink\BusinessLogic\FileResolver\FileResolverService;
 use Packlink\BusinessLogic\Order\Interfaces\ShopOrderService as ShopOrderServiceInterface;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
@@ -73,6 +76,13 @@ class Bootstrap extends BootstrapComponent
         );
 
         ServiceRegister::registerService(
+            BrandConfigurationService::CLASS_NAME,
+            function () {
+                return new PacklinkConfigurationService();
+            }
+        );
+
+        ServiceRegister::registerService(
             ShopShippingMethodService::CLASS_NAME,
             function () {
                 return new CarrierService();
@@ -104,6 +114,16 @@ class Bootstrap extends BootstrapComponent
             SystemInfoInterface::CLASS_NAME,
             function () {
                 return new SystemInfoService();
+            }
+        );
+
+        ServiceRegister::registerService(
+            FileResolverService::CLASS_NAME,
+            function () {
+                return new FileResolverService(array(
+                    __DIR__ . '/../views/brand/countries',
+                    __DIR__ . '/../views/countries',
+                ));
             }
         );
     }

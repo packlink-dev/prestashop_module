@@ -34,7 +34,7 @@ class DefaultWarehouseController extends PacklinkBaseController
     {
         $warehouseController = new WarehouseController();
 
-        Configuration::setCurrentLanguage($this->context->language->iso_code);
+        Configuration::setUICountryCode($this->context->language->iso_code);
         $countries = $warehouseController->getWarehouseCountries();
 
         PacklinkPrestaShopUtility::dieDtoEntities($countries);
