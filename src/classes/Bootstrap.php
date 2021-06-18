@@ -28,12 +28,14 @@ use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\RegistrationInfoService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ShopOrderService;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\SystemInfoService;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
 use Packlink\PrestaShop\Classes\InfrastructureServices\LoggerService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
 use Packlink\PrestaShop\Classes\Repositories\QueueItemRepository;
 use Packlink\BusinessLogic\Registration\RegistrationInfoService as RegistrationInfoServiceInterface;
+use Packlink\BusinessLogic\SystemInformation\SystemInfoService as SystemInfoInterface;
 
 /**
  * Class Bootstrap
@@ -95,6 +97,13 @@ class Bootstrap extends BootstrapComponent
             RegistrationInfoServiceInterface::CLASS_NAME,
             function () {
                 return new RegistrationInfoService();
+            }
+        );
+
+        ServiceRegister::registerService(
+            SystemInfoInterface::CLASS_NAME,
+            function () {
+                return new SystemInfoService();
             }
         );
     }
