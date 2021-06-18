@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/packlink-dev/prestashop_module/compare/master...logeecom:dev)
+### Changed
+- Updated to the module white-label changes.
+- Updated to the multi-currency changes.
 
 ## [3.1.2](https://github.com/packlink-dev/prestashop_module/compare/v3.1.0...v3.1.1)
 ### Changed
