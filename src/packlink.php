@@ -898,7 +898,7 @@ class Packlink extends CarrierModule
                 'getServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
                 'deleteServiceUrl' => $this->getAction('ShippingMethods', 'deactivate'),
                 'getCurrencyDetailsUrl' => $this->getAction('SystemInfo', 'get'),
-                'systemId' => \Context::getContext()->shop->id,
+                'systemId' => (string)\Context::getContext()->shop->id,
             ),
             'pick-shipping-service' => array(
                 'getActiveServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
@@ -907,7 +907,7 @@ class Packlink extends CarrierModule
                 'startAutoConfigureUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
                 'disableCarriersUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
                 'getCurrencyDetailsUrl' => $this->getAction('SystemInfo', 'get'),
-                'systemId' => \Context::getContext()->shop->id,
+                'systemId' => (string)\Context::getContext()->shop->id,
             ),
             'edit-service' => array(
                 'getServiceUrl' => $this->getAction('ShippingMethods', 'getShippingMethod'),

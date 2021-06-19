@@ -91,7 +91,8 @@ class PackageCostCalculator
             $toCountry,
             $toZip,
             $parcels,
-            self::getCartTotal($cart)
+            self::getCartTotal($cart),
+            (string)\Context::getContext()->shop->id
         );
 
         CachingUtility::setCosts($calculatedCosts);
@@ -166,7 +167,8 @@ class PackageCostCalculator
             self::getDestinationCountryCode($cart, $warehouse),
             self::getDestinationCountryZip($cart, $warehouse),
             CachingUtility::getPackages($products),
-            self::getCartTotal($cart)
+            self::getCartTotal($cart),
+            (string)\Context::getContext()->shop->id
         );
     }
 
@@ -174,7 +176,7 @@ class PackageCostCalculator
      * Returns destination country code.
      *
      * @param \Cart $cart PrestaShop cart object.
-     * @param \Packlink\BusinessLogic\Http\DTO\Warehouse $warehouse
+     * @param \Packlink\BusinessLogic\Warehouse\Warehouse $warehouse
      *
      * @return string Destination country code.
      *
@@ -200,7 +202,7 @@ class PackageCostCalculator
      * Returns destination country ZIP code.
      *
      * @param \Cart $cart PrestaShop cart object.
-     * @param \Packlink\BusinessLogic\Http\DTO\Warehouse $warehouse
+     * @param \Packlink\BusinessLogic\Warehouse\Warehouse $warehouse
      *
      * @return string Destination country zip code.
      */
