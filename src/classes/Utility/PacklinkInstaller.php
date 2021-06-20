@@ -57,6 +57,7 @@ class PacklinkInstaller
         'Registration',
         'RegistrationRegions',
         'ShippingZones',
+        'SystemInfo'
     );
 
     /**
