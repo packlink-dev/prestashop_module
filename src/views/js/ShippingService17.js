@@ -62,11 +62,17 @@ var Packlink = window.Packlink || {};
          * @param {string} btnMsg
          */
         function showDropOff(clickedCallback, dropoff, btnMsg) {
+            let insertedElements = document.querySelectorAll('.pl-drop-off-inserted');
+            for (let insertedElement of insertedElements) {
+                insertedElement.remove();
+            }
+
             if (dropoffElement) {
                 dropoffElement.remove();
             }
 
             dropoffElement = document.getElementById('pl-dropoff').cloneNode(true);
+            dropoffElement.classList.add('pl-drop-off-inserted');
 
             let point = dropoff.parentElement;
             while (!point.classList
