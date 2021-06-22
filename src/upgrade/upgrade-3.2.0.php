@@ -112,13 +112,15 @@ function getSystemSpecificPricingPolicies($service, $systemDetails)
     $policies = array();
     $isMultistore = count($systemDetails) > 1;
 
-    foreach ($service['pricingPolicies'] as $policy) {
-        foreach ($systemDetails as $systemInfo) {
-            $newPolicy = \Packlink\BusinessLogic\ShippingMethod\Models\ShippingPricePolicy::fromArray($policy);
-            $newPolicy->usesDefault = true;
-            $newPolicy->systemId = $isMultistore ? $systemInfo->systemId : null;
+    if (!empty($service['pricingPolicies'])) {
+        foreach ($service['pricingPolicies'] as $policy) {
+            foreach ($systemDetails as $systemInfo) {
+                $newPolicy = \Packlink\BusinessLogic\ShippingMethod\Models\ShippingPricePolicy::fromArray($policy);
+                $newPolicy->usesDefault = true;
+                $newPolicy->systemId = $isMultistore ? $systemInfo->systemId : null;
 
-            $policies[] = $newPolicy->toArray();
+                $policies[] = $newPolicy->toArray();
+            }
         }
     }
 
