@@ -110,13 +110,12 @@ function updateShippingService($service, $systemDetails)
 function getSystemSpecificPricingPolicies($service, $systemDetails)
 {
     $policies = array();
-    $isMultistore = count($systemDetails) > 1;
 
     if (!empty($service['pricingPolicies'])) {
         foreach ($service['pricingPolicies'] as $policy) {
             foreach ($systemDetails as $systemInfo) {
                 $newPolicy = \Packlink\BusinessLogic\ShippingMethod\Models\ShippingPricePolicy::fromArray($policy);
-                $newPolicy->systemId = $isMultistore ? $systemInfo->systemId : null;
+                $newPolicy->systemId = $systemInfo->systemId;
 
                 $policies[] = $newPolicy->toArray();
             }
