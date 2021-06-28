@@ -61,8 +61,6 @@ class SystemInfoService implements SystemInfoInterface
      * @param string $systemId
      *
      * @return array
-     *
-     * @throws \PrestaShopDatabaseException
      */
     private function getCurrencies($systemId = null)
     {
@@ -70,36 +68,13 @@ class SystemInfoService implements SystemInfoInterface
             return array();
         }
 
-        $currencies = $this->getCurrenciesForShop($systemId);
-        $currencyCodes = array();
-        foreach ($currencies as $currency) {
-            if ($currency['active'] && (float)$currency['conversion_rate'] === 1.0) {
-                $currencyCodes[] = $currency['iso_code'];
-            }
-        }
+        $currency = new \Currency(\Configuration::get(
+            'PS_CURRENCY_DEFAULT',
+            null,
+            null,
+            $systemId
+        ));
 
-        return $currencyCodes;
-    }
-
-    /**
-     * Returns currency for the provided system.
-     *
-     * NOTE: This had to be implemented since the PrestaShop's method that does this
-     * has a bug in some versions which always returns currencies only for the current system.
-     *
-     * @param string $systemId
-     *
-     * @return array|bool|\mysqli_result|\PDOStatement|resource|null
-     *
-     * @throws \PrestaShopDatabaseException
-     */
-    private function getCurrenciesForShop($systemId)
-    {
-        return \Db::getInstance()->executeS('
-		SELECT *
-		FROM `' . _DB_PREFIX_ . 'currency` c
-		LEFT JOIN `' . _DB_PREFIX_ . 'currency_shop` cs ON (cs.`id_currency` = c.`id_currency`)
-        ' . ($systemId ? ' WHERE cs.`id_shop` = ' . (int)$systemId : '') . '
-		ORDER BY `iso_code` ASC');
+        return array($currency->iso_code);
     }
 }
