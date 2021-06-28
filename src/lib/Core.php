@@ -55,7 +55,7 @@ class Core
      */
     private static function mkdir($dst)
     {
-        if (!file_exists($dst) && !mkdir($dst) && !is_dir($dst)) {
+        if (!file_exists($dst) && !mkdir($dst, 0777, true) && !is_dir($dst)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $dst));
         }
     }
