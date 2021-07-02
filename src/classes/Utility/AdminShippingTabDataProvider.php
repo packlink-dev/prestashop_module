@@ -175,7 +175,7 @@ class AdminShippingTabDataProvider
             'carrier_tracking_numbers' => $shipmentDetails->getCarrierTrackingNumbers(),
             'carrier_tracking_url' => $shipmentDetails->getCarrierTrackingUrl() ?: '',
             'packlink_shipping_price' => $shipmentDetails->getShippingCost() !== null
-                ? $shipmentDetails->getShippingCost() . ' €' : '',
+                ? $shipmentDetails->getShippingCost() . ' ' . $shipmentDetails->getCurrencySymbol() : '',
             'link' => $shipmentDetails->getShipmentUrl(),
         );
     }
