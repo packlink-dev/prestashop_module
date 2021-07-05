@@ -15,6 +15,7 @@ use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
+use Packlink\BusinessLogic\Utility\CurrencySymbolService;
 
 /**
  * Class AdminShippingTabDataProvider.
@@ -175,7 +176,7 @@ class AdminShippingTabDataProvider
             'carrier_tracking_numbers' => $shipmentDetails->getCarrierTrackingNumbers(),
             'carrier_tracking_url' => $shipmentDetails->getCarrierTrackingUrl() ?: '',
             'packlink_shipping_price' => $shipmentDetails->getShippingCost() !== null
-                ? $shipmentDetails->getShippingCost() . ' ' . $shipmentDetails->getCurrencySymbol() : '',
+                ? $shipmentDetails->getShippingCost() . ' ' . CurrencySymbolService::getCurrencySymbol($shipmentDetails->getCurrency()) : '',
             'link' => $shipmentDetails->getShipmentUrl(),
         );
     }
