@@ -12,6 +12,7 @@ class Core
     public static function postUpdate()
     {
         $from = __DIR__ . '/../vendor/packlink/integration-core/src/BusinessLogic/Resources';
+        $brandDir = __DIR__ . '/../vendor/packlink/integration-core/src/Brands/Packlink/Resources';
         $to = __DIR__ . '/../views';
 
         self::copyDirectory($from . '/images', $to . '/img/core/images');
@@ -20,7 +21,8 @@ class Core
         self::copyDirectory($from . '/css', $to . '/css');
         self::copyDirectory($from . '/LocationPicker/css', $to . '/css');
         self::copyDirectory($from . '/templates', $to . '/templates/core');
-        self::copyDirectory($from . '/lang', $to . '/lang');
+        self::copyDirectory($from . '/countries', $to . '/countries');
+        self::copyDirectory($brandDir . '/countries', $to . '/brand/countries');
     }
 
     /**
@@ -53,7 +55,7 @@ class Core
      */
     private static function mkdir($dst)
     {
-        if (!file_exists($dst) && !mkdir($dst) && !is_dir($dst)) {
+        if (!file_exists($dst) && !mkdir($dst, 0777, true) && !is_dir($dst)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $dst));
         }
     }

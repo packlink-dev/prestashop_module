@@ -5,7 +5,6 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Logeecom\Infrastructure\TaskExecution\QueueService;
-use Packlink\BusinessLogic\Country\CountryService;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Scheduler\Models\HourlySchedule;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
@@ -92,12 +91,10 @@ function migrateShopOrderDetailEntities()
     if (!empty($records)) {
         /** @var Configuration $configService */
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-        /** @var CountryService $countryService */
-        $countryService = ServiceRegister::getService(CountryService::CLASS_NAME);
 
         $userInfo = $configService->getUserInfo();
         $userDomain = 'com';
-        if ($userInfo !== null && $countryService->isBaseCountry($userInfo->country)) {
+        if ($userInfo && in_array($userInfo->country, array('ES', 'DE', 'FR', 'IT'))) {
             $userDomain = \Tools::strtolower($userInfo->country);
         }
 

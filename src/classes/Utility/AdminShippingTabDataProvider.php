@@ -15,6 +15,7 @@ use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
+use Packlink\BusinessLogic\Utility\CurrencySymbolService;
 
 /**
  * Class AdminShippingTabDataProvider.
@@ -49,7 +50,7 @@ class AdminShippingTabDataProvider
         self::$context = $context;
         self::$module = $module;
 
-        Configuration::setCurrentLanguage($context->language->iso_code);
+        Configuration::setUICountryCode($context->language->iso_code);
 
         /* @var OrderShipmentDetailsService $shipmentDetailsService */
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
@@ -90,7 +91,7 @@ class AdminShippingTabDataProvider
      */
     public static function getShippingContentData(\Context $context, \Module $module, $orderId)
     {
-        Configuration::setCurrentLanguage($context->language->iso_code);
+        Configuration::setUICountryCode($context->language->iso_code);
 
         self::$context = $context;
         self::$module = $module;
@@ -175,7 +176,9 @@ class AdminShippingTabDataProvider
             'carrier_tracking_numbers' => $shipmentDetails->getCarrierTrackingNumbers(),
             'carrier_tracking_url' => $shipmentDetails->getCarrierTrackingUrl() ?: '',
             'packlink_shipping_price' => $shipmentDetails->getShippingCost() !== null
-                ? $shipmentDetails->getShippingCost() . ' €' : '',
+                ? $shipmentDetails->getShippingCost() . ' '
+                . CurrencySymbolService::getCurrencySymbol($shipmentDetails->getCurrency())
+                : '',
             'link' => $shipmentDetails->getShipmentUrl(),
         );
     }
@@ -208,7 +211,7 @@ class AdminShippingTabDataProvider
     {
         $printLabelsUrl = self::$context->link->getAdminLink('BulkShipmentLabels');
         if (strpos($printLabelsUrl, _PS_BASE_URL_) === false) {
-            $admin = explode(DIRECTORY_SEPARATOR,_PS_ADMIN_DIR_);
+            $admin = explode(DIRECTORY_SEPARATOR, _PS_ADMIN_DIR_);
             $adminArray = array_slice($admin, -1);
             $adminFolder = array_pop($adminArray);
             $printLabelsUrl = _PS_BASE_URL_ . __PS_BASE_URI__ . $adminFolder . '/' . $printLabelsUrl;

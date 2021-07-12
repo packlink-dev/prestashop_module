@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.1.3';
+        $this->version = '3.2.0';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -619,7 +619,7 @@ class Packlink extends CarrierModule
         $this->loadStyles();
         $this->loadScripts();
 
-        \Packlink\BusinessLogic\Configuration::setCurrentLanguage($this->context->language->iso_code);
+        \Packlink\BusinessLogic\Configuration::setUICountryCode($this->context->language->iso_code);
 
         $this->context->smarty->assign(array(
             'lang' => $this->getTranslations(),
@@ -667,7 +667,8 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/ConfigurationController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
-                $this->getPathUri() . 'views/js/EditServiceController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/EditServiceController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/SingleStorePricePolicyController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/LoginController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/ModalService.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/MyShippingServicesController.js?v=' . $this->version,
@@ -686,6 +687,7 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/SystemInfoController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/PrestaAjaxService.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/SettingsButtonService.js?v=' . $this->version,
             ),
             false
         );
@@ -711,8 +713,12 @@ class Packlink extends CarrierModule
      */
     private function getDefaultTranslations()
     {
-        $baseDir = $this->getLocalPath() . 'views/lang/';
-        $defaultTranslations = json_decode(Tools::file_get_contents($baseDir . 'en.json'), true);
+        /** @var \Packlink\BusinessLogic\CountryLabels\CountryService $countryService */
+        $countryService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\CountryLabels\Interfaces\CountryService::CLASS_NAME
+        );
+        $labels = $countryService->getAllLabels('en');
+        $defaultTranslations = $labels['en'];
 
         $zonesDescription = 'Select the availability for the zones that are supported for your shipping service.';
         $selectOneZone = 'Select availability of at least one zone and add as many required';
@@ -738,13 +744,14 @@ class Packlink extends CarrierModule
      */
     private function getCurrentTranslations()
     {
-        $baseDir = $this->getLocalPath() . 'views/lang/';
         $locale = Tools::strtolower($this->context->language->iso_code);
 
-        $currentLangFilename = $baseDir . $locale . '.json';
-        $currentTranslations = file_exists($currentLangFilename)
-            ? json_decode(Tools::file_get_contents($currentLangFilename), true)
-            : array();
+        /** @var \Packlink\BusinessLogic\CountryLabels\CountryService $countryService */
+        $countryService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\CountryLabels\Interfaces\CountryService::CLASS_NAME
+        );
+        $labels = $countryService->getAllLabels($locale);
+        $currentTranslations = $labels[$locale];
 
         if (!empty($currentTranslations)) {
             $currentTranslations['shippingServices']['serviceCountriesTitle'] = $this->l(
@@ -890,6 +897,8 @@ class Packlink extends CarrierModule
             'my-shipping-services' => array(
                 'getServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
                 'deleteServiceUrl' => $this->getAction('ShippingMethods', 'deactivate'),
+                'getCurrencyDetailsUrl' => $this->getAction('SystemInfo', 'get'),
+                'systemId' => (string)\Context::getContext()->shop->id,
             ),
             'pick-shipping-service' => array(
                 'getActiveServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
@@ -897,12 +906,15 @@ class Packlink extends CarrierModule
                 'getTaskStatusUrl' => $this->getAction('ShippingMethods', 'getTaskStatus'),
                 'startAutoConfigureUrl' => $this->getAction('PacklinkAutoConfigure', 'start'),
                 'disableCarriersUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
+                'getCurrencyDetailsUrl' => $this->getAction('SystemInfo', 'get'),
+                'systemId' => (string)\Context::getContext()->shop->id,
             ),
             'edit-service' => array(
                 'getServiceUrl' => $this->getAction('ShippingMethods', 'getShippingMethod'),
                 'saveServiceUrl' => $this->getAction('ShippingMethods', 'save'),
                 'getTaxClassesUrl' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
                 'getCountriesListUrl' => $this->getAction('ShippingZones', 'getShippingZones'),
+                'getCurrencyDetailsUrl' => $this->getAction('SystemInfo', 'get'),
                 'hasTaxConfiguration' => true,
                 'hasCountryConfiguration' => true,
                 'canDisplayCarrierLogos' => true,
