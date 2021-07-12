@@ -121,8 +121,8 @@ class Bootstrap extends BootstrapComponent
             FileResolverService::CLASS_NAME,
             function () {
                 return new FileResolverService(array(
-                    __DIR__ . '/../views/brand/countries',
-                    __DIR__ . '/../views/countries',
+                    dirname(__FILE__) . '/../views/brand/countries',
+                    dirname(__FILE__) . '/../views/countries',
                 ));
             }
         );

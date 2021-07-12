@@ -54,9 +54,9 @@ rm -rf packlink/vendor/packlink/integration-core/tests
 rm -rf packlink/vendor/packlink/integration-core/generic_tests
 rm -rf packlink/vendor/packlink/integration-core/README.md
 rm -rf packlink/vendor/setasign/fpdf/tutorial/
-rm -rf packlink/views/lang/toCSV.php
-rm -rf packlink/views/lang/fromCSV.php
-rm -rf packlink/views/lang/translations.csv
+rm -rf packlink/views/countries/toCSV.php
+rm -rf packlink/views/countries/fromCSV.php
+rm -rf packlink/views/countries/translations.csv
 
 echo -e "\e[32mSTEP 4:\e[0m Adding PrestaShop mandatory licence header to files..."
 php "$PWD/src/lib/autoLicence.php" "$PWD/packlink"
