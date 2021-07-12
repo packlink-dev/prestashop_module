@@ -3,10 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [3.2.0](https://github.com/packlink-dev/prestashop_module/compare/v3.1.2...v3.2.0)
+## [3.2.0](https://github.com/packlink-dev/prestashop_module/compare/v3.1.3...v3.2.0)
 ### Changed
 - Updated to the module white-label changes.
 - Updated to the multi-currency changes.
+
+## [3.1.3](https://github.com/packlink-dev/prestashop_module/compare/v3.1.2...v3.1.3)
+### Changed
+- Fix shipping labels printing in PrestaShop 1.6.
 
 ## [3.1.2](https://github.com/packlink-dev/prestashop_module/compare/v3.1.1...v3.1.2)
 ### Changed
