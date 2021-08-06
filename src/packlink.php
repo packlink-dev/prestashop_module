@@ -667,7 +667,7 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/ConfigurationController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
-                $this->getPathUri() . 'views/js/core/EditServiceController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/EditServiceController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/SingleStorePricePolicyController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/LoginController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/ModalService.js?v=' . $this->version,
