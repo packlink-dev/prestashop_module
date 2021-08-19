@@ -488,6 +488,7 @@ class PacklinkInstaller
                     ShipmentStatus::STATUS_IN_TRANSIT => 4,
                     ShipmentStatus::STATUS_DELIVERED => 5,
                     ShipmentStatus::STATUS_CANCELLED => 6,
+                    ShipmentStatus::OUT_FOR_DELIVERY => 4,
                 )
             );
         }

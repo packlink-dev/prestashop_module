@@ -8,6 +8,7 @@ use Logeecom\Infrastructure\Logger\LogData;
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\Singleton;
+use Packlink\WooCommerce\Components\Services\Config_Service;
 
 /**
  * Class LoggerService.
@@ -50,6 +51,18 @@ class LoggerService extends Singleton implements ShopLoggerAdapter
         Logger::INFO => self::PRESTASHOP_INFO,
         Logger::DEBUG => self::PRESTASHOP_INFO,
     );
+
+    /**
+     * Creates instance of this class.
+     *
+     * @return static
+     *
+     * @noinspection PhpDocSignatureInspection
+     */
+    public static function create()
+    {
+        return new self();
+    }
 
     /**
      * Log message in system

@@ -4,6 +4,7 @@ namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
 use Logeecom\Infrastructure\Logger\Logger;
 use Packlink\BusinessLogic\Configuration;
+use Packlink\WooCommerce\Components\Services\Config_Service;
 
 class ConfigurationService extends Configuration
 {
@@ -53,6 +54,18 @@ class ConfigurationService extends Configuration
     public function getMaxTaskInactivityPeriod()
     {
         return parent::getMaxTaskInactivityPeriod() ?: self::MAX_TASK_INACTIVITY_PERIOD;
+    }
+
+    /**
+     * Creates instance of this class.
+     *
+     * @return static
+     *
+     * @noinspection PhpDocSignatureInspection
+     */
+    public static function create()
+    {
+        return new self();
     }
 
     /**
