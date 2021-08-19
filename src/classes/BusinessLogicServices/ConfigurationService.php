@@ -4,7 +4,6 @@ namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
 use Logeecom\Infrastructure\Logger\Logger;
 use Packlink\BusinessLogic\Configuration;
-use Packlink\WooCommerce\Components\Services\Config_Service;
 
 class ConfigurationService extends Configuration
 {

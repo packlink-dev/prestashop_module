@@ -8,7 +8,6 @@ use Logeecom\Infrastructure\Logger\LogData;
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\Singleton;
-use Packlink\WooCommerce\Components\Services\Config_Service;
 
 /**
  * Class LoggerService.
