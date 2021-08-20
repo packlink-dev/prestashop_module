@@ -667,7 +667,7 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/ConfigurationController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
-                $this->getPathUri() . 'views/js/EditServiceController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/EditServiceController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/SingleStorePricePolicyController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/LoginController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/ModalService.js?v=' . $this->version,
@@ -849,6 +849,13 @@ class Packlink extends CarrierModule
      */
     private function getUrls()
     {
+        $prefix = '';
+
+        if (version_compare(_PS_VERSION_, '1.7.5.0', 'l')) {
+            $admin = (array_slice(explode(DIRECTORY_SEPARATOR,_PS_ADMIN_DIR_), -1));
+            $prefix = _PS_BASE_URL_ . __PS_BASE_URI__ . array_pop($admin) . '/';
+        }
+
         return array(
             'login' => array(
                 'submit' => $this->getAction('Login', 'login'),
@@ -910,7 +917,7 @@ class Packlink extends CarrierModule
                 'systemId' => (string)\Context::getContext()->shop->id,
             ),
             'edit-service' => array(
-                'getServiceUrl' => $this->getAction('ShippingMethods', 'getShippingMethod'),
+                'getServiceUrl' => $prefix . $this->getAction('ShippingMethods', 'getShippingMethod'),
                 'saveServiceUrl' => $this->getAction('ShippingMethods', 'save'),
                 'getTaxClassesUrl' => $this->getAction('ShippingMethods', 'getAvailableTaxClasses'),
                 'getCountriesListUrl' => $this->getAction('ShippingZones', 'getShippingZones'),
