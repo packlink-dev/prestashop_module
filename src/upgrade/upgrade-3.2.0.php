@@ -51,7 +51,7 @@ function upgrade_module_3_2_0($module)
     $installer = new PacklinkInstaller($module);
     $installer->addController('SystemInfo');
 
-    updateServices();
+    updateServices320();
 
     return true;
 }
@@ -130,7 +130,7 @@ function getSystemSpecificPricingPolicies($service, $systemDetails)
  *
  * @throws \Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException
  */
-function updateServices()
+function updateServices320()
 {
     /** @var \Logeecom\Infrastructure\TaskExecution\QueueService $queueService */
     $queueService = \Logeecom\Infrastructure\ServiceRegister::getService(
