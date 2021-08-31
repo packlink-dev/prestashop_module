@@ -52,18 +52,6 @@ class LoggerService extends Singleton implements ShopLoggerAdapter
     );
 
     /**
-     * Creates instance of this class.
-     *
-     * @return static
-     *
-     * @noinspection PhpDocSignatureInspection
-     */
-    public static function create()
-    {
-        return new self();
-    }
-
-    /**
      * Log message in system
      *
      * @param LogData $data

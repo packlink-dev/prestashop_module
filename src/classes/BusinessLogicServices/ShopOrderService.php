@@ -88,6 +88,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $currency = \Currency::getCurrency($currencyId);
 
             $order->setId($orderId);
+            $order->setOrderNumber($orderId);
             $order->setCustomerId((int)$sourceOrder->id_customer);
             $order->setCurrency($currency['iso_code']);
             $order->setTotalPrice((float)$sourceOrder->total_paid_tax_incl);

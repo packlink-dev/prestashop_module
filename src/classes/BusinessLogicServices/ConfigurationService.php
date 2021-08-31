@@ -56,18 +56,6 @@ class ConfigurationService extends Configuration
     }
 
     /**
-     * Creates instance of this class.
-     *
-     * @return static
-     *
-     * @noinspection PhpDocSignatureInspection
-     */
-    public static function create()
-    {
-        return new self();
-    }
-
-    /**
      * Returns web-hook callback URL for current system.
      *
      * @return string Web-hook callback URL.
