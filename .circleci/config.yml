@@ -53,6 +53,8 @@ workflows:
             - packlink-github
           filters:
             branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
+            #  ignore: /.*/
+              only:
+                - fix-circleci
+            #tags:
+            #  only: /.*/
