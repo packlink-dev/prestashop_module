@@ -7,7 +7,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * Updates module to version 3.2.1.
+ * Updates module to version 3.2.0.
  *
  * @param \Packlink $module
  *
