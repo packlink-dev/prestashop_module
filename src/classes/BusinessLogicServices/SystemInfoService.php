@@ -28,7 +28,7 @@ class SystemInfoService implements SystemInfoInterface
             $systemInfos[] = $this->getSystemInfo($shopId);
         }
 
-        return $systemInfos;
+        return array_filter($systemInfos);
     }
 
     /**
