@@ -107,7 +107,7 @@ var Packlink = window.Packlink || {};
 
             let submitBtn = document.getElementsByName('confirmDeliveryOption');
             if (submitBtn.length) {
-                submitBtn[0].classList.remove('disabled');
+                submitBtn[0].classList.remove('pl-checkout-disabled');
             }
 
             let element = document.getElementById('checkout-payment-step');
@@ -124,7 +124,7 @@ var Packlink = window.Packlink || {};
 
             var submitBtn = document.getElementsByName('confirmDeliveryOption');
             if (submitBtn.length) {
-                submitBtn[0].classList.add('disabled');
+                submitBtn[0].classList.add('pl-checkout-disabled');
             }
 
             clickOnDeliveryStep();

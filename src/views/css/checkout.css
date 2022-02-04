@@ -98,7 +98,7 @@
   display: none !important;
 }
 
-.disabled {
+.pl-checkout-disabled {
   background-color: #7a7a7a;
   pointer-events: none !important;
   cursor: not-allowed !important;
