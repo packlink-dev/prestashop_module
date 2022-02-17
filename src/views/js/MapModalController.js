@@ -18,7 +18,7 @@ var Packlink = window.Packlink || {};
       modal = document.getElementById('pl-map-modal');
       modal.classList.remove('hidden');
 
-      document.getElementById('pl-modal-spinner').classList.remove('disabled');
+      document.getElementById('pl-modal-spinner').classList.remove('pl-checkout-disabled');
 
       closeButton = document.getElementById('pl-close-modal-btn');
       closeButton.addEventListener('click', closeClickedListener);
@@ -75,7 +75,7 @@ var Packlink = window.Packlink || {};
      */
     function submitLocations() {
       Packlink.locationPicker.display(locations, onDropoffSelected, configuration.dropOffId, lang);
-      document.getElementById('pl-modal-spinner').classList.add('disabled');
+      document.getElementById('pl-modal-spinner').classList.add('pl-checkout-disabled');
     }
 
     /**
@@ -89,7 +89,7 @@ var Packlink = window.Packlink || {};
      * Selects dropoff location.
      */
     function selectDropoff() {
-      document.getElementById('pl-modal-spinner').classList.remove('disabled');
+      document.getElementById('pl-modal-spinner').classList.remove('pl-checkout-disabled');
       let dropOffModel = {
         method: 'postSelectedDropoff',
         carrierId: configuration.carrierId,
@@ -108,7 +108,7 @@ var Packlink = window.Packlink || {};
      * Select dropoff location success callback.
      */
     function selectDropoffSuccessHandler() {
-      document.getElementById('pl-modal-spinner').classList.add('disabled');
+      document.getElementById('pl-modal-spinner').classList.add('pl-checkout-disabled');
       configuration.onComplete(
           {
             type: 'success',

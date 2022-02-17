@@ -93,7 +93,7 @@ var Packlink = window.Packlink || {};
         function enableSubmit() {
             let submitBtn = document.getElementsByName('processCarrier');
             if (submitBtn.length) {
-                submitBtn[0].classList.remove('disabled');
+                submitBtn[0].classList.remove('pl-checkout-disabled');
             }
         }
 
@@ -103,7 +103,7 @@ var Packlink = window.Packlink || {};
         function disableSubmit() {
             let submitBtn = document.getElementsByName('processCarrier');
             if (submitBtn.length) {
-                submitBtn[0].classList.add('disabled');
+                submitBtn[0].classList.add('pl-checkout-disabled');
             }
         }
 

@@ -28,7 +28,7 @@ var Packlink = window.Packlink || {};
             }
 
             for (let element of inputElements) {
-                if (element.type === 'radio') {
+                if (element.type === 'radio' && element.getAttribute('name').includes('delivery_option')) {
                     let id = trimString(element.value);
 
                     if (referenceIds.indexOf(id) !== -1) {
@@ -107,7 +107,7 @@ var Packlink = window.Packlink || {};
 
             let submitBtn = document.getElementsByName('confirmDeliveryOption');
             if (submitBtn.length) {
-                submitBtn[0].classList.remove('disabled');
+                submitBtn[0].classList.remove('pl-checkout-disabled');
             }
 
             let element = document.getElementById('checkout-payment-step');
@@ -124,7 +124,7 @@ var Packlink = window.Packlink || {};
 
             var submitBtn = document.getElementsByName('confirmDeliveryOption');
             if (submitBtn.length) {
-                submitBtn[0].classList.add('disabled');
+                submitBtn[0].classList.add('pl-checkout-disabled');
             }
 
             clickOnDeliveryStep();
