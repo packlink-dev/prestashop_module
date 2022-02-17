@@ -28,7 +28,7 @@ var Packlink = window.Packlink || {};
             }
 
             for (let element of inputElements) {
-                if (element.type === 'radio') {
+                if (element.type === 'radio' && element.getAttribute('name').includes('delivery_option')) {
                     let id = trimString(element.value);
 
                     if (referenceIds.indexOf(id) !== -1) {

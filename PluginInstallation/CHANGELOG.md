@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.3](https://github.com/packlink-dev/prestashop_module/compare/v3.2.2...v3.2.3)
+# Changed
+- Updated to the latest Core changes regarding changing the value of the marketing calls flag.
+- Updated storefront styles and scripts to accommodate changes in latest PrestaShop versions.
+
 ## [3.2.2](https://github.com/packlink-dev/prestashop_module/compare/v3.2.1...v3.2.2)
 ### Changed
 - Updated the mechanism for fetching controller URLs on the frontend views.
