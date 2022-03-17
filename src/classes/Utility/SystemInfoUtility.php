@@ -102,6 +102,13 @@ class SystemInfoUtility
         $result['Plugin version'] = $packlink->version;
         $result['Async process URL'] = $configService->getAsyncProcessUrl('test');
         $result['Auto-test URL'] = \Context::getContext()->link->getAdminLink('PacklinkAutoTest');
+        $result['Test cURL URL'] = \Context::getContext()->link->getAdminLink('Debug') . '&' .
+            http_build_query(
+                array(
+                    'ajax' => true,
+                    'action' => 'testCurl',
+                )
+            );
 
         return json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
