@@ -1,5 +1,6 @@
 <?php
 
+use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\SystemInfoUtility;
 use Packlink\BusinessLogic\Controllers\DebugController as BaseDebugController;
@@ -59,5 +60,54 @@ class DebugController extends PacklinkBaseController
         $file = SystemInfoUtility::getSystemInfo();
 
         PacklinkPrestaShopUtility::dieFile($file, self::SYSTEM_INFO_FILE_NAME);
+    }
+
+    /**
+     * Tests cURL request to the async process controller.
+     *
+     * @return void
+     */
+    public function displayAjaxTestCurl()
+    {
+        /** @var \Logeecom\Infrastructure\Configuration\Configuration $config */
+        $config = ServiceRegister::getService( \Logeecom\Infrastructure\Configuration\Configuration::CLASS_NAME );
+        $url    = $config->getAsyncProcessUrl( 'test' );
+
+        $curl    = curl_init();
+        $verbose = fopen( 'php://temp', 'wb+' );
+        /** @noinspection CurlSslServerSpoofingInspection */
+        curl_setopt_array(
+            $curl,
+            array(
+                CURLOPT_URL            => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_HEADER         => true,
+                // CURLOPT_SSLVERSION      => CURL_SSLVERSION_TLSv1_0,
+                // CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT        => 2,
+                CURLOPT_CUSTOMREQUEST  => 'POST',
+                CURLOPT_VERBOSE        => true,
+                CURLOPT_STDERR         => $verbose,
+                // CURLOPT_SSL_CIPHER_LIST => 'TLSv1.2',
+                CURLOPT_HTTPHEADER     => array(
+                    'Cache-Control: no-cache',
+                ),
+            )
+        );
+
+        $response = curl_exec( $curl );
+
+        rewind( $verbose );
+        echo '<pre>', stream_get_contents( $verbose );
+
+        curl_close( $curl );
+
+        echo $response;
+
+        echo '</pre>';
+        exit;
     }
 }
