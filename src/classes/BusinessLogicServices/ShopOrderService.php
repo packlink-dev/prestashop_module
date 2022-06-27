@@ -93,7 +93,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $order->setCurrency($currency['iso_code']);
             $order->setTotalPrice((float)$sourceOrder->total_paid_tax_incl);
             $order->setBasePrice((float)$sourceOrder->total_paid_tax_excl);
-
             $dropOffId = $this->getDropOffId($sourceOrder);
             if ($dropOffId) {
                 $order->setShippingDropOffId($dropOffId);
@@ -268,6 +267,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $orderItem = new Item();
         $product = new \Product((int)$sourceOrderItem['product_id']);
         $languageId = (int)\Context::getContext()->language->id;
+
 
         $orderItem->setQuantity((int)$sourceOrderItem['product_quantity']);
 
