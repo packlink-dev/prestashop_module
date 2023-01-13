@@ -113,30 +113,29 @@ class DebugController extends PacklinkBaseController
     }
 
     /**
-     * Sets async request timeout
+     * Sets the task runner wake up delay. The 'taskRunnerWakeupDelay' should be in seconds. The default value is 5.
      *
      * @return void
      */
-    public function displayAjaxSetAsyncTimeout()
+    public function displayAjaxSetTaskRunnerWakeUpDelay()
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
-        if (!isset($data['asyncProcessTimeout']) || !is_int($data['asyncProcessTimeout'])) {
+        if (!isset($data['taskRunnerWakeupDelay']) || !is_int($data['taskRunnerWakeupDelay'])) {
             PacklinkPrestaShopUtility::die400();
         }
 
-        $this->getConfigurationService()->setAsyncRequestTimeout($data['asyncProcessTimeout']);
+        $this->getConfigurationService()->setTaskRunnerWakeupDelay($data['taskRunnerWakeupDelay']);
 
-        PacklinkPrestaShopUtility::dieJson(array('asyncProcessTimeout' => $data['asyncProcessTimeout']));
+        PacklinkPrestaShopUtility::dieJson(array('taskRunnerWakeupDelay' => $data['taskRunnerWakeupDelay']));
     }
 
     /**
-     * Retrieves async process timeout
+     * Retrieves task runner wake up delay.
      */
-    public function displayAjaxGetAsyncTimeout()
+    public function displayAjaxGetTaskRunnerWakeUpDelay()
     {
         PacklinkPrestaShopUtility::dieJson(array(
-            'ASYNC_PROCESS_TIMEOUT' => $this->getConfigurationService()
-                ->getAsyncRequestTimeout(),
+            'taskRunnerWakeupDelay' => $this->getConfigurationService()->getTaskRunnerWakeupDelay(),
         ));
     }
 
