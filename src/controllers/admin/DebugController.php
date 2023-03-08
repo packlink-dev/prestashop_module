@@ -140,6 +140,34 @@ class DebugController extends PacklinkBaseController
     }
 
     /**
+     * Sets async request timeout
+     *
+     * @return void
+     */
+    public function displayAjaxSetAsyncTimeout()
+    {
+        $data = PacklinkPrestaShopUtility::getPacklinkPostData();
+        if (!isset($data['asyncProcessTimeout']) || !is_int($data['asyncProcessTimeout'])) {
+            PacklinkPrestaShopUtility::die400();
+        }
+
+        $this->getConfigurationService()->setAsyncRequestTimeout($data['asyncProcessTimeout']);
+
+        PacklinkPrestaShopUtility::dieJson(array('asyncProcessTimeout' => $data['asyncProcessTimeout']));
+    }
+
+    /**
+     * Retrieves async process timeout
+     */
+    public function displayAjaxGetAsyncTimeout()
+    {
+        PacklinkPrestaShopUtility::dieJson(array(
+            'ASYNC_PROCESS_TIMEOUT' => $this->getConfigurationService()
+                ->getAsyncRequestTimeout(),
+        ));
+    }
+
+    /**
      * @return ConfigurationService
      */
     private function getConfigurationService()
