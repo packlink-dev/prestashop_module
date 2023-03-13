@@ -1,9 +1,11 @@
 <?php
 
+use Logeecom\Infrastructure\Configuration\Configuration;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\SystemInfoUtility;
 use Packlink\BusinessLogic\Controllers\DebugController as BaseDebugController;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -11,7 +13,6 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
 class DebugController extends PacklinkBaseController
 {
     const SYSTEM_INFO_FILE_NAME = 'packlink-debug-data.zip';
-
     /** @var BaseDebugController */
     private $baseController;
 
@@ -70,44 +71,108 @@ class DebugController extends PacklinkBaseController
     public function displayAjaxTestCurl()
     {
         /** @var \Logeecom\Infrastructure\Configuration\Configuration $config */
-        $config = ServiceRegister::getService( \Logeecom\Infrastructure\Configuration\Configuration::CLASS_NAME );
-        $url    = $config->getAsyncProcessUrl( 'test' );
+        $config = ServiceRegister::getService(\Logeecom\Infrastructure\Configuration\Configuration::CLASS_NAME);
+        $url = $config->getAsyncProcessUrl('test');
 
-        $curl    = curl_init();
-        $verbose = fopen( 'php://temp', 'wb+' );
+        $curl = curl_init();
+        $verbose = fopen('php://temp', 'wb+');
         /** @noinspection CurlSslServerSpoofingInspection */
         curl_setopt_array(
             $curl,
             array(
-                CURLOPT_URL            => $url,
+                CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_SSL_VERIFYHOST => false,
                 CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_HEADER         => true,
+                CURLOPT_HEADER => true,
                 // CURLOPT_SSLVERSION      => CURL_SSLVERSION_TLSv1_0,
                 // CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
                 CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_TIMEOUT        => 2,
-                CURLOPT_CUSTOMREQUEST  => 'POST',
-                CURLOPT_VERBOSE        => true,
-                CURLOPT_STDERR         => $verbose,
+                CURLOPT_TIMEOUT => 2,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_VERBOSE => true,
+                CURLOPT_STDERR => $verbose,
                 // CURLOPT_SSL_CIPHER_LIST => 'TLSv1.2',
-                CURLOPT_HTTPHEADER     => array(
+                CURLOPT_HTTPHEADER => array(
                     'Cache-Control: no-cache',
                 ),
             )
         );
 
-        $response = curl_exec( $curl );
+        $response = curl_exec($curl);
 
-        rewind( $verbose );
-        echo '<pre>', stream_get_contents( $verbose );
+        rewind($verbose);
+        echo '<pre>', stream_get_contents($verbose);
 
-        curl_close( $curl );
+        curl_close($curl);
 
         echo $response;
 
         echo '</pre>';
         exit;
+    }
+
+    /**
+     * Sets the task runner wake up delay. The 'taskRunnerWakeupDelay' should be in seconds. The default value is 5.
+     *
+     * @return void
+     */
+    public function displayAjaxSetTaskRunnerWakeUpDelay()
+    {
+        $data = PacklinkPrestaShopUtility::getPacklinkPostData();
+        if (!isset($data['taskRunnerWakeupDelay']) || !is_int($data['taskRunnerWakeupDelay'])) {
+            PacklinkPrestaShopUtility::die400();
+        }
+
+        $this->getConfigurationService()->setTaskRunnerWakeupDelay($data['taskRunnerWakeupDelay']);
+
+        PacklinkPrestaShopUtility::dieJson(array('taskRunnerWakeupDelay' => $data['taskRunnerWakeupDelay']));
+    }
+
+    /**
+     * Retrieves task runner wake up delay.
+     */
+    public function displayAjaxGetTaskRunnerWakeUpDelay()
+    {
+        PacklinkPrestaShopUtility::dieJson(array(
+            'taskRunnerWakeupDelay' => $this->getConfigurationService()->getTaskRunnerWakeupDelay(),
+        ));
+    }
+
+    /**
+     * Sets async request timeout
+     *
+     * @return void
+     */
+    public function displayAjaxSetAsyncTimeout()
+    {
+        $data = PacklinkPrestaShopUtility::getPacklinkPostData();
+        if (!isset($data['asyncProcessTimeout']) || !is_int($data['asyncProcessTimeout'])) {
+            PacklinkPrestaShopUtility::die400();
+        }
+
+        $this->getConfigurationService()->setAsyncRequestTimeout($data['asyncProcessTimeout']);
+
+        PacklinkPrestaShopUtility::dieJson(array('asyncProcessTimeout' => $data['asyncProcessTimeout']));
+    }
+
+    /**
+     * Retrieves async process timeout
+     */
+    public function displayAjaxGetAsyncTimeout()
+    {
+        PacklinkPrestaShopUtility::dieJson(array(
+            'ASYNC_PROCESS_TIMEOUT' => $this->getConfigurationService()
+                ->getAsyncRequestTimeout(),
+        ));
+    }
+
+    /**
+     * @return ConfigurationService
+     */
+    private function getConfigurationService()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return ServiceRegister::getService(Configuration::CLASS_NAME);
     }
 }
