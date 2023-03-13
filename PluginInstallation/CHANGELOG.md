@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.8](https://github.com/packlink-dev/prestashop_module/compare/v3.2.7...v3.2.8)
+# Added
+- Added compatibility with PrestaShop 8.
+- Updated to Core version 3.3.13.
+- Added get/set methods for async process timeout and task runner wake up delay in the debug controller.
+
+## [3.2.7](https://github.com/packlink-dev/prestashop_module/compare/v3.2.6...v3.2.7)
+# Added
+- Updated to Core version 3.3.11.
+
 ## [3.2.6](https://github.com/packlink-dev/prestashop_module/compare/v3.2.5...v3.2.6)
 # Changed
 - Fixed the release package.
@@ -134,22 +144,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Removed array_column usages from code.
 - Fixed bugs in BaseRepository discovered by the new test suite.
 - Shipping cost calculator now takes in consideration specific shipping costs set on product level.
-- The lowest boundary in fixed price policies (by weight and by price) can be higher than zero. 
+- The lowest boundary in fixed price policies (by weight and by price) can be higher than zero.
 This allows users to disable a shipping method for orders below the set limit.
 
-## [v2.1.1](https://github.com/packlink-dev/prestashop_module/compare/v2.1.0...v2.1.1) - 2019-10-28 
+## [v2.1.1](https://github.com/packlink-dev/prestashop_module/compare/v2.1.0...v2.1.1) - 2019-10-28
 ### Changed
 - Fixed class auto-loader.
 
-## [v2.1.0](https://github.com/packlink-dev/prestashop_module/compare/v2.0.4...v2.1.0) - 2019-10-15 
+## [v2.1.0](https://github.com/packlink-dev/prestashop_module/compare/v2.0.4...v2.1.0) - 2019-10-15
 ### Added
 - Auto-test and auto-configuration features.
 
 ### Changed
 - Update to latest core v1.4.*
-- Fixed sending full address 
+- Fixed sending full address
 - Fixed using first and last name for drop-off address from shipping address instead of the customer.
-- Fixed a case when old reference exists and order page was throwing order not found exception. 
+- Fixed a case when old reference exists and order page was throwing order not found exception.
 
 ## [v2.0.4](https://github.com/packlink-dev/prestashop_module/compare/v2.0.3...v2.0.4) - 2019-07-11
 ### Changed
@@ -167,8 +177,8 @@ First marketplace release of the new version.
 ### Changed
 - Updated to the latest core changes
 - Module now supports sending analytics events
-- Fix the upgrade process for overrides. Module now handles properly overridden 
-PrestaShop files - if other module did the override before Packlink module, it will 
+- Fix the upgrade process for overrides. Module now handles properly overridden
+PrestaShop files - if other module did the override before Packlink module, it will
 be handled gracefully - Packlink overrides will not be installed. Before this update,
 PrestaShop was giving an error message and module could not be activated.
 - Moved code for package shipping cost calculation to a separate class `PackageCostCalculator`
@@ -178,7 +188,7 @@ PrestaShop was giving an error message and module could not be activated.
 ## [v2.0.1](https://github.com/packlink-dev/prestashop_module/compare/v2.0.0...v2.0.1) - 2019-05-29
 ### Changed
 - Updated to the latest core changes
-- Shipment labels are now fetched from Packlink only when order does not have labels set 
+- Shipment labels are now fetched from Packlink only when order does not have labels set
 and shipment status is in one of:
     * READY_TO_PRINT
     * READY_FOR_COLLECTION
