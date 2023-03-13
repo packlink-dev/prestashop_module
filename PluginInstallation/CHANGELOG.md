@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.9](https://github.com/packlink-dev/prestashop_module/compare/v3.2.7...v3.2.8)
+# Added
+- Added compatibility with PrestaShop 8.
+- Updated to Core version 3.3.13.
+- Added get/set methods for async process timeout and task runner wake up delay in the debug controller.
+
 ## [3.2.8](https://github.com/packlink-dev/prestashop_module/compare/v3.2.7...v3.2.8)
 # Changed
 - Updated to Core version 3.3.12.

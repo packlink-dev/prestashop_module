@@ -294,7 +294,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $productImageUrl = $link->getImageLink(
                 $product->link_rewrite[$languageId],
                 (int)$productCoverImage['id_image'],
-                \ImageType::getFormatedName('home')
+                \ImageType::getFormattedName('home')
             );
             $orderItem->setPictureUrl($productImageUrl);
         }
