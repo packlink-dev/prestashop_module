@@ -2,6 +2,8 @@
 
 /** @noinspection PhpUnusedParameterInspection */
 
+use Packlink\PrestaShop\Classes\BusinessLogicServices\CleanupTaskSchedulerService;
+
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -67,6 +69,7 @@ class Packlink extends CarrierModule
      *
      * @throws \PrestaShopException
      * @throws \PrestaShop\PrestaShop\Adapter\CoreException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
     public function install()
     {
@@ -75,6 +78,8 @@ class Packlink extends CarrierModule
         Shop::setContext(Shop::CONTEXT_ALL);
 
         $result = $installer->initializePlugin() && parent::install() && $installer->addControllersAndHooks();
+
+        CleanupTaskSchedulerService::scheduleTaskCleanupTask();
 
         Shop::setContext($previousShopContext);
 
