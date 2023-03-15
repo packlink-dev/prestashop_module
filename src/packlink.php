@@ -2,8 +2,6 @@
 
 /** @noinspection PhpUnusedParameterInspection */
 
-use Packlink\PrestaShop\Classes\BusinessLogicServices\CleanupTaskSchedulerService;
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
@@ -79,7 +77,7 @@ class Packlink extends CarrierModule
 
         $result = $installer->initializePlugin() && parent::install() && $installer->addControllersAndHooks();
 
-        CleanupTaskSchedulerService::scheduleTaskCleanupTask();
+        \Packlink\PrestaShop\Classes\BusinessLogicServices\CleanupTaskSchedulerService::scheduleTaskCleanupTask();
 
         Shop::setContext($previousShopContext);
 
