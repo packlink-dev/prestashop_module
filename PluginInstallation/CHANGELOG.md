@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.10](https://github.com/packlink-dev/prestashop_module/compare/v3.2.9...v3.2.10)
+# Changed
+- Added the mechanism for deleting unnecessary database data hourly
+
 ## [3.2.9](https://github.com/packlink-dev/prestashop_module/compare/v3.2.8...v3.2.9)
 # Added
 - Added compatibility with PrestaShop 8.

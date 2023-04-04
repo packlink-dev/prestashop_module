@@ -2,7 +2,7 @@
   "name": "packlink/prestashop",
   "description": "Packlink Shipping PrestaShop plugin",
   "type": "library",
-  "version": "3.2.9",
+  "version": "3.2.10",
   "repositories": [
     {
       "type": "vcs",
