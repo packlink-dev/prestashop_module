@@ -8,12 +8,12 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * Updates module to version 3.3.0.
+ * Updates module to version 3.2.10.
  *
  * @return bool
  * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
  */
-function upgrade_module_3_3_0()
+function upgrade_module_3_2_10()
 {
     $previousShopContext = \Shop::getContext();
     \Shop::setContext(\Shop::CONTEXT_ALL);
