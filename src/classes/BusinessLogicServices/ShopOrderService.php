@@ -290,11 +290,18 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $productCoverImage = \Image::getCover($product->id);
         if (!empty($productCoverImage)) {
             $link = new \Link();
+
+            if (version_compare(_PS_VERSION_, '1.7.0.0', '<')) {
+                $imageType = \ImageType::getFormatedName('home');
+            } else {
+                $imageType = \ImageType::getFormattedName('home');
+            }
+
             /** @noinspection PhpDeprecationInspection */
             $productImageUrl = $link->getImageLink(
                 $product->link_rewrite[$languageId],
                 (int)$productCoverImage['id_image'],
-                \ImageType::getFormattedName('home')
+                $imageType
             );
             $orderItem->setPictureUrl($productImageUrl);
         }
