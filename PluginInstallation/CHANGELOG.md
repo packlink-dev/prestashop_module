@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.12](https://github.com/packlink-dev/prestashop_module/compare/v3.2.11...v3.2.12)
+# Changed
+- Fix issue with not being able to send order with Packlink on version < 1.7.0.0
+
 ## [3.2.11](https://github.com/packlink-dev/prestashop_module/compare/v3.2.10...v3.2.11)
 # Changed
 - Fix the issue with __serialize and __unserialize methods not being implemented in UpgradeShopOrderDetailsTask.php.
