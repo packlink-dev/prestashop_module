@@ -65,6 +65,25 @@ class UpgradeShopOrderDetailsTask extends Task
     }
 
     /**
+     * @inheritDoc
+     */
+    public function __serialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __unserialize($data)
+    {
+        $this->ordersToSync = $data['ordersToSync'];
+        $this->batchSize = $data['batchSize'];
+        $this->numberOfOrders = $data['numberOfOrders'];
+        $this->currentProgress = $data['currentProgress'];
+    }
+
+    /**
      * Returns string representation of object.
      *
      * @inheritdoc
