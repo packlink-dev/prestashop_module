@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.14](https://github.com/packlink-dev/prestashop_module/compare/v3.2.13...v3.2.14)
+### Changed
+- Update link to order draft on Packlink
+
 ## [3.2.13](https://github.com/packlink-dev/prestashop_module/compare/v3.2.12...v3.2.13)
 # Changed
 - Fix view on Packlink link
