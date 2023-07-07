@@ -90,6 +90,7 @@
       </a>
     </div>
   </div>
+  <input type="hidden" id="pl-shipping-configuration" value="{$configuration|json_encode}">
 </location-picker-template>
 
 <script>
@@ -100,13 +101,10 @@
     wrongAddress: "{l s='There are no delivery locations available for your delivery address. Please change your address.' mod='packlink'}"
   };
 
+  Packlink.configuration = document.getElementById('pl-shipping-configuration');
   Packlink.checkOut = new Packlink.CheckOutController(
-      JSON.parse(
-          '{$configuration|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}'
-              .replace(/&quot;/g, '"')
-              .replace(/&amp;/g, '&')
-      )
-  );
+      JSON.parse('{$configuration|json_encode nofilter}')
+  )
 
   Packlink.checkOut.init();
 </script>
