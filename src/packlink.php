@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.2.14';
+        $this->version = '3.2.15';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -204,7 +204,7 @@ class Packlink extends CarrierModule
         $configuration = $this->getShippingStepConfiguration($params);
 
         $this->context->smarty->assign(array(
-            'configuration' => json_encode($configuration),
+            'configuration' => $configuration,
         ));
 
         return $this->display(__FILE__, 'shipping_methods_17.tpl');
@@ -290,7 +290,7 @@ class Packlink extends CarrierModule
             $configuration['addressId'] = $order->id_address_delivery;
             $configuration['cartId'] = $order->id_cart;
             $this->context->smarty->assign(
-                array('configuration' => json_encode($configuration))
+                array('configuration' => $configuration)
             );
 
             $output = $this->getLocationPickerFilesLinks();
@@ -1000,7 +1000,7 @@ class Packlink extends CarrierModule
         $configuration = $this->getShippingStepConfiguration($params);
 
         $this->context->smarty->assign(
-            array('configuration' => json_encode($configuration))
+            array('configuration' => $configuration)
         );
 
         $stylesPath = $this->_path . 'views/css/packlink-shipping-methods.css?v=' . $this->version;
