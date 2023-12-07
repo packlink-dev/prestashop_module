@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [3.2.16](https://github.com/packlink-dev/prestashop_module/compare/v3.2.15...v3.2.16)
 ### Added
 - Change to Core version 3.3.18
+- Adjust the code to pass the PrestaShop validator
 
 ## [3.2.15](https://github.com/packlink-dev/prestashop_module/compare/v3.2.14...v3.2.15)
 ### Changed
