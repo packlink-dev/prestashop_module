@@ -15,6 +15,8 @@ echo -e "\e[32mSTEP 1:\e[0m Copying plugin source..."
 mkdir packlink
 cp -r ./src/* packlink
 
+cp ./src/.htaccess packlink/
+
 # Ensure proper composer dependencies
 echo -e "\e[32mSTEP 2:\e[0m Installing composer dependencies..."
 cd packlink
@@ -58,15 +60,21 @@ rm -rf packlink/views/countries/toCSV.php
 rm -rf packlink/views/countries/fromCSV.php
 rm -rf packlink/views/countries/translations.csv
 
-echo -e "\e[32mSTEP 4:\e[0m Adding PrestaShop mandatory licence header to files..."
+echo -e "\e[32mSTEP 4:\e[0m Adapt the plugin to the PrestaShop validator"
+echo -e "\e[32mSTEP 4.1:\e[0m Adding PS version check in every PHP file"
+./scripts/check_ps_version.sh
+echo -e "\e[32mSTEP 4.2:\e[0m Remove .html extension from files"
+./scripts/remove_html_extension_from_file_name.sh "./packlink/views/templates/core" "./packlink/packlink.php"
+
+echo -e "\e[32mSTEP 5:\e[0m Adding PrestaShop mandatory licence header to files..."
 php "$PWD/src/lib/autoLicence.php" "$PWD/packlink"
 
 # Adding PrestaShop mandatory index.php file to all folders
-echo -e "\e[32mSTEP 5:\e[0m Adding PrestaShop mandatory index.php file to all folders..."
+echo -e "\e[32mSTEP 6:\e[0m Adding PrestaShop mandatory index.php file to all folders..."
 php "$PWD/lib/autoindex/index.php" "$PWD/packlink" >/dev/null
 
 # get plugin version
-echo -e "\e[32mSTEP 6:\e[0m Reading module version..."
+echo -e "\e[32mSTEP 7:\e[0m Reading module version..."
 
 version="$1"
 if [ "$version" = "" ]; then
@@ -80,7 +88,7 @@ if [ "$version" = "" ]; then
 fi
 
 # Create plugin archive
-echo -e "\e[32mSTEP 7:\e[0m Creating new archive..."
+echo -e "\e[32mSTEP 8:\e[0m Creating new archive..."
 zip -r -q  packlink.zip ./packlink
 
 if [ "$version" != "" ]; then

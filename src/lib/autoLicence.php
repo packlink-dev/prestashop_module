@@ -63,13 +63,13 @@ function addLicenceToFile($path)
         case 'php':
             // strip php header
             $file = substr($file, 5);
-            $header = "<?php\n/**\n" . $licence . " */\n\n";
+            $header = "<?php\n/**\n" . $licence . " */\n";
             break;
         case 'tpl':
-            $header = "{**\n" . $licence . " *}\n\n";
+            $header = "{**\n" . $licence . " *}\n";
             break;
         case 'js':
-            $header = "/**\n" . $licence . " */\n\n";
+            $header = "/**\n" . $licence . " */\n";
             break;
         default:
             return;

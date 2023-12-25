@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.2.15';
+        $this->version = '3.2.16';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -173,15 +173,17 @@ class Packlink extends CarrierModule
      */
     public function hookDisplayBeforeCarrier($params)
     {
+        $this->context->smarty->assign(array(
+            'shippingServicePath' => $this->_path . 'views/js/ShippingService17.js?v=' . $this->version
+        ));
+
         $output = $this->getLocationPickerFilesLinks();
 
         if (version_compare(_PS_VERSION_, '1.7.0.0', '<')) {
             return $output . $this->getPresta16ShippingStepPage($params);
         }
 
-        $shippingServicePath = $this->_path . 'views/js/ShippingService17.js?v=' . $this->version;
-        $output .= "<script src=\"{$shippingServicePath}\"></script>\n";
-
+        $output .= $this->display(__FILE__, 'displayBeforeCarrier.tpl');
         $output .= $this->getCheckoutFilesLinks();
 
         return $output;
@@ -289,6 +291,7 @@ class Packlink extends CarrierModule
             $configuration['orderId'] = $order->id;
             $configuration['addressId'] = $order->id_address_delivery;
             $configuration['cartId'] = $order->id_cart;
+
             $this->context->smarty->assign(
                 array('configuration' => $configuration)
             );
@@ -999,19 +1002,18 @@ class Packlink extends CarrierModule
     {
         $configuration = $this->getShippingStepConfiguration($params);
 
-        $this->context->smarty->assign(
-            array('configuration' => $configuration)
-        );
+        $this->context->smarty->assign(array(
+            'configuration' => $configuration,
+            'stylesPath' => $this->_path . 'views/css/packlink-shipping-methods.css?v=' . $this->version,
+            'shippingServicePath' => $this->_path . 'views/js/ShippingService16.js?v=' . $this->version,
+        ));
 
-        $stylesPath = $this->_path . 'views/css/packlink-shipping-methods.css?v=' . $this->version;
-        $output = "<link rel=\"stylesheet\" href=\"{$stylesPath}\"/>\n";
-
-        $shippingServicePath = $this->_path . 'views/js/ShippingService16.js?v=' . $this->version;
-        $output .= "<script src=\"{$shippingServicePath}\"></script>\n";
+        $output = $this->display(__FILE__, 'getPresta16ShippingStepPage.tpl');
 
         $output .= $this->getCheckoutFilesLinks();
+        $output .= $this->display(__FILE__, 'shipping_methods_16.tpl');
 
-        return $output . $this->display(__FILE__, 'shipping_methods_16.tpl');
+        return $output;
     }
 
     /**
@@ -1021,28 +1023,17 @@ class Packlink extends CarrierModule
      */
     protected function getCheckoutFilesLinks()
     {
-        $ajaxPath = $this->getPathUri() . 'views/js/core/AjaxService.js?v=' . $this->version;
-        $output = "<script src=\"{$ajaxPath}\"></script>\n";
+        $this->context->smarty->assign(array(
+            'ajaxPath' => $this->getPathUri() . 'views/js/core/AjaxService.js?v=' . $this->version,
+            'responsePath' => $this->getPathUri() . 'views/js/core/ResponseService.js?v=' . $this->version,
+            'stateUuidPath' => $this->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . $this->version,
+            'prestaAjaxPath' => $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
+            'stylePath' => $this->_path . 'views/css/checkout.css?v=' . $this->version,
+            'checkoutPath' => $this->_path . 'views/js/CheckOutController.js?v=' . $this->version,
+            'mapModalPath' => $this->_path . 'views/js/MapModalController.js?v=' . $this->version
+        ));
 
-        $responsePath = $this->getPathUri() . 'views/js/core/ResponseService.js?v=' . $this->version;
-        $output .= "<script src=\"{$responsePath}\"></script>\n";
-
-        $stateUuidPath = $this->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . $this->version;
-        $output .= "<script src=\"{$stateUuidPath}\"></script>\n";
-
-        $prestaAjaxPath = $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version;
-        $output .= "<script src=\"{$prestaAjaxPath}\"></script>\n";
-
-        $stylePath = $this->_path . 'views/css/checkout.css?v=' . $this->version;
-        $output .= "<link rel=\"stylesheet\" href=\"{$stylePath}\"/>\n";
-
-        $checkoutPath = $this->_path . 'views/js/CheckOutController.js?v=' . $this->version;
-        $output .= "<script src=\"{$checkoutPath}\"></script>\n";
-
-        $mapModalPath = $this->_path . 'views/js/MapModalController.js?v=' . $this->version;
-        $output .= "<script src=\"{$mapModalPath}\"></script>\n";
-
-        return $output;
+        return $this->display(__FILE__, 'checkoutFilesLinks.tpl');
     }
 
     /**
@@ -1052,16 +1043,13 @@ class Packlink extends CarrierModule
      */
     protected function getLocationPickerFilesLinks()
     {
-        $locationPickerLibrary = $this->_path . 'views/js/location/LocationPicker.js?v=' . $this->version;
-        $output = "<script src=\"{$locationPickerLibrary}\"></script>\n";
+        $this->context->smarty->assign(array(
+            'locationPickerLibrary' => $this->_path . 'views/js/location/LocationPicker.js?v=' . $this->version,
+            'locationPickerTrans' => $this->_path . 'views/js/location/Translations.js?v=' . $this->version,
+            'locationPickerCSS' => $this->_path . 'views/css/locationPicker.css?v=' . $this->version
+        ));
 
-        $locationPickerTrans = $this->_path . 'views/js/location/Translations.js?v=' . $this->version;
-        $output .= "<script src=\"{$locationPickerTrans}\"></script>\n";
-
-        $locationPickerCSS = $this->_path . 'views/css/locationPicker.css?v=' . $this->version;
-        $output .= "<link rel=\"stylesheet\" href=\"{$locationPickerCSS}\"/>\n";
-
-        return $output;
+        return $this->display(__FILE__, 'locationPickerFilesLinks.tpl');
     }
 
     /**

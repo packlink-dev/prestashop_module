@@ -1,0 +1,1 @@
+<script src="{$shippingServicePath|escape:'htmlall':'UTF-8'}"></script>

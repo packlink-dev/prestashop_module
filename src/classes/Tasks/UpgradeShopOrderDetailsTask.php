@@ -84,41 +84,7 @@ class UpgradeShopOrderDetailsTask extends Task
     }
 
     /**
-     * Returns string representation of object.
-     *
-     * @inheritdoc
-     */
-    public function serialize()
-    {
-        return Serializer::serialize(
-            array(
-                $this->ordersToSync,
-                $this->batchSize,
-                $this->numberOfOrders,
-                $this->currentProgress,
-            )
-        );
-    }
-
-    /**
-     * Constructs the object.
-     *
-     * @param string data <p>
-     * The string representation of the object.
-     * </p>
-     */
-    public function unserialize($data)
-    {
-        list($this->ordersToSync, $this->batchSize, $this->numberOfOrders, $this->currentProgress) =
-            Serializer::unserialize($data);
-
-        $this->orderShipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
-        $this->orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
-        $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
-    }
-
-    /**
-     * Transforms array into an serializable object,
+     * Transforms array into a serializable object,
      *
      * @param array $array Data that is used to instantiate serializable object.
      *
