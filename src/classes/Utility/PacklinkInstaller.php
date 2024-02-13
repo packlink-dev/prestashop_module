@@ -27,10 +27,7 @@ class PacklinkInstaller
      */
     private $module;
     private static $hooks = array(
-        'updateCarrier',
         'displayAfterCarrier',
-        'actionValidateStepComplete',
-        'displayBackOfficeOrderActions',
         'displayAdminOrderTabShip',
         'displayAdminOrderContentShip',
         'displayBeforeCarrier',
