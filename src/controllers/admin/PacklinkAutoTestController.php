@@ -97,6 +97,14 @@ class PacklinkAutoTestController extends PacklinkBaseController
                 'moduleUrl' => $this->getAction('Packlink', '', false),
             )
         );
+
+        // Register modifier function
+        $this->context->smarty->registerPlugin(
+            'modifier',
+            'htmlspecialchars_decode',
+            'htmlspecialchars_decode'
+        );
+
         // render template and assign it to the page
         $content = $this->context->smarty->fetch($this->getTemplatePath() . 'auto-test.tpl');
         $this->context->smarty->assign(
