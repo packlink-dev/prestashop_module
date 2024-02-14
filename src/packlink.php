@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.2.16';
+        $this->version = '3.2.17';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -200,6 +200,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws SmartyException
      */
     public function hookDisplayAfterCarrier($params)
     {
@@ -208,6 +209,13 @@ class Packlink extends CarrierModule
         $this->context->smarty->assign(array(
             'configuration' => $configuration,
         ));
+
+        // Register modifier function
+        $this->context->smarty->registerPlugin(
+            'modifier',
+            'htmlspecialchars_decode',
+            'htmlspecialchars_decode'
+        );
 
         return $this->display(__FILE__, 'shipping_methods_17.tpl');
     }
@@ -254,6 +262,13 @@ class Packlink extends CarrierModule
             Tools::getValue('id_order')
         );
 
+        // Register modifier function
+        $this->context->smarty->registerPlugin(
+            'modifier',
+            'htmlspecialchars_decode',
+            'htmlspecialchars_decode'
+        );
+
         return $this->context->smarty->createTemplate(
             $this->getLocalPath() . self::PACKLINK_SHIPPING_CONTENT,
             $this->context->smarty
@@ -271,6 +286,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws SmartyException
      */
     public function hookDisplayOrderConfirmation($params)
     {
@@ -294,6 +310,13 @@ class Packlink extends CarrierModule
 
             $this->context->smarty->assign(
                 array('configuration' => $configuration)
+            );
+
+            // Register modifier function
+            $this->context->smarty->registerPlugin(
+                'modifier',
+                'htmlspecialchars_decode',
+                'htmlspecialchars_decode'
             );
 
             $output = $this->getLocationPickerFilesLinks();
@@ -611,6 +634,7 @@ class Packlink extends CarrierModule
      * @return string
      *
      * @throws \PrestaShopException
+     * @throws SmartyException
      */
     public function getContent()
     {
@@ -635,6 +659,13 @@ class Packlink extends CarrierModule
             'baseResourcesUrl' => $this->getPathUri() . 'views/img/core',
             'gridResizerScript' => $this->getPathUri() . 'views/js/core/GridResizerService.js?v=' . $this->version,
         ));
+
+        // Register modifier function
+        $this->context->smarty->registerPlugin(
+            'modifier',
+            'htmlspecialchars_decode',
+            'htmlspecialchars_decode'
+        );
 
         return $this->display(__FILE__, 'index.tpl');
     }
@@ -997,6 +1028,7 @@ class Packlink extends CarrierModule
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \PrestaShopDatabaseException
      * @throws \PrestaShopException
+     * @throws SmartyException
      */
     protected function getPresta16ShippingStepPage($params)
     {
@@ -1007,6 +1039,13 @@ class Packlink extends CarrierModule
             'stylesPath' => $this->_path . 'views/css/packlink-shipping-methods.css?v=' . $this->version,
             'shippingServicePath' => $this->_path . 'views/js/ShippingService16.js?v=' . $this->version,
         ));
+
+        // Register modifier function
+        $this->context->smarty->registerPlugin(
+            'modifier',
+            'htmlspecialchars_decode',
+            'htmlspecialchars_decode'
+        );
 
         $output = $this->display(__FILE__, 'getPresta16ShippingStepPage.tpl');
 
