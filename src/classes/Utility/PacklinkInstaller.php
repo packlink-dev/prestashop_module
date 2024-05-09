@@ -180,6 +180,13 @@ class PacklinkInstaller
      */
     public function addMenuItem()
     {
+        /** @noinspection PhpDeprecationInspection */
+        $id = \Tab::getIdFromClassName('Packlink');
+
+        if ($id) {
+            return true;
+        }
+
         $tab = new \Tab();
 
         $languages = \Language::getLanguages(true, \Context::getContext()->shop->id);
