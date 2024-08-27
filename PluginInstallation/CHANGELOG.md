@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.20](https://github.com/packlink-dev/prestashop_module/compare/v3.2.19...v3.2.20)
+### Changed
+- Added webhook registration in debug controller
+- Added check if menu item already exists before adding it
+
 ## [3.2.19](https://github.com/packlink-dev/prestashop_module/compare/v3.2.18...v3.2.19)
 ### Changed
 - Updated to Core version 3.3.21

@@ -1,7 +1,11 @@
 <?php
 
 use Logeecom\Infrastructure\Configuration\Configuration;
+use Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException;
+use Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException;
+use Logeecom\Infrastructure\Http\Exceptions\HttpRequestException;
 use Logeecom\Infrastructure\ServiceRegister;
+use Packlink\BusinessLogic\Http\Proxy;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\SystemInfoUtility;
 use Packlink\BusinessLogic\Controllers\DebugController as BaseDebugController;
@@ -168,11 +172,37 @@ class DebugController extends PacklinkBaseController
     }
 
     /**
+     * @return void
+     *
+     * @throws HttpAuthenticationException
+     * @throws HttpCommunicationException
+     * @throws HttpRequestException
+     */
+    public function displayAjaxRegisterWebhooks()
+    {
+        $webHookUrl = $this->getConfigService()->getWebHookUrl();
+        if (!empty($webHookUrl)) {
+            $this->getProxy()->registerWebHookHandler($webHookUrl);
+        }
+
+        PacklinkPrestaShopUtility::dieJson(array('success' => true));
+    }
+
+    /**
      * @return ConfigurationService
      */
     private function getConfigurationService()
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return ServiceRegister::getService(Configuration::CLASS_NAME);
+    }
+
+    /**
+     * @return Proxy
+     */
+    private function getProxy()
+    {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return ServiceRegister::getService(Proxy::CLASS_NAME);
     }
 }
