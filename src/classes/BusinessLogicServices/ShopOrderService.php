@@ -292,7 +292,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $link = new \Link();
 
             if (version_compare(_PS_VERSION_, '1.7.0.0', '<')) {
-                $imageType = \ImageType::getFormatedName('home');
+                $imageType = \ImageType::getFormattedName('home');
             } else {
                 $imageType = \ImageType::getFormattedName('home');
             }
