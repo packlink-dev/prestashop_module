@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.2.22';
+        $this->version = '3.2.23';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -945,6 +945,8 @@ class Packlink extends CarrierModule
                 'disableCarriersUrl' => $this->getAction('ShippingMethods', 'disableShopShippingMethods'),
                 'getCurrencyDetailsUrl' => $this->getAction('SystemInfo', 'get'),
                 'systemId' => (string)\Context::getContext()->shop->id,
+                'enqueue' => $this->getAction('ManualRefreshService', 'refreshService'),
+                'getTaskStatus' => $this->getAction('ManualRefreshService', 'getTaskStatus'),
             ),
             'edit-service' => array(
                 'getServiceUrl' => $this->getAction('ShippingMethods', 'getShippingMethod'),
