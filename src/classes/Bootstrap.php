@@ -20,6 +20,7 @@ use Packlink\Brands\Packlink\PacklinkConfigurationService;
 use Packlink\BusinessLogic\BootstrapComponent;
 use Packlink\BusinessLogic\Brand\BrandConfigurationService;
 use Packlink\BusinessLogic\Configuration;
+use Packlink\BusinessLogic\Country\WarehouseCountryService;
 use Packlink\BusinessLogic\FileResolver\FileResolverService;
 use Packlink\BusinessLogic\Order\Interfaces\ShopOrderService as ShopOrderServiceInterface;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
@@ -124,6 +125,13 @@ class Bootstrap extends BootstrapComponent
                     dirname(__FILE__) . '/../views/brand/countries',
                     dirname(__FILE__) . '/../views/countries',
                 ));
+            }
+        );
+
+        ServiceRegister::registerService(
+            WarehouseCountryService::CLASS_NAME,
+            function () {
+                return BusinessLogicServices\WarehouseCountryService::getInstance();
             }
         );
     }

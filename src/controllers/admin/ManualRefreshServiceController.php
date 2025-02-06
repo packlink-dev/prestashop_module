@@ -27,7 +27,7 @@ class ManualRefreshServiceController extends PacklinkBaseController
 
     public function displayAjaxRefreshService()
     {
-        PacklinkPrestaShopUtility::dieJson(json_decode($this->controller->enqueueUpdateTask(), true));
+        PacklinkPrestaShopUtility::dieJson($this->controller->enqueueUpdateTask());
     }
 
     /**
@@ -38,6 +38,6 @@ class ManualRefreshServiceController extends PacklinkBaseController
      */
     public function displayAjaxGetTaskStatus()
     {
-        PacklinkPrestaShopUtility::dieJson(json_decode($this->controller->getTaskStatus(), true));
+        PacklinkPrestaShopUtility::dieJson($this->controller->getTaskStatus());
     }
 }
