@@ -31,7 +31,7 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
 class ManualRefreshServiceController extends PacklinkBaseController
 {
     /**
-     * @var \Packlink\BusinessLogic\Controllers\ManualRefreshServiceController
+     * @var \Packlink\BusinessLogic\Controllers\ManualRefreshController
      */
     protected $controller;
 
