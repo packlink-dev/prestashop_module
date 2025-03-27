@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.2.23](https://github.com/packlink-dev/prestashop_module/compare/v3.2.22...v3.2.23)
+### Changed
+- Restored shop context and Shop ID in install() to fix ps_mbo incompatibility.
+
 ## [3.2.22](https://github.com/packlink-dev/prestashop_module/compare/v3.2.21...v3.2.22)
 ### Changed
 - Fix double change of order status when webhook is received

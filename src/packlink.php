@@ -73,13 +73,14 @@ class Packlink extends CarrierModule
     {
         $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($this);
         $previousShopContext = Shop::getContext();
+        $previousShopContextId = Shop::getContextShopID();
         Shop::setContext(Shop::CONTEXT_ALL);
 
         $result = $installer->initializePlugin() && parent::install() && $installer->addControllersAndHooks();
 
         \Packlink\PrestaShop\Classes\BusinessLogicServices\CleanupTaskSchedulerService::scheduleTaskCleanupTask();
 
-        Shop::setContext($previousShopContext);
+        Shop::setContext($previousShopContext, $previousShopContextId);
 
         return $result;
     }
