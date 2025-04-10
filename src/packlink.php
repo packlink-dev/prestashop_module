@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.3.0';
+        $this->version = '3.3.1';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -73,14 +73,13 @@ class Packlink extends CarrierModule
     {
         $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($this);
         $previousShopContext = Shop::getContext();
-        $previousShopContextId = Shop::getContextShopID();
         Shop::setContext(Shop::CONTEXT_ALL);
 
         $result = $installer->initializePlugin() && parent::install() && $installer->addControllersAndHooks();
 
         \Packlink\PrestaShop\Classes\BusinessLogicServices\CleanupTaskSchedulerService::scheduleTaskCleanupTask();
 
-        Shop::setContext($previousShopContext, $previousShopContextId);
+        Shop::setContext($previousShopContext);
 
         return $result;
     }
