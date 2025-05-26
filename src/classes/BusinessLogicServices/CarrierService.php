@@ -175,7 +175,7 @@ class CarrierService implements ShopShippingMethodService
         $ranges = $this->setCarrierRanges($carrier);
         $this->setBackupCarrierZones($carrier, $shippingMethod, $ranges);
 
-        if (!$this->copyCarrierLogo($carrier->name, (int)$carrier->id)) {
+        if (!$this->copyCarrierLogo($carrier->name, (int)$carrier->id,  $shippingMethod->getLogoUrl())) {
             throw new \RuntimeException(
                 TranslationUtility::__('Failed copying carrier logo to the system')
             );
@@ -384,7 +384,7 @@ class CarrierService implements ShopShippingMethodService
         }
 
         if ($shippingMethod->isDisplayLogo()
-            && !$this->copyCarrierLogo($shippingMethod->getCarrierName(), (int)$carrier->id)
+            && !$this->copyCarrierLogo($shippingMethod->getCarrierName(), (int)$carrier->id, $shippingMethod->getLogoUrl())
         ) {
             throw new \RuntimeException(
                 TranslationUtility::__('Failed copying carrier logo to the system')
@@ -399,15 +399,23 @@ class CarrierService implements ShopShippingMethodService
      *
      * @return string
      */
-    private function getCarrierLogoRelativePath($carrierName)
+    private function getCarrierLogoRelativePath($carrierName, $fallbackLogoUrl = '')
     {
         $defaultCarrierLogoPath = 'packlink/views/img/carrier.jpg';
 
         $carrierImageFile = \Tools::strtolower(str_replace(' ', '-', $carrierName));
         $logoFilePath = 'packlink/views/img/core/images/carriers/' . $carrierImageFile . '.png';
 
-        return \Tools::file_exists_cache(_PS_MODULE_DIR_ . $logoFilePath)
-            ? $logoFilePath : $defaultCarrierLogoPath;
+        if (!\Tools::file_exists_cache(_PS_MODULE_DIR_ . $logoFilePath)) {
+            $shopUrl = _PS_BASE_URL_ . __PS_BASE_URI__;
+
+            $relativeFallbackPath = str_replace($shopUrl, '', $fallbackLogoUrl);
+            $relativeFallbackPath = preg_replace('/^modules\//', '', $relativeFallbackPath);
+            return \Tools::file_exists_cache(_PS_MODULE_DIR_ . $relativeFallbackPath)
+                ? $relativeFallbackPath : $defaultCarrierLogoPath;
+        }
+
+        return $logoFilePath;
     }
 
     /**
@@ -686,9 +694,9 @@ class CarrierService implements ShopShippingMethodService
      *
      * @return bool Returns true if logo has been successfully copied, otherwise returns false.
      */
-    private function copyCarrierLogo($shippingMethodName, $carrierId)
+    private function copyCarrierLogo($shippingMethodName, $carrierId, $fallbackLogoUrl = '')
     {
-        $source = _PS_MODULE_DIR_ . $this->getCarrierLogoRelativePath($shippingMethodName);
+        $source = _PS_MODULE_DIR_ . $this->getCarrierLogoRelativePath($shippingMethodName, $fallbackLogoUrl);
 
         if (!copy($source, $this->getPrestaCarrierLogoPath($carrierId))) {
             return false;
