@@ -59,7 +59,12 @@ class CarrierService implements ShopShippingMethodService
                 $ranges = $this->setCarrierRanges($carrier);
                 $this->setCarrierZones($carrier, $shippingMethod, $ranges);
 
-                $this->updateCarrierLogo($shippingMethod, $carrier);
+                $logoUrl = $shippingMethod->getLogoUrl();
+                $isDisplay = $this->validateLogoUrl($logoUrl);
+                if ($isDisplay) {
+                    $this->updateCarrierLogo($shippingMethod, $carrier);
+                }
+
                 $this->saveCarrierServiceMapping((int)$carrier->id, $shippingMethod->getId());
 
                 return true;
@@ -97,7 +102,12 @@ class CarrierService implements ShopShippingMethodService
                     $this->setCarrierZones($carrier, $shippingMethod, $ranges);
 
                     $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
-                    $this->updateCarrierLogo($shippingMethod, $carrier);
+                    $logoUrl = $shippingMethod->getLogoUrl();
+                    $isDisplay = $this->validateLogoUrl($logoUrl);
+                    if ($isDisplay) {
+                        $this->updateCarrierLogo($shippingMethod, $carrier);
+                    }
+
                     $carrier->update();
                 } catch (\Exception $e) {
                     Logger::logError($e->getMessage(), 'Integration');
@@ -175,7 +185,9 @@ class CarrierService implements ShopShippingMethodService
         $ranges = $this->setCarrierRanges($carrier);
         $this->setBackupCarrierZones($carrier, $shippingMethod, $ranges);
 
-        if (!$this->copyCarrierLogo($carrier->name, (int)$carrier->id,  $shippingMethod->getLogoUrl())) {
+        $logoUrl = $shippingMethod->getLogoUrl();
+        $isDisplay = $this->validateLogoUrl($logoUrl);
+        if ($isDisplay && !$this->copyCarrierLogo($carrier->name, (int)$carrier->id,  $shippingMethod->getLogoUrl())) {
             throw new \RuntimeException(
                 TranslationUtility::__('Failed copying carrier logo to the system')
             );
@@ -384,7 +396,9 @@ class CarrierService implements ShopShippingMethodService
         }
 
         if ($shippingMethod->isDisplayLogo()
-            && !$this->copyCarrierLogo($shippingMethod->getCarrierName(), (int)$carrier->id, $shippingMethod->getLogoUrl())
+            && !$this->copyCarrierLogo($shippingMethod->getCarrierName(),
+                (int)$carrier->id,
+                $shippingMethod->getLogoUrl())
         ) {
             throw new \RuntimeException(
                 TranslationUtility::__('Failed copying carrier logo to the system')
@@ -771,5 +785,26 @@ class CarrierService implements ShopShippingMethodService
             ->where('deleted = 0');
 
         return $db->executeS($query) ?: array();
+    }
+
+
+    /**
+     * Validates the logo URL.
+     *
+     * @param string $logoUrl Logo URL to validate.
+     *
+     * @return bool True if the URL is valid and points to a PNG or JPG/JPEG image, false otherwise.
+     */
+    private function validateLogoUrl($logoUrl)
+    {
+        if (
+            empty($logoUrl) ||
+            !filter_var($logoUrl, FILTER_VALIDATE_URL) ||
+            !preg_match('/\.(png|jpe?g)$/i', parse_url($logoUrl, PHP_URL_PATH))
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }
