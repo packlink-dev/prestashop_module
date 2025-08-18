@@ -205,6 +205,7 @@ class Packlink extends CarrierModule
     public function hookDisplayAfterCarrier($params)
     {
         $configuration = $this->getShippingStepConfiguration($params);
+        $configuration['offlinePaymentMethods'] = $this->getFrontAction('offlinepayments');
 
         $this->context->smarty->assign(array(
             'configuration' => $configuration,
@@ -1071,7 +1072,8 @@ class Packlink extends CarrierModule
             'prestaAjaxPath' => $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
             'stylePath' => $this->_path . 'views/css/checkout.css?v=' . $this->version,
             'checkoutPath' => $this->_path . 'views/js/CheckOutController.js?v=' . $this->version,
-            'mapModalPath' => $this->_path . 'views/js/MapModalController.js?v=' . $this->version
+            'mapModalPath' => $this->_path . 'views/js/MapModalController.js?v=' . $this->version,
+            'offlinePaymentsPath' => $this->_path . 'views/js/OfflinePaymentsController.js?v=' . $this->version,
         ));
 
         return $this->display(__FILE__, 'checkoutFilesLinks.tpl');

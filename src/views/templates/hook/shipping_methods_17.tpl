@@ -110,4 +110,14 @@
   );
 
   Packlink.checkOut.init();
+
+  Packlink.paymentController = new Packlink.OfflinePaymentsController(
+          JSON.parse(
+                  '{$configuration|json_encode|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}'
+                          .replace(/&quot;/g, '"')
+                          .replace(/&amp;/g, '&')
+          )
+  );
+
+  Packlink.paymentController.init();
 </script>

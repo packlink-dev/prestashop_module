@@ -5,3 +5,4 @@
 <link rel="stylesheet" href="{$stylePath|escape:'htmlall':'UTF-8'}"/>
 <script src="{$checkoutPath|escape:'htmlall':'UTF-8'}"></script>
 <script src="{$mapModalPath|escape:'htmlall':'UTF-8'}"></script>
+<script src="{$offlinePaymentsPath|escape:'htmlall':'UTF-8'}"></script>
