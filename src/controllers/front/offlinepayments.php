@@ -1,11 +1,15 @@
 <?php
 
 use Packlink\BusinessLogic\Controllers\CashOnDeliveryController as CoreController;
+use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Http\DTO\CashOnDelivery;
 use Packlink\PrestaShop\Classes\Bootstrap;
-use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\OfflinePaymentService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
+
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 class PacklinkOfflinePaymentsModuleFrontController extends ModuleFrontController
 {
@@ -13,10 +17,16 @@ class PacklinkOfflinePaymentsModuleFrontController extends ModuleFrontController
      * @var OfflinePaymentService
      */
     protected $offlinePaymentService;
+
     /**
      * @var CoreController $controller
      */
     protected $controller;
+
+    /**
+     * @var ShippingMethodController $shippingMethodController
+     */
+    protected $shippingMethodController;
 
     public function __construct()
     {
@@ -24,24 +34,47 @@ class PacklinkOfflinePaymentsModuleFrontController extends ModuleFrontController
 
         Bootstrap::init();
 
-        $this->offlinePaymentService = new OfflinePaymentService();
         $this->controller = new CoreController();
+        $this->offlinePaymentService = new OfflinePaymentService();
+        $this->shippingMethodController = new ShippingMethodController();
+
     }
 
     /**
      * @return void
      */
-    public function initContent(): void
+    public function postProcess()
     {
-        parent::initContent();
+        parent::postProcess();
 
         try {
-            $payments = $this->offlinePaymentService->getOfflinePayments();
+            $input = PacklinkPrestaShopUtility::getPacklinkPostData();
+
             $acc = $this->getAccountConfiguration();
+
+            $paymentsToHide = array();
+
+            if(empty($input) && empty($input['selectedService'])) {
+               $this->sendSuccessResponse($paymentsToHide);
+            }
+
+            $services = $this->shippingMethodController->getShippingServicesForMethod($input['selectedService']);
+
+            $config = $services[0]->cashOnDeliveryConfig;
+
+            if($config &&
+                !$config->offered
+                && $acc !== null
+                && $acc->enabled
+                && $acc->active
+                && $acc->account)
+            {
+                $paymentsToHide[] = array('name' => $acc->account->getOfflinePaymentMethod());
+            }
 
             PacklinkPrestaShopUtility::dieJson(array(
                 'success' => true,
-                'data' => $payments,
+                'data' => $paymentsToHide,
             ));
         } catch (Exception $e) {
             PacklinkPrestaShopUtility::dieJson(array(
@@ -52,16 +85,26 @@ class PacklinkOfflinePaymentsModuleFrontController extends ModuleFrontController
     }
 
     /**
+     * @param $data
+     *
+     * @return void
+     */
+    public function sendSuccessResponse($data)
+    {
+        PacklinkPrestaShopUtility::dieJson(array(
+            'success' => true,
+            'data' => $data,
+        ));
+    }
+
+    /**
      * Retrieves Packlink account configuration and checks if an account exists.
      *
-     * @return CashOnDelivery
-     *
+     * @return CashOnDelivery|null
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
-     * @throws \Packlink\BusinessLogic\Http\CashOnDelivery\Exeption\CashOnDeliveryNotFoundException
      */
     private function getAccountConfiguration()
     {
-        return $this->controller->getCashOnDeliveryConfiguration(ConfigurationService::getInstance()
-            ->getCurrentSystemId());
+        return $this->controller->getCashOnDeliveryConfiguration();
     }
 }

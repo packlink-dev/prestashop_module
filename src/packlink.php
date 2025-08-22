@@ -207,6 +207,11 @@ class Packlink extends CarrierModule
         $configuration = $this->getShippingStepConfiguration($params);
         $configuration['offlinePaymentMethods'] = $this->getFrontAction('offlinepayments');
 
+        $configuration['selectedService'] = \Packlink\PrestaShop\Classes\Utility\CarrierUtility
+            ::getServiceFromReferenceId(
+            \Context::getContext()->cart->id_carrier
+        );
+
         $this->context->smarty->assign(array(
             'configuration' => $configuration,
         ));
@@ -705,6 +710,7 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/ConfigurationController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/CashOnDeliveryController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/EditServiceController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/SingleStorePricePolicyController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/LoginController.js?v=' . $this->version,
@@ -875,6 +881,9 @@ class Packlink extends CarrierModule
             ),
             'pl-pricing-policy-modal' => Tools::file_get_contents($baseDir . 'pricing-policy-modal.html'),
             'pl-countries-selection-modal' => Tools::file_get_contents($baseDir . 'countries-selection-modal.html'),
+            'pl-cod-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'cash-on-delivery.html'),
+            ),
         );
     }
 
@@ -958,6 +967,10 @@ class Packlink extends CarrierModule
                 'hasTaxConfiguration' => true,
                 'hasCountryConfiguration' => true,
                 'canDisplayCarrierLogos' => true,
+            ),
+            'cash-on-delivery' => array(
+                'getDataUrl' => $this->getAction('CashOnDelivery', 'getData'),
+                'submitDataUrl' => $this->getAction('CashOnDelivery', 'saveData'),
             ),
         );
     }

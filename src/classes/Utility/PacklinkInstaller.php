@@ -55,7 +55,8 @@ class PacklinkInstaller
         'RegistrationRegions',
         'ShippingZones',
         'SystemInfo',
-        'ManualRefreshService'
+        'ManualRefreshService',
+        'CashOnDelivery',
     );
 
     /**

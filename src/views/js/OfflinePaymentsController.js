@@ -25,14 +25,23 @@ var Packlink = window.Packlink || {};
             const checkoutContainer = document.querySelector('#checkout');
             if (!checkoutContainer) return;
 
-            ajaxService.get(configuration.offlinePaymentMethods, (response) => {
-                try {
-                    offlineModules = response.data.map(module => module.name);
-                    hideOfflinePayments();
-                } catch (e) {
-                    console.error('Failed to parse offline payment modules:', e, response);
-                }
-            });
+            if (configuration.selectedService === null) {
+                offlineModules = [];
+            } else {
+                let payload = {selectedService: configuration.selectedService};
+                    ajaxService.post(
+                        configuration.offlinePaymentMethods,
+                        payload,
+                        (response) => {
+                            try {
+                                offlineModules = response.data.map(module => module.name);
+                                hideOfflinePayments();
+                            } catch (e) {
+                                console.error('Failed to parse offline payment modules:', e, response);
+                            }
+                        }
+                    );
+            }
 
             const observer = new MutationObserver(() => {
                 const paymentStep = document.querySelector('#checkout-payment-step');

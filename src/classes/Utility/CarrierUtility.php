@@ -13,6 +13,19 @@ class CarrierUtility
     /**
      * Gets all carrier IDs that require drop-off.
      *
+     * @var int $carrierReference
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     */
+    public static function getServiceFromReferenceId($carrierReference)
+    {
+        $carrierService = new CarrierService();
+        return $carrierService->getShippingMethodId((int)$carrierReference);
+    }
+    /**
+     * Gets all carrier IDs that require drop-off.
+     *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
      */
