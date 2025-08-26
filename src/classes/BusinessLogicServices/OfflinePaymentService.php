@@ -2,9 +2,15 @@
 
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
+use Logeecom\Infrastructure\ServiceRegister;
 use Module;
+use Packlink\BusinessLogic\Controllers\ShippingMethodController;
+use Packlink\BusinessLogic\Http\DTO\CashOnDelivery;
+use Packlink\PrestaShop\Classes\Bootstrap;
 use PaymentModule;
 use Validate;
+use Packlink\BusinessLogic\Controllers\CashOnDeliveryController as CoreController;
+
 
 /**
  * Class OfflinePaymentService
@@ -13,6 +19,23 @@ use Validate;
  */
 class OfflinePaymentService
 {
+    /**
+     * @var CoreController $controller
+     */
+    protected $controller;
+
+    /**
+     * @var ShippingMethodController $shippingMethodController
+     */
+    protected $shippingMethodController;
+
+    public function __construct()
+    {
+        Bootstrap::init();
+
+        $this->controller = new CoreController();
+        $this->shippingMethodController = new ShippingMethodController();
+    }
     /**
      * Offline payment methods
      *
@@ -50,6 +73,46 @@ class OfflinePaymentService
     }
 
     /**
+     * @param string $orderId
+     *
+     * @return bool
+     */
+    public function shouldSurchargeApply($orderId)
+    {
+        try {
+            $acc = $this->getAccountConfiguration();
+
+            $order = $this->getShopOrderService()->getOrderAndShippingData($orderId);
+
+            return $acc && $acc->account && $acc->account->getOfflinePaymentMethod() === $order->getPaymentId();
+
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    public function calculateFee($orderId)
+    {
+        $controller = new CoreController();
+
+        $order = $this->getShopOrderService()->getOrderAndShippingData($orderId);
+
+        return $controller->calculateFee($order);
+    }
+
+    /**
+     * Retrieves Packlink account configuration and checks if an account exists.
+     *
+     * @return CashOnDelivery|null
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     */
+    public function getAccountConfiguration()
+    {
+        return $this->controller->getCashOnDeliveryConfiguration();
+    }
+
+    /**
      * @param string $moduleName
      *
      * @return bool
@@ -57,5 +120,16 @@ class OfflinePaymentService
     protected function isOffline($moduleName)
     {
         return in_array($moduleName, $this->knownOffline, true);
+    }
+
+    /**
+     * @return ShopOrderService
+     */
+    private function getShopOrderService()
+    {
+        /** @var ShopOrderService $shopOrderService */
+        $shopOrderService = ServiceRegister::getService(ShopOrderService::CLASS_NAME);
+
+        return $shopOrderService;
     }
 }

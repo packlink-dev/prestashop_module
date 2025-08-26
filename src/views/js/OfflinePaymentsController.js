@@ -4,7 +4,7 @@ var Packlink = window.Packlink || {};
     function OfflinePaymentsController(configuration) {
 
         let offlineModules = [];
-        const ajaxService = Packlink.ajaxService;
+        const ajaxService = Packlink.customAjaxService;
 
         const hideOfflinePayments = () => {
             const paymentMethods = document.querySelectorAll('#checkout-payment-step input[name="payment-option"]');

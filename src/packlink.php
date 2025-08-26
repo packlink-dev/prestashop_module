@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.3.4';
+        $this->version = '3.4.0';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -370,6 +370,14 @@ class Packlink extends CarrierModule
             }
         }
 
+        $offlineService = new \Packlink\PrestaShop\Classes\BusinessLogicServices\OfflinePaymentService();
+
+        if($offlineService->shouldSurchargeApply($order->id)) {
+            $surchargeAmount = $offlineService->calculateFee($order->id);
+        }
+
+        $this->addSurchargeItem($order, $surchargeAmount);
+
         $this->createOrderDraft($params['order'], $params['orderStatus'], $isDelayed);
     }
 
@@ -427,6 +435,7 @@ class Packlink extends CarrierModule
                     $this->_path . 'views/js/core/StateUUIDService.js?v=' . $this->version,
                     $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
                     $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
+                    $this->_path . 'views/js/CustomAjaxService.js?v=' . $this->version,
                     $this->_path . 'views/js/PrestaPrintShipmentLabels.js?v=' . $this->version,
                     $this->_path . 'views/js/PrestaCreateOrderDraft.js?v=' . $this->version,
                 ),
@@ -674,6 +683,31 @@ class Packlink extends CarrierModule
         );
 
         return $this->display(__FILE__, 'index.tpl');
+    }
+
+    /**
+     * Add surcharge as item
+     */
+    private function addSurchargeItem($order, $surchargeAmount)
+    {
+        $orderDetail = new OrderDetail();
+        $orderDetail->id_order = (int)$order->id;
+        $orderDetail->product_name = 'Surcharge Fee';
+        $orderDetail->product_quantity = 1;
+        $orderDetail->product_price = $surchargeAmount;
+        $orderDetail->unit_price_tax_incl = $surchargeAmount;
+        $orderDetail->unit_price_tax_excl = $surchargeAmount;
+        $orderDetail->total_price_tax_incl = $surchargeAmount;
+        $orderDetail->total_price_tax_excl = $surchargeAmount;
+        $orderDetail->id_warehouse = 0;
+        $orderDetail->id_shop = (int) $order->id_shop;
+
+        $orderDetail->save();
+
+        $order->total_paid += $surchargeAmount;
+        $order->total_paid_tax_incl += $surchargeAmount;
+        $order->total_paid_tax_excl += $surchargeAmount;
+        $order->save();
     }
 
     /**
@@ -1083,6 +1117,7 @@ class Packlink extends CarrierModule
             'responsePath' => $this->getPathUri() . 'views/js/core/ResponseService.js?v=' . $this->version,
             'stateUuidPath' => $this->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . $this->version,
             'prestaAjaxPath' => $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
+            'customAjaxPath' => $this->_path . 'views/js/CustomAjaxService.js?v=' . $this->version,
             'stylePath' => $this->_path . 'views/css/checkout.css?v=' . $this->version,
             'checkoutPath' => $this->_path . 'views/js/CheckOutController.js?v=' . $this->version,
             'mapModalPath' => $this->_path . 'views/js/MapModalController.js?v=' . $this->version,

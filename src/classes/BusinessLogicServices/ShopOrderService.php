@@ -98,6 +98,10 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
                 $order->setShippingDropOffId($dropOffId);
             }
 
+            if ($sourceOrder) {
+                $order->setPaymentId($sourceOrder->module);
+            }
+
             $order->setShippingAddress($this->getAddress($sourceOrder));
 
             $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
