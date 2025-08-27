@@ -355,6 +355,19 @@ class Packlink extends CarrierModule
         $order = $params['order'];
         $carrier = new \Carrier($order->id_carrier);
 
+        $offlineService = new \Packlink\PrestaShop\Classes\BusinessLogicServices\OfflinePaymentService();
+        $shippingId = \Packlink\PrestaShop\Classes\Utility\CarrierUtility
+            ::getServiceFromReferenceId(
+                \Context::getContext()->cart->id_carrier
+            );
+
+        if (!$offlineService->isValidPaymentMethod($order->id, $shippingId)) {
+            \Logeecom\Infrastructure\Logger\Logger::logError(
+                "Payment method is not valid for [{$order->id}]."
+            );
+        }
+
+
         $isDelayed = false;
 
         if (\Packlink\PrestaShop\Classes\Utility\CarrierUtility::isDropOff((int)$carrier->id_reference)) {
@@ -374,9 +387,8 @@ class Packlink extends CarrierModule
 
         if($offlineService->shouldSurchargeApply($order->id)) {
             $surchargeAmount = $offlineService->calculateFee($order->id);
+            $this->addSurchargeItem($order, $surchargeAmount);
         }
-
-        $this->addSurchargeItem($order, $surchargeAmount);
 
         $this->createOrderDraft($params['order'], $params['orderStatus'], $isDelayed);
     }
@@ -692,9 +704,14 @@ class Packlink extends CarrierModule
     {
         $orderDetail = new OrderDetail();
         $orderDetail->id_order = (int)$order->id;
-        $orderDetail->product_name = 'Surcharge Fee';
+        $orderDetail->product_name =  Packlink\BusinessLogic\Language\Translator::translate(
+            'cashOnDelivery.surcharge');
+
         $orderDetail->product_quantity = 1;
         $orderDetail->product_price = $surchargeAmount;
+        $orderDetail->product_id = 0;
+        $orderDetail->product_attribute_id = 0;
+        $orderDetail->product_reference = 'COD_SURCHARGE';
         $orderDetail->unit_price_tax_incl = $surchargeAmount;
         $orderDetail->unit_price_tax_excl = $surchargeAmount;
         $orderDetail->total_price_tax_incl = $surchargeAmount;

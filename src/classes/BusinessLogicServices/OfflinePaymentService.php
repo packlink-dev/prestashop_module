@@ -91,6 +91,37 @@ class OfflinePaymentService
         }
     }
 
+    /**
+     * @param $orderId
+     * @param $shippingMethodId
+     * @return bool
+     */
+    public function isValidPaymentMethod($orderId, $shippingMethodId)
+    {
+        try {
+            $acc = $this->getAccountConfiguration();
+
+            $paymentId = $this->getShopOrderService()->getOrderAndShippingData($orderId)->getPaymentId();
+
+            if(!$acc || !$acc->active || !$acc->enabled || !$acc->account || $acc->account->getOfflinePaymentMethod() !== $paymentId) {
+                return true;
+            }
+
+            $services = $this->shippingMethodController->getShippingServicesForMethod($shippingMethodId);
+
+            $config = $services[0]->cashOnDeliveryConfig;
+
+            if ($config && !$config->offered) {
+                return false;
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
     public function calculateFee($orderId)
     {
         $controller = new CoreController();
