@@ -84,7 +84,7 @@ class OfflinePaymentService
 
             $order = $this->getShopOrderService()->getOrderAndShippingData($orderId);
 
-            return $acc && $acc->account && $acc->account->getOfflinePaymentMethod() === $order->getPaymentId();
+            return $acc && $acc->account && $acc->enabled && $acc->active && $acc->account->getOfflinePaymentMethod() === $order->getPaymentId();
 
         } catch (\Exception $e) {
             return false;
