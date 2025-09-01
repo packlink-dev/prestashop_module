@@ -66,12 +66,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "72286fed1ae3b91c78258e0f8137b2cc2cc316a4"
+                "reference": "3567ad4c9845119dbf994ba5f2be5a4ba32f6b1c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/72286fed1ae3b91c78258e0f8137b2cc2cc316a4",
-                "reference": "72286fed1ae3b91c78258e0f8137b2cc2cc316a4",
+                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/3567ad4c9845119dbf994ba5f2be5a4ba32f6b1c",
+                "reference": "3567ad4c9845119dbf994ba5f2be5a4ba32f6b1c",
                 "shasum": ""
             },
             "require": {
@@ -110,7 +110,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2025-08-27T10:18:21+00:00"
+            "time": "2025-09-01T07:49:57+00:00"
         },
         {
             "name": "setasign/fpdf",
