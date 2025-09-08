@@ -701,7 +701,7 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/ValidationService.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/ShippingServicesRenderer.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/AutoTestController.js?v=' . $this->version,
-                $this->getPathUri() . 'views/js/core/ConfigurationController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/ConfigurationController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/EditServiceController.js?v=' . $this->version,
@@ -824,6 +824,7 @@ class Packlink extends CarrierModule
     private function getTemplates()
     {
         $baseDir = $this->getLocalPath() . 'views/templates/core/';
+        $baseDirOverride = $this->getLocalPath() . 'views/templates/override/';
 
         return array(
             'pl-login-page' => array(
@@ -846,7 +847,7 @@ class Packlink extends CarrierModule
                 'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'default-warehouse.html'),
             ),
             'pl-configuration-page' => array(
-                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'configuration.html'),
+                'pl-main-page-holder' => Tools::file_get_contents($baseDirOverride . 'configuration.html'),
                 'pl-header-section' => '',
             ),
             'pl-order-status-mapping-page' => array(
