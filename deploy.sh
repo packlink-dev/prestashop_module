@@ -66,6 +66,9 @@ echo -e "\e[32mSTEP 4.1:\e[0m Adding PS version check in every PHP file"
 echo -e "\e[32mSTEP 4.2:\e[0m Remove .html extension from files"
 ./scripts/remove_html_extension_from_file_name.sh "./packlink/views/templates/core" "./packlink/packlink.php"
 
+# Remove .html extension from override folder
+./scripts/remove_html_extension_from_file_name.sh "./packlink/views/templates/override" "./packlink/packlink.php"
+
 echo -e "\e[32mSTEP 5:\e[0m Adding PrestaShop mandatory licence header to files..."
 php "$PWD/src/lib/autoLicence.php" "$PWD/packlink"
 
