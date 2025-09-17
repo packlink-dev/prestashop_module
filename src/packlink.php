@@ -758,7 +758,7 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/ValidationService.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/ShippingServicesRenderer.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/AutoTestController.js?v=' . $this->version,
-                $this->getPathUri() . 'views/js/core/ConfigurationController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/ConfigurationController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/CashOnDeliveryController.js?v=' . $this->version,
@@ -882,6 +882,7 @@ class Packlink extends CarrierModule
     private function getTemplates()
     {
         $baseDir = $this->getLocalPath() . 'views/templates/core/';
+        $baseDirOverride = $this->getLocalPath() . 'views/templates/override/';
 
         return array(
             'pl-login-page' => array(
@@ -904,7 +905,7 @@ class Packlink extends CarrierModule
                 'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'default-warehouse.html'),
             ),
             'pl-configuration-page' => array(
-                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'configuration.html'),
+                'pl-main-page-holder' => Tools::file_get_contents($baseDirOverride . 'configuration.html'),
                 'pl-header-section' => '',
             ),
             'pl-order-status-mapping-page' => array(
@@ -1134,7 +1135,6 @@ class Packlink extends CarrierModule
             'responsePath' => $this->getPathUri() . 'views/js/core/ResponseService.js?v=' . $this->version,
             'stateUuidPath' => $this->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . $this->version,
             'prestaAjaxPath' => $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
-            'customAjaxPath' => $this->_path . 'views/js/CustomAjaxService.js?v=' . $this->version,
             'stylePath' => $this->_path . 'views/css/checkout.css?v=' . $this->version,
             'checkoutPath' => $this->_path . 'views/js/CheckOutController.js?v=' . $this->version,
             'mapModalPath' => $this->_path . 'views/js/MapModalController.js?v=' . $this->version,

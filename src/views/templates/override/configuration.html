@@ -1,0 +1,59 @@
+<div class="pl-configuration-page pl-page-config">
+    <div class="pl-flex-expand">
+        <header class="pl-sub-header">
+            <button id="pl-back-button" class="pl-icon-button">
+                <i class="material-icons">keyboard_backspace</i>
+            </button>
+            <h1>{$configuration.menu}</h1>
+        </header>
+        <div class="pl-flex-left pl-config-list">
+            <div class="pl-config-list-item" id="pl-navigate-order-status">
+                <i class="material-icons pl-icon-text">fact_check</i>
+                <div class="pl-flex-expand pl-left-separate">
+                    {$configuration.orderStatus}
+                </div>
+                <i class="material-icons pl-no-margin pl-icon-text">chevron_right</i>
+            </div>
+            <div class="pl-config-list-item" id="pl-navigate-warehouse">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#2095f2">
+                    <path d="M13.4 16.26h4.783a.48.48 0 0 0 .478-.478V13.87a.48.48 0 0 0-.478-.478H13.4a.48.48 0 0 0-.478.478v1.913a.48.48 0 0 0 .478.478zm.478-1.913h3.826v.957H13.87v-.957zm-.478-1.913h4.783a.48.48 0 0 0 .478-.478v-1.913a.48.48 0 0 0-.478-.478H13.4a.48.48 0 0 0-.478.478v1.913a.48.48 0 0 0 .478.478zm.478-1.913h3.826v.957H13.87v-.957zM13.4 8.6h4.783a.48.48 0 0 0 .478-.478V6.217a.48.48 0 0 0-.478-.478H13.4a.48.48 0 0 0-.478.478V8.13a.48.48 0 0 0 .478.478zm.478-1.913h3.826v.957H13.87v-.957zM13.4 4.784h4.783a.48.48 0 0 0 .478-.478V2.4a.48.48 0 0 0-.478-.478H13.4a.48.48 0 0 0-.478.478v1.913a.48.48 0 0 0 .478.478zm.478-1.913h3.826v.957H13.87V2.87zm7.654 18.172h-.478V.478A.48.48 0 0 0 20.565 0H11c-.062 0-.124.013-.183.037s-.1.06-.155.103L7.792 3c-.1.1-.14.2-.14.338v1.435H1.435a.48.48 0 0 0-.478.478v15.783h-.48a.48.48 0 0 0-.478.478.48.48 0 0 0 .478.478H21.52a.48.48 0 0 0 .478-.478.48.48 0 0 0-.478-.478zm-1.435 0h-1.435v-3.348a.48.48 0 0 0-.478-.478H13.4a.48.48 0 0 0-.478.478v3.348h-1.435V.957h8.6v20.087zm-2.4 0H13.87v-2.87h3.826v2.87zM8.6 3.546l1.913-1.913v3.15H8.6V3.546zM1.913 5.74h8.6v15.304h-8.6V5.74zM8.6 7.174H3.826a.48.48 0 0 0-.478.478v4.783a.48.48 0 0 0 .478.478H8.6a.48.48 0 0 0 .478-.478V7.652a.48.48 0 0 0-.478-.478zm-.478 2.4H6.696V8.13H8.13v1.435zM4.304 8.13H5.74v1.435H4.304V8.13zm0 3.826V10.52H5.74v1.435H4.304zm3.826 0H6.696V10.52H8.13v1.435zm.478 1.913H3.826a.48.48 0 0 0-.478.478v4.783a.48.48 0 0 0 .478.478H8.6a.48.48 0 0 0 .478-.478v-4.783a.48.48 0 0 0-.478-.478zm-.478 2.4H6.696v-1.435H8.13v1.435zm-3.826-1.435H5.74v1.435H4.304v-1.435zm0 3.826v-1.435H5.74v1.435H4.304zm3.826 0H6.696v-1.435H8.13v1.435z"/>
+                </svg>
+                <div class="pl-flex-expand pl-left-separate">
+                    {$configuration.warehouse}
+                </div>
+                <i class="material-icons pl-no-margin pl-icon-text">chevron_right</i>
+            </div>
+            <div class="pl-config-list-item" id="pl-navigate-parcel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="22" fill="#2095f2" fill-rule="evenodd"
+                     stroke-width="2">
+                    <path d="M20.977 22H1.535C.665 22 0 21.335 0 20.465V6.498c0-.358.102-.716.358-.972L4.4.563C4.707.205 5.116 0 5.577 0h11.307c.46 0 .87.205 1.177.563l4.042 4.963c.205.256.358.614.358.972v13.967c.05.87-.614 1.535-1.484 1.535h0zM5.577 1.023c-.153 0-.307.05-.41.205L1.126 6.19c-.05.102-.102.205-.102.307v13.967a.48.48 0 0 0 .512.512h19.442a.48.48 0 0 0 .512-.512V6.498a.55.55 0 0 0-.102-.307l-4.042-4.963c-.153-.153-.256-.205-.41-.205H5.577z"/>
+                    <path d="M22 7.163H.512A.48.48 0 0 1 0 6.651.48.48 0 0 1 .512 6.14H22a.48.48 0 0 1 .512.512.48.48 0 0 1-.512.512h0z"/>
+                    <path d="M11.256 6.65a.48.48 0 0 1-.512-.512V.512A.48.48 0 0 1 11.256 0a.48.48 0 0 1 .512.512V6.14a.48.48 0 0 1-.512.512h0zm8.698 12.79H9.72V15.35h10.233v4.093zm-9.21-1.023h8.186v-2.047h-8.186v2.047z"/>
+                </svg>
+                <div class="pl-flex-expand pl-left-separate">
+                    {$configuration.parcel}
+                </div>
+                <i class="material-icons pl-no-margin pl-icon-text">chevron_right</i>
+            </div>
+            <div class="pl-config-list-item">
+                <a target="_blank" id="pl-navigate-help">
+                    <i class="material-icons pl-icon-text">help_outline</i>
+                    <div class="pl-flex-expand pl-left-separate">
+                        {$configuration.help}
+                    </div>
+                    <i class="material-icons pl-no-margin pl-icon-text">chevron_right</i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="pl-footer">
+        <div class="pl-row-orientation">
+            <span>{$configuration.contactUs}</span>
+            &nbsp;<a href="{$configuration.contactUrlMail}" rel="nofollow" target="_blank">{$configuration.contactUrl}</a>
+        </div>
+        <div class="pl-row-orientation">
+            <span id="pl-version-number"></span>
+            &nbsp;<div id="pl-open-system-info" class="pl-icon-text pl-clickable">{$configuration.systemInfo}</div>
+        </div>
+    </div>
+</div>
