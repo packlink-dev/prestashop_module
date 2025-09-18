@@ -2,10 +2,16 @@
 
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
+use Address;
+use Cart;
+use Country;
 use Logeecom\Infrastructure\ServiceRegister;
 use Module;
+use Packlink\BusinessLogic\CashOnDelivery\Services\OfflinePaymentsServices;
+use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Http\DTO\CashOnDelivery;
+use Packlink\BusinessLogic\ShippingMethod\Models\ShippingService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use PaymentModule;
 use Validate;
@@ -17,7 +23,7 @@ use Packlink\BusinessLogic\Controllers\CashOnDeliveryController as CoreControlle
  *
  * @package Packlink\PrestaShop\Classes\BusinessLogicServices
  */
-class OfflinePaymentService
+class OfflinePaymentService extends OfflinePaymentsServices
 {
     /**
      * @var CoreController $controller
@@ -29,13 +35,20 @@ class OfflinePaymentService
      */
     protected $shippingMethodController;
 
+    /**
+     * @var ConfigurationService $configuration
+     */
+    protected $configuration;
+
     public function __construct()
     {
         Bootstrap::init();
 
         $this->controller = new CoreController();
         $this->shippingMethodController = new ShippingMethodController();
+        $this->configuration = ServiceRegister::getService( Configuration::CLASS_NAME );
     }
+
     /**
      * Offline payment methods
      *
@@ -47,6 +60,32 @@ class OfflinePaymentService
         'ps_cashondelivery',
     );
 
+    /**
+     * @param ShippingService[] $services
+     * @param Cart $cart
+     *
+     * @return ShippingService|null
+     *
+     * @throws \PrestaShopDatabaseException
+     * @throws \PrestaShopException
+     */
+    public function getMatchingService(array $services, Cart $cart)
+    {
+        $warehouse = $this->configuration->getDefaultWarehouse();
+
+        $fromCountry = $warehouse ? $warehouse->country : null;
+        $toCountry   = $warehouse ? $warehouse->country : null;
+
+        if ($cart && $cart->id_address_delivery) {
+            $address = new Address((int) $cart->id_address_delivery);
+            if (Validate::isLoadedObject($address) && $address->id_country) {
+                $country = new Country((int) $address->id_country);
+                $toCountry = $country->iso_code;
+            }
+        }
+
+        return $this->getCheapestMatchingService($services, $fromCountry, $toCountry);
+    }
     /**
      * @return array
      */

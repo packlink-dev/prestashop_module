@@ -1135,6 +1135,7 @@ class Packlink extends CarrierModule
             'responsePath' => $this->getPathUri() . 'views/js/core/ResponseService.js?v=' . $this->version,
             'stateUuidPath' => $this->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . $this->version,
             'prestaAjaxPath' => $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
+            'customAjaxPath' => $this->_path . 'views/js/CustomAjaxService.js?v=' . $this->version,
             'stylePath' => $this->_path . 'views/css/checkout.css?v=' . $this->version,
             'checkoutPath' => $this->_path . 'views/js/CheckOutController.js?v=' . $this->version,
             'mapModalPath' => $this->_path . 'views/js/MapModalController.js?v=' . $this->version,

@@ -60,7 +60,9 @@ class PacklinkOfflinePaymentsModuleFrontController extends ModuleFrontController
 
             $services = $this->shippingMethodController->getShippingServicesForMethod($input['selectedService']);
 
-            $config = $services[0]->cashOnDeliveryConfig;
+            $service = $this->offlinePaymentService->getMatchingService($services, $this->context->cart);
+
+            $config = $service ? $service->cashOnDeliveryConfig : null;
 
             if($config &&
                 !$config->offered
