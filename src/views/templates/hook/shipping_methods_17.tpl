@@ -23,6 +23,13 @@
       </div>
     </div>
   </div>
+  <div class="row pl-cod-message" id="pl-cod">
+    <div class="col-md-12">
+      <p>
+        {l s='This service supports cash on delivery' mod='packlink'}
+      </p>
+    </div>
+  </div>
 </div>
 
 <div class="pl-input-mask hidden" id="pl-map-modal">

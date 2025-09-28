@@ -9,6 +9,7 @@ var Packlink = window.Packlink || {};
 
     let currentMethod = null;
     let dropOffIds = [];
+    let cashOnDeliveryIds = [];
 
     let mapController = null;
 
@@ -16,8 +17,9 @@ var Packlink = window.Packlink || {};
 
     function init() {
       dropOffIds = Object.keys(configuration.dropoffIds);
+      cashOnDeliveryIds = configuration.cashOnDelivery;
 
-      let dropOffs = shippingService.getDropOffShippingMethods(dropOffIds);
+      let dropOffs = shippingService.getDropOffShippingMethods(dropOffIds, cashOnDeliveryIds);
 
       let selectedLocation = configuration.selectedLocation;
       let selectedCarrier = configuration.selectedCarrier;
@@ -38,6 +40,10 @@ var Packlink = window.Packlink || {};
           }
         }
 
+        if (dropOff.checked && dropOff.getAttribute('data-pl-cod') === 'true') {
+          shippingService.showCODMessage(dropOff, configuration.offlineMethod);
+        }
+
         dropOff.addEventListener('change', dropoffChangedHandler);
       }
     }
@@ -54,6 +60,12 @@ var Packlink = window.Packlink || {};
         showDropoff(Packlink.trans.select, true);
       } else {
         hideDropoff();
+      }
+
+      if (currentMethod.getAttribute('data-pl-cod') === 'true') {
+        shippingService.showCODMessage(currentMethod,  configuration.offlineMethod);
+      } else {
+        shippingService.hideCODMessage();
       }
     }
 

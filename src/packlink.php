@@ -205,7 +205,6 @@ class Packlink extends CarrierModule
     public function hookDisplayAfterCarrier($params)
     {
         $configuration = $this->getShippingStepConfiguration($params);
-        $configuration['offlinePaymentMethods'] = $this->getFrontAction('offlinepayments');
 
         $configuration['selectedService'] = \Packlink\PrestaShop\Classes\Utility\CarrierUtility
             ::getServiceFromReferenceId(
@@ -1051,9 +1050,41 @@ class Packlink extends CarrierModule
             'getLocationsUrl' => $this->getFrontAction('locations'),
         );
 
+        $configuration['offlinePaymentMethods'] = $this->getFrontAction('offlinepayments');
+
         $lang = 'en';
         $cart = $params['cart'];
         $language = new \Language((int)$cart->id_lang);
+
+        /** @var Packlink\PrestaShop\Classes\BusinessLogicServices\OfflinePaymentService $codService */
+        $codService =  new \Packlink\PrestaShop\Classes\BusinessLogicServices\OfflinePaymentService();
+
+        try {
+            $cod = $codService->getAccountConfiguration();
+        } catch (Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException $e) {
+            $cod = null;
+        }
+
+        $offlineMethods = $codService->getOfflinePayments();
+
+        if($cod && $cod->active && $cod->enabled && $cod->account) {
+            $cartTotal = (float)$cart->getOrderTotal(true, \Cart::BOTH);
+            $address = new \Address($cart->id_address_delivery);
+            $countryCode = Validate::isLoadedObject($address) ? (new \Country($address->id_country))->iso_code : null;
+
+            $configuration['cashOnDelivery'] = \Packlink\PrestaShop\Classes\Utility\CarrierUtility::
+            getCashOnDeliveryReferenceIds($cartTotal, $cod);
+
+            $offlineMethodName = null;
+            foreach ($offlineMethods as $method) {
+                if ($method['name'] === $cod->account->getOfflinePaymentMethod()) {
+                    $offlineMethodName = $method['displayName'];
+                    break;
+                }
+            }
+
+            $configuration['offlineMethod'] = $offlineMethodName;
+        }
 
         if (Validate::isLoadedObject($language) && in_array($language->iso_code, $supportedLanguages, true)) {
             $lang = $language->iso_code;

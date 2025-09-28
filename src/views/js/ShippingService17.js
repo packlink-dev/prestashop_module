@@ -12,19 +12,29 @@ var Packlink = window.Packlink || {};
         this.enableSubmit = enableSubmit;
         this.disableSubmit = disableSubmit;
         this.changeBtnText = changeBtnText;
+        this.showCODMessage = showCODMessage;
+        this.hideCODMessage = hideCODMessage;
 
         /**
          * Returns radio buttons of drop off shipping methods.
          *
          * @param referenceIds
+         * @param cashOnDeliveryReferences
          * @return {Array}
          */
-        function getDropOffShippingMethods(referenceIds) {
+        function getDropOffShippingMethods(referenceIds, cashOnDeliveryReferences) {
             let result = [];
 
             let inputElements = document.getElementsByTagName('input');
             if (!referenceIds.length || !inputElements.length) {
                 return result;
+            }
+
+            let codKeys = [];
+            let codPrices = {};
+            if (cashOnDeliveryReferences) {
+                codKeys = Object.keys(cashOnDeliveryReferences).filter(k => k !== "");
+                codKeys.forEach(k => codPrices[k] = cashOnDeliveryReferences[k]);
             }
 
             for (let element of inputElements) {
@@ -34,6 +44,11 @@ var Packlink = window.Packlink || {};
                     if (referenceIds.indexOf(id) !== -1) {
                         element.setAttribute('data-pl-dropoff', 'true');
                         element.setAttribute('data-pl-id', id);
+                    }
+
+                    if (codKeys.indexOf(id) !== -1) {
+                        element.setAttribute('data-pl-cod', 'true');
+                        element.setAttribute('data-pl-cod-price', codPrices[id]);
                     }
 
                     result.push(element);
@@ -90,6 +105,34 @@ var Packlink = window.Packlink || {};
         }
 
         /**
+         * Shows COD message.
+         *
+         * @param {Element} dropoff
+         * @param {string} paymentMethod
+         */
+        function showCODMessage(dropoff, paymentMethod) {
+            let existing = document.querySelectorAll('.pl-cod-inserted');
+            existing.forEach(el => el.remove());
+
+            let codElement = document.getElementById('pl-cod').cloneNode(true);
+            codElement.classList.add('pl-cod-inserted');
+
+            let codPrice = dropoff.getAttribute('data-pl-cod-price') || '0';
+
+            codElement.querySelector('p').innerHTML =
+                `This service supports ${paymentMethod}. If you choose the ${paymentMethod} payment method, additional fee of ${codPrice} will be applied.`;
+
+            let point = dropoff.parentElement;
+            while (!point.classList
+                || !(point.classList.contains('delivery-option') || point.classList.contains('checkout-delivery-line'))
+                ) {
+                point = point.parentElement;
+            }
+
+            point.after(codElement);
+        }
+
+        /**
          * Hides drop off.
          */
         function hideDropOff() {
@@ -97,6 +140,11 @@ var Packlink = window.Packlink || {};
                 dropoffElement.remove();
                 dropoffElement = null;
             }
+        }
+
+        function hideCODMessage() {
+            let existing = document.querySelectorAll('.pl-cod-inserted');
+            existing.forEach(el => el.remove());
         }
 
         /**
