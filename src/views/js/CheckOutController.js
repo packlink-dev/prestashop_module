@@ -20,6 +20,7 @@ var Packlink = window.Packlink || {};
       cashOnDeliveryIds = configuration.cashOnDelivery;
 
       let dropOffs = shippingService.getDropOffShippingMethods(dropOffIds, cashOnDeliveryIds);
+      let ids = shippingService.markCashOnDeliveryMethods(cashOnDeliveryIds);
 
       let selectedLocation = configuration.selectedLocation;
       let selectedCarrier = configuration.selectedCarrier;
@@ -40,11 +41,31 @@ var Packlink = window.Packlink || {};
           }
         }
 
-        if (dropOff.checked && dropOff.getAttribute('data-pl-cod') === 'true') {
-          shippingService.showCODMessage(dropOff, configuration.offlineMethod);
+        dropOff.addEventListener('change', dropoffChangedHandler);
+      }
+
+      for(cod of ids) {
+        if (cod.checked && cod.getAttribute('data-pl-cod') === 'true') {
+          shippingService.showCODMessage(cod, configuration.offlineMethod);
         }
 
-        dropOff.addEventListener('change', dropoffChangedHandler);
+        cod.addEventListener('change', codChangedHandler);
+      }
+
+    }
+
+    /**
+     * Handles changed event
+     *
+     * @param event
+     */
+    function codChangedHandler(event) {
+      currentMethod = event.target;
+
+      if (currentMethod.getAttribute('data-pl-cod') === 'true') {
+        shippingService.showCODMessage(currentMethod,  configuration.offlineMethod);
+      } else {
+        shippingService.hideCODMessage();
       }
     }
 

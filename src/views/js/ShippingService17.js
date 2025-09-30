@@ -14,6 +14,7 @@ var Packlink = window.Packlink || {};
         this.changeBtnText = changeBtnText;
         this.showCODMessage = showCODMessage;
         this.hideCODMessage = hideCODMessage;
+        this.markCashOnDeliveryMethods = markCashOnDeliveryMethods;
 
         /**
          * Returns radio buttons of drop off shipping methods.
@@ -52,6 +53,37 @@ var Packlink = window.Packlink || {};
                     }
 
                     result.push(element);
+                }
+            }
+
+            return result;
+        }
+
+        function markCashOnDeliveryMethods(cashOnDeliveryReferences) {
+            let result = [];
+
+            if (!cashOnDeliveryReferences || !Object.keys(cashOnDeliveryReferences).length) {
+                return result;
+            }
+
+            let inputElements = document.getElementsByTagName('input');
+            if (!inputElements.length) {
+                return result;
+            }
+
+            let codKeys = Object.keys(cashOnDeliveryReferences).filter(k => k !== "");
+            let codPrices = {};
+            codKeys.forEach(k => codPrices[k] = cashOnDeliveryReferences[k]);
+
+            for (let element of inputElements) {
+                if (element.type === 'radio' && element.getAttribute('name').includes('delivery_option')) {
+                    let id = trimString(element.value);
+
+                    if (codKeys.indexOf(id) !== -1) {
+                        element.setAttribute('data-pl-cod', 'true');
+                        element.setAttribute('data-pl-cod-price', codPrices[id]);
+                        result.push(element);
+                    }
                 }
             }
 
@@ -117,7 +149,11 @@ var Packlink = window.Packlink || {};
             let codElement = document.getElementById('pl-cod').cloneNode(true);
             codElement.classList.add('pl-cod-inserted');
 
-            let codPrice = dropoff.getAttribute('data-pl-cod-price') || '0';
+            let codPrice = dropoff.getAttribute('data-pl-cod-price') || 0;
+
+            if (codPrice === "0") {
+                return;
+            }
 
             codElement.querySelector('p').innerHTML =
                 `This service supports ${paymentMethod}. If you choose the ${paymentMethod} payment method, additional fee of ${codPrice} will be applied.`;

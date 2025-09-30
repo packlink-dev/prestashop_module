@@ -95,7 +95,6 @@ class Packlink extends CarrierModule
         $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($this);
         $installer->removeOldOverrides();
         if (!$installer->shouldInstallOverrides()) {
-            // skip installing overrides / do not call parent method
             return true;
         }
 
@@ -701,6 +700,10 @@ class Packlink extends CarrierModule
      */
     private function addSurchargeItem($order, $surchargeAmount)
     {
+        if($surchargeAmount === 0){
+            return;
+        }
+
         $orderDetail = new OrderDetail();
         $orderDetail->id_order = (int)$order->id;
         $orderDetail->product_name =  Packlink\BusinessLogic\Language\Translator::translate(
