@@ -36,7 +36,7 @@ class Packlink extends CarrierModule
      * method for calculating shipping cost is called.
      * @var int
      */
-    public $id_carrier;
+    public $id_carrier = -1;
 
     /**
      * Packlink constructor.
@@ -73,13 +73,22 @@ class Packlink extends CarrierModule
     {
         $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($this);
         $previousShopContext = Shop::getContext();
+        $previousShopId  = Shop::getContextShopID();
+        $previousGroupId = Shop::getContextShopGroupID(true);
+
         Shop::setContext(Shop::CONTEXT_ALL);
 
         $result = $installer->initializePlugin() && parent::install() && $installer->addControllersAndHooks();
 
         \Packlink\PrestaShop\Classes\BusinessLogicServices\CleanupTaskSchedulerService::scheduleTaskCleanupTask();
 
-        Shop::setContext($previousShopContext);
+        if ($previousShopContext === Shop::CONTEXT_SHOP) {
+            Shop::setContext(Shop::CONTEXT_SHOP, $previousShopId);
+        } elseif ($previousShopContext === Shop::CONTEXT_GROUP) {
+            Shop::setContext(Shop::CONTEXT_GROUP, $previousGroupId);
+        } else {
+            Shop::setContext(Shop::CONTEXT_ALL);
+        }
 
         return $result;
     }

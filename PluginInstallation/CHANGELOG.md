@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.3.6](https://github.com/packlink-dev/prestashop_module/compare/v3.3.5...v3.3.6)
+### Changed
+- Remove the custom section from the configuration
+
 ## [3.3.5](https://github.com/packlink-dev/prestashop_module/compare/v3.3.4...v3.3.5)
 ### Changed
 - Remove the custom section from the configuration

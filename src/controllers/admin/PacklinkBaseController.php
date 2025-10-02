@@ -74,7 +74,6 @@ class PacklinkBaseController extends ModuleAdminController
      */
     protected function l($string, $class = null, $addSlashes = false, $htmlEntities = true)
     {
-        /** @noinspection PhpDeprecationInspection */
-        return parent::l($string, $class, $addSlashes, $htmlEntities);
+        return $this->trans($string);
     }
 }
