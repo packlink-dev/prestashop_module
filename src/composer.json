@@ -13,7 +13,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=5.3",
-    "packlink/integration-core": "3.6.5",
+    "packlink/integration-core": "dev-fix/CS-7341",
     "ext-json": "*",
     "ext-curl": "*",
     "ext-zip": "*",
