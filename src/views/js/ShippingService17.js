@@ -161,7 +161,8 @@ var Packlink = window.Packlink || {};
 
             let point = dropoff.parentElement;
             while (!point.classList
-                || !(point.classList.contains('delivery-option') || point.classList.contains('checkout-delivery-line'))
+                || !(point.classList.contains('delivery-option') || point.classList.contains('checkout-delivery-line')
+                    || point.classList.contains('delivery-options__item'))
                 ) {
                 point = point.parentElement;
             }
