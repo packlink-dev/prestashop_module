@@ -90,6 +90,9 @@ if [ "$version" = "" ]; then
     fi
 fi
 
+echo -e "\e[32mSTEP 7.1:\e[0m Converting all files to Unix line endings..."
+find ./packlink -type f -exec dos2unix {} \;
+
 # Create plugin archive
 echo -e "\e[32mSTEP 8:\e[0m Creating new archive..."
 zip -r -q  packlink.zip ./packlink
