@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.4.0](https://github.com/packlink-dev/prestashop_module/compare/v3.3.6...v3.4.0)
+### Added
+- Support for Presta 9
+- Cash on delivery configuration
+### Changed
+- Fix fetching drop off locations for Mondial services
+
 ## [3.3.6](https://github.com/packlink-dev/prestashop_module/compare/v3.3.5...v3.3.6)
 ### Changed
 - Remove the custom section from the configuration
