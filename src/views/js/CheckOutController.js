@@ -14,13 +14,16 @@ var Packlink = window.Packlink || {};
     let mapController = null;
 
     let selectedId = null;
+    let ids = [];
 
     function init() {
       dropOffIds = Object.keys(configuration.dropoffIds);
       cashOnDeliveryIds = configuration.cashOnDelivery;
 
-      let dropOffs = shippingService.getDropOffShippingMethods(dropOffIds, cashOnDeliveryIds);
-      let ids = shippingService.markCashOnDeliveryMethods(cashOnDeliveryIds);
+      let dropOffs = shippingService.getDropOffShippingMethods(dropOffIds);
+      if (shippingService.markCashOnDeliveryMethods) {
+       ids = shippingService.markCashOnDeliveryMethods(cashOnDeliveryIds);
+      }
 
       let selectedLocation = configuration.selectedLocation;
       let selectedCarrier = configuration.selectedCarrier;
@@ -81,12 +84,6 @@ var Packlink = window.Packlink || {};
         showDropoff(Packlink.trans.select, true);
       } else {
         hideDropoff();
-      }
-
-      if (currentMethod.getAttribute('data-pl-cod') === 'true') {
-        shippingService.showCODMessage(currentMethod,  configuration.offlineMethod);
-      } else {
-        shippingService.hideCODMessage();
       }
     }
 

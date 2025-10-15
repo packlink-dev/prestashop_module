@@ -20,10 +20,9 @@ var Packlink = window.Packlink || {};
          * Returns radio buttons of drop off shipping methods.
          *
          * @param referenceIds
-         * @param cashOnDeliveryReferences
          * @return {Array}
          */
-        function getDropOffShippingMethods(referenceIds, cashOnDeliveryReferences) {
+        function getDropOffShippingMethods(referenceIds) {
             let result = [];
 
             let inputElements = document.getElementsByTagName('input');
@@ -31,12 +30,6 @@ var Packlink = window.Packlink || {};
                 return result;
             }
 
-            let codKeys = [];
-            let codPrices = {};
-            if (cashOnDeliveryReferences) {
-                codKeys = Object.keys(cashOnDeliveryReferences).filter(k => k !== "");
-                codKeys.forEach(k => codPrices[k] = cashOnDeliveryReferences[k]);
-            }
 
             for (let element of inputElements) {
                 if (element.type === 'radio' && element.getAttribute('name').includes('delivery_option')) {
@@ -45,11 +38,6 @@ var Packlink = window.Packlink || {};
                     if (referenceIds.indexOf(id) !== -1) {
                         element.setAttribute('data-pl-dropoff', 'true');
                         element.setAttribute('data-pl-id', id);
-                    }
-
-                    if (codKeys.indexOf(id) !== -1) {
-                        element.setAttribute('data-pl-cod', 'true');
-                        element.setAttribute('data-pl-cod-price', codPrices[id]);
                     }
 
                     result.push(element);
@@ -82,8 +70,9 @@ var Packlink = window.Packlink || {};
                     if (codKeys.indexOf(id) !== -1) {
                         element.setAttribute('data-pl-cod', 'true');
                         element.setAttribute('data-pl-cod-price', codPrices[id]);
-                        result.push(element);
                     }
+
+                    result.push(element);
                 }
             }
 

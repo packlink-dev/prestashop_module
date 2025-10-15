@@ -58,6 +58,9 @@ class OfflinePaymentService extends OfflinePaymentsServices
         'ps_wirepayment',
         'ps_checkpayment',
         'ps_cashondelivery',
+        'bankwire',
+        'cheque',
+        'cashondelivery',
     );
 
     /**

@@ -10,7 +10,7 @@ var Packlink = window.Packlink || {};
             const paymentMethods = document.querySelectorAll('#checkout-payment-step input[name="payment-option"]');
             paymentMethods.forEach(method => {
                 if (offlineModules.includes(method.dataset.moduleName)) {
-                    const container = method.closest('.payment-option');
+                    const container = method.closest('.payment-option') || method.closest('.payment__option');
                     if (container) {
                         container.style.display = 'none';
                         if (method.checked) {
@@ -45,8 +45,20 @@ var Packlink = window.Packlink || {};
 
             const observer = new MutationObserver(() => {
                 const paymentStep = document.querySelector('#checkout-payment-step');
+                let payload = {selectedService: configuration.selectedService};
                 if (paymentStep) {
-                    hideOfflinePayments();
+                    ajaxService.post(
+                        configuration.offlinePaymentMethods,
+                        payload,
+                        (response) => {
+                            try {
+                                offlineModules = response.data.map(module => module.name);
+                                hideOfflinePayments();
+                            } catch (e) {
+                                console.error('Failed to parse offline payment modules:', e, response);
+                            }
+                        }
+                    );
                 }
             });
 
