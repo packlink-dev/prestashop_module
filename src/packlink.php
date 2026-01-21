@@ -531,10 +531,12 @@ class Packlink extends CarrierModule
         /** @var \Packlink\BusinessLogic\Order\OrderService $orderService */
         $orderService = \Logeecom\Infrastructure\ServiceRegister::getService(\Packlink\BusinessLogic\Order\OrderService::CLASS_NAME);
 
+        $module = Module::getInstanceByName('packlink');
+
         $params['presented_grid']['data']['draftStatusUrl'] = $this->getAjaxControllerUrl('OrderDraft', 'getDraftStatus');
         $params['presented_grid']['data']['createDraftUrl'] = $this->getAjaxControllerUrl('OrderDraft', 'createOrderDraft');
         $params['presented_grid']['data']['printLabelsUrl'] = $this->context->link->getAdminLink('BulkShipmentLabels');
-        $params['presented_grid']['data']['packlinkLogo'] = _PS_BASE_URL_ . _MODULE_DIR_ . 'packlink/logo.png';
+        $params['presented_grid']['data']['packlinkLogo'] = $module->getPathUri() . 'logo.png';
 
         $records = $params['presented_grid']['data']['records']->all();
         foreach ($records as &$record) {
