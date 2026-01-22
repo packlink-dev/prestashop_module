@@ -379,7 +379,9 @@ class CarrierService implements ShopShippingMethodService
      */
     public function getCarrierLogoFilePath($carrierName)
     {
-        return _PS_BASE_URL_ . __PS_BASE_URI__ . 'modules/' . $this->getCarrierLogoRelativePath($carrierName);
+        $relativePath = $this->getCarrierLogoRelativePath($carrierName);
+
+        return \Context::getContext()->link->getMediaLink(_MODULE_DIR_ . $relativePath);
     }
 
     /**
