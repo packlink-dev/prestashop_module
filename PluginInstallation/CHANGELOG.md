@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.4.1](https://github.com/packlink-dev/prestashop_module/compare/v3.4.0...v3.4.1)
+### Added
+- Add support for cash on delivery presta 1.6 and 9
+### Changed
+- Fix mixed content warning on orders page
+
 ## [3.4.0](https://github.com/packlink-dev/prestashop_module/compare/v3.3.6...v3.4.0)
 ### Added
 - Support for Presta 9
