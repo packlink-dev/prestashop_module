@@ -371,6 +371,33 @@ class CarrierService implements ShopShippingMethodService
     }
 
     /**
+     * Disables active Packlink carriers.
+     *
+     * @return bool TRUE if operation succeeded; otherwise, false.
+     */
+    public function disablePacklinkCarriers()
+    {
+        try {
+            $carrierIds = $this->getPacklinkCarrierIds();
+
+            foreach ($carrierIds as $carrierId) {
+                $carrier = new \Carrier((int)$carrierId);
+                $carrier->active = false;
+                $carrier->update();
+            }
+
+            return true;
+        } catch (\PrestaShopException $e) {
+            Logger::logError(
+                'Error disabling Packlink carriers. Error: ' . $e->getMessage(),
+                'Integration'
+            );
+        }
+
+        return false;
+    }
+
+    /**
      * Generates PrestaShop public URL for logo of carrier with provided title.
      *
      * @param string $carrierName Name of the carrier.
