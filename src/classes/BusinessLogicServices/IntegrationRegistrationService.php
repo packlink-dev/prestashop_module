@@ -2,6 +2,8 @@
 
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
+use Exception;
+use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Http\Proxy;
 use Packlink\BusinessLogic\IntegrationRegistration\IntegrationRegistrationServiceInterface;
@@ -70,10 +72,30 @@ class IntegrationRegistrationService implements IntegrationRegistrationServiceIn
 
     /**
      * Disconnects the integration from Packlink.
+     *
+     * @return void
      */
     public function disconnectIntegration()
     {
-        // TODO: Implement disconnectIntegration() method.
+        $integrationId = $this->configurationService->getIntegrationId();
+
+        // Must have a check for legacy merchants that uninstall without ever registering
+        if (empty($integrationId)) {
+            return;
+        }
+
+        try {
+            $success = $this->proxy->disconnectIntegration($integrationId);
+            if (!$success) {
+                Logger::logError(
+                    'Packlink integration disconnect failed during uninstall: API returned false'
+                );
+            }
+        } catch (Exception $e) {
+            Logger::logError(
+                'Packlink integration disconnect failed during uninstall: ' . $e->getMessage()
+            );
+        }
     }
 
     /**
