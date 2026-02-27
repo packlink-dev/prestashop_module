@@ -66,6 +66,16 @@ class ConfigurationService extends Configuration
     }
 
     /**
+     * Returns status update web-hook callback URL for current system.
+     *
+     * @return string Status Update Web-hook callback URL.
+     */
+    public function getStatusUpdateUrl()
+    {
+        return $this->getFrontendUrl('registrationwebhooks');
+    }
+
+    /**
      * Returns async process starter URL.
      *
      * @param string $guid Process identifier.
@@ -100,6 +110,72 @@ class ConfigurationService extends Configuration
     public function setBackupCarrierId($carrierId)
     {
         $this->saveConfigValue('backupCarrierId', $carrierId);
+    }
+
+    /**
+     * Sets Integration identifier.
+     *
+     * @param string $integrationId ID of the integration.
+     *
+     * @return \Logeecom\Infrastructure\Configuration\ConfigEntity
+     */
+    public function setIntegrationId($integrationId)
+    {
+        return $this->saveConfigValue('integrationId', $integrationId);
+    }
+
+    /**
+     * Retrieves Integration identifier.
+     *
+     * @return string | null  IntegrationId configuration.
+     */
+    public function getIntegrationId()
+    {
+        return $this->getConfigValue('integrationId');
+    }
+
+    /**
+     * Sets backup carrier ID.
+     *
+     * @param string $webhookSecret
+     *
+     * @return \Logeecom\Infrastructure\Configuration\ConfigEntity
+     */
+    public function setWebhookSecret($webhookSecret)
+    {
+        return $this->saveConfigValue('webhookSecret', $webhookSecret);
+    }
+
+    /**
+     * Retrieves Webhook secret.
+     *
+     * @return string | null  Webhook Secret configuration.
+     */
+    public function getWebhookSecret()
+    {
+        return $this->getConfigValue('webhookSecret');
+    }
+
+    /**
+     * Sets Integration Guid.
+     *
+     * @param string $webhookSecret
+     *
+     * @return \Logeecom\Infrastructure\Configuration\ConfigEntity
+     */
+    public function setIntegrationGuid($integrationGuid)
+    {
+        return $this->saveConfigValue('integrationGuid', $integrationGuid);
+    }
+
+    /**
+     * Retrieves Integration Guid.
+     *
+     * @return string | null  Integration Guid configuration.
+     */
+    public function getIntegrationGuid()
+    {
+        return $this->getConfigValue('integrationGuid');
     }
 
     /**

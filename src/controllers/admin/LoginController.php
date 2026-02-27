@@ -23,6 +23,14 @@ class LoginController extends PacklinkBaseController
         $controller = new BaseLoginController();
         $status = $controller->login(!empty($data['apiKey']) ? $data['apiKey'] : '');
 
-        PacklinkPrestaShopUtility::dieJson(array('success' => $status));
+        $response = array(
+            'success' => $status,
+        );
+
+        if (!$status && method_exists($controller, 'getLastErrorCode')) {
+            $response['error'] = $controller->getLastErrorCode();
+        }
+
+        PacklinkPrestaShopUtility::dieJson($response);
     }
 }

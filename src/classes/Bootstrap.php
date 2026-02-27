@@ -23,6 +23,7 @@ use Packlink\BusinessLogic\CashOnDelivery\Model\CashOnDelivery;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Country\WarehouseCountryService;
 use Packlink\BusinessLogic\FileResolver\FileResolverService;
+use Packlink\BusinessLogic\IntegrationRegistration\IntegrationRegistrationServiceInterface;
 use Packlink\BusinessLogic\Order\Interfaces\ShopOrderService as ShopOrderServiceInterface;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
@@ -31,6 +32,7 @@ use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\IntegrationRegistrationService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\RegistrationInfoService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ShopOrderService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\SystemInfoService;
@@ -74,6 +76,13 @@ class Bootstrap extends BootstrapComponent
             Configuration::CLASS_NAME,
             function () {
                 return ConfigurationService::getInstance();
+            }
+        );
+
+        ServiceRegister::registerService(
+            IntegrationRegistrationServiceInterface::CLASS_NAME,
+            function () {
+                return new IntegrationRegistrationService();
             }
         );
 
