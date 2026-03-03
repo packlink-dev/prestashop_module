@@ -2,14 +2,9 @@
 
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
-use Exception;
-use Logeecom\Infrastructure\Logger\Logger;
-use Logeecom\Infrastructure\ServiceRegister;
-use Packlink\BusinessLogic\Http\Proxy;
-use Packlink\BusinessLogic\IntegrationRegistration\IntegrationRegistrationServiceInterface;
-use PrestaShop\PrestaShop\Adapter\Configuration;
+use Packlink\BusinessLogic\IntegrationRegistration\IntegrationRegistrationDataProviderInterface;
 
-class IntegrationRegistrationService implements IntegrationRegistrationServiceInterface
+class IntegrationRegistrationDataProvider implements IntegrationRegistrationDataProviderInterface
 {
     const INTEGRATION_TYPE = 'prestashop_module';
     /**
@@ -17,40 +12,21 @@ class IntegrationRegistrationService implements IntegrationRegistrationServiceIn
      */
     private $integrationId = null;
     /**
-     * @var Proxy
-     */
-    private $proxy;
-
-    /**
      * @var Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService
      */
     private $configurationService;
 
-    public function __construct()
+    public function __construct($configurationService)
     {
-        $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
-        $this->configurationService = ServiceRegister::getService(
-            \Logeecom\Infrastructure\Configuration\Configuration::CLASS_NAME);
+        $this->configurationService = $configurationService;
     }
 
     /**
-     * Registers the integration with Packlink and saves integration ID from the response into ConfigEntity.
-     *
-     * @return null|string Integration identifier or null if request fails
-     *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpRequestException
-     * @throws \Packlink\BusinessLogic\IntegrationRegistration\Exceptions\IntegrationNotRegisteredException
+     * @return array Payload.
      */
-    public function registerIntegration()
+    public function getRegistrationPayload()
     {
-        $existingId = $this->getIntegrationId();
-        if (!empty($existingId)) {
-            return $existingId;
-        }
-
-        $payload = array(
+        return array(
             'integration_type' => $this->getIntegrationType(),
             'integration' => array(
                 'guid' => $this->getIntegrationGuid(),
@@ -62,40 +38,6 @@ class IntegrationRegistrationService implements IntegrationRegistrationServiceIn
                 'status_update_url' => $this->getIntegrationWebhookStatusUpdateUrl(),
             ),
         );
-
-        $integrationId = $this->proxy->registerIntegration($payload);
-        $this->configurationService->setIntegrationId($integrationId);
-        $this->integrationId = $integrationId;
-
-        return $integrationId;
-    }
-
-    /**
-     * Disconnects the integration from Packlink.
-     *
-     * @return void
-     */
-    public function disconnectIntegration()
-    {
-        $integrationId = $this->configurationService->getIntegrationId();
-
-        // Must have a check for legacy merchants that uninstall without ever registering
-        if (empty($integrationId)) {
-            return;
-        }
-
-        try {
-            $success = $this->proxy->disconnectIntegration($integrationId);
-            if (!$success) {
-                Logger::logError(
-                    'Packlink integration disconnect failed during uninstall: API returned false'
-                );
-            }
-        } catch (Exception $e) {
-            Logger::logError(
-                'Packlink integration disconnect failed during uninstall: ' . $e->getMessage()
-            );
-        }
     }
 
     /**
@@ -112,6 +54,18 @@ class IntegrationRegistrationService implements IntegrationRegistrationServiceIn
         }
 
         return $guid;
+    }
+
+    /**
+     * Saves Integration Identifier to database
+     *
+     * @param string $integrationId
+     *
+     * @return void
+     */
+    public function setIntegrationId($integrationId)
+    {
+        $this->configurationService->setIntegrationId($integrationId);
     }
 
     /**
