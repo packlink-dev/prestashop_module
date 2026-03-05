@@ -23,7 +23,8 @@ use Packlink\BusinessLogic\CashOnDelivery\Model\CashOnDelivery;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Country\WarehouseCountryService;
 use Packlink\BusinessLogic\FileResolver\FileResolverService;
-use Packlink\BusinessLogic\IntegrationRegistration\IntegrationRegistrationDataProviderInterface;
+use Packlink\BusinessLogic\IntegrationRegistration\Interfaces\IntegrationRegistrationDataProviderInterface;
+use Packlink\BusinessLogic\IntegrationRegistration\Interfaces\ModuleResetServiceInterface;
 use Packlink\BusinessLogic\Order\Interfaces\ShopOrderService as ShopOrderServiceInterface;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\Scheduler\Models\Schedule;
@@ -33,6 +34,7 @@ use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\IntegrationRegistrationDataProvider;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\ModuleResetService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\RegistrationInfoService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ShopOrderService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\SystemInfoService;
@@ -68,6 +70,15 @@ class Bootstrap extends BootstrapComponent
             function () {
                 return new IntegrationRegistrationDataProvider(
                     ServiceRegister::getService(\Logeecom\Infrastructure\Configuration\Configuration::CLASS_NAME)
+                );
+            }
+        );
+
+        ServiceRegister::registerService(
+            ModuleResetServiceInterface::CLASS_NAME,
+            function () {
+                return new ModuleResetService(
+                    ServiceRegister::getService(IntegrationRegistrationDataProviderInterface::CLASS_NAME)
                 );
             }
         );

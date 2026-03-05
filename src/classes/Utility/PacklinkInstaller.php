@@ -5,7 +5,7 @@ namespace Packlink\PrestaShop\Classes\Utility;
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\Exceptions\TaskRunnerStatusStorageUnavailableException;
-use Packlink\BusinessLogic\IntegrationRegistration\IntegrationRegistrationServiceInterface;
+use Packlink\BusinessLogic\IntegrationRegistration\Interfaces\IntegrationRegistrationServiceInterface;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;

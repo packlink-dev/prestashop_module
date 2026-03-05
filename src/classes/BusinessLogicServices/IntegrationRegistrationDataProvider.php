@@ -2,7 +2,7 @@
 
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
-use Packlink\BusinessLogic\IntegrationRegistration\IntegrationRegistrationDataProviderInterface;
+use Packlink\BusinessLogic\IntegrationRegistration\Interfaces\IntegrationRegistrationDataProviderInterface;
 
 class IntegrationRegistrationDataProvider implements IntegrationRegistrationDataProviderInterface
 {
@@ -12,7 +12,7 @@ class IntegrationRegistrationDataProvider implements IntegrationRegistrationData
      */
     private $integrationId = null;
     /**
-     * @var Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService
+     * @var ConfigurationService
      */
     private $configurationService;
 
@@ -33,7 +33,7 @@ class IntegrationRegistrationDataProvider implements IntegrationRegistrationData
                 'name' => $this->getIntegrationName(),
             ),
             'webhooks' => array(
-                'http_header_name' => 'X-Packlink-Webhook-Secret', //TODO: Probably wrong -> will change when get to webhooks
+                'http_header_name' => 'X-Packlink-Webhook-Secret',
                 'http_header_value' => $this->getWebhookSecret(),
                 'status_update_url' => $this->getIntegrationWebhookStatusUpdateUrl(),
             ),
@@ -134,6 +134,17 @@ class IntegrationRegistrationDataProvider implements IntegrationRegistrationData
      */
     public function getIntegrationWebhookStatusUpdateUrl()
     {
-        return $this->configurationService->getStatusUpdateUrl('registrationwebhooks');
+        return $this->configurationService->getStatusUpdateUrl();
+    }
+
+    /**
+     * Removes integration registration data from the database.
+     *
+     * @return void
+     */
+    public function deleteIntegrationData()
+    {
+        $this->integrationId = null;
+        $this->configurationService->deleteIntegrationData();
     }
 }
