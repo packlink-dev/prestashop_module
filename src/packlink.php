@@ -128,7 +128,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Disables the module.
+     * Disables the module and it's active carriers.
      *
      * @param bool $force_all
      *
@@ -140,6 +140,12 @@ class Packlink extends CarrierModule
             // v1.7+ uninstalls overrides on disable and 1.6 does not.
             $this->uninstallOverrides();
         }
+
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME);
+        $carrierService->disablePacklinkCarriers();
 
         return parent::disable($force_all);
     }
