@@ -530,6 +530,10 @@ class Packlink extends CarrierModule
         );
         /** @var \Packlink\BusinessLogic\Order\OrderService $orderService */
         $orderService = \Logeecom\Infrastructure\ServiceRegister::getService(\Packlink\BusinessLogic\Order\OrderService::CLASS_NAME);
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Configuration::CLASS_NAME
+        );
 
         $module = Module::getInstanceByName('packlink');
 
@@ -556,6 +560,7 @@ class Packlink extends CarrierModule
         }
 
         $params['presented_grid']['data']['records'] = new \PrestaShop\PrestaShop\Core\Grid\Record\RecordCollection($records);
+        $params['presented_grid']['data']['integrationActive'] = $configService->isIntegrationActive();
     }
 
     /**

@@ -121,7 +121,7 @@ class ConfigurationService extends Configuration
      */
     public function setIntegrationId($integrationId)
     {
-        return $this->saveConfigValue('integrationId', $integrationId);
+        return parent::setIntegrationId($integrationId);
     }
 
     /**
@@ -131,7 +131,7 @@ class ConfigurationService extends Configuration
      */
     public function getIntegrationId()
     {
-        return $this->getConfigValue('integrationId');
+        return parent::getIntegrationId();
     }
 
     /**
@@ -143,7 +143,7 @@ class ConfigurationService extends Configuration
      */
     public function setWebhookSecret($webhookSecret)
     {
-        return $this->saveConfigValue('webhookSecret', $webhookSecret);
+        return parent::setWebhookSecret($webhookSecret);
     }
 
     /**
@@ -153,7 +153,7 @@ class ConfigurationService extends Configuration
      */
     public function getWebhookSecret()
     {
-        return $this->getConfigValue('webhookSecret');
+        return parent::getWebhookSecret();
     }
 
     /**
@@ -165,7 +165,7 @@ class ConfigurationService extends Configuration
      */
     public function setIntegrationGuid($integrationGuid)
     {
-        return $this->saveConfigValue('integrationGuid', $integrationGuid);
+        return parent::setIntegrationGuid($integrationGuid);
     }
 
     /**
@@ -175,7 +175,7 @@ class ConfigurationService extends Configuration
      */
     public function getIntegrationGuid()
     {
-        return $this->getConfigValue('integrationGuid');
+        return parent::getIntegrationGuid();
     }
 
     /**
