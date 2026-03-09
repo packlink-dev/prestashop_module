@@ -23,19 +23,20 @@
           >
               {l s='Draft is currently being created.' mod='packlink'}
           </span>
-{else}
-        {if $integrationActive}
-          <a>
-          class="btn btn-default pl-create-draft-button"
-          data-order-id="{html_entity_decode($orderId|escape:'html':'UTF-8')}"
-          >
-          <img
-                  class="pl-image"
-                  src="{html_entity_decode($imgSrc|escape:'html':'UTF-8')}"
-                  alt="{l s='Packlink order draft' mod='packlink'}"
-          >
-          <span>{l s='Send with Packlink' mod='packlink'}</span>
-          </a>
+        {else}
+          {if $integrationActive}
+            <a
+                    class="btn btn-default pl-create-draft-button"
+                    data-order-id="{html_entity_decode($orderId|escape:'html':'UTF-8')}"
+            >
+                <img
+                        class="pl-image"
+                        src="{html_entity_decode($imgSrc|escape:'html':'UTF-8')}"
+                        alt="{l s='Packlink order draft' mod='packlink'}"
+                >
+                <span>{l s='Send with Packlink' mod='packlink'}</span>
+            </a>
+          {/if}
         {/if}
     </span>
 </span>
