@@ -696,6 +696,16 @@ class Packlink extends CarrierModule
             'gridResizerScript' => $this->getPathUri() . 'views/js/core/GridResizerService.js?v=' . $this->version,
         ));
 
+        $this->context->smarty->assign(array(
+            'lang' => $this->getTranslations(),
+            'templates' => $this->getTemplates(),
+            'urls' => $this->getUrls(),
+            'stateUrl' => $this->getAction('ModuleState', 'getCurrentState'),
+            'integrationStatusUrl' => $this->getAction('IntegrationStatus', 'getIntegrationStatus'),
+            'baseResourcesUrl' => $this->getPathUri() . 'views/img/core',
+            'gridResizerScript' => $this->getPathUri() . 'views/js/core/GridResizerService.js?v=' . $this->version,
+        ));
+
         // Register modifier function
         $this->context->smarty->registerPlugin(
             'modifier',

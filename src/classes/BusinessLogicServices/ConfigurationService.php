@@ -247,6 +247,39 @@ class ConfigurationService extends Configuration
     }
 
     /**
+     * Retrieves integration status.
+     *
+     * @return string|null
+     */
+    public function getIntegrationStatus()
+    {
+        return parent::getIntegrationStatus();
+    }
+
+    /**
+     * Sets integration status.
+     *
+     * @param string $status
+     *
+     * @return \Logeecom\Infrastructure\Configuration\ConfigEntity
+     */
+    public function setIntegrationStatus($status)
+    {
+        return parent::setIntegrationStatus($status);
+    }
+
+    /**
+     * Returns whether the integration is currently active.
+     * Integration is considered active unless explicitly set to DISABLED.
+     *
+     * @return bool
+     */
+    public function isIntegrationActive()
+    {
+        return parent::isIntegrationActive();
+    }
+
+    /**
      * Gets the URL of the frontend controller.
      *
      * @param string $controller Controller name.
