@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d6aec7eab03116794ff060f95b09675",
+    "content-hash": "2ae82c8a32881d19287b864414c19f68",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -62,16 +62,16 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "dev-CS-7831",
+            "version": "v3.7.5",
             "source": {
                 "type": "git",
                 "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "7c473e8c8da748c290f0c47a70057bd4eeb08ed9"
+                "reference": "a7555db04f646af3c02c1c33ed7533838dad4d51"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/7c473e8c8da748c290f0c47a70057bd4eeb08ed9",
-                "reference": "7c473e8c8da748c290f0c47a70057bd4eeb08ed9",
+                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/a7555db04f646af3c02c1c33ed7533838dad4d51",
+                "reference": "a7555db04f646af3c02c1c33ed7533838dad4d51",
                 "shasum": ""
             },
             "require": {
@@ -110,7 +110,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2026-03-06T14:14:51+00:00"
+            "time": "2026-03-09T11:30:00+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -1394,9 +1394,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "packlink/integration-core": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
