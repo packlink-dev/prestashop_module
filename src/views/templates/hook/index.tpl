@@ -60,6 +60,7 @@
                 baseResourcesUrl: "{$baseResourcesUrl|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}",
                 stateUrl: "{$stateUrl|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}",
                 integrationStatusUrl: "{$integrationStatusUrl|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}",
+                platformDomain: "{$platformDomain|escape:'htmlall':'UTF-8'}",
                 pageConfiguration: pageConfiguration,
                 templates: {json_encode($templates)|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}
             }

@@ -1,6 +1,6 @@
 <?php
 
-use Logeecom\Infrastructure\Configuration\Configuration;
+use Packlink\BusinessLogic\Configuration;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
@@ -11,7 +11,7 @@ use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
  * Returns the current integration activation status.
  * Called from StateController.js after the initial state check.
  */
-class PacklinkIntegrationStatusModuleFrontController extends ModuleFrontController
+class PacklinkIntegrationstatusModuleFrontController extends ModuleFrontController
 {
     public function __construct()
     {

@@ -184,11 +184,12 @@ class ConfigurationService extends Configuration
      *
      * @return void
      */
-    public function deleteIntegrationData() //TODO: test when packlink unblocks issue
+    public function deleteIntegrationData()
     {
         $this->saveConfigValue('integrationId', null);
         $this->saveConfigValue('integrationGuid', null);
         $this->saveConfigValue('webhookSecret', null);
+        $this->saveConfigValue('integrationStatus', null);
     }
 
     /**

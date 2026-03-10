@@ -692,21 +692,20 @@ class Packlink extends CarrierModule
 
         \Packlink\BusinessLogic\Configuration::setUICountryCode($this->context->language->iso_code);
 
-        $this->context->smarty->assign(array(
-            'lang' => $this->getTranslations(),
-            'templates' => $this->getTemplates(),
-            'urls' => $this->getUrls(),
-            'stateUrl' => $this->getAction('ModuleState', 'getCurrentState'),
-            'baseResourcesUrl' => $this->getPathUri() . 'views/img/core',
-            'gridResizerScript' => $this->getPathUri() . 'views/js/core/GridResizerService.js?v=' . $this->version,
-        ));
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Configuration::CLASS_NAME
+        );
+        $userInfo = $configService->getUserInfo();
+        $platformDomain = $userInfo ? strtolower($userInfo->country) : 'es';
 
         $this->context->smarty->assign(array(
             'lang' => $this->getTranslations(),
             'templates' => $this->getTemplates(),
             'urls' => $this->getUrls(),
             'stateUrl' => $this->getAction('ModuleState', 'getCurrentState'),
-            'integrationStatusUrl' => $this->getAction('IntegrationStatus', 'getIntegrationStatus'),
+            'integrationStatusUrl' => $this->getFrontAction('integrationstatus'),
+            'platformDomain' => $platformDomain,
             'baseResourcesUrl' => $this->getPathUri() . 'views/img/core',
             'gridResizerScript' => $this->getPathUri() . 'views/js/core/GridResizerService.js?v=' . $this->version,
         ));
