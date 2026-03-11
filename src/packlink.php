@@ -615,6 +615,50 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Hook triggered after a shop URL is updated.
+     * Re-registers the integration with Packlink if the URL has changed
+     * so the webhook status_update_url stays up to date.
+     *
+     * @param array $params
+     */
+    public function hookActionObjectShopUrlUpdateAfter($params)
+    {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        $newUrl = $params['object']->getUrl();
+        $currentDomain = ShopUrlCore::getMainShopDomain();
+
+        if ($newUrl === $currentDomain) {
+            return;
+        }
+
+        try {
+            $integrationRegistrationService = \Logeecom\Infrastructure\ServiceRegister::getService(
+                \Packlink\BusinessLogic\IntegrationRegistration\Interfaces\IntegrationRegistrationServiceInterface::CLASS_NAME
+            );
+            $integrationId = $integrationRegistrationService->updateIntegrationUrl();
+
+            if ($integrationId === null) {
+                \Logeecom\Infrastructure\Logger\Logger::logError(
+                    'Failed to re-register integration after shop URL change.',
+                    array('newUrl' => $newUrl, 'currentDomain' => $currentDomain)
+                );
+
+                return;
+            }
+            \Logeecom\Infrastructure\Logger\Logger::logInfo(
+                'Integration re-registered after shop URL change.',
+                array('newUrl' => $newUrl, 'integrationId' => $integrationId)
+            );
+        } catch (\Exception $e) {
+            \Logeecom\Infrastructure\Logger\Logger::logError(
+                'Exception during integration re-registration after shop URL change: ' . $e->getMessage(),
+                array('newUrl' => $newUrl, 'trace' => $e->getTraceAsString())
+            );
+        }
+    }
+
+    /**
      * Front Methods
      *
      * If you set need_range at true when you created your carrier,
