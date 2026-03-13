@@ -46,7 +46,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.4.1';
+        $this->version = '3.4.2';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
@@ -128,7 +128,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Disables the module.
+     * Disables the module and it's active carriers.
      *
      * @param bool $force_all
      *
@@ -140,6 +140,12 @@ class Packlink extends CarrierModule
             // v1.7+ uninstalls overrides on disable and 1.6 does not.
             $this->uninstallOverrides();
         }
+
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME);
+        $carrierService->disablePacklinkCarriers();
 
         return parent::disable($force_all);
     }
