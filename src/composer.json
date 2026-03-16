@@ -13,12 +13,13 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=5.3",
-    "packlink/integration-core": "3.7.5",
+    "packlink/integration-core": "dev-cr-set-64-before-code-review",
     "ext-json": "*",
     "ext-curl": "*",
     "ext-zip": "*",
     "ext-fileinfo": "*",
-    "iio/libmergepdf": "3.0.0"
+    "iio/libmergepdf": "3.0.0",
+    "ext-openssl": "*"
   },
   "autoload": {
     "psr-4": {

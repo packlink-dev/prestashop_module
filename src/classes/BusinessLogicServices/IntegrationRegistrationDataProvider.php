@@ -77,7 +77,13 @@ class IntegrationRegistrationDataProvider implements IntegrationRegistrationData
     {
         $secret = $this->configurationService->getWebhookSecret();
         if (!$secret) {
-            $bytes32 = openssl_random_pseudo_bytes(32);
+            $cryptoStrong = false;
+            $bytes32 = openssl_random_pseudo_bytes(32, $cryptoStrong);
+
+            if ($bytes32 === false || $cryptoStrong === false) {
+                throw new \RuntimeException('Unable to generate a secure webhook secret.');
+            }
+
             $secret = rtrim(strtr(base64_encode($bytes32), '+/', '-_'), '=');
             $this->configurationService->setWebhookSecret($secret);
         }

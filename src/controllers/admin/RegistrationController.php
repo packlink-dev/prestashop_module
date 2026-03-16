@@ -54,14 +54,12 @@ class RegistrationController extends PacklinkBaseController
         $payload['ecommerces'] = static::$ecommerceIdentifiers;
 
         try {
-            $status = $this->baseController->register($payload);
+            $result = $this->baseController->register($payload);
 
-            $response = array(
-                'success' => $status,
-            );
+            $response = array('success' => $result['success']);
 
-            if (!$status && method_exists($this->baseController, 'getLastErrorCode')) {
-                $response['error'] = $this->baseController->getLastErrorCode();
+            if (!$result['success'] && !empty($result['errorCode'])) {
+                $response['error'] = $result['errorCode'];
             }
 
             PacklinkPrestaShopUtility::dieJson($response);
