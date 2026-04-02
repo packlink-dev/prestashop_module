@@ -29,6 +29,7 @@ class ModuleResetService implements ModuleResetServiceInterface
     {
         try {
             $this->dataProvider->deleteIntegrationData();
+            $this->dataProvider->deleteToken();
 
             return true;
         } catch (\Exception $e) {

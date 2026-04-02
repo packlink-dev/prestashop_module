@@ -35,7 +35,6 @@ class PacklinkInstaller
         'displayOrderConfirmation',
         'actionValidateOrder',
         'actionOrderStatusUpdate',
-        'actionObjectShopUrlUpdateAfter',
     );
     private static $controllers = array(
         'Debug',
@@ -465,6 +464,7 @@ class PacklinkInstaller
             'actionOrderGridPresenterModifier',
             'displayAdminOrderTabLink',
             'displayAdminOrderTabContent',
+            'actionObjectShopUrlUpdateAfter',
         );
     }
 
