@@ -179,20 +179,6 @@ class ConfigurationService extends Configuration
     }
 
     /**
-     * Removes integration registration data from the database
-     * by nulling out all integration-related configuration values.
-     *
-     * @return void
-     */
-    public function deleteIntegrationData()
-    {
-        $this->saveConfigValue('integrationId', null);
-        $this->saveConfigValue('integrationGuid', null);
-        $this->saveConfigValue('webhookSecret', null);
-        $this->saveConfigValue('integrationStatus', null);
-    }
-
-    /**
      * Retrieves integration name.
      *
      * @return string Integration name.
