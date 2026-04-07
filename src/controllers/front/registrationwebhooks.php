@@ -1,5 +1,8 @@
 <?php
 
+use Logeecom\Infrastructure\Logger\Logger;
+use Packlink\BusinessLogic\WebHook\Exceptions\WebhookAuthorizationException;
+use Packlink\BusinessLogic\WebHook\Exceptions\WebhookPayloadValidationException;
 use Packlink\BusinessLogic\WebHook\IntegrationRegistrationWebhookEventHandler;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\EmployeeUtility;
@@ -36,12 +39,28 @@ class PacklinkRegistrationwebhooksModuleFrontController extends ModuleFrontContr
 
         $input = \Tools::file_get_contents('php://input');
 
-        $webhookHandler = IntegrationRegistrationWebHookEventHandler::getInstance();
+        try {
+            $webhookHandler = IntegrationRegistrationWebHookEventHandler::getInstance();
+            $webhookHandler->handle($input);
 
-        if (!$webhookHandler->handle($input)) {
-            PacklinkPrestaShopUtility::die400(array('message' => 'Invalid request'));
+            PacklinkPrestaShopUtility::dieJson(array('success' => true));
+
+        } catch (WebhookAuthorizationException $e) {
+            PacklinkPrestaShopUtility::dieJson(
+                array('success' => false, 'error' => $e->getMessage()), 401);
+
+        } catch (WebhookPayloadValidationException $e) {
+            PacklinkPrestaShopUtility::dieJson(
+                array('success' => false, 'error' => $e->getMessage()), 400);
+
+        } catch (\Exception $e) {
+            Logger::logError(
+                'Packlink registration webhook: unexpected error.',
+                'Integration',
+                array('message' => $e->getMessage())
+            );
+            PacklinkPrestaShopUtility::dieJson(
+                array('success' => false, 'error' => 'Internal server error.'), 500);
         }
-
-        PacklinkPrestaShopUtility::dieJson(array('success' => true));
     }
 }
