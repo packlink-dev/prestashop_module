@@ -40,7 +40,8 @@ class IntegrationRegistrationDataProvider extends AbstractIntegrationDataProvide
      */
     public function getIntegrationWebhookStatusUpdateUrl()
     {
-        return $this->getConfigService()->getStatusUpdateUrl();
+        $url = $this->getConfigService()->getStatusUpdateUrl();
+        return $this->enforceHttps($url);
     }
 
     /**
@@ -51,5 +52,26 @@ class IntegrationRegistrationDataProvider extends AbstractIntegrationDataProvide
     public function deleteToken()
     {
         $this->getConfigService()->resetAuthorizationCredentials();
+    }
+
+    /**
+     * Ensures the given URL uses HTTPS if the shop is operating over SSL.
+     *
+     * PrestaShop 1.6.x has a known issue where getModuleLink() may ignore
+     * the $ssl parameter and return an HTTP URL even when SSL is active.
+     * This method corrects that by checking PrestaShop's own SSL config
+     * and the current request protocol, then upgrading the scheme if needed.
+     *
+     * @param string $url The URL to potentially upgrade.
+     *
+     * @return string The URL with the correct scheme.
+     */
+    private function enforceHttps($url)
+    {
+        if (strpos($url, 'http://') === 0) {
+            $url = 'https://' . substr($url, 7);
+        }
+
+        return $url;
     }
 }
