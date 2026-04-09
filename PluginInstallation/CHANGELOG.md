@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.4.3](https://github.com/packlink-dev/prestashop_module/compare/v3.4.2...v3.4.3)
+### Changed
+- Fixed an issue where an incorrect service ID was sent to the Packlink API
+- Fix postal code for AE
+
 ## [3.4.2](https://github.com/packlink-dev/prestashop_module/compare/v3.4.1...v3.4.2)
 ### Added
 - Transformations for Greek and Latvian postal codes
