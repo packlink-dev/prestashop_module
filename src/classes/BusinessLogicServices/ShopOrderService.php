@@ -87,7 +87,8 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $currencyId = (int)$sourceOrder->id_currency;
             $currency = \Currency::getCurrency($currencyId);
 
-            $order->setId($orderId);
+            $reference = !empty($sourceOrder->reference) ? $sourceOrder->reference : (string)$orderId;
+            $order->setId($reference);
             $order->setOrderNumber($orderId);
             $order->setCustomerId((int)$sourceOrder->id_customer);
             $order->setCurrency($currency['iso_code']);
