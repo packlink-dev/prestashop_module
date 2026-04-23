@@ -49,7 +49,7 @@ class Packlink extends CarrierModule
         $this->version = '3.5.0';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => '9.0.0');
         $this->bootstrap = true;
 
         parent::__construct();
