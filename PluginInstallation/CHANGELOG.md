@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.5.0](https://github.com/packlink-dev/prestashop_module/compare/v3.4.3...v3.5.0)
+### Added
+- Integration registration on Packlink account 
+
 ## [3.4.3](https://github.com/packlink-dev/prestashop_module/compare/v3.4.2...v3.4.3)
 ### Changed
 - Fixed an issue where an incorrect service ID was sent to the Packlink API

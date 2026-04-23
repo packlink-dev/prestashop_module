@@ -154,15 +154,27 @@
             </td>
               {if $displayDraftButton}
                 <td style="border:none;text-align:right;">
-                  <button
-                          type="button"
-                          class="btn btn-default"
-                          data-order="{$orderId|escape:'html':'UTF-8'}"
-                          data-create-draft-url="{html_entity_decode($createDraftUrl|escape:'html':'UTF-8')}"
-                          onclick="plCreateOrderDraft(this)"
-                  >
-                    <i class="icon-plus-sign"></i> {l s='Create Draft' mod='packlink'}
-                  </button>
+                    {if $integrationActive}
+                      <button
+                              type="button"
+                              class="btn btn-default"
+                              data-order="{$orderId|escape:'html':'UTF-8'}"
+                              data-create-draft-url="{html_entity_decode($createDraftUrl|escape:'html':'UTF-8')}"
+                              onclick="plCreateOrderDraft(this)"
+                      >
+                        <i class="icon-plus-sign"></i> {l s='Create Draft' mod='packlink'}
+                      </button>
+                    {else}
+                      <button
+                              type="button"
+                              class="btn btn-default"
+                              disabled="disabled"
+                              title="{l s='Integration is disabled' mod='packlink'}"
+                              style="opacity:0.5;cursor:not-allowed;"
+                      >
+                        <i class="icon-plus-sign"></i> {l s='Create Draft' mod='packlink'}
+                      </button>
+                    {/if}
                 </td>
               {/if}
           </tr>

@@ -66,6 +66,16 @@ class ConfigurationService extends Configuration
     }
 
     /**
+     * Returns status update web-hook callback URL for current system.
+     *
+     * @return string Status Update Web-hook callback URL.
+     */
+    public function getStatusUpdateUrl()
+    {
+        return $this->getFrontendUrl('registrationwebhooks');
+    }
+
+    /**
      * Returns async process starter URL.
      *
      * @param string $guid Process identifier.
@@ -100,6 +110,72 @@ class ConfigurationService extends Configuration
     public function setBackupCarrierId($carrierId)
     {
         $this->saveConfigValue('backupCarrierId', $carrierId);
+    }
+
+    /**
+     * Sets Integration identifier.
+     *
+     * @param string $integrationId ID of the integration.
+     *
+     * @return \Logeecom\Infrastructure\Configuration\ConfigEntity
+     */
+    public function setIntegrationId($integrationId)
+    {
+        return parent::setIntegrationId($integrationId);
+    }
+
+    /**
+     * Retrieves Integration identifier.
+     *
+     * @return string | null  IntegrationId configuration.
+     */
+    public function getIntegrationId()
+    {
+        return parent::getIntegrationId();
+    }
+
+    /**
+     * Sets backup carrier ID.
+     *
+     * @param string $webhookSecret
+     *
+     * @return \Logeecom\Infrastructure\Configuration\ConfigEntity
+     */
+    public function setWebhookSecret($webhookSecret)
+    {
+        return parent::setWebhookSecret($webhookSecret);
+    }
+
+    /**
+     * Retrieves Webhook secret.
+     *
+     * @return string | null  Webhook Secret configuration.
+     */
+    public function getWebhookSecret()
+    {
+        return parent::getWebhookSecret();
+    }
+
+    /**
+     * Sets Integration Guid.
+     *
+     * @param string $webhookSecret
+     *
+     * @return \Logeecom\Infrastructure\Configuration\ConfigEntity
+     */
+    public function setIntegrationGuid($integrationGuid)
+    {
+        return parent::setIntegrationGuid($integrationGuid);
+    }
+
+    /**
+     * Retrieves Integration Guid.
+     *
+     * @return string | null  Integration Guid configuration.
+     */
+    public function getIntegrationGuid()
+    {
+        return parent::getIntegrationGuid();
     }
 
     /**
@@ -155,6 +231,39 @@ class ConfigurationService extends Configuration
     public function getECommerceVersion()
     {
         return _PS_VERSION_;
+    }
+
+    /**
+     * Retrieves integration status.
+     *
+     * @return string|null
+     */
+    public function getIntegrationStatus()
+    {
+        return parent::getIntegrationStatus();
+    }
+
+    /**
+     * Sets integration status.
+     *
+     * @param string $status
+     *
+     * @return \Logeecom\Infrastructure\Configuration\ConfigEntity
+     */
+    public function setIntegrationStatus($status)
+    {
+        return parent::setIntegrationStatus($status);
+    }
+
+    /**
+     * Returns whether the integration is currently active.
+     * Integration is considered active unless explicitly set to DISABLED.
+     *
+     * @return bool
+     */
+    public function isIntegrationActive()
+    {
+        return parent::isIntegrationActive();
     }
 
     /**

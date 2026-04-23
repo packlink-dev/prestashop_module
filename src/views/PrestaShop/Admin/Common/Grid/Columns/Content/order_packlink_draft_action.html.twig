@@ -16,7 +16,7 @@
         >
             <span>{{ 'View on Packlink'|trans({}, 'Modules.Packlink.Admin') }}</span>
             </a>
-        {%  elseif record.draftStatus == 'queued' %}
+        {% elseif record.draftStatus == 'queued' %}
             <span
                     class="pl-draft-in-progress"
                     data-order-id="{{ record.id_order }}"
@@ -25,17 +25,32 @@
               {{ 'Draft is currently being created.'|trans({}, 'Modules.Packlink.Admin') }}
           </span>
         {% else %}
-            <a
-                    class="btn btn-default pl-create-draft-button"
-                    data-order-id="{{ record.id_order }}"
-            >
-              <img
-                      class="pl-image"
-                      src="{{ grid.data.packlinkLogo }}"
-                      alt="{{ 'Packlink order draft'|trans({}, 'Modules.Packlink.Admin') }}"
-              >
-              <span>{{ 'Send with Packlink'|trans({}, 'Modules.Packlink.Admin') }}</span>
-          </a>
+            {% if grid.data.integrationActive %}
+                <a
+                class="btn btn-default pl-create-draft-button"
+                data-order-id="{{ record.id_order }}"
+                >
+                <img
+                        class="pl-image"
+                        src="{{ grid.data.packlinkLogo }}"
+                        alt="{{ 'Packlink order draft'|trans({}, 'Modules.Packlink.Admin') }}"
+                >
+                <span>{{ 'Send with Packlink'|trans({}, 'Modules.Packlink.Admin') }}</span>
+                </a>
+            {% else %}
+                <a
+                class="btn btn-default pl-create-draft-button pl-draft-button-disabled"
+                style="opacity:0.5;cursor:not-allowed;pointer-events:none;"
+                title="{{ 'Integration is disabled'|trans({}, 'Modules.Packlink.Admin') }}"
+                >
+                <img
+                        class="pl-image"
+                        src="{{ grid.data.packlinkLogo }}"
+                        alt="{{ 'Packlink order draft'|trans({}, 'Modules.Packlink.Admin') }}"
+                >
+                <span>{{ 'Send with Packlink'|trans({}, 'Modules.Packlink.Admin') }}</span>
+                </a>
+            {% endif %}
         {% endif %}
     </span>
 </span>

@@ -246,6 +246,10 @@ class AdminShippingTabDataProvider
      */
     private static function getDraftParams($orderId, $shipmentDetails = null)
     {
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+        $integrationActive = $configService->isIntegrationActive();
+
         /** @var ShipmentDraftService $shipmentDraftService */
         $shipmentDraftService = ServiceRegister::getService(ShipmentDraftService::CLASS_NAME);
 
@@ -272,6 +276,7 @@ class AdminShippingTabDataProvider
             'shipping' => !$displayDraftButton ? (object)self::getShippingDetails($orderId, $shipmentDetails) : '',
             'message' => $message,
             'displayDraftButton' => $displayDraftButton,
+            'integrationActive' => $integrationActive,
         );
     }
 

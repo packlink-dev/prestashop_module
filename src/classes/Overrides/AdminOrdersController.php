@@ -2,6 +2,7 @@
 
 namespace Packlink\PrestaShop\Classes\Overrides;
 
+use Logeecom\Infrastructure\Configuration\Configuration;
 use Logeecom\Infrastructure\ServiceRegister;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Packlink\BusinessLogic\Order\OrderService;
@@ -154,6 +155,8 @@ class AdminOrdersController
         $shipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
         /** @var ShipmentDraftService $draftService */
         $draftService = ServiceRegister::getService(ShipmentDraftService::CLASS_NAME);
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
 
         $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
         $draftStatus = $draftService->getDraftStatus((string)$orderId);
@@ -169,6 +172,7 @@ class AdminOrdersController
                 'orderDraftLink' => $draftCreated ? $shipmentDetails->getShipmentUrl() : '#',
                 'draftStatusUrl' => $this->getAjaxControllerUrl($context, 'OrderDraft', 'getDraftStatus'),
                 'createDraftUrl' => $this->getAjaxControllerUrl($context, 'OrderDraft', 'createOrderDraft'),
+                'integrationActive' => $configService->isIntegrationActive(),
             )
         );
 

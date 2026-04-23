@@ -1,4 +1,5 @@
-<div class="tab-pane d-print-block fade" id="packlinkShippingTabContent" role="tabpanel" aria-labelledby="packlinkShippingTab">
+<div class="tab-pane d-print-block fade" id="packlinkShippingTabContent" role="tabpanel"
+     aria-labelledby="packlinkShippingTab">
     <p id="pl-label-printed" hidden>{{ 'Printed'|trans({}, 'Modules.Packlink.Admin') }}</p>
     <p id="pl-label-ready" hidden>{{ 'Ready'|trans({}, 'Modules.Packlink.Admin') }}</p>
     <p id="pl-print-labels-url" hidden>
@@ -149,21 +150,33 @@
                             >
                         </td>
                         <td style="border:none;">
-              <span style="font-weight: normal;">
-                  {{ message }}
-              </span>
+                        <span style="font-weight: normal;">
+                            {{ message }}
+                        </span>
                         </td>
                         {% if displayDraftButton %}
                             <td style="border:none;text-align:right;">
-                                <button
-                                        type="button"
-                                        class="btn btn-default"
-                                        data-order="{{ orderId }}"
-                                        data-create-draft-url="{{ createDraftUrl }}"
-                                        onclick="plCreateOrderDraft(this)"
-                                >
-                                    <i class="material-icons">add_circle</i> {{ 'Create Draft'|trans({}, 'Modules.Packlink.Admin') }}
-                                </button>
+                                {% if integrationActive %}
+                                    <button
+                                            type="button"
+                                            class="btn btn-default"
+                                            data-order="{{ orderId }}"
+                                            data-create-draft-url="{{ createDraftUrl }}"
+                                            onclick="plCreateOrderDraft(this)"
+                                    >
+                                        <i class="material-icons">add_circle</i> {{ 'Create Draft'|trans({}, 'Modules.Packlink.Admin') }}
+                                    </button>
+                                {% else %}
+                                    <button
+                                            type="button"
+                                            class="btn btn-default"
+                                            disabled
+                                            title="{{ 'Integration is disabled'|trans({}, 'Modules.Packlink.Admin') }}"
+                                            style="opacity:0.5;cursor:not-allowed;"
+                                    >
+                                        <i class="material-icons">add_circle</i> {{ 'Create Draft'|trans({}, 'Modules.Packlink.Admin') }}
+                                    </button>
+                                {% endif %}
                             </td>
                         {% endif %}
                     </tr>

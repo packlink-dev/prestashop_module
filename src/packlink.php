@@ -46,10 +46,10 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.4.3';
+        $this->version = '3.5.0';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => '9.0.0');
         $this->bootstrap = true;
 
         parent::__construct();
@@ -536,6 +536,10 @@ class Packlink extends CarrierModule
         );
         /** @var \Packlink\BusinessLogic\Order\OrderService $orderService */
         $orderService = \Logeecom\Infrastructure\ServiceRegister::getService(\Packlink\BusinessLogic\Order\OrderService::CLASS_NAME);
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Configuration::CLASS_NAME
+        );
 
         $module = Module::getInstanceByName('packlink');
 
@@ -562,6 +566,7 @@ class Packlink extends CarrierModule
         }
 
         $params['presented_grid']['data']['records'] = new \PrestaShop\PrestaShop\Core\Grid\Record\RecordCollection($records);
+        $params['presented_grid']['data']['integrationActive'] = $configService->isIntegrationActive();
     }
 
     /**
@@ -613,6 +618,50 @@ class Packlink extends CarrierModule
         }
 
         return '';
+    }
+
+    /**
+     * Hook triggered after a shop URL is updated.
+     * Re-registers the integration with Packlink if the URL has changed
+     * so the webhook status_update_url stays up to date.
+     *
+     * @param array $params
+     */
+    public function hookActionObjectShopUrlUpdateAfter($params)
+    {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        $newUrl = $params['object']->getUrl();
+        $currentDomain = ShopUrlCore::getMainShopDomain();
+
+        if ($newUrl === $currentDomain) {
+            return;
+        }
+
+        try {
+            $integrationRegistrationService = \Logeecom\Infrastructure\ServiceRegister::getService(
+                \Packlink\BusinessLogic\IntegrationRegistration\Interfaces\IntegrationRegistrationServiceInterface::CLASS_NAME
+            );
+            $integrationId = $integrationRegistrationService->updateIntegrationUrl();
+
+            if ($integrationId === null) {
+                \Logeecom\Infrastructure\Logger\Logger::logError(
+                    'Failed to re-register integration after shop URL change.',
+                    array('newUrl' => $newUrl, 'currentDomain' => $currentDomain)
+                );
+
+                return;
+            }
+            \Logeecom\Infrastructure\Logger\Logger::logInfo(
+                'Integration re-registered after shop URL change.',
+                array('newUrl' => $newUrl, 'integrationId' => $integrationId)
+            );
+        } catch (\Exception $e) {
+            \Logeecom\Infrastructure\Logger\Logger::logError(
+                'Exception during integration re-registration after shop URL change: ' . $e->getMessage(),
+                array('newUrl' => $newUrl, 'trace' => $e->getTraceAsString())
+            );
+        }
     }
 
     /**
@@ -693,11 +742,28 @@ class Packlink extends CarrierModule
 
         \Packlink\BusinessLogic\Configuration::setUICountryCode($this->context->language->iso_code);
 
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
+        $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
+            \Packlink\BusinessLogic\Configuration::CLASS_NAME
+        );
+
+        $userInfo = $configService->getUserInfo();
+        $platformDomain = 'com';
+        if (!empty($userInfo) && !empty($userInfo->country)) {
+            $country = strtolower($userInfo->country);
+
+            if ($country !== 'un') {
+                $platformDomain = $country;
+            }
+        }
+
         $this->context->smarty->assign(array(
             'lang' => $this->getTranslations(),
             'templates' => $this->getTemplates(),
             'urls' => $this->getUrls(),
             'stateUrl' => $this->getAction('ModuleState', 'getCurrentState'),
+            'integrationStatusUrl' => $this->getFrontAction('integrationstatus'),
+            'platformDomain' => $platformDomain,
             'baseResourcesUrl' => $this->getPathUri() . 'views/img/core',
             'gridResizerScript' => $this->getPathUri() . 'views/js/core/GridResizerService.js?v=' . $this->version,
         ));

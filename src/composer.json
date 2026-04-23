@@ -2,7 +2,7 @@
   "name": "packlink/prestashop",
   "description": "Packlink Shipping PrestaShop plugin",
   "type": "library",
-  "version": "3.4.3",
+  "version": "3.5.0",
   "repositories": [
     {
       "type": "vcs",
@@ -13,12 +13,13 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=5.3",
-    "packlink/integration-core": "v3.7.6",
+    "packlink/integration-core": "3.8.0",
     "ext-json": "*",
     "ext-curl": "*",
     "ext-zip": "*",
     "ext-fileinfo": "*",
-    "iio/libmergepdf": "3.0.0"
+    "iio/libmergepdf": "3.0.0",
+    "ext-openssl": "*"
   },
   "autoload": {
     "psr-4": {

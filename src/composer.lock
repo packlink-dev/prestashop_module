@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d8d26cca1ff5b3b229ee2480c8f551ad",
+    "content-hash": "96ea530b146181cb1363e5ba29230114",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -62,20 +62,21 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "v3.7.6",
+            "version": "v3.8.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "df1324530608723c165d8f7dbf5f28fca531905d"
+                "reference": "fdbbc02239b3db4400e2a94013ddd6dccf0e1b15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/df1324530608723c165d8f7dbf5f28fca531905d",
-                "reference": "df1324530608723c165d8f7dbf5f28fca531905d",
+                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/fdbbc02239b3db4400e2a94013ddd6dccf0e1b15",
+                "reference": "fdbbc02239b3db4400e2a94013ddd6dccf0e1b15",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
+                "ext-openssl": "*",
                 "php": ">=5.3.29"
             },
             "require-dev": {
@@ -110,7 +111,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2026-03-24T09:41:57+00:00"
+            "time": "2026-04-21T12:15:17+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -1402,7 +1403,8 @@
         "ext-json": "*",
         "ext-curl": "*",
         "ext-zip": "*",
-        "ext-fileinfo": "*"
+        "ext-fileinfo": "*",
+        "ext-openssl": "*"
     },
     "platform-dev": [],
     "platform-overrides": {
