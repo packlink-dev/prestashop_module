@@ -7,6 +7,7 @@ use Packlink\BusinessLogic\IntegrationRegistration\AbstractIntegrationDataProvid
 class IntegrationRegistrationDataProvider extends AbstractIntegrationDataProvider
 {
     const INTEGRATION_TYPE = 'prestashop_module';
+    const DEFAULT_INTEGRATION_NAME = 'Packlink PrestaShop Integration';
 
     public function __construct($configurationService)
     {
@@ -30,7 +31,9 @@ class IntegrationRegistrationDataProvider extends AbstractIntegrationDataProvide
      */
     public function getIntegrationName()
     {
-        return \Configuration::get('PS_SHOP_NAME');
+        $shopName = \Configuration::get('PS_SHOP_NAME');
+
+        return !empty($shopName) ? $shopName : self::DEFAULT_INTEGRATION_NAME;
     }
 
     /**
