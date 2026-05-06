@@ -127,4 +127,11 @@
   );
 
   Packlink.paymentController.init();
+
+  if (typeof prestashop !== 'undefined' && typeof prestashop.on === 'function') {
+    prestashop.on('updatedDeliveryForm', function () {
+      Packlink.checkOut.init();
+      Packlink.paymentController.init();
+    });
+  }
 </script>

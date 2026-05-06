@@ -118,6 +118,14 @@ var Packlink = window.Packlink || {};
 
       if (payload.type === 'no-locations') {
         shippingService.setMessage(Packlink.trans.wrongAddress);
+        return;
+      }
+
+      if (payload.type === 'close') {
+        if (selectedId) {
+          shippingService.enableSubmit();
+        }
+        return;
       }
 
       if (payload.type === 'success') {

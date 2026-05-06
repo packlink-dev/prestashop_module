@@ -110,12 +110,11 @@ var Packlink = window.Packlink || {};
             dropoffElement = document.getElementById('pl-dropoff').cloneNode(true);
             dropoffElement.classList.add('pl-drop-off-inserted');
 
-            let point = dropoff.parentElement;
-            while (!point.classList
-                || !(point.classList.contains('delivery-option') || point.classList.contains('checkout-delivery-line')
-                    || point.classList.contains('delivery-options__item'))
-                ) {
-                point = point.parentElement;
+            let point = dropoff.closest(
+                '.delivery-option, .checkout-delivery-line, .delivery-options__item, .delivery-option__item'
+            );
+            if (!point) {
+                throw new Error('Packlink: could not find a delivery option wrapper element. The active theme may be incompatible.');
             }
 
             point.after(dropoffElement);
@@ -148,12 +147,11 @@ var Packlink = window.Packlink || {};
             codElement.querySelector('p').innerHTML =
                 `This service supports ${paymentMethod}. If you choose the ${paymentMethod} payment method, additional fee of ${codPrice} will be applied.`;
 
-            let point = dropoff.parentElement;
-            while (!point.classList
-                || !(point.classList.contains('delivery-option') || point.classList.contains('checkout-delivery-line')
-                    || point.classList.contains('delivery-options__item'))
-                ) {
-                point = point.parentElement;
+            let point = dropoff.closest(
+                '.delivery-option, .checkout-delivery-line, .delivery-options__item, .delivery-option__item'
+            );
+            if (!point) {
+                throw new Error('Packlink: could not find a delivery option wrapper element. The active theme may be incompatible.');
             }
 
             point.after(codElement);
@@ -202,8 +200,12 @@ var Packlink = window.Packlink || {};
                 submitBtn[0].classList.add('pl-checkout-disabled');
             }
 
+            var paymentStep = document.getElementById('checkout-payment-step');
+            if (paymentStep) {
+                paymentStep.classList.add('pl-disabled');
+            }
+
             clickOnDeliveryStep();
-            setTimeout(disablePaymentTab, 100)
         }
 
         /**
@@ -223,22 +225,6 @@ var Packlink = window.Packlink || {};
             let deliveryStep = document.getElementById('checkout-delivery-step');
             if (deliveryStep) {
                 deliveryStep.click();
-            }
-        }
-
-        /**
-         * Disables payment tab.
-         */
-        function disablePaymentTab() {
-            if (isDisabled) {
-                clickOnDeliveryStep();
-                let element = document.getElementById('checkout-payment-step');
-
-                if (element) {
-                    element.classList.add('pl-disabled')
-                } else {
-                    setTimeout(disablePaymentTab, 100)
-                }
             }
         }
 
