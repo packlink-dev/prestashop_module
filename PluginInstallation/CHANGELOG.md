@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Checkout bug fixes
 - Hummingbird v2.0 theme compatibility
 - Offline payments performance patch
+- DOM text reinterpreted as HTML fix
 
 ## [3.5.1](https://github.com/packlink-dev/prestashop_module/compare/v3.5.0...v3.5.1)
 ### Changed

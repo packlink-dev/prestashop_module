@@ -144,7 +144,7 @@ var Packlink = window.Packlink || {};
                 return;
             }
 
-            codElement.querySelector('p').innerHTML =
+            codElement.querySelector('p').textContent =
                 `This service supports ${paymentMethod}. If you choose the ${paymentMethod} payment method, additional fee of ${codPrice} will be applied.`;
 
             let point = dropoff.closest(
