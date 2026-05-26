@@ -111,10 +111,11 @@ var Packlink = window.Packlink || {};
             dropoffElement.classList.add('pl-drop-off-inserted');
 
             let point = dropoff.closest(
-                '.delivery-option, .checkout-delivery-line, .delivery-options__item, .delivery-option__item'
+                '.js-delivery-option, .delivery-option, .delivery-option__item, .checkout-delivery-line, .delivery-options__item'
             );
+
             if (!point) {
-                throw new Error('Packlink: could not find a delivery option wrapper element. The active theme may be incompatible.');
+                return;
             }
 
             point.after(dropoffElement);
@@ -148,10 +149,11 @@ var Packlink = window.Packlink || {};
                 `This service supports ${paymentMethod}. If you choose the ${paymentMethod} payment method, additional fee of ${codPrice} will be applied.`;
 
             let point = dropoff.closest(
-                '.delivery-option, .checkout-delivery-line, .delivery-options__item, .delivery-option__item'
+                '.js-delivery-option, .delivery-option, .delivery-option__item, .checkout-delivery-line, .delivery-options__item'
             );
+
             if (!point) {
-                throw new Error('Packlink: could not find a delivery option wrapper element. The active theme may be incompatible.');
+                return;
             }
 
             point.after(codElement);

@@ -45,7 +45,7 @@
   </template>
 </div>
 
-<script type="text/javascript" src="{$gridResizerScript}"></script>
+<script type="text/javascript" src="{$gridResizerScript|escape:'html':'UTF-8'}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         Packlink.translations = {

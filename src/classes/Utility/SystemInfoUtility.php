@@ -87,7 +87,19 @@ class SystemInfoUtility
         $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
         $result = array();
         $result['PrestaShop version'] = _PS_VERSION_;
-        $result['Theme'] = _THEME_NAME_;
+        $context = \Context::getContext();
+        $themeName = 'unknown';
+        /** @noinspection PhpUndefinedFieldInspection */
+        if ($context && isset($context->shop->theme_name)) {
+            $themeName = $context->shop->theme_name;
+            /** @noinspection PhpUndefinedFieldInspection */
+        } elseif ($context && isset($context->shop->id_theme)) {
+            $theme = new \Theme((int) $context->shop->id_theme);
+            if (\Validate::isLoadedObject($theme)) {
+                $themeName = $theme->directory;
+            }
+        }
+        $result['Theme'] = $themeName;
 
         $adminDirectoryPath = explode('/', _PS_ADMIN_DIR_);
         $adminDirectory = $adminDirectoryPath[count($adminDirectoryPath) - 1];

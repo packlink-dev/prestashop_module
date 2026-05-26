@@ -88,7 +88,7 @@ class AdminOrdersController
         }
 
         $printLabelsUrl = $context->link->getAdminLink('BulkShipmentLabels');
-        if (strpos($printLabelsUrl, _PS_BASE_URL_) === false) {
+        if (!preg_match('#^https?://#i', $printLabelsUrl)) {
             $admin = explode(DIRECTORY_SEPARATOR, _PS_ADMIN_DIR_);
             $adminArray = array_slice($admin, -1);
             $adminFolder = array_pop($adminArray);
