@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.5.4](https://github.com/packlink-dev/prestashop_module/compare/v3.5.3...v3.5.4)
+### Changed
+- Added compatibility with presta 9.1.4
+- Added zip codes for BR, AR and AL
+
 ## [3.5.3](https://github.com/packlink-dev/prestashop_module/compare/v3.5.2...v3.5.3)
 ### Changed
 - Added compatibility with presta 9.1.3 and php 8.5
