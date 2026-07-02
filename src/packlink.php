@@ -48,7 +48,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.5.4';
+        $this->version = '3.6.0';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => '9.1.4');
@@ -352,6 +352,128 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Renders the Packlink shared (public) tracking page link on the customer's order
+     * detail page, underneath the information about the selected carrier.
+     *
+     * @param array $params Hook parameters.
+     *
+     * @return string
+     */
+    public function hookDisplayOrderDetail($params)
+    {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        // On PS 1.7+/8/9 the theme passes the *presented* order (a lazy array), not a
+        // \Order object; on PS 1.6 it is a \Order. Extract the id robustly, falling back
+        // to the request which always carries id_order on the order-detail page.
+        $orderId = 0;
+        if (array_key_exists('order', $params)) {
+            $orderParam = $params['order'];
+            if ($orderParam instanceof \Order) {
+                $orderId = (int)$orderParam->id;
+            } elseif (is_object($orderParam) && isset($orderParam->id)) {
+                $orderId = (int)$orderParam->id;
+            } elseif (is_array($orderParam) && isset($orderParam['id'])) {
+                $orderId = (int)$orderParam['id'];
+            }
+        }
+
+        if (!$orderId) {
+            $orderId = (int)\Tools::getValue('id_order');
+        }
+
+        if (!$orderId) {
+            return '';
+        }
+
+        $trackingUrl = $this->getSharedTrackingUrl((string)$orderId);
+        if (empty($trackingUrl)) {
+            return '';
+        }
+
+        $this->context->smarty->assign(
+            array('packlinkSharedTrackingUrl' => $trackingUrl)
+        );
+
+        return $this->display(__FILE__, 'order_detail_tracking.tpl');
+    }
+
+    /**
+     * Fetches the Packlink shared (public) tracking page URL for the given order on demand.
+     * Fails open: returns an empty string on any error or when no shipment reference exists.
+     * Result is memoized per request to avoid duplicate API calls.
+     *
+     * @param string $orderId
+     *
+     * @return string
+     */
+    private function getSharedTrackingUrl($orderId)
+    {
+        static $cache = array();
+
+        if (array_key_exists($orderId, $cache)) {
+            return $cache[$orderId];
+        }
+
+        $url = '';
+
+        try {
+            /** @var \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService $shipmentDetailsService */
+            $shipmentDetailsService = \Logeecom\Infrastructure\ServiceRegister::getService(
+                \Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService::CLASS_NAME
+            );
+            $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId($orderId);
+
+            if ($shipmentDetails !== null && $shipmentDetails->getReference()) {
+                /** @var \Packlink\BusinessLogic\Http\Proxy $proxy */
+                $proxy = \Logeecom\Infrastructure\ServiceRegister::getService(
+                    \Packlink\BusinessLogic\Http\Proxy::CLASS_NAME
+                );
+
+                $publicUrl = $proxy->getPublicTrackingUrl(
+                    $shipmentDetails->getReference(),
+                    $this->getTrackingLocale()
+                );
+                $url = $publicUrl ? $publicUrl : '';
+            }
+        } catch (\Exception $e) {
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Failed to fetch Packlink shared tracking URL: ' . $e->getMessage(),
+                'Integration'
+            );
+            $url = '';
+        }
+
+        $cache[$orderId] = $url;
+
+        return $url;
+    }
+
+    /**
+     * Builds a BCP-47 locale (e.g. "en-GB") for the tracking page request from the
+     * current shop language.
+     *
+     * @return string
+     */
+    private function getTrackingLocale()
+    {
+        $iso = 'en';
+        if (!empty($this->context->language) && !empty($this->context->language->iso_code)) {
+            $iso = strtolower($this->context->language->iso_code);
+        }
+
+        $map = array(
+            'en' => 'en-GB',
+            'es' => 'es-ES',
+            'fr' => 'fr-FR',
+            'de' => 'de-DE',
+            'it' => 'it-IT',
+        );
+
+        return array_key_exists($iso, $map) ? $map[$iso] : 'en-GB';
+    }
+
+    /**
      * Hook for order creation.
      *
      * @param array $params Hook parameters.
@@ -463,6 +585,7 @@ class Packlink extends CarrierModule
                     $this->_path . 'views/js/core/AjaxService.js?v=' . $this->version,
                     $this->_path . 'views/js/PrestaAjaxService.js?v=' . $this->version,
                     $this->_path . 'views/js/CustomAjaxService.js?v=' . $this->version,
+                    $this->_path . 'views/js/core/PrintService.js?v=' . $this->version,
                     $this->_path . 'views/js/PrestaPrintShipmentLabels.js?v=' . $this->version,
                     $this->_path . 'views/js/PrestaCreateOrderDraft.js?v=' . $this->version,
                 ),
@@ -499,8 +622,17 @@ class Packlink extends CarrierModule
                     'actions' => (new \PrestaShop\PrestaShop\Core\Grid\Action\Row\RowActionCollection()),
                 ));
 
-            $bulkAction = new \PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\ButtonBulkAction('packlink_bulk_print_labels');
-            $bulkAction->setName($this->trans('Print Packlink PRO shipment labels'))
+            $bulkAction = new \PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\ButtonBulkAction('packlink_bulk_download_labels');
+            $bulkAction->setName($this->trans('Download Packlink PRO shipment labels'))
+                ->setOptions(array(
+                    'class' => 'open_tabs',
+                    'attributes' => array(
+                        'data-route-param-name' => 'orderId',
+                    ),
+                ));
+
+            $browserPrintBulkAction = new \PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\ButtonBulkAction('packlink_bulk_browser_print_labels');
+            $browserPrintBulkAction->setName($this->trans('Print Packlink PRO shipment labels (browser)'))
                 ->setOptions(array(
                     'class' => 'open_tabs',
                     'attributes' => array(
@@ -511,6 +643,7 @@ class Packlink extends CarrierModule
             $columns->addAfter('payment', $draftColumn);
             $columns->addBefore('actions', $labelColumn);
             $bulkActions->add($bulkAction);
+            $bulkActions->add($browserPrintBulkAction);
 
             $definition->setColumns($columns);
             $definition->setBulkActions($bulkActions);
@@ -845,6 +978,7 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/ValidationService.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/ShippingServicesRenderer.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/AutoTestController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/SubscriptionBannerController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/ConfigurationController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
@@ -1068,6 +1202,7 @@ class Packlink extends CarrierModule
             ),
             'configuration' => array(
                 'getDataUrl' => $this->getAction('Configuration', 'getData'),
+                'getPromotionalBannerUrl' => $this->getAction('Subscription', 'getPromotionalBanner'),
             ),
             'system-info' => array(
                 'getStatusUrl' => $this->getAction('Debug', 'getStatus'),
@@ -1085,6 +1220,8 @@ class Packlink extends CarrierModule
                 'deleteServiceUrl' => $this->getAction('ShippingMethods', 'deactivate'),
                 'getCurrencyDetailsUrl' => $this->getAction('SystemInfo', 'get'),
                 'systemId' => (string)\Context::getContext()->shop->id,
+                'getSubscriptionPlanUrl' => $this->getAction('Subscription', 'getPlan'),
+                'getPromotionalBannerUrl' => $this->getAction('Subscription', 'getPromotionalBanner'),
             ),
             'pick-shipping-service' => array(
                 'getActiveServicesUrl' => $this->getAction('ShippingMethods', 'getActive'),
@@ -1096,6 +1233,8 @@ class Packlink extends CarrierModule
                 'systemId' => (string)\Context::getContext()->shop->id,
                 'enqueue' => $this->getAction('ManualRefreshService', 'refreshService'),
                 'getTaskStatus' => $this->getAction('ManualRefreshService', 'getTaskStatus'),
+                'getSubscriptionPlanUrl' => $this->getAction('Subscription', 'getPlan'),
+                'getPromotionalBannerUrl' => $this->getAction('Subscription', 'getPromotionalBanner'),
             ),
             'edit-service' => array(
                 'getServiceUrl' => $this->getAction('ShippingMethods', 'getShippingMethod'),

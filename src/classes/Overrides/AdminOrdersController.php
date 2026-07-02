@@ -62,9 +62,14 @@ class AdminOrdersController
      */
     public function addBulkActions(array &$bulk_actions)
     {
-        $bulk_actions['printShipmentLabels'] = array(
-            'text' => TranslationUtility::__('Print Shipment Labels'),
-            'icon' => 'icon-tag',
+        $bulk_actions['downloadShipmentLabels'] = array(
+            'text' => TranslationUtility::__('Download Shipment Labels'),
+            'icon' => 'icon-download',
+        );
+
+        $bulk_actions['browserPrintShipmentLabels'] = array(
+            'text' => TranslationUtility::__('Print Shipment Labels (browser)'),
+            'icon' => 'icon-print',
         );
     }
 
@@ -113,6 +118,7 @@ class AdminOrdersController
 
         $context->controller->addJS(
             array(
+                _PS_MODULE_DIR_ . 'packlink/views/js/core/PrintService.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaPrintShipmentLabels.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/PrestaAjaxService.js',
                 _PS_MODULE_DIR_ . 'packlink/views/js/OrderOverviewDraft.js',

@@ -1,0 +1,585 @@
+Group,key,English,Spanish,German,French,Italian
+general,generalConditions,"General conditions","Condiciones generales","Allgemeine Bedingungen","Conditions générales","Condizioni generali"
+general,basicSettings,"Basic settings",Configuración,Einstellungen,Paramètres,Configurazione
+general,contactUs,"Contact us","Contacta con nosotros","Kontaktieren Sie uns",Contactez-nous,Contattaci
+general,systemInfo,"System info","Información del sistema",Systeminformationen,"Informations du système","Informazioni del sistema"
+general,debugMode,"Debug mode","Debug mode","Debug mode","Debug mode","Debug mode"
+general,help,Help,Ayuda,Hilfe,Aide,Aiuto
+general,downloadSystemInfoFile,"Download system info file","Descargar el archivo de información del sistema","Systeminfodatei herunterladen","Téléchargez le document d'information système","Scarica il file di informazioni del sistema"
+general,curlIsNotInstalled,"cURL is not installed or enabled in your PHP installation. This is required for background task to work. Please install it and then refresh this page.","cURL no está instalado ni habilitado en tu instalación de PHP. Es necesario para que funcione la tarea en segundo plano. Por favor, instálalo y luego actualiza esta página.","cURL ist in Ihrer PHP-Installation nicht installiert oder aktiviert. Dies ist jedoch erforderlich, damit die Hintergrundaufgabe funktioniert. Bitte installieren Sie es und aktualisieren Sie diese Seite.","cURL non installé ou non activé dans votre installation PHP. Cette démarche est nécessaire pour que la tâche de fond fonctionne. Veuillez l’installer et rafraîchir cette page.","cURL non installato o abilitato nella tua installazione PHP. È necessario per il corretto funzionamento dell’attività in background. Installalo e aggiorna la pagina."
+general,loading,Loading...,Cargando...,Lädt...,"Chargement en cours...","Caricamento in corso..."
+general,save,Save,Guardar,Speichern,Enregistrer,Salva
+general,saveChanges,"Save changes","Guardar cambios",Speichern,"Enregistrer les modifications","Salva le modifiche"
+general,accept,Accept,Aceptar,Akzeptieren,Accepter,Accetto
+general,cancel,Cancel,Cancelar,Abbrechen,Annuler,Annulla
+general,continue,Continue,Continuar,Weiter,Continuer,Continua
+general,complete,Complete,Completar,Vollständig,Compléter,Completi
+general,add,Add,Añadir,Hinzufügen,Ajouter,Aggiungi
+general,edit,Edit,Editar,Bearbeiten,Modifier,Modifica
+general,delete,Delete,Borrar,Löschen,Supprimer,Elimina
+general,discard,Discard,Ignorar,Verwerfen,Ignorer,Scarta
+validation,requiredField,"This field is required.","Esta campo es obligatorio.","Dies ist ein Pflichtfeld.","Ce champs est obligatoire.","Questo campo è obbligatorio."
+validation,invalidField,"This field is invalid.","This field is invalid.","This field is invalid.","This field is invalid.","This field is invalid."
+validation,invalidEmail,"This field must be valid email.","El campo debe ser un correo electrónico válido.","Das Feld muss eine gültige E-Mail-Adresse sein.","Le champs doit être une adresse email valide","Il campo deve essere un email valido."
+validation,shortPassword,"The password must be at least %s characters long.","La contraseña debe contener %s caracteres como mínimo.","Das Passwort muss mindestens %s Zeichen haben.","Le mot de passe doit comporter au moins %s lettres.","La password deve contenere almeno %s caratteri."
+validation,invalidPhone,"This field must be valid phone number.","Este campo deber ser un número de teléfono válido.","Bitte geben Sie eine gültige Telefonnummer ein.","Ce champs doit contenir un numéro de téléphone valide.","Questo campo deve contenere un numero di telefono valido."
+validation,maxLength,"The field cannot have more than %s characters.","Este campo no puede tener más de %s caracteres.","Dieses Feld darf maximal %s Zeichen enthalten.","Ce champ ne peut contenir plus de %s caractères.","Il campo non può contenere più di %s caratteri."
+validation,numeric,"Value must be valid number.","Debe ser un valor numérico.","Bitte geben Sie einen numerischen Wert ein.","Cette valeur doit être numérique.","Questo valore deve essere numerico."
+validation,greaterThanZero,"Value must be greater than 0.","El valor debe ser mayor que 0.","Der Wert muss größer als 0 sein.","La valeur doit être spérieure à 0.","Il valore deve essere maggiore di 0."
+validation,nonNegative,"Field cannot have a negative value.","Field cannot have a negative value.","Das Feld darf keine negativen Werte enthalten.","Le champ ne peut contenir de valeur négative.","Il campo non può avere un valore negativo."
+validation,numberOfDecimalPlaces,"Field must have 2 decimal places.","El campo debe tener 2 decimales.","Das Feld muss 2 Dezimalstellen haben.","Le champs doit contenir deux décimales.","Il campo deve contenere due decimali."
+validation,integer,"Field must be an integer.","El campo debe ser un número entero.","Das Feld muss eine ganze Zahl sein.","Le champs doit être un nombre entier.","Il campo deve essere un numero intero."
+validation,invalidCountryList,"You must select destination countries.","Debes seleccionar los países de destino.","Bitte wählen Sie die Zielländer aus.","Veuillez sélectionner les pays de destination.","Devi selezionare i paesi di destinazione."
+validation,invalidLanguage,"Field is not a valid language.","Field is not a valid language.","Dieses Feld enthält keine gültige Sprache.","Le champ ne contient pas de langue valide.","Il campo non contiene una lingua valida."
+validation,invalidPlatformCountry,"Field is not a valid platform country.","Field is not a valid platform country.","Dieses Feld enthält kein gültiges Land.","Le champ ne contient pas de pays valide.","Il campo non contiene un paese della piattaforma valido."
+validation,invalidUrl,"Field must be a valid URL.","Field must be a valid URL.","Dieses Feld muss eine gültige URL enthalten.","Le champ doit contenir une URL valide.","Il campo deve contenere un URL valido."
+validation,invalidFieldValue,"Field must be set to ""%s"".","Field must be set to ""%s"".","Dieses Feld muss auf „%s“ gesetzt werden.","Le champ doit être défini sur « %s ».","Il campo deve essere impostato su ""%s""."
+validation,invalidMaxValue,"Maximal allowed value is %s.","Maximal allowed value is %s.","Der maximale Wert beträgt %s.","La valeur maximale autorisée est %s.","Il valore massimo consentito è %s."
+validation,invalidIBAN,"Merchant IBAN number must be up to 24 characters and contain only numbers and capital letters.",,,,
+validation,passwordRestriction,"Your password must be at least %s characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol","Tu contraseña debe tener al menos %s caracteres e incluir al menos una letra minúscula, una letra mayúscula, un número y un símbolo","Ihr Passwort muss mindestens %s Zeichen lang sein und mindestens einen Kleinbuchstaben, einen Großbuchstaben, eine Zahl und ein Sonderzeichen enthalten","Votre mot de passe doit contenir au moins %s caractères, dont au moins une lettre minuscule, une lettre majuscule, un chiffre et un symbole","La tua password deve contenere almeno %s caratteri e includere almeno una lettera minuscola, una lettera maiuscola, un numero e un simbolo"
+login,apiKey,"Api key","Api key",API-Schlüssel,"Clé API","API Key"
+login,apiKeyIncorrect,"API key was incorrect.","Clave de API incorrecta","Falscher API-Schlüssel","Clé API incorrecte","API Key non corretta"
+login,integrationRegistrationFailed,"Integration registration failed.","El registro de la integración falló.","Registrierung der Integration fehlgeschlagen.","Échec de l’enregistrement de l’intégration.","Registrazione dell’integrazione non riuscita."
+login,dontHaveAccount,"Don't have an account?","¿No tienes una cuenta?","Sie haben noch keinen Account?","Vous n’avez pas de compte ?","Non hai un account?"
+login,validateApiKey,"Validate API key","Validar API key","API-Schlüssel bestätigen","Valider clé API","Convalida la chiave API"
+login,connect,Connect,Conectar,Verbinden,Connecter,Connetti
+login,connectDesc,"Effortlessly integrate your Shopify store with Packlink PRO to streamline your shipping process. Simply click the Connect button below to get started and unlock efficient order management and automated shipping features.","Integra sin esfuerzo tu tienda de Shopify con Packlink PRO para optimizar tu proceso de envío. Simplemente haz clic en el botón Conectar para comenzar y desbloquear una gestión de pedidos eficiente y funciones de envío automatizado.","Integrieren Sie mühelos Ihren Shopify-Shop mit Packlink PRO, um Ihren Versandprozess zu optimieren. Klicken Sie einfach auf die Schaltfläche „Verbinden“, um zu starten und effizientes Auftragsmanagement sowie automatisierte Versandfunktionen freizuschalten.","Intégrez facilement votre boutique Shopify avec Packlink PRO pour simplifier votre processus d’expédition. Cliquez simplement sur le bouton Connecter ci-dessous pour commencer et profiter d’une gestion des commandes efficace et de fonctionnalités d’expédition automatisées.","Integra facilmente il tuo negozio Shopify con Packlink PRO per semplificare il processo di spedizione. Clicca semplicemente sul pulsante Connetti qui sotto per iniziare e attivare una gestione efficiente degli ordini e funzionalità di spedizione automatizzate."
+login,chooseYourCountry,"Choose your country to start the registration process","Elige tu país para comenzar el registro","Wählen Sie Ihr Land aus, um mit der Registrierung beginnen zu können","Sélectionnez votre pays pour commencer votre inscription","Per iniziare la registrazione, scegli il tuo paese"
+login,registerMe,"Register me",Registrarme,Registrieren,S’inscrire,Iscriviti
+countries,AF,Afghanistan,Afghanistan,Afghanistan,Afghanistan,Afghanistan
+countries,AL,Albania,Albania,Albania,Albania,Albania
+countries,DZ,Algeria,Argelia,Algerien,Algérie,Algeria
+countries,AS,"American Samoa","American Samoa","American Samoa","American Samoa","American Samoa"
+countries,AD,Andorra,Andorra,Andorra,Andorra,Andorra
+countries,AO,Angola,Angola,Angola,Angola,Angola
+countries,AI,Anguilla,Anguilla,Anguilla,Anguilla,Anguilla
+countries,AQ,Antarctica,Antarctica,Antarctica,Antarctica,Antarctica
+countries,AG,"Antigua and Barbuda","Antigua and Barbuda","Antigua and Barbuda","Antigua and Barbuda","Antigua and Barbuda"
+countries,AR,Argentina,Argentina,Argentinien,Argentine,Argentina
+countries,AM,Armenia,Armenia,Armenia,Armenia,Armenia
+countries,AW,Aruba,Aruba,Aruba,Aruba,Aruba
+countries,AU,Australia,Australia,Australien,Australie,Australia
+countries,AT,Austria,Austria,Österreich,Autriche,Austria
+countries,AZ,Azerbaijan,Azerbaijan,Azerbaijan,Azerbaijan,Azerbaijan
+countries,BS,Bahamas,Bahamas,Bahamas,Bahamas,Bahamas
+countries,BH,Bahrain,Bahrain,Bahrain,Bahrain,Bahrain
+countries,BD,Bangladesh,Bangladesh,Bangladesh,Bangladesh,Bangladesh
+countries,BB,Barbados,Barbados,Barbados,Barbados,Barbados
+countries,BY,Belarus,Belarus,Belarus,Belarus,Belarus
+countries,BE,Belgium,Bélgica,Belgien,Belgique,Belgio
+countries,BZ,Belize,Belize,Belize,Belize,Belize
+countries,BJ,Benin,Benin,Benin,Benin,Benin
+countries,BM,Bermuda,Bermuda,Bermuda,Bermuda,Bermuda
+countries,BT,Bhutan,Bhutan,Bhutan,Bhutan,Bhutan
+countries,BO,"Bolivia (Plurinational State of)",Bolivia,Bolivien,Bolivie,Bolivia
+countries,BQ,"Bonaire, Sint Eustatius and Saba","Bonaire, Sint Eustatius and Saba","Bonaire, Sint Eustatius and Saba","Bonaire, Sint Eustatius and Saba","Bonaire, Sint Eustatius and Saba"
+countries,BA,"Bosnia and Herzegovina","Bosnia and Herzegovina","Bosnia and Herzegovina","Bosnia and Herzegovina","Bosnia and Herzegovina"
+countries,BW,Botswana,Botswana,Botswana,Botswana,Botswana
+countries,BV,"Bouvet Island","Bouvet Island","Bouvet Island","Bouvet Island","Bouvet Island"
+countries,BR,Brazil,Brazil,Brazil,Brazil,Brazil
+countries,IO,"British Indian Ocean Territory","British Indian Ocean Territory","British Indian Ocean Territory","British Indian Ocean Territory","British Indian Ocean Territory"
+countries,BN,"Brunei Darussalam","Brunei Darussalam","Brunei Darussalam","Brunei Darussalam","Brunei Darussalam"
+countries,BG,Bulgaria,Bulgaria,Bulgarien,Bulgarie,Bulgaria
+countries,BF,"Burkina Faso","Burkina Faso","Burkina Faso","Burkina Faso","Burkina Faso"
+countries,BI,Burundi,Burundi,Burundi,Burundi,Burundi
+countries,CV,"Cabo Verde","Cabo Verde","Cabo Verde","Cabo Verde","Cabo Verde"
+countries,KH,Cambodia,Cambodia,Cambodia,Cambodia,Cambodia
+countries,CM,Cameroon,Cameroon,Cameroon,Cameroon,Cameroon
+countries,CA,Canada,Canada,Canada,Canada,Canada
+countries,KY,"Cayman Islands","Cayman Islands","Cayman Islands","Cayman Islands","Cayman Islands"
+countries,CF,"Central African Republic","Central African Republic","Central African Republic","Central African Republic","Central African Republic"
+countries,TD,Chad,Chad,Chad,Chad,Chad
+countries,CL,Chile,Chile,Chile,Chili,Chile
+countries,CN,China,China,China,China,China
+countries,CX,"Christmas Island","Christmas Island","Christmas Island","Christmas Island","Christmas Island"
+countries,CC,"Cocos (Keeling) Islands","Cocos (Keeling) Islands","Cocos (Keeling) Islands","Cocos (Keeling) Islands","Cocos (Keeling) Islands"
+countries,CO,Colombia,Colombia,Colombia,Colombia,Colombia
+countries,KM,Comoros,Comoros,Comoros,Comoros,Comoros
+countries,CD,"Congo (the Democratic Republic of the)","Congo (the Democratic Republic of the)","Congo (the Democratic Republic of the)","Congo (the Democratic Republic of the)","Congo (the Democratic Republic of the)"
+countries,CG,Congo,Congo,Congo,Congo,Congo
+countries,CK,"Cook Islands","Cook Islands","Cook Islands","Cook Islands","Cook Islands"
+countries,CR,"Costa Rica","Costa Rica","Costa Rica","Costa Rica","Costa Rica"
+countries,HR,Croatia,Croatia,Croatia,Croatia,Croatia
+countries,CU,Cuba,Cuba,Cuba,Cuba,Cuba
+countries,CW,Curaçao,Curaçao,Curaçao,Curaçao,Curaçao
+countries,CY,Cyprus,Cyprus,Cyprus,Cyprus,Cyprus
+countries,CZ,"Czech Republic","Republica checa",Tschechien,"République Tchèque","Repubblica Ceca"
+countries,CI,"Côte d`Ivoire","Côte d`Ivoire","Côte d`Ivoire","Côte d`Ivoire","Côte d`Ivoire"
+countries,DK,Denmark,Denmark,Denmark,Denmark,Denmark
+countries,DJ,Djibouti,Djibouti,Djibouti,Djibouti,Djibouti
+countries,DM,Dominica,Dominica,Dominica,Dominica,Dominica
+countries,DO,"Dominican Republic","Dominican Republic","Dominican Republic","Dominican Republic","Dominican Republic"
+countries,EC,Ecuador,Ecuador,Ecuador,Ecuador,Ecuador
+countries,EG,Egypt,Egypt,Egypt,Egypt,Egypt
+countries,SV,"El Salvador","El Salvador","El Salvador","El Salvador","El Salvador"
+countries,GQ,"Equatorial Guinea","Equatorial Guinea","Equatorial Guinea","Equatorial Guinea","Equatorial Guinea"
+countries,ER,Eritrea,Eritrea,Eritrea,Eritrea,Eritrea
+countries,EE,Estonia,Estonia,Estland,Estonie,Estonia
+countries,SZ,Eswatini,Eswatini,Eswatini,Eswatini,Eswatini
+countries,ET,Ethiopia,Ethiopia,Ethiopia,Ethiopia,Ethiopia
+countries,FK,"Falkland Islands","Falkland Islands","Falkland Islands","Falkland Islands","Falkland Islands"
+countries,FO,"Faroe Islands","Faroe Islands","Faroe Islands","Faroe Islands","Faroe Islands"
+countries,FJ,Fiji,Fiji,Fiji,Fiji,Fiji
+countries,FI,Finland,Finlandia,Finnland,Finlande,Finlandia
+countries,FR,France,Francia,Frankreich,France,Francia
+countries,GF,"French Guiana","Guayana Francesa",Französisch-Guayana,"Guyane française","Guyana francese"
+countries,PF,"French Polynesia","French Polynesia","French Polynesia","French Polynesia","French Polynesia"
+countries,TF,"French Southern Territories","French Southern Territories","French Southern Territories","French Southern Territories","French Southern Territories"
+countries,GA,Gabon,Gabon,Gabon,Gabon,Gabon
+countries,GM,Gambia,Gambia,Gambia,Gambia,Gambia
+countries,GE,Georgia,Georgia,Georgia,Georgia,Georgia
+countries,DE,Germany,Alemania,Deutschland,Allemagne,Germania
+countries,GH,Ghana,Ghana,Ghana,Ghana,Ghana
+countries,GI,Gibraltar,Gibraltar,Gibraltar,Gibraltar,Gibraltar
+countries,GB,"United Kingdom","Reino Unido","Vereinigtes Königreich",Royaume-Uni,"Regno Unito"
+countries,GR,Greece,Grecia,Griechenland,Grèce,Grecia
+countries,GL,Greenland,Greenland,Greenland,Greenland,Greenland
+countries,GD,Grenada,Grenada,Grenada,Grenada,Grenada
+countries,GP,Guadeloupe,Guadalupe,Guadeloupe,Guadeloupe,Guadalupa
+countries,GU,Guam,Guam,Guam,Guam,Guam
+countries,GT,Guatemala,Guatemala,Guatemala,Guatemala,Guatemala
+countries,GG,Guernsey,Guernsey,Guernsey,Guernsey,Guernsey
+countries,GN,Guinea,Guinea,Guinea,Guinea,Guinea
+countries,GW,Guinea-Bissau,Guinea-Bissau,Guinea-Bissau,Guinea-Bissau,Guinea-Bissau
+countries,GY,Guyana,Guyana,Guyana,Guyana,Guyana
+countries,HT,Haiti,Haiti,Haiti,Haiti,Haiti
+countries,HM,"Heard Island and McDonald Islands","Heard Island and McDonald Islands","Heard Island and McDonald Islands","Heard Island and McDonald Islands","Heard Island and McDonald Islands"
+countries,VA,"Holy See","Holy See","Holy See","Holy See","Holy See"
+countries,HN,Honduras,Honduras,Honduras,Honduras,Honduras
+countries,HK,"Hong Kong","Hong Kong","Hong Kong","Hong Kong","Hong Kong"
+countries,HU,Hungary,Hungría,Ungarn,Hongrie,Ungheria
+countries,IS,Iceland,Iceland,Iceland,Iceland,Iceland
+countries,IN,India,India,India,India,India
+countries,ID,Indonesia,Indonesia,Indonesia,Indonesia,Indonesia
+countries,IR,Iran,Iran,Iran,Iran,Iran
+countries,IQ,Iraq,Iraq,Iraq,Iraq,Iraq
+countries,IE,Ireland,Irlanda,Irland,Irlande,Irlanda
+countries,IM,"Isle of Man","Isle of Man","Isle of Man","Isle of Man","Isle of Man"
+countries,IL,Israel,Israel,Israel,Israel,Israel
+countries,IT,Italy,Italia,Italien,Italie,Italia
+countries,JM,Jamaica,Jamaica,Jamaica,Jamaica,Jamaica
+countries,JP,Japan,Japón,Japan,Japon,Giappone
+countries,JE,Jersey,Jersey,Jersey,Jersey,Jersey
+countries,JO,Jordan,Jordan,Jordan,Jordan,Jordan
+countries,KZ,Kazakhstan,Kazakhstan,Kazakhstan,Kazakhstan,Kazakhstan
+countries,KE,Kenya,Kenya,Kenya,Kenya,Kenya
+countries,KI,Kiribati,Kiribati,Kiribati,Kiribati,Kiribati
+countries,KP,"Korea, North","Korea, North","Korea, North","Korea, North","Korea, North"
+countries,KR,"Korea, South","Korea, South","Korea, South","Korea, South","Korea, South"
+countries,KW,Kuwait,Kuwait,Kuwait,Kuwait,Kuwait
+countries,KG,Kyrgyzstan,Kyrgyzstan,Kyrgyzstan,Kyrgyzstan,Kyrgyzstan
+countries,LA,"Lao People`s Democratic Republic","Lao People`s Democratic Republic","Lao People`s Democratic Republic","Lao People`s Democratic Republic","Lao People`s Democratic Republic"
+countries,LV,Latvia,Letonia,Lettland,Lettonie,Lettonia
+countries,LB,Lebanon,Lebanon,Lebanon,Lebanon,Lebanon
+countries,LS,Lesotho,Lesotho,Lesotho,Lesotho,Lesotho
+countries,LR,Liberia,Liberia,Liberia,Liberia,Liberia
+countries,LY,Libya,Libya,Libya,Libya,Libya
+countries,LI,Liechtenstein,Liechtenstein,Liechtenstein,Liechtenstein,Liechtenstein
+countries,LT,Lithuania,Lithuania,Lithuania,Lithuania,Lithuania
+countries,LU,Luxembourg,Luxemburgo,Luxemburg,Luxembourg,Lussemburgo
+countries,MO,Macao,Macao,Macao,Macao,Macao
+countries,MG,Madagascar,Madagascar,Madagascar,Madagascar,Madagascar
+countries,MW,Malawi,Malawi,Malawi,Malawi,Malawi
+countries,MY,Malaysia,Malaysia,Malaysia,Malaysia,Malaysia
+countries,MV,Maldives,Maldives,Maldives,Maldives,Maldives
+countries,ML,Mali,Mali,Mali,Mali,Mali
+countries,MT,Malta,Malta,Malta,Malta,Malta
+countries,MH,"Marshall Islands","Marshall Islands","Marshall Islands","Marshall Islands","Marshall Islands"
+countries,MQ,Martinique,Martinica,Martinique,Martinique,Martinica
+countries,MR,Mauritania,Mauritania,Mauritania,Mauritania,Mauritania
+countries,MU,Mauritius,Mauritius,Mauritius,Mauritius,Mauritius
+countries,YT,Mayotte,Mayotte,Mayotte,Mayotte,Mayotte
+countries,MX,Mexico,México,Mexiko,Mexique,Messico
+countries,FM,"Micronesia (Federated States of)","Micronesia (Federated States of)","Micronesia (Federated States of)","Micronesia (Federated States of)","Micronesia (Federated States of)"
+countries,MD,Moldova,Moldova,Moldova,Moldova,Moldova
+countries,MC,Monaco,Mónaco,Monaco,Monaco,Monaco
+countries,MN,Mongolia,Mongolia,Mongolia,Mongolia,Mongolia
+countries,ME,Montenegro,Montenegro,Montenegro,Montenegro,Montenegro
+countries,MS,Montserrat,Montserrat,Montserrat,Montserrat,Montserrat
+countries,MA,Morocco,Marruecos,Marokko,Maroc,Marocco
+countries,MZ,Mozambique,Mozambique,Mozambique,Mozambique,Mozambique
+countries,MM,Myanmar,Myanmar,Myanmar,Myanmar,Myanmar
+countries,NA,Namibia,Namibia,Namibia,Namibia,Namibia
+countries,NR,Nauru,Nauru,Nauru,Nauru,Nauru
+countries,NP,Nepal,Nepal,Nepal,Nepal,Nepal
+countries,NL,Netherlands,"Países Bajos",Niederlande,Pays-Bas,"Paesi Bassi"
+countries,NC,"New Caledonia","New Caledonia","New Caledonia","New Caledonia","New Caledonia"
+countries,NZ,"New Zealand","New Zealand","New Zealand","New Zealand","New Zealand"
+countries,NI,Nicaragua,Nicaragua,Nicaragua,Nicaragua,Nicaragua
+countries,NE,Niger,Niger,Niger,Niger,Niger
+countries,NG,Nigeria,Nigeria,Nigeria,Nigeria,Nigeria
+countries,NU,Niue,Niue,Niue,Niue,Niue
+countries,NF,"Norfolk Island","Norfolk Island","Norfolk Island","Norfolk Island","Norfolk Island"
+countries,MP,"Northern Mariana Islands","Northern Mariana Islands","Northern Mariana Islands","Northern Mariana Islands","Northern Mariana Islands"
+countries,NO,Norway,Norway,Norway,Norway,Norway
+countries,OM,Oman,Oman,Oman,Oman,Oman
+countries,PK,Pakistan,Pakistan,Pakistan,Pakistan,Pakistan
+countries,PW,Palau,Palau,Palau,Palau,Palau
+countries,PS,"Palestine, State of","Palestine, State of","Palestine, State of","Palestine, State of","Palestine, State of"
+countries,PA,Panama,Panama,Panama,Panama,Panama
+countries,PG,"Papua New Guinea","Papua New Guinea","Papua New Guinea","Papua New Guinea","Papua New Guinea"
+countries,PY,Paraguay,Paraguay,Paraguay,Paraguay,Paraguay
+countries,PE,Peru,Peru,Peru,Peru,Peru
+countries,PH,Philippines,Philippines,Philippines,Philippines,Philippines
+countries,PN,Pitcairn,Pitcairn,Pitcairn,Pitcairn,Pitcairn
+countries,PL,Poland,Polonia,Polen,Pologne,Polonia
+countries,PT,Portugal,Portugal,Portugal,Portugal,Portogallo
+countries,PR,"Puerto Rico","Puerto Rico","Puerto Rico","Puerto Rico","Puerto Rico"
+countries,QA,Qatar,Qatar,Qatar,Qatar,Qatar
+countries,MK,Macedonia,Macedonia,Macedonia,Macedonia,Macedonia
+countries,RO,Romania,Rumania,Rumänien,Roumanie,Romania
+countries,RU,"Russian Federation","Russian Federation","Russian Federation","Russian Federation","Russian Federation"
+countries,RW,Rwanda,Rwanda,Rwanda,Rwanda,Rwanda
+countries,RE,"La Réunion","La Reunión","La Réunion","La Réunion","La Riunione"
+countries,BL,"Saint Barthélemy","Saint Barthélemy","Saint Barthélemy","Saint Barthélemy","Saint Barthélemy"
+countries,SH,"Saint Helena, Ascension and Tristan da Cunh","Saint Helena, Ascension and Tristan da Cunh","Saint Helena, Ascension and Tristan da Cunh","Saint Helena, Ascension and Tristan da Cunh","Saint Helena, Ascension and Tristan da Cunh"
+countries,KN,"Saint Kitts and Nevis","Saint Kitts and Nevis","Saint Kitts and Nevis","Saint Kitts and Nevis","Saint Kitts and Nevis"
+countries,LC,"Saint Lucia","Saint Lucia","Saint Lucia","Saint Lucia","Saint Lucia"
+countries,MF,"Saint Martin (French part)","Saint Martin (French part)","Saint Martin (French part)","Saint Martin (French part)","Saint Martin (French part)"
+countries,PM,"Saint Pierre and Miquelon","Saint Pierre and Miquelon","Saint Pierre and Miquelon","Saint Pierre and Miquelon","Saint Pierre and Miquelon"
+countries,VC,"Saint Vincent and the Grenadines","Saint Vincent and the Grenadines","Saint Vincent and the Grenadines","Saint Vincent and the Grenadines","Saint Vincent and the Grenadines"
+countries,WS,Samoa,Samoa,Samoa,Samoa,Samoa
+countries,SM,"San Marino","San Marino","San Marino","San Marino","San Marino"
+countries,ST,"Sao Tome and Principe","Sao Tome and Principe","Sao Tome and Principe","Sao Tome and Principe","Sao Tome and Principe"
+countries,SA,"Saudi Arabia","Saudi Arabia","Saudi Arabia","Saudi Arabia","Saudi Arabia"
+countries,SN,Senegal,Senegal,Senegal,Senegal,Senegal
+countries,RS,Serbia,Serbia,Serbia,Serbia,Serbia
+countries,SC,Seychelles,Seychelles,Seychelles,Seychelles,Seychelles
+countries,SL,"Sierra Leone","Sierra Leone","Sierra Leone","Sierra Leone","Sierra Leone"
+countries,SG,Singapore,Singapur,Singapur,Singapour,Singapore
+countries,SX,"Sint Maarten (Dutch part)","Sint Maarten (Dutch part)","Sint Maarten (Dutch part)","Sint Maarten (Dutch part)","Sint Maarten (Dutch part)"
+countries,SK,Slovakia,Slovakia,Slovakia,Slovakia,Slovakia
+countries,SI,Slovenia,Slovenia,Slovenia,Slovenia,Slovenia
+countries,SB,"Solomon Islands","Solomon Islands","Solomon Islands","Solomon Islands","Solomon Islands"
+countries,SO,Somalia,Somalia,Somalia,Somalia,Somalia
+countries,ZA,"South Africa","South Africa","South Africa","South Africa","South Africa"
+countries,GS,"South Georgia and the South Sandwich Islands","South Georgia and the South Sandwich Islands","South Georgia and the South Sandwich Islands","South Georgia and the South Sandwich Islands","South Georgia and the South Sandwich Islands"
+countries,SS,"South Sudan","South Sudan","South Sudan","South Sudan","South Sudan"
+countries,ES,Spain,España,Spanien,Espagne,Spagna
+countries,LK,"Sri Lanka","Sri Lanka","Sri Lanka","Sri Lanka","Sri Lanka"
+countries,SD,Sudan,Sudan,Sudan,Sudan,Sudan
+countries,SR,Suriname,Suriname,Suriname,Suriname,Suriname
+countries,SJ,"Svalbard and Jan Mayen","Svalbard and Jan Mayen","Svalbard and Jan Mayen","Svalbard and Jan Mayen","Svalbard and Jan Mayen"
+countries,SE,Sweden,Suecia,Schweden,Suède,Svezia
+countries,CH,Switzerland,Suiza,Schweiz,Suisse,Svizzera
+countries,SY,"Syrian Arab Republic","Syrian Arab Republic","Syrian Arab Republic","Syrian Arab Republic","Syrian Arab Republic"
+countries,TW,"Taiwan (Province of China)","Taiwán (provincia de China)","Taiwan (Provinz China)","Taïwan (province de Chine)","Taiwan (provincia della Cina)"
+countries,TJ,Tajikistan,Tajikistan,Tajikistan,Tajikistan,Tajikistan
+countries,TZ,"Tanzania, United Republic of","Tanzania, United Republic of","Tanzania, United Republic of","Tanzania, United Republic of","Tanzania, United Republic of"
+countries,TH,Thailand,Thailand,Thailand,Thailand,Thailand
+countries,TL,Timor-Leste,Timor-Leste,Timor-Leste,Timor-Leste,Timor-Leste
+countries,TG,Togo,Togo,Togo,Togo,Togo
+countries,TK,Tokelau,Tokelau,Tokelau,Tokelau,Tokelau
+countries,TO,Tonga,Tonga,Tonga,Tonga,Tonga
+countries,TT,"Trinidad and Tobago","Trinidad and Tobago","Trinidad and Tobago","Trinidad and Tobago","Trinidad and Tobago"
+countries,TN,Tunisia,Tunisia,Tunisia,Tunisia,Tunisia
+countries,TR,Turkey,Turquía,Türkei,Turquie,Turchia
+countries,TM,Turkmenistan,Turkmenistan,Turkmenistan,Turkmenistan,Turkmenistan
+countries,TC,"Turks and Caicos Islands","Turks and Caicos Islands","Turks and Caicos Islands","Turks and Caicos Islands","Turks and Caicos Islands"
+countries,TV,Tuvalu,Tuvalu,Tuvalu,Tuvalu,Tuvalu
+countries,UG,Uganda,Uganda,Uganda,Uganda,Uganda
+countries,UA,Ukraine,Ukraine,Ukraine,Ukraine,Ukraine
+countries,AE,"United Arab Emirates","Emiratos Árabes Unidos","Vereinigte Arabische Emirate","Émirats arabes unis","Emirati Arabi Uniti"
+countries,UM,"United States Minor Outlying Islands","United States Minor Outlying Islands","United States Minor Outlying Islands","United States Minor Outlying Islands","United States Minor Outlying Islands"
+countries,US,"United States Of America","Estados Unidos","Vereinigte Staaten","États Unis","Stati Uniti"
+countries,UY,Uruguay,Uruguay,Uruguay,Uruguay,Uruguay
+countries,UZ,Uzbekistan,Uzbekistan,Uzbekistan,Uzbekistan,Uzbekistan
+countries,VU,Vanuatu,Vanuatu,Vanuatu,Vanuatu,Vanuatu
+countries,VE,Venezuela,Venezuela,Venezuela,Venezuela,Venezuela
+countries,VN,"Viet Nam","Viet Nam","Viet Nam","Viet Nam","Viet Nam"
+countries,VG,"Virgin Islands (British)","Virgin Islands (British)","Virgin Islands (British)","Virgin Islands (British)","Virgin Islands (British)"
+countries,VI,"Virgin Islands (U.S.)","Virgin Islands (U.S.)","Virgin Islands (U.S.)","Virgin Islands (U.S.)","Virgin Islands (U.S.)"
+countries,WF,"Wallis and Futuna","Wallis and Futuna","Wallis and Futuna","Wallis and Futuna","Wallis and Futuna"
+countries,EH,"Western Sahara","Western Sahara","Western Sahara","Western Sahara","Western Sahara"
+countries,YE,Yemen,Yemen,Yemen,Yemen,Yemen
+countries,ZM,Zambia,Zambia,Zambia,Zambia,Zambia
+countries,ZW,Zimbabwe,Zimbabwe,Zimbabwe,Zimbabwe,Zimbabwe
+countries,WW,Other,Otro,Sonstiges,Autre,Altro
+register,logIn,"Log in","Iniciar sesión",Einloggen,"Se connecter",Accedi
+register,email,Email,"Correo electrónico",E-Mail,"Adresse électronique",Email
+register,password,Password,Contraseña,Passwort,"Mot de passe",Password
+register,haveAccount,"Already have an account?","¿Ya tienes una cuenta?","Haben Sie bereits einen Account?","Vous avez déjà un compte ?","Hai già un account?"
+register,registerAccount,"Register your account",Registro,"Jetzt registrieren",Enregistrez-vous,Registrati
+register,integrationRegistrationFailed,"Your Packlink account was created successfully, but the store integration failed","Tu cuenta de Packlink se creó correctamente, pero la integración de la tienda falló","Ihr Packlink-Konto wurde erfolgreich erstellt, aber die Shop-Integration ist fehlgeschlagen","Votre compte Packlink a été créé avec succès, mais l’intégration de la boutique a échoué","Il tuo account Packlink è stato creato con successo, ma l’integrazione del negozio non è riuscita"
+register,getToKnowYou,"We would like to get to know you better in order to adapt to you and to send you an individual offer","Queremos conocerte mejor para adaptarnos a ti y hacerte una propuesta personalizada.","Wir möchten Sie besser kennenlernen, um uns an Sie anzupassen und Ihnen ein individuelles Angebot zukommen zu lassen","Nous souhaitons mieux vous connaître afin de nous adapter à vous et de vous faire une offre sur mesure","Vogliamo conoscerti meglio per adattarci a te e preparare una proposta personalizzata per te"
+register,monthlyShipmentVolume,"What is your monthly shipment volume?","¿Cuántos envíos sueles hacer al mes?","Wie hoch ist Ihr monatliches Sendungsaufkommen?","Combien d’envois faites-vous généralement par mois?","Quante spedizioni fai solitamente al mese?"
+register,phone,"Phone number",Teléfono,Telefonnummer,"Numéro de téléphone","Numero di telefono"
+register,submit,Register,Regístrate,Registrieren,S'inscrire,Registrati
+register,chooseYourCountry,"Choose your country","Elige tu país","Wählen Sie Ihr Land aus","Sélectionnez votre pays","Scegli il paese"
+register,searchCountry,"Search country","Busca el país","Land suchen","Rechercher un pays","Cerca paese"
+register,invalidDeliveryVolume,"Field is not a valid delivery volume.","El campo no contiene un volumen de entrega válido.","Das Feld enthält keinen gültigen Lieferumfang.","Le champ ne contient pas de volume de livraison valide.","Il campo non contiene un volume di consegna valido."
+register,passwordRestriction,"Your password must be at least %s characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol",,,,
+onboardingWelcome,header,"Let's set up basic information so that you can make shipments","Vamos a configurar tu información básica para poder hacer envíos","Richten Sie nun die grundlegenden Informationen ein, damit Sie Versendungen vornehmen können","Configurez vos informations de base afin d’effectuer des envois","È necessario impostare alcuni dati di base così che potrai effettuare spedizioni"
+onboardingWelcome,steps,"It's just two steps that we need to go through to offer you the carrier that best suits your needs","Son solo dos pasos, los necesitamos para ofrecerte los servicios de transporte que más se adaptan a tus necesidades.","In nur zwei Schritten können wir Ihnen den Spediteur anbieten, der all Ihre Anforderungen erfüllt","Il ne vous reste que deux étapes pour savoir quel transporteur répond le mieux à vos besoins","Si tratta di due semplici passaggi che dobbiamo completare per offrirti la compagnia di trasporto che più si adatta alle tue esigenze"
+onboardingWelcome,stepOne,"Set parcel details","Configurar los detalles del paquete","Paketangaben einfügen","Configurez les informations sur le colis","Imposta i dettagli del pacco"
+onboardingWelcome,stepTwo,"Set sender's address","Configurar la dirección del remitente","Absenderadresse eingeben","Configurez l’adresse de l’émetteur","Imposta l’indirizzo del mittente"
+onboardingWelcome,startSetUp,"Start set up","Comenzar con la configuración","Einrichten beginnen","Démarrez la configuration","Avvia la configurazione"
+onboardingOverview,header,"Almost there! Please check that the entered information is correct or complete it in order to continue.","Ya casi estamos. Por favor, comprueba que la información es correcta o complétala para continuar.","Fast geschafft! Bitte überprüfen Sie, ob die eingegebenen Informationen richtig sind oder vervollständigen Sie die Angaben, um fortzufahren.","Vous y êtes presque ! Veuillez vérifier que les informations saisies sont correctes ou complétez-les pour continuer.","Ci siamo quasi! Per continuare, verifica che i dati inseriti siano corretti o completali."
+onboardingOverview,parcelDetails,"Parcel details","Detalle del paquete",Paketangaben,"Informations sur le colis","Dettagli del pacco"
+onboardingOverview,senderAddress,"Sender's Address","Dirección del remitente",Absenderadresse,"Adresse de l’émetteur","Indirizzo del mittente"
+onboardingOverview,missingInfo,"Missing information","Faltan datos","Fehlende Informationen","Informations manquantes","Dati mancanti"
+onboardingOverview,parcelData,"Weight %s kg | Height %s cm | Width %s cm | Length %s cm","Peso %s kg | Alto %s cm | Ancho %s cm | Largo %s cm","Gewicht %s kg | Höhe %s cm | Breite %s cm | Länge %s cm","Poids %s kg | Hauteur %s cm | Largeur %s cm | Longueur %s cm","Peso %s kg | Altezza %s cm | Largezza %s cm | Lunghezza %s cm"
+onboardingOverview,warehouseData,"%s | %s | %s","%s | %s | %s","%s | %s | %s","%s | %s | %s","%s | %s | %s"
+defaultParcel,title-onboarding,"1. Set parcel details","1. Configurar los detalles del paquete","1. Paketangaben einfügen","1. Configurez les informations sur le colis","1. Imposta i dettagli del pacco"
+defaultParcel,description-onboarding,"We will use this default data for <strong>items that do not have defined dimensions and weight.</strong> You can edit them whenever you like via the settings tab.","Utilizaremos estos datos predeterminados <strong>para los artículos que no tengan dimensiones y peso definidos.</strong> Podrás editarlos cuando quieras desde la pestaña de configuración.","Wir werden diese Standarddaten für <strong>Artikel verwenden, die keine festgelegten Abmessungen und kein festgelegtes Gewicht haben.</strong> Sie können sie jederzeit über die Registerkarte Einstellungen bearbeiten.","Nous utiliserons ces données prédéfinies pour les <strong>articles dont les dimensions et le poids n’ont pas été définis.</strong> Vous pouvez les modifier à tout moment via l’onglet Paramètres.","Useremo questi dati predefiniti per gli <strong>articoli per cui non vengono specificate le dimensioni e il peso.</strong> Puoi modificarli quando vuoi dalla scheda delle impostazioni."
+defaultParcel,title-config,"Default parcel","Paquete predeterminado",Standardpaket,"Colis prédéfini","Pacco predefinito"
+defaultParcel,description-config,"We will use this data for <strong>items that do not have defined dimensions and weight.</strong>","Utilizaremos estos datos <strong>para los artículos que no tengan dimensiones y peso definidos.</strong>","Wir werden diese Daten für <strong>Artikel verwenden, die keine festgelegten Abmessungen und kein festgelegtes Gewicht haben.</strong>","Nous utiliserons ces données pour les <strong>articles dont les dimensions et le poids n’ont pas été définis.</strong>","Useremo questi dati per <strong>articoli privi di dimensioni e peso definiti.</strong>"
+defaultParcel,weight,Weight,Peso,Gewicht,Poids,Peso
+defaultParcel,height,Height,Alto,Höhe,Hauteur,Altezza
+defaultParcel,width,Width,Ancho,Breite,Largeur,Largezza
+defaultParcel,length,Length,Largo,Länge,Longueur,Lunghezza
+defaultWarehouse,title-onboarding,"2. Set sender’s address","2. Configurar la dirección del remitente","2. Absenderadresse eingeben","2. Configurer l’adresse de l’émetteur","2. Imposta l’indirizzo del mittente"
+defaultWarehouse,description-onboarding,"We will use this address to create <strong>a default sender for all shipments.</strong> You will be able to edit it whenever you wish via the settings tab.","Utilizaremos esta dirección para crear un <strong>remitente por defecto que valga para todos los envíos.</strong> Podrás editarla cuando quieras desde la pestaña de configuración.","Wir werden diese Adresse verwenden, um <strong>einen Standardabsender für alle Sendungen </strong>zu erstellen. Sie können die Adresse jederzeit über die Registerkarte Einstellungen bearbeiten.","Nous utiliserons cette adresse pour créer <strong>un émetteur prédéfini pour toutes les expéditions.</strong> Vous pourrez la modifier à tout moment via l’onglet Paramètres.","Useremo questo indirizzo per creare <strong>un mittente predefinito per tutte le spedizioni.</strong> Potrai modificarlo ogni volta che vuoi dalla scheda delle impostazioni."
+defaultWarehouse,title-config,"Default sender address","Dirección del remitente por defecto",Standard-Absenderadresse,"Adresse de l’émetteur prédéfinie","Indirizzo del mittente predefinito"
+defaultWarehouse,description-config,"We will use this address to create <strong>a default sender for all shipments.</strong> You can edit it at any time.","Utilizaremos esta <strong>dirección para crear un remitente por defecto</strong> que valga para todos los envíos.","Wir werden diese Adresse verwenden, um <strong>einen Standardabsender für alle Sendungen </strong>zu erstellen. Sie können die Adresse jederzeit bearbeiten.","Nous utiliserons cette adresse pour créer <strong>un émetteur prédéfini pour toutes les expéditions.</strong> Vous pourrez la modifier à tout moment.","Useremo questo indirizzo per creare <strong>un mittente predefinito per tutte le spedizioni.</strong> Potrai modificarlo ogni volta che vuoi."
+defaultWarehouse,alias,"Warehouse name","Nombre del almacén",Absendername,"Nom de l’émetteur","Nome del mittente"
+defaultWarehouse,alias-placeholder,"Main warehouse","Almacen principal",Hauptlager,"Magasin principal","Magazzino principale"
+defaultWarehouse,name,"Name of contact person","Nombre de la persona de contacto","Name der Kontaktperson","Prénom de la personne à contacter","Nome della persona di contatto"
+defaultWarehouse,name-placeholder,Name,"Nombe de la persona",Name,Prénom,Nome
+defaultWarehouse,surname,"Surname of contact person","Apellido de la persona de contacto","Nachname der Kontaktperson","Nom de la personne à contacter","Cognome della persona di contatto"
+defaultWarehouse,surname-placeholder,Surname,"Apellido de la persona",Nachname,Nom,cognome
+defaultWarehouse,company,"Company name","Nombre de la empresa",Unternehmen,"Nom de l'entreprise","Nome dell'azienda"
+defaultWarehouse,company-placeholder,Company,"Empresa S.A.",Unternehmen,Société,Azienda
+defaultWarehouse,country,Country,País,Land,Pays,Paese
+defaultWarehouse,postal_code,"City or postcode","Ciudad o código postal","Stadt oder Postleitzahl","Ville ou code postal","Città o codice postale"
+defaultWarehouse,postal_code-placeholder,-,-,-,-,-
+defaultWarehouse,address,Address,Dirección,"Straße und Hausnummer",Adresse,Indirizzo
+defaultWarehouse,address-placeholder,Address,Dirección,Anschrift,Adresse,Indirizzo
+defaultWarehouse,phone,"Phone number","Número de teléfono",Telefonnummer,"Numéro de téléphone","Numero di telefono"
+defaultWarehouse,phone-placeholder,"123 456 7777","123 456 7777","123 456 7777","123 456 7777","123 456 7777"
+defaultWarehouse,email,Email,"Correo electrónico",E-Mail-Adresse,Email,Email
+defaultWarehouse,email-placeholder,youremail@example.com,tucorreo@example.com,ihreemail@example.com,votreemail@exemple.com,latuaemail@esempio.com
+customs,defaultValues,"Default values","Valores por defecto ",Standardwerte,"Valeurs par défaut","Valori predefiniti"
+customs,description,"To send international shipment data to Packlink, please set default values that will be used if the values are not found on %s.","Para enviar datos de envíos internacionales en Packlink, defina los valores por defecto que se utilizarán si los valores no se encuentran en %s.","Um internationale Versanddaten an Packlink zu senden, legen Sie bitte Standardwerte fest, die verwendet werden, wenn die Werte nicht auf %s gefunden werden..","Pour envoyer les données des expéditions à l'internationale dans Packlink, veuillez définir des valeurs par défaut qui seront utilisées si les valeurs ne sont pas trouvées sur %s.","Per inviare i dati di spedizione internazionale a Packlink, si prega di impostare valori predefiniti che verranno utilizzati se i valori non sono presenti su %s."
+customs,reasonForExport,"Reason for export","Motivo de exportación",Exportgrund,"Motif de l'export","Motivo dell'esportazione"
+customs,purchase,"Purchase or sale","Compra o venta","Kauf oder Verkauf","Achat ou vente","Acquisto o vendita"
+customs,personalBelongings,"Personal belongings","Bienes personales","Persönliche Gegenstände","Effets personnels","Effetti personali"
+customs,sample,Sample,Muestra,Probe,Échantillon,Campione
+customs,documents,Documents,Documentos,Dokumente,Documents,Documenti
+customs,return,Return,Devolución,Rücksendung,Retour,Reso
+customs,senderTax,"Sender tax id/vat number","Número de identificación fiscal del remitente/Número de IVA","Absender Steuer-ID/USt-IdNr","Numéro d'identification fiscale de l'expéditeur/Numéro de TVA","Numero di identificazione fiscale del mittente/Numero di partita IVA"
+customs,receiverUserType,"Receiver user type","Información del destinatario","Art des Empfängers","Données du destinataire","Tipo di destinatario"
+customs,private,"Private person",Particular,Privatperson,Particulier,Privato
+customs,company,Company,Empresa,Unternehmen,Entreprise,Azienda
+customs,receiverTaxId,"Receiver tax id/vat number","Número de identificación fiscal del destinatario/Número de IVA","Empfänger Steuer-ID/USt-IdNr","Numéro d'identification fiscale du destinataire/Numéro de TVA","Numero di identificazione fiscale del destinatario/Numero di partita IVA"
+customs,tariffNumber,"Harmonized System (HS) code","Código HS","HS Code","Code HS","HS Code"
+customs,countryOrigin,"Country of origin","País de origen",Herkunftsland,"Pays d'origine","Paese di origine"
+customs,dataMapping,"Data mapping","Mapeo de datos",Datenzuordnung,"Data mapping","Mappatura dati"
+customs,mappingDescription,"Please map international shipment data to %s custom data. Mapped data values will be used when the app sends customs invoice data to Packlink.","Por favor, asigne los datos de los envíos internacionales a %s datos personalizados. Los valores de los datos asignados se utilizarán cuando la aplicación envíe los datos de la factura de aduanas a Packlink.","Bitte weisen Sie internationale Versanddaten den benutzerdefinierten %s-Daten zu. Die zugeordneten Datenwerte werden verwendet, wenn die App Zollrechnungsdaten an Packlink sendet.","Veuillez associer les données relatives aux expéditions internationales aux données personnalisées de %s. Les valeurs des données mappées seront utilisées lorsque l'application enverra les données de facture douanière à Packlink.","Si prega di associare i dati di spedizione internazionale ai dati personalizzati di %s. I valori dei dati associati verranno poi utilizzati quando l'app invia dati di fattura doganale a Packlink."
+configuration,menu,Settings,Configuración,Einstellungen,Paramètres,Impostazioni
+configuration,title,Settings,Configuración,Einstellungen,Paramètres,Impostazioni
+configuration,orderStatus,"Order status","Estado de la orden",Bestellstatus,"Statut de la commande","Stato dell’ordine"
+configuration,customs,Customs,Aduanas,Zoll,Douanes,Dogana
+configuration,warehouse,"Default sender address","Almacén por defecto",Standard-Absenderadresse,"Adresse de l’émetteur prédéfinie","Indirizzo del mittente predefinito"
+configuration,parcel,"Default parcel","Paquete predeterminado",Standardpaket,"Colis par défaut","Pacco predefinito"
+configuration,help,Help,Ayuda,Hilfe,Aide,Aiuto
+configuration,contactUs,"Contact us at:",Contáctanos:,"Kontaktieren Sie uns:",Contactez-nous:,Contattaci:
+configuration,systemInfo,"System information","Información del sistema",Systeminformationen,"Informations du système","Informazioni del sistema"
+configuration,cashOnDelivery,"Cash on Delivery",,,,
+configuration,email,E-mail:,"Correo electrónico:",E-Mail:,E-mail:,E-mail:
+cashOnDelivery,descriptionFirst,"Cash on Delivery is a feature available to our merchants on the Packlink PRO Plus plans. COD is delivery service in which the recipient is responsible for paying the postage rather than the sender. COD postpones the payment for the delivery until the recipient receives the parcel instead of having to pay for it before the package is shipped.",,,,
+cashOnDelivery,descriptionSecond,"Packlink offers such a service as well for some of our shipping services and the process differs slightly. At Packlink, the sender is required to pay for the shipping when ordering the service but is reimbursed after the recipient pays the courier. 
+ For shipping methods that support Cash on Delivery, the integration will offer the payment method mapped as Cash on Delivery in your shop.",,,,
+cashOnDelivery,activate,"Activate Cash on Delivery",,,,
+cashOnDelivery,accountHolder,"Account holder",,,,
+cashOnDelivery,accountHolder-placeholder,"First and last name",,,,
+cashOnDelivery,iban,"Merchant IBAN",,,,
+cashOnDelivery,iban-placeholder,IBAN,,,,
+cashOnDelivery,fee,"Cash on Delivery fee",,,,
+cashOnDelivery,fee-placeholder," ",,,,
+cashOnDelivery,paymentMethod,"Shop offline payment method",,,,
+cashOnDelivery,configurationTitle,"Cash on Delivery configuration",,,,
+cashOnDelivery,configurationDescription,"Please configure your account holder name and IBAN and map one of the available shop payment methods to the Cash on Delivery payment method. Mapped payment method will be treated as a Cash on Delivery payment option for shipping services that support it. For the rest of Packlink services, it will be hidden.",,,,
+cashOnDelivery,surcharge,"Packlink Cash on Delivery Surcharge fee",,,,
+cashOnDelivery,infoMessage,"In case selected Cash On Delivery is the only active payment method, please ensure at least one other payment option is available to allow customers to complete orders when a Packlink shipping method that does not support COD is selected.",,,,
+cashOnDelivery,noOfflinePayments,"No offline payment methods are available in your shop. If you want to configure Cash on Delivery, please make sure that at least one offline payment method is activated.",,,,
+systemInfo,title,"System information file <br>and debug mode","System information file <br>and debug mode","Systeminfodatei <br>und debug mode","Fichier d’informations du système <br>et mode débogage","File di informazioni del sistema <br>e modalità debug"
+systemInfo,debugMode,"Debug mode","Debug mode","Debug mode","Debug mode","Debug mode"
+systemInfo,download,"Download system information","Download system information","Systeminfodatei herunterladen","Téléchargez le document d'information système","Scarica il file di informazioni del sistema"
+orderStatusMapping,title,"Order status","Estado de la orden",Bestellstatus,"Statut de la commande","Stato dell’ordine"
+orderStatusMapping,systemOrderStatus,"%s <strong>ORDER STATUS</strong>","ESTADO DEL <strong>PEDIDO</strong> de %s","<strong>BESTELLSTATUS</strong> von %s","STATUT DE LA <strong>COMMANDE</strong> %s","STATO DELLA <strong>SPEDIZIONE</strong> di %s"
+orderStatusMapping,none,None,Ninguno,Leer,Aucun,Nessuno
+orderStatusMapping,pending,Pending,Pendiente,Ausstehend,"En attente","In attesa"
+orderStatusMapping,processing,Processing,Procesando,"In Bearbeitung","En cours de traitement",Processando
+orderStatusMapping,readyForShipping,"Ready for shipping","Listo para enviar",Versandfertig,"Prêt pour la livraison","Pronto per la spedizione"
+orderStatusMapping,inTransit,"In transit","En tránsito",Unterwegs,"En transit","In transito"
+orderStatusMapping,delivered,Delivered,Entregado,Zugestellt,Délivré,Consegnato
+orderStatusMapping,cancelled,Canceled,Cancelado,Storniert,Annulé,Annullato
+orderStatusMapping,incident,Incident,,,,
+orderStatusMapping,outForDelivery,"Out for delivery",,,,
+shippingServices,myServices,"My shipping services","Mis servicios de envío","Mein Versandservice","Mes services d’expédition","I miei servizi di spedizione"
+shippingServices,noServicesTitle,"You just need to add your shipment services","Solo queda añadir tus servicios de envío","Sie brauchen nur Ihre Transportdienstleistung hinzuzufügen","Vous devez simplement ajouter vos services d’expédition","Dovrai solo aggiungere i tuoi servizi di spedizione"
+shippingServices,noServicesDescription,"They will be shown to your customer at the time of checkout, so that they can choose which carrier will deliver their parcel. Set it up now so that you don't need to worry about anything else. You can change it whenever you wish, to renew or upgrade shipping services.","Se mostrarán a tu cliente en el momento del checkout, así podrá elegir qué transportista le llevará su paquete. Lo configuras ahora y no tienes que preocuparte por nada más, puedes cambiarlo siempre que quieras para renovar o ampliar servicios de envío.","Sie werden Ihrem Kunden zum Zeitpunkt der Kaufabwicklung angezeigt, damit er auswählen kann, welcher Spediteur sein Paket ausliefert. Richten Sie es jetzt ein, damit Sie sich um nichts anderes kümmern müssen. Sie können es jederzeit ändern, um die Versanddienste zu erneuern oder zu aktualisieren.","Votre client pourra les voir au moment du paiement et choisir le transporteur qui livrera son colis. Configurez-les maintenant pour n’avoir à vous soucier de rien d’autre. Vous pourrez à tout moment modifier, mettre à jour ou améliorer vos services d’expédition.","Questi saranno mostrati al cliente al momento del pagamento, per consentirgli di scegliere la compagnia di trasporto che effettuerà la consegna del pacco. Configurali adesso e non dovrai più preoccuparti di nulla. Puoi modificarli ogni volta che vuoi, per aggiornare o rinnovare i servizi di spedizione."
+shippingServices,addService,"Add service","Añadir servicio","Dienstleistung hinzufügen","Ajouter un service","Aggiungi servizio"
+shippingServices,addNewService,"Add new service","Añadir nuevo servicio","Neue Dienstleistung hinzufügen","Ajouter un nouveau service","Aggiungi nuovo servizio"
+shippingServices,addedSuccessTitle,"Shipping service added successfully","Servicio de envío añadido correctamente","Versanddienst erfolgreich hinzugefügt","Service d’expédition ajouté avec succès","Il servizio di spedizione è stato aggiunto"
+shippingServices,addedSuccessDescription,"You can edit the service from the <strong>""My services""</strong> section.","Podrás editarlo desde la sección <strong>""Mis servicios""</strong>.","Sie können die Dienstleistung unter <strong>„Meine Dienstleistungen“</strong> bearbeiten.","Vous pouvez modifier le service dans la section <strong>« Mes services »</strong>.","Puoi modificare il servizio dalla sezione <strong>""I miei servizi""</strong>."
+shippingServices,deletedSuccessTitle,"Shipping service deleted successfully","Servicio de envío eliminado correctamente","Versanddienst erfolgreich gelöscht","Service d’expédition supprimé avec succès","Il servizio di spedizione è stato eliminato"
+shippingServices,deletedSuccessDescription,"You can add new services from the <strong>""Add new service""</strong> button.","Puedes añadir nuevos servicios con el botón <strong>""Añadir nuevo servicio""</strong>.","Über die Schaltfläche <strong>„Neue Dienstleistung hinzufügen“</strong> können Sie neue Dienstleistungen hinzufügen.","Vous pouvez ajouter de nouveaux services avec le bouton <strong>« Ajouter un nouveau service »</strong>.","Puoi aggiungere nuovi servizi tramite il pulsante <strong>""Aggiungi nuovo servizio""</strong>."
+shippingServices,disableCarriersTitle,"You have created your first shipment service. Do you want to disable previous carriers?","Has creado tu primer servicio de envío. ¿Quieres desabilitar los transportistas anteriores?","Sie haben Ihre erste Transportdienstleistung erstellt. Möchten Sie die vorherigen Spediteure deaktivieren?","Vous avez créé votre premier service d’expédition. Souhaitez-vous désactiver les anciens transporteurs ?","Hai creato il tuo primo servizio di spedizione. Vuoi disattivare le compagnie di trasporto precedenti?"
+shippingServices,disableCarriersDescription,"To provide you with a better service, it is important to <strong>disable the carriers</strong> you previously used.","Para ofrecerte un mejor servicio, es importante <strong>desabilitar los transportistas</strong> que tenías previamente.","Um Ihnen einen besseren Service anbieten zu können, sollten Sie die vorher genutzten <strong>Spediteure deaktivieren</strong>.","Afin de vous offrir un meilleur service, il est important de <strong>désactiver le transporteur</strong> que vous utilisiez auparavant.","Per garantirti un servizio migliore, è importante <strong>disattivare le compagnie di trasporto</strong> utilizzati in precedenza."
+shippingServices,successfullyDisabledShippingMethods,"Successfully disabled shipping methods.","Servicios de envío correctamente deseleccionados.","Versanddienste erfolgreich deaktiviert.","Service d'envoi désactivé avec succès.","Servizi di spedizione disattivati correttamente."
+shippingServices,failedToDisableShippingMethods,"Failed to disable shipping methods.","Error al deshabilitar los servicios de envío.","Versanddienste konnten nicht deaktiviert werden.","Échec de la désactivation du service d'envoi.","Impossibile disattivare i servizi di spedizione."
+shippingServices,pickShippingService,"Add delivery services","Añadir servicios de envío","Lieferdienst hinzufügen","Ajouter des services de livraison","Aggiungi servizi di consegna"
+shippingServices,failedGettingServicesTitle,"We are having troubles getting shipping services","Tenemos dificultades para obtener servicios de envío","Beim Abrufen der Versanddienste ist ein Problem aufgetreten","Nous rencontrons des problèmes dans l’importation des services de livraison","Si è verificato un problema durante l’acquisizione dei servizi di spedizione"
+shippingServices,failedGettingServicesSubtitle,"Do you want to retry?","¿Quieres volverlo a intentar?","Möchten Sie es erneut versuchen?","Souhaitez-vous réessayer ?","Vuoi riprovare?"
+shippingServices,retry,Retry,"Volver a intentar","Erneut versuchen",Réessayer,Riprova
+shippingServices,filterModalTitle,Filters,Filtros,Filter,Filtres,Filtri
+shippingServices,applyFilters,Apply,Aplicar,Anwenden,Appliquer,Applica
+shippingServices,type,Type,Tipo,Typ,Type,Tipo
+shippingServices,national,Domestic,Nacional,National,National,Nazionale
+shippingServices,international,International,Internacional,International,International,Internazionale
+shippingServices,deliveryType,"Type of shipment",Servicio,Versandart,Livraison,Servizio
+shippingServices,economic,Budget,Económico,Standard,Économique,Economico
+shippingServices,express,Express,Express,Express,Express,Espresso
+shippingServices,parcelOrigin,"Parcel origin",Origen,"Absendeort des Pakets","Origine du colis","Origine del pacco"
+shippingServices,collection,Collection,Recogida,"Abholung an Adresse","Collecte à domicile","Ritiro a domicilio"
+shippingServices,dropoff,"Drop off","Drop off","Abgabe im Paketshop","Dépôt en point relais","Ritiro in punto corriere"
+shippingServices,parcelDestination,"Parcel destination",Destino,"Zielort des Pakets","Destination du colis","Destinazione pacco"
+shippingServices,pickup,"Pick up","Pick up","Abholung im Paketshop","Point de retrait","Consegna in punto corriere"
+shippingServices,delivery,Delivery,Entrega,"Zustellung an Adresse","Livraison à domicile","Consegna al domicilio"
+shippingServices,carrierLogo,"Carrier logo","Logo del transportista","Logo des Versandunternehmens","Logo du transporteur","Logo del corriere"
+shippingServices,carrier,Carrier,Transportista,Versandpartner,Transporteur,Corriere
+shippingServices,serviceTitle,"Service title","Nombre del servicio","Name des Dienstes","Titre du service","Titolo del servizio"
+shippingServices,serviceTitleDescription,"Customise your shipment by editing it. Your customers will be able to see it.","Personaliza tu envío editándolo. Será visible para tus clientes.","Personalisieren Sie Ihren Versand, indem Sie ihn bearbeiten. Ihre Kunden werden es sehen können.","Personnalisez votre envoi en le modifiant. Vos clients pourront le voir.","Modifica le tue spedizioni per personalizzarle. Queste informazioni saranno visualizzate dai tuoi clienti."
+shippingServices,transitTime,"Transit Time","Tiempo de tránsito",Versandlaufzeit,"Temps de transit","Tempi di transito"
+shippingServices,origin,Origin,Origen,Absender,Origine,Origine
+shippingServices,destination,Destination,Destino,Empfänger,Destination,Destinazione
+shippingServices,myPrices,"My prices","Mis precios","Meine Preise","Mes prix","I miei prezzi"
+shippingServices,configureService,"Set up service","Configura el servicio","Dienst einrichten","Configurer le service","Configura il servizio"
+shippingServices,showCarrierLogo,"Show carrier logo to my customers","Mostrar logo del transportista a mis clientes.","Meinen Kunden das Logo anzeigen","Montrer le logo du transporteur à mes clients","Mostra logo del corriere ai miei clienti"
+shippingServices,pricePolicy,"Price policy","Política de precios",Preispolitik,"Politique tarifaire","Politica dei prezzi"
+shippingServices,configurePricePolicy,"Set up my shipment prices","Configurar mis precios de envío","Meine Versandkosten einrichten","Configurer mes frais d’expédition","Configura i prezzi di spedizione"
+shippingServices,taxClassTitle,"Choose your saved tax class","Elige tu tipo de impuesto guardado","Wählen Sie Ihre gespeicherte Steuerkategorie","Sélectionnez votre taux fiscal enregistré","Scegli la tua aliquota fiscale salvata"
+shippingServices,tax,Tax,Impuestos,Steuer,Taxe,Tassa
+shippingServices,serviceCountriesTitle,"Availability by destination country","Disponibilidad por país de destino","Verfügbarkeit nach Zielland","Disponibilité par pays de destination","Disponibilità per paese di destinazione"
+shippingServices,serviceCountriesDescription,"Select the availability for the countries that are supported for your shipping service.","Selecciona la disponibilidad para los países que hay permitidos para tu servicio de envío.","Wählen Sie die Verfügbarkeit der Länder, die von Ihrem Versanddienst unterstützt werden.","Sélectionnez la disponibilité des pays pris en charge par votre service d’expédition.","Seleziona la disponibilità per i paesi supportati per i tuoi servizi di spedizione."
+shippingServices,openCountries,"See countries","Ver países","Länder anzeigen","Voir pays","Vedi i paesi"
+shippingServices,allCountriesSelected,"All countries selected","Todos los países seleccionados","Es wurden alle Länder ausgewählt","Tous les pays sont sélectionnés","Tutti i paesi selezionati"
+shippingServices,oneCountrySelected,"One country selected","Un país seleccionado","Es wurde ein Land ausgewählt","Un pays est sélectionné","Un paese selezionato"
+shippingServices,selectedCountries,"%s countries selected.","%s países seleccionados","Es wurden %s Länder ausgewählt","%s pays sont sélectionnés","%s paesi selezionati"
+shippingServices,firstPricePolicyDescription,"Perfect, just a couple of steps:<br><br>1. Choose whether you want to set them by weight and/or purchase price.<br><br>2. Choose a price policy and set it up.","Perfecto, son un par de pasos:<br><br>1- Elige si quieres fijarlos por el peso y/o el precio de la compra.<br><br>2- Elige una política de precios y configúrala.","Perfekt, nur noch wenige Schritte:<br><br>1. Wählen Sie aus, ob Sie diese nach Gewicht und / oder Kaufpreis einstellen möchten.<br><br>2. Wählen Sie eine Preispolitik und richten Sie diese ein.","Parfait, il ne vous reste que quelques étapes :<br><br>1. Choisissez si vous souhaitez les configurer par poids et/ou par prix d’achat.<br><br>2. Choisissez une politique tarifaire et configurez-la.","Perfetto, mancano solo due passaggi:<br><br>1. Scegli se vuoi importarli per peso e/o prezzo di acquisto.<br><br>2. Scegli una politica dei prezzi e configurala."
+shippingServices,addFirstPolicy,"Add price rule","Añadir regla de precio","Preisregel hinzufügen","Ajouter une règle de prix","Aggiungi regola di prezzo"
+shippingServices,addAnotherPolicy,"Add another rule","Añadir otro precio","Weitere Regel hinzufügen","Ajouter une autre règle","Aggiungi un’altra regola"
+shippingServices,from,From,Desde,Von,De,Da
+shippingServices,to,To,Hasta,Bis,À,A
+shippingServices,price,Price,Precio,Preis,Prix,Prezzo
+shippingServices,rangeTypeExplanation,"1. Choose whether you want to set them by weight and/or purchase price.","1- Elige si quieres fijarlos por el peso y/o el precio de la compra.","1. Wählen Sie aus, ob Sie diese nach Gewicht und / oder Kaufpreis einstellen möchten.","1. Choisissez si vous souhaitez les configurer par poids et/ou par prix d’achat.","1. Scegli se vuoi importarli per peso e/o prezzo di acquisto."
+shippingServices,rangeType,"Range type","Tipo de rango",Typenreihe,"Type de fourchette","Tipo di range"
+shippingServices,priceRange,"Price range","Rango de precio",Preisklasse,"Fourchette de prix","Range di prezzo"
+shippingServices,priceRangeWithData,"Price range: from %s€ to %s€","Rango de precio: desde %s€ hasta %s€","Preisklasse: von %s € bis %s €","Fourchette de prix : de %s € à %s €","Range di prezzo: da %s€ a %s€"
+shippingServices,weightRange,"Weight range","Rango de peso",Gewichtsklasse,"Fourchette de poids","Range di peso"
+shippingServices,weightRangeWithData,"Weight range: from %s kg to %s kg","Rango de peso: desde %s kg hasta %s kg","Gewichtsklasse: von %s kg bis %s kg","Fourchette de poids : de %s kg à %s kg","Range di peso: da %s kg a %s kg"
+shippingServices,weightAndPriceRange,"Weight and price range","Rango de peso y precio","Gewichts- und Preisklasse","Fourchette de poids et de prix","Range di prezzo e di peso"
+shippingServices,weightAndPriceRangeWithData,"Weight and price range: from %s kg to %s kg and from %s€ to %s€","Rango de peso y precio: desde %s kg hasta %s kg y desde %s€ hasta %s€","Gewichts- und Preisklasse: von %s kg bis %s kg und von %s € bis %s €","Fourchette de poids et de prix : de %s kg à %s kg et de %s € à %s €","Range di prezzo e di peso: da %s kg a %s kg e da %s€ a %s€"
+shippingServices,singlePricePolicy,"Price policy %s","Política de precio %s","Preispolitik %s","Politique tarifaire %s","Politica dei prezzi %s"
+shippingServices,pricePolicyExplanation,"2. Choose a price policy and set it up.","2- Elige una política de precios y configúrala.","2. Wählen Sie eine Preispolitik und richten Sie diese ein.","2. Choisissez une politique tarifaire et configurez-la.","2. Scegli una politica dei prezzi e configurala."
+shippingServices,fixedPrices,"Fixed price","Precio fijo",Festpreis,"Prix fixe","Prezzo fisso"
+shippingServices,fixedPricesWithData,"Fixed price: %s€","Precio fijo: %s€","Festpreis: %s €","Prix fixe : %s €","Prezzo fisso: %s€"
+shippingServices,increaseExplanation,"Increase: add a % to the price, this will be paid by the customer.","Incrementar: añade un % al precio, lo pagará el cliente.","Erhöhen: fügen Sie % zum Preis hinzu. Dies wird dann vom Kunden bezahlt.","Augmentation : ajoutez % au prix, c’est le client qui payera.","Incremento sul prezzo: aggiungi una % al prezzo, che sarà pagata dal cliente."
+shippingServices,reduceExplanation,"Reduce: deduct a % from the price, you will pay for it yourself.","Reducir: descuenta un % al precio, lo pagarás tú.","Reduzieren: ziehen Sie % vom Preis ab. Dies werden Sie dann selbst zahlen.","Réduction : déduisez % du prix, c’est vous qui payerez.","Riduzione sul prezzo: deduci una % dal prezzo, che sarà pagata da te."
+shippingServices,select,Select,Elige,Auswählen,Sélectionner,Sélectionner
+shippingServices,invalidRange,"Invalid range","Rango no válido","Unzulässiger Bereich","Fourchette invalide","Range non valido"
+shippingServices,increase,increase,incrementar,Erhöhen,Augmenter,Aumenta
+shippingServices,reduce,reduce,reducir,Reduzieren,Réduire,Diminuisci
+shippingServices,selectAllCountries,"All selected countries","Selecionar todos los países","Alle ausgewählten Länder","Tous les pays sélectionnés","Tutti i paesi selezionati"
+shippingServices,selectCountriesHeader,"Countries supported for your <br> shipping service","Países permitidos para tu servicio <br> de envío","Länder, die von Ihrem <br> Versanddienst unterstützt werden","Pays pris en charge par votre <br> service d’expédition","Paesi supportati per il tuo <br> servizio di spedizione"
+shippingServices,selectCountriesSubheader,"Select availability of at least one country and add <br> as many required","Selecciona la disponibilidad de al menos un país y <br> añade tantos como necesites","Wählen Sie die Verfügbarkeit von mindestens einem Land aus und fügen Sie <br> beliebig viele hinzu","Sélectionnez la disponibilité d’au moins un pays et ajoutez-en <br> autant que nécessaire","Seleziona la disponibilità di almeno un paese e aggiungi <br> tutti quelli richiesti"
+shippingServices,discardChangesQuestion,"There are unsaved changes.<br>Are you sure you want to go back and discard them?","Algunos cambios no se han guardado.<br>¿Estás seguro de que quieres volver e ignorar los cambios?","Es gibt nicht gespeicherte Änderungen.<br>Sind Sie sicher, dass Sie zurückgehen und sie verwerfen möchten?","Certaines modifications n’ont pas été enregistrées.<br>Êtes-vous sûr de vouloir revenir en arrière et de les ignorer ?","Alcune modifiche non sono state salvate.<br>Sei sicuro di voler tornare indietro e annullarle?"
+shippingServices,atLeastOneCountry,"At least one country must be selected.",,,,
+shippingServices,misconfiguration,"Due to store currency change, you must set a Fixed Price value by clicking ""edit"" on the shipping service.","Debido al cambio de moneda de la tienda, debe establecer un valor de precio fijo haciendo clic en editar en el servicio de envío.","Um Währungsänderungen zu speichern, müssen Sie einen Festpreiswert einstellen, indem Sie auf Versandservice ""Bearbeiten"" klicken.","En raison du changement de devise en magasin, vous devez établir une valeur monétaire fixe en cliquant sur « Modifier » dans le service d’expédition.","A causa del cambio di valuta del negozio, devi impostare un valore di prezzo fisso cliccando “Modifica” sul servizio di spedizione."
+shippingServices,refreshServiceList,"Refresh service list","Actualizar la lista de servicios","Serviceliste aktualisieren","Actualiser la liste des services","Aggiorna l'elenco dei servizi"
+shippingServices,refreshError,"An error occurred while refreshing the service list","Ocurrió un error al actualizar la lista de servicios","Beim Aktualisieren der Serviceliste ist ein Fehler aufgetreten","Une erreur s'est produite lors de l'actualisation de la liste des services","Si è verificato un errore durante l'aggiornamento dell'elenco dei servizi"
+orderListAndDetails,printed,Printed,Impreso,Ausgedruckt,Imprimé,Stampato
+orderListAndDetails,ready,Ready,Listo,Bereit,Prêt,"Pronto per la spedizione"
+orderListAndDetails,printLabel,"Print label","Imprimir etiquetas","Versandetikett drucken","Imprimer étiquette","Stampa etichette"
+orderListAndDetails,shipmentLabels,"Shipment Labels","Etiquetas de los envíos",Versandetiketten,"Étiquettes de livraison","Etichette di spedizione"
+orderListAndDetails,shipmentDetails,"Shipment details","Detalles del envío",Versanddetails,"Détails de l'envoi","Dettagli della spedizione"
+orderListAndDetails,disablePopUpBlocker,"Please disable pop-up blocker on this page in order to bulk open shipment labels","Deshabilita el bloqueador de elementos emergentes en esta página para abrir de forma masiva las etiquetas de envío","Bitte deaktivieren Sie den Popup-Blocker auf dieser Seite, um alle Versandetiketten auf einmal zu öffnen.","Veuillez désactiver l'outil de blocage des fenêtres pop-up sur cette page afin d'ouvrir massivement les étiquettes d'envoi.","Disabilita il blocco pop-up su questa pagina per poter aprire le etichette di spedizione insieme"
+orderListAndDetails,date,Date,Fecha,Datum,Date,Data
+orderListAndDetails,number,Number,Número,Nummer,Numéro,Numero
+orderListAndDetails,status,Status,Estado,Status,Statut,Stato
+orderListAndDetails,print,Print,Imprimir,Drucken,Imprimer,Stampa
+orderListAndDetails,carrierTrackingNumbers,"Carrier tracking numbers","Número de tracking del transportista","Trackingnummer des Versandunternehmens","Numéro de tracking du transporteur","Numero di tracking del corriere"
+orderListAndDetails,trackIt,"Track it!",Seguimiento,"Versand verfolgen","Suivez le!",Traccialo!
+orderListAndDetails,createDraft,"Create Draft","Crear borrador","Entwurf erstellen","Créer un brouillon","Crea bozza"
+orderListAndDetails,draftCreateFailed,"Previous attempt to create a draft failed. Error: %s","El intento anterior de crear un borrador ha fallado. Error: %s","Der Versuch der Entwurfserstellung ist fehlgeschlagen. Fehler: %s","La tentative précédente de création d'un brouillon a échoué. Erreur: %s","Il precedente tentativo di creare una bozza è fallito. Errore: %s"
+orderListAndDetails,shipmentOrderNotExist,"Order with shipment reference %s doesn't exist in the shop","El pedido con referencia de envío %s no existe en la tienda","Die Bestellung mit der Versandreferenznummer %s existiert nicht im Shop","La commande de livraison sous le référence %s n'existe pas sur le shop.","L'ordine con il numero di spedizione %s non esiste nel negozio"
+orderListAndDetails,orderDetailsNotFound,"Order details not found","Detalles del pedido no encontrados","Bestelldetails nicht gefunden","Détails de commande introuvables","Dettagli dell'ordine non trovati"
+orderListAndDetails,orderNotExist,"Order with ID %s doesn't exist in the shop","El pedido con ID %s no existe en la tienda","Die Bestellung mit der ID %s existiert nicht im Shop","La commande sous l'ID %s n'existe pas sur le shop.","L'ordine con ID %s non esiste nel negozio"
+orderListAndDetails,bulkFailCreateFail,"Unable to create bulk labels file","No se puede crear el archivo de etiquetas masivas","Die Datei der Versandetiketten konnte nicht erstellt werden","Création d'un dossier d'étiquettes en masse impossible.","Impossibile creare il file di etichette in blocco"
+orderListAndDetails,draftOrderDelayed,"Creation of the draft is delayed","La creación del borrador se ha retrasado","Die Erstellung des Entwurfs verzögert sich","La création du brouillon a été retardée","La creazione della bozza è stata ritardata"
+orderListAndDetails,completeServicesSetup,"You need to complete the services setup to create order draft.","You need to complete the services setup to create order draft.","You need to complete the services setup to create order draft.","You need to complete the services setup to create order draft.","You need to complete the services setup to create order draft."
+checkoutProcess,choseDropOffLocation,"This shipping service supports delivery to pre-defined drop-off locations. Please choose location that suits you the most by clicking on the ""Select drop-off location"" button.","Este servicio de envío admite la entrega a ubicaciones de entrega predefinidas. Elige la ubicación que más te convenga haciendo clic en el botón ""Seleccionar ubicación de entrega""..","Dieser Versanddienst unterstützt die Zustellung an vordefinierte Abgabestellen. Bitte wählen Sie den für Sie günstigsten Ort aus, indem Sie auf ""Abgabestelle auswählen"" klicken.","Ce service de transport soutient la livraison vers des lieux de dépôts prédéfinis. Veuillez choisir la localisation qui vous convient le mieux en cliquant sur le bouton ""Sélectionner le lieu de dépôt""","Questo servizio di spedizione supporta la consegna a punti corriere predefiniti. Scegli la località più adatta a te, facendo clic sul pulsante ""Seleziona punto corriere""."
+checkoutProcess,selectDropOffLocation,"Select drop-off location","Seleccionar lugar de entrega","Abgabestelle auswählen","Sélectionner le lieu de dépôt.","Seleziona la località del punto corriere"
+checkoutProcess,changeDropOffLocation,"Change drop-off location","Cambiar el lugar de entrega","Abgabestelle ändern","Changer le lieu de depôt.","Cambia località del punto corriere"
+checkoutProcess,packageDeliveredTo,"Package will be delivered to:","El paquete será entregado a:","Das Paket wird geliefert an:","Le colis sera délivré à:","La spedizione verrà consegnata a:"
+checkoutProcess,dropOffDeliveryAddress,"Drop-Off delivery address","Dirección de entrega",Zustelladresse,"Adresse de livraison.","Indirizzo di consegna del punto corriere"
+checkoutProcess,changeAddress,"There are no delivery locations available for your delivery address. Please change your address.","No hay servicio disponible para la dirección de entrega. Por favor cambia tu direccion.","Für Ihre Zustelladresse sind keine Zustellorte verfügbar. Bitte ändern Sie Ihre Adresse.","Il n'y a pas de lieux de livraison disponibles pour votre adresse de livraison. Veuillez changer votre adresse.","Non ci sono località di consegna disponibili per il tuo indirizzo di consegna. Per favore cambia l'indirizzo."
+checkoutProcess,shippingServiceNotFound,"Shipping service not found","Servicio de envío no encontrado","Versanddienst nicht gefunden","Service de livraison introuvable.","Servizio di spedizione non trovato"
+locationPicker,monday,Monday,Lunes,Montag,Lundi,Lunedì
+locationPicker,tuesday,Tuesday,Martes,Dienstag,Mardi,Martedì
+locationPicker,wednesday,Wednesday,Miércoles,Mittwoch,Mercredi,Mercoledì
+locationPicker,thursday,Thursday,Jueves,Donnerstag,Jeudi,Giovedì
+locationPicker,friday,Friday,Viernes,Freitag,Vendredi,Venerdì
+locationPicker,saturday,Saturday,Sábado,Samstag,Samedi,Sabato
+locationPicker,sunday,Sunday,Domingo,Sonntag,Dimanche,Domenica
+locationPicker,zipCode,"Zip code","Código postal",Postleitzahl,"Code postal","Codice postale"
+locationPicker,idCode,"ID code","Código ID","ID Code","Code ID","Codice ID"
+locationPicker,selectThisLocation,"Select this location","Selecciona esta ubicación","Diesen Ort auswählen","Sélectionner ce lieu","Seleziona la località"
+locationPicker,showWorkingHours,"Show working hours","Mostrar horas de apertura","Öffnungszeiten anzeigen","Montrer les heures de travail","Mostra orari di apertura"
+locationPicker,hideWorkingHours,"Hide working hours","Ocultar horario de apertura","Öffnungszeiten ausblenden","Cacher les heures d'ouverture","Nascondi orari di apertura"
+locationPicker,showOnMap,"Show on map","Mostrar en el mapa","Auf der Karte anzeigen","Montrer sur la carte","Mostra sulla mappa"
+locationPicker,searchBy,"Search by location name, id or address","Buscar por nombre de ubicación, ID o dirección","Suche nach Standortname, ID oder Adresse","Chercher par lieu, nom, id ou adresse","Cerca nome della località per nome, id o indirizzo"
+migrationLogMessages,removeControllersHooksFailed,"Failed to remove old controllers and hooks because: %s","Error al eliminar los controladores y enlaces antiguos porque: %s","Alte Controller und Hooks konnten nicht entfernt werden auf Grund von: %s","Echec du retrait des anciens régulateurs et crochets parce que. %s","Impossibile rimuovere vecchi controller e hook perché: %s"
+migrationLogMessages,deleteObsoleteFilesFailed,"Could not delete obsolete files because: %s","No se pudieron eliminar los archivos antiguos porque: %s","Alte Dateien konnten nicht gelöscht werden auf Grund von: %s","La suppression des dossiers obsolètes n'a pas pu être effectuée car: %s","Impossibile eliminare i file obsoleti perché: %s"
+migrationLogMessages,oldAPIKeyDetected.,"Old API key detected.","Se ha detectado una clave de API antigua.","Alter API-Schlüssel erkannt.","Ancienne clé API détectée.","Rilevata vecchia API Key."
+migrationLogMessages,successfullyLoggedIn,"Successfully logged in with existing api key.","Has iniciado correctamente la sesión con la clave de API existente.","Erfolgreich mit bestehendem API-Schlüssel angemeldet.","Connecté avec succès avec la clé API existante.","Accesso eseguito correttamente con la API Key esistente."
+migrationLogMessages,removingObsoleteFiles.,"Removing obsolete files.","Eliminando archivo antiguos.","Veraltete Dateien werden entfernt.","Retrait des dossiers osolètes.","Rimozione di file obsoleti."
+migrationLogMessages,cannotEnqueueUpgradeShopDetailsTask,"Cannot enqueue UpgradeShopDetailsTask because: %s","No se pueden poner en espera los detalles de la actualización de la tienda porque: %s","UpgradeShopDetailsTask kann aus folgenden Gründen nicht in die Warteschlange gestellt werden: %s","Mise en attente de la tâche ""Mise à jour des détails du Shop"" impossible car: %s","Impossibile richiamare UpgradeShopDetailsTask perché: %s"
+migrationLogMessages,deletingOldPluginDta.,"Deleting old plugin data.","Eliminando datos antiguos del plugin.","Alte Plugin-Daten werden gelöscht.","Suppression des informations relatives à l'ancien plugin.","Eliminando i vecchi dati del plug-in"
+migrationLogMessages,cannotRetrieveOrderReferences,"Cannot retrieve order references because: %s","No se pueden recuperar referencias de pedidos porque: %s","Bestellreferenzen können nicht abgerufen werden auf Grund von: %s","Récupération des références de commande impossible car: %s","Impossibile recuperare i riferimenti degli ordini perché: %s"
+migrationLogMessages,createOrderReferenceFailed,"Failed to create reference for order %s","Error al crear la referencia para el pedido %s","Referenz für Auftrag %s konnte nicht erstellt werden.","Échec de création de référence pour la commande %s","Impossibile creare il riferimento per l'ordine %s"
+migrationLogMessages,setLabelsFailed,"Failed to set labels for order with reference %s","Error al generar las etiquetas para el pedido con referencia %s","Versandetiketten für Bestellung mit Referenz %s konnten nicht erstellt werden.","Échec de la mise en place d'étiquettes pour la commande sous la référence %s","Impossibile impostare le etichette per l'ordine con riferimento %s"
+migrationLogMessages,setTrackingInfoFailed,"Failed to set tracking info for order with reference %s","Error al generar la información de seguimiento para el pedido con la referencia %s","Fehler beim Festlegen der Tracking-Informationen für die Bestellung mit Referenz %s","Échec de la mise en place des informations de suivi pour la commande sous la référence %s","Impossibile impostare le informazioni di tracciamento per l'ordine con riferimento %s"
+migrationLogMessages,orderNotFound,"Order with reference %s not found.","Pedido con referencia %s no encontrado.","Auftrag mit Referenz %s nicht gefunden.","La commande sous la référence %s introuvable.","Ordine con riferimento %s non trovato"
+systemLogMessages,errorCreatingDefaultTask,"Error creating default task runner status configuration.","Error creating default task runner status configuration.","Fehler beim Erstellen der Standardkonfiguration des Task-Runner-Status.","Erreur lors de la création de la configuration du gestionnaire de tâches par défaut.","Error creating default task runner status configuration."
+systemLogMessages,couldNotDelete,"Could not delete entity %s with ID %s","No se pudo eliminar la entidad %s con ID %s","Element %s mit ID %s konnte nicht gelöscht werden","L'entité %s dont l'ID est %s n'a pas pu être supprimée.","Impossibile eliminare l'entità %s con ID %s"
+systemLogMessages,entityCannotBeSaved,"Entity %s with ID %s cannot be saved.","La entidad %s con ID %s no se puede guardar.","Element %s mit ID %s kann nicht gespeichert werden.","L'entité %s dont l'ID est %s n'a pas pu être enregistrée.","L'entità %s con ID %s non può essere salvata."
+systemLogMessages,entityCannotBeUpdated,"Entity %s with ID %s cannot be updated.","La entidad %s con ID %s no se puede actualizar.","Element %s mit ID %s kann nicht aktualisiert werden.","L'entité %s dont l'ID est %s n'a pas pu être mise à jour.","L'entità %s con ID %s non può essere aggiornata."
+systemLogMessages,fieldIsNotIndexed,"Field %s is not indexed!","¡El campo %s no está indexado!","Feld %s ist nicht indiziert!","Le champs %s n'est pas indexé!","Il campo %s non è indicizzato!"
+systemLogMessages,unknownOrNotIndexed,"Unknown or not indexed OrderBy column %s","Desconocido o no indexado OrderBy column %s","Unbekannte oder nicht indizierte OrderBy-Spalte %s","Inconnu ou non-indexé OrderBy column %s","Colonna OrderBy %s sconosciuta o non indicizzata"
+systemLogMessages,dirNotCreated,"Directory ""%s"" was not created","El directorio ""%s"" no fue creado","Das Verzeichnis ""%s"" wurde nicht erstellt","Annuaire ""%s"" n'a pas été créé","La directory ""%s"" non è stata creata"
+systemLogMessages,failedCreatingBackup,"Failed creating backup service.","Error al crear el servicio flexible","Fehler beim Erstellen des Backup-Versanddienstes.","Impossible de créer le service de flexibilité.","Impossibile creare il servizio jolly."
+systemLogMessages,backupServiceNotFound,"Backup service not found.","Servicio flexible no encontrado","Backup-Versanddienst konnte nicht gefunden werden.","Service de flexibilité introuvable","Servizio jolly non trovato."
+autoTest,dbNotAccessible.,"Database not accessible.","DNo se puede acceder a la base de datos.","Zugriff auf Datenbank nicht möglich.","Base de données inaccessible.","Database non accessibile."
+autoTest,taskCouldNotBeStarted.,"Task could not be started.","No se ha podido iniciar la tarea.","Die Aufgabe konnte nicht gestartet werden.","La tâche n’a pu être lancée.","Non è stato possibile avviare l’attività."
+autoTest,start,Start,Inicio,Start,Démarrer,Avvia
+autoTest,downloadTestLog,"Download test log","Descargar el registro de pruebas","Testprotokoll herunterladen","Télécharger le registre de tests","Scarica il registro test"
+autoTest,autotestPassedSuccessfully,"Auto-test passed successfully!","Prueba automática superada con éxito.","Der automatische Test wurde erfolgreich abgeschlossen!","Test automatique réussi avec succès !","L’auto-test è stato superato con successo!"
+autoTest,testNotSuccessful,"The test did not complete successfully.","La prueba no se ha completado correctamente.","Der Test wurde nicht erfolgreich abgeschlossen!","Le test a échoué.","Il test non è stato completato correttamente."
+integrationDisabled,title,"Your module has been disabled","Tu módulo ha sido deshabilitado","Ihr Modul wurde deaktiviert","Votre module a été désactivé","Il tuo modulo è stato disattivato"
+integrationDisabled,storeDisabled,"Your Packlink PRO integration has been disabled for this store","Tu integración de Packlink PRO ha sido deshabilitada para esta tienda","Ihre Packlink PRO-Integration wurde für diesen Shop deaktiviert","Votre intégration Packlink PRO a été désactivée pour cette boutique","La tua integrazione Packlink PRO è stata disattivata per questo negozio"
+integrationDisabled,exceededConnections,"Your Packlink PRO integration has been disabled for this store because you have exceeded the number of store connections included in your subscription plan.","Tu integración de Packlink PRO ha sido deshabilitada para esta tienda porque has superado el número de conexiones de tiendas incluidas en tu plan de suscripción.","Ihre Packlink PRO-Integration wurde für diesen Shop deaktiviert, da Sie die Anzahl der in Ihrem Abonnement enthaltenen Shop-Verbindungen überschritten haben.","Votre intégration Packlink PRO a été désactivée pour cette boutique car vous avez dépassé le nombre de connexions de boutiques incluses dans votre abonnement.","La tua integrazione Packlink PRO è stata disattivata per questo negozio perché hai superato il numero di connessioni negozio incluse nel tuo piano di abbonamento."
+integrationDisabled,whileDisabled,"While the integration is disabled, you will not be able to use Packlink shipping services, including dynamic rates and shipment creation and management.","Mientras la integración esté deshabilitada, no podrás utilizar los servicios de envío de Packlink, incluidas las tarifas dinámicas y la creación y gestión de envíos.","Solange die Integration deaktiviert ist, können Sie die Versanddienste von Packlink, einschließlich dynamischer Tarife sowie Erstellung und Verwaltung von Sendungen, nicht nutzen.","Pendant que l’intégration est désactivée, vous ne pourrez pas utiliser les services d’expédition Packlink, y compris les tarifs dynamiques ainsi que la création et la gestion des expéditions.","Finché l’integrazione è disattivata, non potrai utilizzare i servizi di spedizione Packlink, inclusi i prezzi dinamici e la creazione e gestione delle spedizioni."
+integrationDisabled,resubscribe,"To automatically reactivate the integration and regain access to all features, please resubscribe to the appropriate subscription plan %s.","Para reactivar automáticamente la integración y recuperar el acceso a todas las funciones, vuelve a suscribirte al plan de suscripción adecuado %s.","Um die Integration automatisch zu reaktivieren und wieder Zugriff auf alle Funktionen zu erhalten, abonnieren Sie bitte erneut den entsprechenden Tarif %s.","Pour réactiver automatiquement l’intégration et retrouver l’accès à toutes les fonctionnalités, veuillez vous réabonner à l’offre appropriée %s.","Per riattivare automaticamente l’integrazione e riottenere l’accesso a tutte le funzionalità, effettua nuovamente l’iscrizione al piano di abbonamento appropriato %s."
+integrationDisabled,resubscribeLink,"here","aquí","hier","ici","qui"
+subscription,upgrade,"Upgrade","Actualizar","Upgrade","Mettre à niveau","Aggiorna"
+subscription,upgradeNow,"Upgrade now","Actualizar ahora","Jetzt upgraden","Mettre à niveau maintenant","Aggiorna ora"
+subscription,tooltipBenefit1,"All features from the Free plan included","Todas las funciones del plan Free incluidas","Alle Funktionen des Free-Tarifs enthalten","Toutes les fonctionnalités du plan Free incluses","Tutte le funzionalità del piano Free incluse"
+subscription,tooltipBenefit2,"Exclusive access to best shipping rates","Acceso exclusivo a tarifas de envío con descuento","Exklusiver Zugang zu vergünstigten Versandtarifen","Accès exclusif à des tarifs d'expédition réduits","Accesso esclusivo a tariffe di spedizione scontate"
+subscription,tooltipBenefit3,"Unlimited shipping cart integrations","Integraciones de tienda adicionales","Zusätzliche Shop-Integrationen","Connexions ecommerce/marketplace illimitées","Integrazioni aggiuntive con negozi"
+subscription,tooltipBenefit4,"Branded emails","Personalización de comunicaciones","Branding der Kommunikation","Personnalisation des emails avec votre image de marque","Personalizzazione delle comunicazioni"
+subscription,tooltipBenefit5,"Ship with your own carrier rates","Conexiones con contratos de transportistas para enviar con tus propias tarifas","Anbindungen an Carrier-Verträge, um mit eigenen Tarifen zu versenden","Connectez vos contrats de transporteurs pour expédier avec vos propres tarifs","Connessioni a contratti con corrieri per spedire con le tue tariffe"
+subscription,tooltipBenefit6,"Premium phone customer support","Soporte premium","Premium-Support","Support premium","Supporto premium"
+subscription,yourPricingPlan,"Your pricing plan:","Tu plan de precios:","Ihr Preisplan:","Votre offre tarifaire :","Il tuo piano tariffario:"
+subscription,ordersPageBanner,"Unlock exclusive access to best shipping rates or ship with your own carrier rates.","Accede a las mejores tarifas de envío o envía con las tarifas de tu propio transportista.","Profitieren Sie von den besten Versandtarifen oder versenden Sie mit Ihren eigenen Carrier-Tarifen.","Accédez aux meilleurs tarifs d'expédition ou expédiez avec les tarifs de votre propre transporteur.","Accedi alle migliori tariffe di spedizione o spedisci con le tariffe del tuo corriere."
+subscription,supportPageBannerFree,"Upgrade and handle shipping issues faster via chat or phone","Actualiza y resuelve incidencias de envío más rápido por chat o teléfono","Upgraden Sie und lösen Sie Versandprobleme schneller per Chat oder Telefon","Passez à un plan supérieur et gérez les problèmes d'expédition plus rapidement par chat ou téléphone","Aggiorna e gestisci i problemi di spedizione più velocemente via chat o telefono"
+subscription,supportPageBannerPlus,"Upgrade and handle shipping issues faster via phone","Actualiza y resuelve incidencias de envío más rápido por teléfono","Upgraden Sie und lösen Sie Versandprobleme schneller per Telefon","Passez à un plan supérieur et gérez les problèmes d'expédition plus rapidement par téléphone","Aggiorna e gestisci i problemi di spedizione più velocemente via telefono"
+subscription,measureAccuratelyTitle,"Measure Accurately!","¡Mide con precisión!","Genau messen!","Mesurez avec précision !","Misura con precisione!"
+subscription,measureAccuratelyHighlight,"Avoid extra charges:","Evita cargos adicionales:","Vermeiden Sie Zusatzkosten:","Évitez les frais supplémentaires :","Evita costi aggiuntivi:"
+subscription,measureAccuratelyBody,"carriers audit parcel sizes, so weigh and measure using a scale and tape measure.","los transportistas auditan el tamaño de los paquetes, así que pesa y mide usando una báscula y una cinta métrica.","Carrier prüfen die Paketgrößen, wiegen und messen Sie daher mit einer Waage und einem Maßband.","les transporteurs contrôlent les dimensions de vos colis. Pensez à les peser et les mesurer à l'aide d'une balance et d'un mètre.","i corrieri verificano le dimensioni dei pacchi, quindi pesa e misura con una bilancia e un metro a nastro."
+subscription,phoneEmailInfoTitle,"Why are mobile phone and email required?","¿Por qué son obligatorios el teléfono móvil y el correo electrónico?","Warum sind Mobiltelefon und E-Mail erforderlich?","Pourquoi le téléphone portable et l'e-mail sont-ils requis ?","Perché sono richiesti telefono cellulare ed e-mail?"
+subscription,phoneEmailInfoBody,"A mobile phone number and email address help carriers contact the recipient, share delivery updates, and ensure a successful delivery. Providing both increases successful delivery rates by up to 95%.","Un número de teléfono móvil y una dirección de correo electrónico ayudan a los transportistas a contactar con el destinatario, compartir actualizaciones de entrega y garantizar una entrega exitosa. Proporcionar ambos aumenta el porcentaje de entregas exitosas hasta en un 95%.","Eine Mobiltelefonnummer und eine E-Mail-Adresse helfen Carriern, den Empfänger zu kontaktieren, Lieferaktualisierungen zu teilen und eine erfolgreiche Zustellung sicherzustellen. Werden beide angegeben, erhöht sich die Erfolgsquote der Zustellung um bis zu 95 %.","Un numéro de téléphone portable et une adresse e-mail aident les transporteurs à contacter le destinataire, à partager les mises à jour de livraison et à assurer une livraison réussie. Fournir les deux augmente le taux de livraisons réussies jusqu'à 95 %.","Un numero di telefono cellulare e un indirizzo e-mail aiutano i corrieri a contattare il destinatario, condividere gli aggiornamenti sulla consegna e garantire una consegna riuscita. Fornendo entrambi, il tasso di consegne riuscite aumenta fino al 95%."
+subscription,phoneEmailInfoWarning,"Missing this information may lead to delivery issues or delays.","Si falta esta información, pueden producirse problemas o retrasos en la entrega.","Fehlen diese Informationen, kann es zu Lieferproblemen oder Verzögerungen kommen.","L'absence de ces informations peut entraîner des problèmes ou des retards de livraison.","La mancanza di queste informazioni può causare problemi o ritardi nella consegna."
+subscription,genericBanner,"Unlock exclusive shipping benefits with access to the best carrier rates, premium refrigerated delivery services, and the freedom to ship using your own negotiated carrier rates.","Desbloquea ventajas de envío exclusivas con acceso a las mejores tarifas de transportistas, servicios premium de entrega refrigerada y la libertad de enviar usando las tarifas negociadas de tu propio transportista.","Schalten Sie exklusive Versandvorteile frei mit Zugang zu den besten Carrier-Tarifen, Premium-Kühlversandservices und der Freiheit, mit Ihren eigenen ausgehandelten Carrier-Tarifen zu versenden.","Débloquez des avantages exclusifs avec l'accès aux meilleurs tarifs d'expédition, à des services de livraison réfrigérée et à la liberté d'expédier en utilisant vos propres tarifs de transporteurs négociés.","Sblocca vantaggi di spedizione esclusivi con accesso alle migliori tariffe dei corrieri, servizi premium di consegna refrigerata e la libertà di spedire utilizzando le tariffe negoziate del tuo corriere."

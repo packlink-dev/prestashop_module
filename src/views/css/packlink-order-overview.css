@@ -25,10 +25,37 @@
 .btn.pl-label-button {
   padding: 5px 12px;
   border: 1px solid;
-  min-width: 90px;
+  min-width: 120px;
   font-weight: 300;
   text-align: left;
   font-size: 12px;
+}
+
+/*
+ * Packlink logo prepended to bulk-action labels in the orders grid.
+ * Targets the ID PS generates for each bulk action button
+ * (order_grid_bulk_action_<action_id>) plus a class fallback.
+ */
+.pl-bulk-action-logo::before,
+#order_grid_bulk_action_packlink_bulk_download_labels::before,
+#order_grid_bulk_action_packlink_bulk_browser_print_labels::before {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: url("../../logo.png") no-repeat center center;
+  background-size: contain;
+}
+
+i.pl-bulk-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: url("../../logo.png") no-repeat center center;
+  background-size: contain;
+  vertical-align: middle;
 }
 
 .pl-no-label {

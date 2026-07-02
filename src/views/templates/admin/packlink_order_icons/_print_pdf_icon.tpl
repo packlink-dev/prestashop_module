@@ -20,14 +20,29 @@
       {if $isLabelAvailable}
         <a class="btn btn-default _blank shipment-label"
            data-order="{$orderId|escape:'html':'UTF-8'}"
-           onclick="plPrintLabelOnOrdersPage(this)"
+           onclick="plDownloadLabelOnOrdersPage(this); return false;"
                 {if $isLabelPrinted}
                   title="{l s='Printed' mod='packlink'}" style="color: #c3c3c3"
                 {else}
-                  title="{l s='Ready' mod='packlink'}"
+                  title="{l s='Download' mod='packlink'}"
                 {/if}
               >
-                <i class="icon-tag"
+                <i class="icon-download"
+                  {if $isLabelPrinted}
+                    style="color: #c3c3c3"
+                  {/if}
+                ></i>
+        </a>
+        <a class="btn btn-default _blank shipment-label"
+           data-order="{$orderId|escape:'html':'UTF-8'}"
+           onclick="plPrintLabelOnOrdersPage(this); return false;"
+                {if $isLabelPrinted}
+                  title="{l s='Printed' mod='packlink'}" style="color: #c3c3c3"
+                {else}
+                  title="{l s='Print' mod='packlink'}"
+                {/if}
+              >
+                <i class="icon-print"
                   {if $isLabelPrinted}
                     style="color: #c3c3c3"
                   {/if}

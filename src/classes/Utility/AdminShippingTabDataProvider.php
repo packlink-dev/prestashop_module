@@ -13,6 +13,7 @@ use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShipmentDraft\Objects\ShipmentDraftStatus;
 use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Packlink\BusinessLogic\ShipmentDocument\Interfaces\ShipmentDocumentServiceInterface;
 use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\BusinessLogic\Utility\CurrencySymbolService;
@@ -60,6 +61,7 @@ class AdminShippingTabDataProvider
         self::prepareDraftButtonSection($orderId, $shipmentDetails);
         if ($shipmentDetails !== null) {
             self::prepareLabelsTemplate($shipmentDetails);
+            self::$context->smarty->assign(self::getDocumentParams($shipmentDetails));
         }
 
         self::$context->smarty->assign(self::getLinks($orderId));
@@ -71,6 +73,7 @@ class AdminShippingTabDataProvider
                 self::$module->getPathUri() . 'views/js/core/AjaxService.js?v=' . self::$module->version,
                 self::$module->getPathUri() . 'views/js/core/ResponseService.js?v=' . self::$module->version,
                 self::$module->getPathUri() . 'views/js/core/StateUUIDService.js?v=' . self::$module->version,
+                self::$module->getPathUri() . 'views/js/core/PrintService.js?v=' . self::$module->version,
             ),
             false
         );
@@ -104,7 +107,8 @@ class AdminShippingTabDataProvider
             self::getLinks($orderId),
             self::getDraftParams($orderId, $shipmentDetails),
             self::getShippingDetails($orderId, $shipmentDetails),
-            $shipmentDetails ? self::getLabelParams($shipmentDetails) : array()
+            $shipmentDetails ? self::getLabelParams($shipmentDetails) : array(),
+            $shipmentDetails ? self::getDocumentParams($shipmentDetails) : array()
         );
     }
 
@@ -180,7 +184,51 @@ class AdminShippingTabDataProvider
                 . CurrencySymbolService::getCurrencySymbol($shipmentDetails->getCurrency())
                 : '',
             'link' => $shipmentDetails->getShipmentUrl(),
+            'public_tracking_url' => self::getPublicTrackingUrl($shipmentDetails->getReference()),
         );
+    }
+
+    /**
+     * Fetches the Packlink shared (public) tracking page URL on demand.
+     * Fails open: returns an empty string on any error or when unavailable.
+     *
+     * @param string $reference Packlink shipment reference.
+     *
+     * @return string
+     */
+    private static function getPublicTrackingUrl($reference)
+    {
+        if (empty($reference)) {
+            return '';
+        }
+
+        try {
+            /** @var \Packlink\BusinessLogic\Http\Proxy $proxy */
+            $proxy = ServiceRegister::getService(\Packlink\BusinessLogic\Http\Proxy::CLASS_NAME);
+
+            $iso = (self::$context !== null && !empty(self::$context->language))
+                ? strtolower(self::$context->language->iso_code)
+                : 'en';
+            $localeMap = array(
+                'en' => 'en-GB',
+                'es' => 'es-ES',
+                'fr' => 'fr-FR',
+                'de' => 'de-DE',
+                'it' => 'it-IT',
+            );
+            $locale = array_key_exists($iso, $localeMap) ? $localeMap[$iso] : 'en-GB';
+
+            $url = $proxy->getPublicTrackingUrl($reference, $locale);
+
+            return $url ? $url : '';
+        } catch (\Exception $e) {
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Failed to fetch Packlink shared tracking URL: ' . $e->getMessage(),
+                'Integration'
+            );
+
+            return '';
+        }
     }
 
     /**
@@ -307,5 +355,75 @@ class AdminShippingTabDataProvider
             'isLabelAvailable' => !empty($labels) || $orderService->isReadyToFetchShipmentLabels($status),
             'number' => '#PLSL1',
         );
+    }
+
+    /**
+     * Returns the documents-section parameters for the Packlink shipping tab.
+     *
+     * @param \Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails $shipmentDetails
+     *
+     * @return array
+     */
+    private static function getDocumentParams(OrderShipmentDetails $shipmentDetails)
+    {
+        /** @var ShipmentDocumentServiceInterface $documentService */
+        $documentService = ServiceRegister::getService(ShipmentDocumentServiceInterface::CLASS_NAME);
+
+        $orderId = $shipmentDetails->getOrderId();
+        $documents = $documentService->getDocumentsForOrder((string)$orderId);
+
+        $printedLabel = Translator::translate('orderListAndDetails.printed');
+        $readyLabel = Translator::translate('orderListAndDetails.ready');
+
+        $documentsView = array();
+        foreach ($documents as $document) {
+            $documentsView[] = array(
+                'type' => $document->getType(),
+                'name' => $document->getName(),
+                'link' => $document->getLink(),
+                'printed' => $document->isPrinted(),
+                'statusLabel' => $document->isPrinted() ? $printedLabel : $readyLabel,
+            );
+        }
+
+        return array(
+            'documents' => $documentsView,
+            'hasDocuments' => count($documentsView) > 0,
+            'documentsListUrl' => self::getDocumentActionUrl('list'),
+            'documentDownloadUrl' => self::getDocumentActionUrl('download'),
+            'documentPrintUrl' => self::getDocumentActionUrl('print'),
+        );
+    }
+
+    /**
+     * Builds the URL for a ShipmentDocuments controller action.
+     *
+     * @param string $action
+     *
+     * @return string
+     *
+     * @throws \PrestaShopException
+     */
+    private static function getDocumentActionUrl($action)
+    {
+        $url = self::$context->link->getAdminLink('ShipmentDocuments') . '&' .
+            http_build_query(
+                array(
+                    'ajax' => true,
+                    'action' => $action,
+                )
+            );
+
+        // The frontend builds the request with `new URL(...)`, which throws on a
+        // relative URL. getAdminLink can return a relative path (e.g. under a
+        // reverse proxy), so force an absolute URL here.
+        if (strpos($url, '://') === false) {
+            $admin = explode(DIRECTORY_SEPARATOR, _PS_ADMIN_DIR_);
+            $adminArray = array_slice($admin, -1);
+            $adminFolder = array_pop($adminArray);
+            $url = _PS_BASE_URL_ . __PS_BASE_URI__ . $adminFolder . '/' . $url;
+        }
+
+        return $url;
     }
 }

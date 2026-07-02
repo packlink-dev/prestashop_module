@@ -35,6 +35,7 @@ class PacklinkInstaller
         'displayOrderConfirmation',
         'actionValidateOrder',
         'actionOrderStatusUpdate',
+        'displayOrderDetail',
     );
     private static $controllers = array(
         'Debug',
@@ -58,6 +59,8 @@ class PacklinkInstaller
         'SystemInfo',
         'ManualRefreshService',
         'CashOnDelivery',
+        'Subscription',
+        'ShipmentDocuments',
     );
 
     /**

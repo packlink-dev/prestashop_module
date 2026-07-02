@@ -4,17 +4,16 @@
 <p id="pl-print-labels-url" hidden>
     {html_entity_decode($printLabelsUrl|escape:'html':'UTF-8')}
 </p>
+<p id="pl-document-download-url" hidden>{html_entity_decode($documentDownloadUrl|escape:'html':'UTF-8')}</p>
+<p id="pl-document-print-url" hidden>{html_entity_decode($documentPrintUrl|escape:'html':'UTF-8')}</p>
 <div class="tab-pane" id="packlink-shipping">
     {if $shipping neq null and isset($shipping->reference)}
-        {if $isLabelAvailable}
-          <h4>{l s='Shipment labels' mod='packlink'}</h4>
+        {if $hasDocuments}
+          <h4>{l s='Documents' mod='packlink'}</h4>
           <div class="table-responsive">
             <table class="table">
               <thead>
               <tr>
-                <th>
-                  <span class="title_box ">{l s='Date' mod='packlink'}</span>
-                </th>
                 <th>
                   <span class="title_box ">{l s='Number' mod='packlink'}</span>
                 </th>
@@ -25,30 +24,36 @@
               </tr>
               </thead>
               <tbody>
-              <tr>
-                <td>{$date|escape:'html':'UTF-8'}</td>
-                <td>
-                  <a
-                          title="{l s='Print' mod='packlink'}"
-                          data-order="{$orderId|escape:'html':'UTF-8'}"
-                          data-label-printed="{$isLabelPrinted|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}"
-                          onclick="plPrintLabelOnOrderDetailsPage(this)">
-                      {$number|escape:'html':'UTF-8'}
-                  </a>
-                </td>
-                <td>{$status|escape:'html':'UTF-8'}</td>
-                <td class="text-right">
-                  <a class="btn btn-default"
-                     href=""
-                     title="{l s='Print' mod='packlink'}"
-                     data-order="{$orderId|escape:'html':'UTF-8'}"
-                     data-label-printed="{$isLabelPrinted|escape:'htmlall':'UTF-8'|htmlspecialchars_decode:3}"
-                     onclick="plPrintLabelOnOrderDetailsPage(this)">
-                    <i class="icon-print"></i>
-                      {l s='Print label' mod='packlink'}
-                  </a>
-                </td>
-              </tr>
+              {foreach from=$documents item=doc}
+                <tr data-type="{$doc.type|escape:'html':'UTF-8'}">
+                  <td>{$doc.name|escape:'html':'UTF-8'}</td>
+                  <td class="pl-document-status {if $doc.printed}pl-printed{/if}">
+                      {$doc.statusLabel|escape:'html':'UTF-8'}
+                  </td>
+                  <td class="text-right">
+                    <a class="btn btn-default"
+                       href="#"
+                       title="{l s='Download' mod='packlink'}"
+                       data-order="{$orderId|escape:'html':'UTF-8'}"
+                       data-type="{$doc.type|escape:'html':'UTF-8'}"
+                       data-link="{$doc.link|escape:'html':'UTF-8'}"
+                       onclick="plDownloadDocument(this); return false;">
+                      <i class="icon-download"></i>
+                        {l s='Download' mod='packlink'}
+                    </a>
+                    <a class="btn btn-default"
+                       href="#"
+                       title="{l s='Print' mod='packlink'}"
+                       data-order="{$orderId|escape:'html':'UTF-8'}"
+                       data-type="{$doc.type|escape:'html':'UTF-8'}"
+                       data-link="{$doc.link|escape:'html':'UTF-8'}"
+                       onclick="plPrintDocument(this); return false;">
+                      <i class="icon-print"></i>
+                        {l s='Print' mod='packlink'}
+                    </a>
+                  </td>
+                </tr>
+              {/foreach}
               </tbody>
             </table>
           </div>
@@ -134,6 +139,17 @@
           >
             <i class="icon-eye"></i>
               {l s='View on Packlink PRO' mod='packlink'}
+          </a>
+        {/if}
+        {if $shipping->public_tracking_url}
+          <a
+                  class="btn btn-default"
+                  href="{html_entity_decode($shipping->public_tracking_url|escape:'html':'UTF-8')}"
+                  title="{l s='View tracking page' mod='packlink'}"
+                  target="_blank"
+          >
+            <i class="icon-truck"></i>
+              {l s='View tracking page' mod='packlink'}
           </a>
         {/if}
     {else}

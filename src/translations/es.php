@@ -2,6 +2,8 @@
 
 global $_MODULE;
 $_MODULE = array();
+$_MODULE['<{packlink}prestashop>order_detail_tracking_77bd8c961e1c49d7c96ed4e3bc0b2f9d'] = 'Ver página de seguimiento';
+$_MODULE['<{packlink}prestashop>shipping_content_77bd8c961e1c49d7c96ed4e3bc0b2f9d'] = 'Ver página de seguimiento';
 $_MODULE['<{packlink}prestashop>packlink_e4c8842b439385d2f1b2b43767021304'] = 'Packlink Shipping S.L.';
 $_MODULE['<{packlink}prestashop>packlink_0b97a05d427162a2ee640649ec60cb29'] = 'Packlink PRO Shipping';
 $_MODULE['<{packlink}prestashop>packlink_ef18c7cd5a3502ed4bd1fbe0711f5b30'] = 'Ahorra hasta un 70% en tus gastos de envío. Sin tarifas fijas, sin volumen de envíos mínimo. Gestiona todos tus envíos en una sola plataforma.';
@@ -41,6 +43,10 @@ $_MODULE['<{packlink}prestashop>shipping_content_625d3ee6573976ba5699374e6fc2b4a
 $_MODULE['<{packlink}prestashop>_print_pdf_icon_9b07c1269fe3afd3f2bbae338f93ce07'] = 'Impreso';
 $_MODULE['<{packlink}prestashop>_print_pdf_icon_e7d31fc0602fb2ede144d18cdffd816b'] = 'Listo';
 $_MODULE['<{packlink}prestashop>_print_pdf_icon_a113e423f5023c598ac765f87dedec4b'] = 'Deshabilita el bloqueador de elementos emergentes en esta página para abrir de forma masiva las etiquetas de envío';
+$_MODULE['<{packlink}prestashop>_print_pdf_icon_801ab24683a4a8c433c6eb40c48bcd9d'] = 'Descargar';
+$_MODULE['<{packlink}prestashop>_print_pdf_icon_13dba24862cf9128167a59100e154c8d'] = 'Imprimir';
+$_MODULE['<{packlink}prestashop>shipping_content_f28128b38efbc6134dc40751ee21fd29'] = 'Documentos';
+$_MODULE['<{packlink}prestashop>shipping_content_801ab24683a4a8c433c6eb40c48bcd9d'] = 'Descargar';
 $_MODULE['<{packlink}prestashop>shipping_tab_14449de7f518a73d53d3ede9ea3e580f'] = 'Packlink Shipping';
 $_MODULE['<{packlink}prestashop>shipping_methods_17_99d4e80562d64b54354238aa87ad4883'] = 'Este servicio de envío admite la entrega a ubicaciones de entrega predefinidas. Elige la ubicación que más te convenga haciendo clic en el botón \"Seleccionar ubicación de entrega\".';
 $_MODULE['<{packlink}prestashop>shipping_methods_17_3bba85e3751486b1f5762a85b3153845'] = 'Seleccionar lugar de entrega';

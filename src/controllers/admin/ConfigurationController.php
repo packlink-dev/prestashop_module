@@ -21,10 +21,12 @@ class ConfigurationController extends PacklinkBaseController
         $controller = new BaseConfigurationController();
         $service = ServiceRegister::getService(Configuration::CLASS_NAME);
 
+        $userInfo = $service->getUserInfo();
 
         $data = array(
             'helpUrl' => $controller->getHelpLink(),
             'version' => $service->getModuleVersion(),
+            'email' => $userInfo !== null ? $userInfo->email : '',
         );
 
         PacklinkPrestaShopUtility::dieJson($data);

@@ -21,6 +21,9 @@ class BulkShipmentLabelsController extends PacklinkBaseController
      */
     public function initContent()
     {
+        // Default mode preserves the legacy download URL behaviour.
+        $mode = \Tools::getValue('mode') ?: 'download';
+
         $result = false;
 
         try {
@@ -34,6 +37,13 @@ class BulkShipmentLabelsController extends PacklinkBaseController
 
         if ($result !== false) {
             // Filename is required because generated temp name is random.
+            // Both modes stream the merged PDF same-origin so the print iframe
+            // can render it; the parameter keeps the two user paths distinct in
+            // request logs and leaves room to evolve the print response.
+            if ($mode === 'print') {
+                PacklinkPrestaShopUtility::dieInline($result, self::FILE_NAME);
+            }
+
             PacklinkPrestaShopUtility::dieInline($result, self::FILE_NAME);
         }
 

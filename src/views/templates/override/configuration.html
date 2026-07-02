@@ -6,6 +6,22 @@
             </button>
             <h1>{$configuration.menu}</h1>
         </header>
+        <div class="pl-account-section" id="pl-account-section">
+            <div class="pl-account-email">
+                <i class="material-icons pl-account-icon">account_circle</i>
+                <span class="pl-account-email-label">{$configuration.email}</span>
+            </div>
+            <span id="pl-account-email-value" class="pl-account-email-value"></span>
+            <div class="pl-upgrade-wrapper pl-hidden" id="pl-dashboard-upgrade">
+                <button class="pl-upgrade-button" id="pl-dashboard-upgrade-btn">
+                    <i class="material-icons pl-upgrade-button-icon">bolt</i>
+                    {$subscription.upgrade}
+                </button>
+                <div class="pl-upgrade-tooltip" id="pl-dashboard-upgrade-tooltip">
+                    <div class="pl-upgrade-benefits" id="pl-dashboard-upgrade-benefits"></div>
+                </div>
+            </div>
+        </div>
         <div class="pl-flex-left pl-config-list">
             <div class="pl-config-list-item" id="pl-navigate-order-status">
                 <i class="material-icons pl-icon-text">fact_check</i>
