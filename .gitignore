@@ -20,3 +20,5 @@ src/views/templates/core
 src/views/img/core/images/*
 !src/views/img/core/images/.gitkeep
 src/views/lang/*
+CLAUDE.md
+.ai-docs

@@ -89,7 +89,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
 
             $reference = !empty($sourceOrder->reference) ? $sourceOrder->reference : (string)$orderId;
             $order->setId($reference);
-            $order->setOrderNumber($orderId);
+            $order->setOrderNumber($reference);
             $order->setCustomerId((int)$sourceOrder->id_customer);
             $order->setCurrency($currency['iso_code']);
             $order->setTotalPrice((float)$sourceOrder->total_paid_tax_incl);
