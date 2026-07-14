@@ -69,9 +69,50 @@ function upgrade_module_3_7_0($module)
 
     $module->enable();
 
+    registerCustomsPlatform($module);
+
     restorePreviousShopContext($previousShopContext, $previousShopId);
 
     return true;
+}
+
+/**
+ * Registers the CR-SET-66 customs platform pieces on an existing store: the Customs admin
+ * controller (only if its tab is missing, so no duplicate tab), the product/customer hooks
+ * (registerHook is idempotent), and a guarded default customs mapping. Fresh installs get these
+ * through PacklinkInstaller::addControllersAndHooks() and the default-configuration step.
+ *
+ * @param \Packlink $module
+ *
+ * @return void
+ */
+function registerCustomsPlatform($module)
+{
+    try {
+        $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($module);
+
+        if (!\Tab::getIdFromClassName('Customs')) {
+            $installer->addController('Customs');
+        }
+
+        $customsHooks = array(
+            'displayAdminProductsExtra',
+            'actionProductUpdate',
+            'actionCustomerFormBuilderModifier',
+            'actionAfterCreateCustomerFormHandler',
+            'actionAfterUpdateCustomerFormHandler',
+        );
+        foreach ($customsHooks as $hook) {
+            $module->registerHook($hook);
+        }
+
+        $installer->addDefaultCustomsMapping();
+    } catch (\Exception $e) {
+        Logger::logWarning(
+            TranslationUtility::__('Failed to register customs platform: %s', array($e->getMessage())),
+            'Integration'
+        );
+    }
 }
 
 /**

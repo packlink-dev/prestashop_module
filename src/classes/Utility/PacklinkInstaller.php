@@ -36,6 +36,11 @@ class PacklinkInstaller
         'actionValidateOrder',
         'actionOrderStatusUpdate',
         'displayOrderDetail',
+        'displayAdminProductsExtra',
+        'actionProductUpdate',
+        'actionCustomerFormBuilderModifier',
+        'actionAfterCreateCustomerFormHandler',
+        'actionAfterUpdateCustomerFormHandler',
     );
     private static $controllers = array(
         'Debug',
@@ -61,6 +66,7 @@ class PacklinkInstaller
         'CashOnDelivery',
         'Subscription',
         'ShipmentDocuments',
+        'Customs',
     );
 
     /**
@@ -435,7 +441,44 @@ class PacklinkInstaller
             return false;
         }
 
+        $this->addDefaultCustomsMapping();
+
         return true;
+    }
+
+    /**
+     * Seeds a default customs mapping so international shipments build a customs invoice out of the
+     * box (CR-SET-66). Guarded: never overwrites an existing merchant-configured mapping. The
+     * default tariff number is a valid 6-8 digit placeholder required by core validation.
+     *
+     * @return void
+     */
+    public function addDefaultCustomsMapping()
+    {
+        try {
+            /** @var ConfigurationService $configService */
+            $configService = ServiceRegister::getService(\Packlink\BusinessLogic\Configuration::CLASS_NAME);
+
+            if ($configService->getCustomsMappings()) {
+                return;
+            }
+
+            $mapping = new \Packlink\BusinessLogic\Customs\Models\CustomsMapping();
+            $mapping->defaultReason = 'sale_of_goods';
+            $mapping->defaultSenderTaxId = '';
+            $mapping->defaultReceiverUserType = \Packlink\BusinessLogic\Customs\CustomsService::PRIVATE_PERSON;
+            $mapping->defaultReceiverTaxId = '';
+            $mapping->defaultTariffNumber = '61091000';
+            $mapping->defaultCountry = '';
+            $mapping->mappingReceiverTaxId = 'tax_id';
+
+            $configService->setCustomsMappings($mapping);
+        } catch (\Exception $e) {
+            Logger::logWarning(
+                'Failed to seed default customs mapping: ' . $e->getMessage(),
+                'Integration'
+            );
+        }
     }
 
     /**

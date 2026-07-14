@@ -374,20 +374,39 @@ class AdminShippingTabDataProvider
         $printedLabel = Translator::translate('orderListAndDetails.printed');
         $readyLabel = Translator::translate('orderListAndDetails.ready');
 
-        $documentsView = array();
+        $order = new \Order((int)$orderId);
+        $date = (\Validate::isLoadedObject($order) && !empty($order->date_add))
+            ? date('d/m/Y', strtotime($order->date_add))
+            : '';
+
+        // Split documents into shipment labels and customs invoices so the order-details tab can
+        // render them as two separate sections ("Shipment labels" + "Customs").
+        $labelDocuments = array();
+        $customsDocuments = array();
         foreach ($documents as $document) {
-            $documentsView[] = array(
+            $view = array(
                 'type' => $document->getType(),
                 'name' => $document->getName(),
                 'link' => $document->getLink(),
                 'printed' => $document->isPrinted(),
                 'statusLabel' => $document->isPrinted() ? $printedLabel : $readyLabel,
+                'date' => $date,
             );
+
+            if ($document->getType() === \Packlink\BusinessLogic\ShipmentDocument\ShipmentDocumentType::CUSTOMS_INVOICE) {
+                $customsDocuments[] = $view;
+            } else {
+                $labelDocuments[] = $view;
+            }
         }
 
         return array(
-            'documents' => $documentsView,
-            'hasDocuments' => count($documentsView) > 0,
+            'documents' => array_merge($labelDocuments, $customsDocuments),
+            'hasDocuments' => (count($labelDocuments) + count($customsDocuments)) > 0,
+            'shipmentLabelDocuments' => $labelDocuments,
+            'hasShipmentLabelDocuments' => count($labelDocuments) > 0,
+            'customsInvoiceDocuments' => $customsDocuments,
+            'hasCustomsInvoiceDocuments' => count($customsDocuments) > 0,
             'documentsListUrl' => self::getDocumentActionUrl('list'),
             'documentDownloadUrl' => self::getDocumentActionUrl('download'),
             'documentPrintUrl' => self::getDocumentActionUrl('print'),

@@ -135,6 +135,13 @@ class Bootstrap extends BootstrapComponent
         );
 
         ServiceRegister::registerService(
+            \Packlink\BusinessLogic\Customs\CustomsMappingService::CLASS_NAME,
+            function () {
+                return new \Packlink\PrestaShop\Classes\BusinessLogicServices\CustomsMappingService();
+            }
+        );
+
+        ServiceRegister::registerService(
             HttpClient::CLASS_NAME,
             function () {
                 return new CurlHttpClient();
@@ -224,6 +231,14 @@ class Bootstrap extends BootstrapComponent
         RepositoryRegistry::registerRepository(ShippingMethod::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(CashOnDelivery::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(CarrierServiceMapping::CLASS_NAME, BaseRepository::getClassName());
+        RepositoryRegistry::registerRepository(
+            \Packlink\PrestaShop\Classes\Entities\ProductCustomsData::CLASS_NAME,
+            BaseRepository::getClassName()
+        );
+        RepositoryRegistry::registerRepository(
+            \Packlink\PrestaShop\Classes\Entities\CustomerCustomsData::CLASS_NAME,
+            BaseRepository::getClassName()
+        );
         RepositoryRegistry::registerRepository(OrderShipmentDetails::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(Schedule::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(

@@ -297,6 +297,281 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Renders the Packlink customs attributes (HS code + country of origin) on the product edit page.
+     * (CR-SET-66)
+     *
+     * @param array $params Hook parameters.
+     *
+     * @return string Rendered template output.
+     */
+    public function hookDisplayAdminProductsExtra($params)
+    {
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        $productId = isset($params['id_product']) ? (int)$params['id_product'] : (int)Tools::getValue('id_product');
+        if ($productId <= 0) {
+            return '';
+        }
+
+        $customs = $this->getProductCustomsData($productId);
+
+        $this->context->smarty->assign(array(
+            'packlinkProductCustoms' => array(
+                'hsCode' => $customs !== null ? $customs->hsCode : '',
+                'countryOfOrigin' => $customs !== null ? $customs->countryOfOrigin : '',
+            ),
+            'packlinkCountryCodes' => \Packlink\BusinessLogic\Country\CountryCodes::$countryCodes,
+            'packlinkCustomsLabels' => array(
+                'title' => $this->l('Packlink customs'),
+                'description' => $this->l('Customs attributes used when creating an international shipment. Leave empty to use the customs defaults.'),
+                'hsCode' => $this->l('HS code (tariff number)'),
+                'hsCodePlaceholder' => $this->l('e.g. 61091000'),
+                'hsCodeHelp' => $this->l('6 to 8 digit Harmonized System code.'),
+                'country' => $this->l('Country of origin'),
+                'countryNone' => $this->l('Use default'),
+                'countryHelp' => $this->l('ISO 3166-1 alpha-2 country code.'),
+            ),
+        ));
+
+        return $this->context->smarty->createTemplate(
+            $this->getLocalPath() . 'views/templates/admin/product_customs/product_customs.tpl',
+            $this->context->smarty
+        )->fetch();
+    }
+
+    /**
+     * Persists the Packlink customs attributes when a product is saved. (CR-SET-66)
+     *
+     * Only acts when the customs tab was part of the submission (marker field), so unrelated
+     * product saves do not wipe the stored values. Blank values are allowed and mean "use the
+     * configured customs defaults".
+     *
+     * @param array $params Hook parameters.
+     *
+     * @return void
+     */
+    public function hookActionProductUpdate($params)
+    {
+        if (!Tools::getIsset('packlink_customs_submitted')) {
+            return;
+        }
+
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        $productId = isset($params['id_product']) ? (int)$params['id_product'] : (int)Tools::getValue('id_product');
+        if ($productId <= 0) {
+            return;
+        }
+
+        $hsCode = trim((string)Tools::getValue('packlink_hs_code'));
+        $country = trim((string)Tools::getValue('packlink_country_of_origin'));
+
+        if ($hsCode !== '' && !preg_match('/^[0-9]{6,8}$/', $hsCode)) {
+            $hsCode = '';
+        }
+        if ($country !== '' && !in_array($country, \Packlink\BusinessLogic\Country\CountryCodes::$countryCodes, true)) {
+            $country = '';
+        }
+
+        $this->saveProductCustomsData($productId, $hsCode, $country);
+    }
+
+    /**
+     * Loads stored customs data for a product, or null when none exists. (CR-SET-66)
+     *
+     * @param int $productId
+     *
+     * @return \Packlink\PrestaShop\Classes\Entities\ProductCustomsData|null
+     */
+    private function getProductCustomsData($productId)
+    {
+        try {
+            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
+                \Packlink\PrestaShop\Classes\Entities\ProductCustomsData::CLASS_NAME
+            );
+
+            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
+            $query->where('productId', '=', (int)$productId);
+
+            return $repository->selectOne($query);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Creates or updates the customs data for a product. (CR-SET-66)
+     *
+     * @param int $productId
+     * @param string $hsCode
+     * @param string $country
+     *
+     * @return void
+     */
+    private function saveProductCustomsData($productId, $hsCode, $country)
+    {
+        try {
+            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
+                \Packlink\PrestaShop\Classes\Entities\ProductCustomsData::CLASS_NAME
+            );
+
+            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
+            $query->where('productId', '=', (int)$productId);
+
+            /** @var \Packlink\PrestaShop\Classes\Entities\ProductCustomsData|null $data */
+            $data = $repository->selectOne($query);
+
+            if ($data === null) {
+                $data = new \Packlink\PrestaShop\Classes\Entities\ProductCustomsData();
+                $data->productId = (int)$productId;
+                $data->hsCode = $hsCode;
+                $data->countryOfOrigin = $country;
+                $repository->save($data);
+            } else {
+                $data->hsCode = $hsCode;
+                $data->countryOfOrigin = $country;
+                $repository->update($data);
+            }
+        } catch (\Exception $e) {
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Failed to save Packlink product customs data: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Adds the Packlink customs "Tax ID" field to the customer edit form. (CR-SET-66; PS 1.7.4+/8/9)
+     *
+     * The private-person tax id feeds the customs receiver tax id during draft creation. Company VAT
+     * stays on the native Address `vat_number` field and is not duplicated here.
+     *
+     * @param array $params Hook parameters (form_builder, data, options, id).
+     *
+     * @return void
+     */
+    public function hookActionCustomerFormBuilderModifier($params)
+    {
+        if (empty($params['form_builder'])) {
+            return;
+        }
+
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        $params['form_builder']->add(
+            'packlink_tax_id',
+            'Symfony\Component\Form\Extension\Core\Type\TextType',
+            array(
+                'label' => $this->l('Tax ID (Packlink customs)'),
+                'required' => false,
+                'empty_data' => '',
+            )
+        );
+
+        $customerId = isset($params['id']) ? (int)$params['id'] : 0;
+        $data = isset($params['data']) && is_array($params['data']) ? $params['data'] : array();
+        $data['packlink_tax_id'] = $customerId > 0 ? $this->getCustomerTaxId($customerId) : '';
+        $params['form_builder']->setData($data);
+    }
+
+    /**
+     * Persists the Packlink customs Tax ID when a customer is created. (CR-SET-66)
+     *
+     * @param array $params Hook parameters (id, form_data).
+     *
+     * @return void
+     */
+    public function hookActionAfterCreateCustomerFormHandler($params)
+    {
+        $this->persistCustomerTaxId($params);
+    }
+
+    /**
+     * Persists the Packlink customs Tax ID when a customer is updated. (CR-SET-66)
+     *
+     * @param array $params Hook parameters (id, form_data).
+     *
+     * @return void
+     */
+    public function hookActionAfterUpdateCustomerFormHandler($params)
+    {
+        $this->persistCustomerTaxId($params);
+    }
+
+    /**
+     * Loads the stored private-person tax id for a customer, or an empty string. (CR-SET-66)
+     *
+     * @param int $customerId
+     *
+     * @return string
+     */
+    private function getCustomerTaxId($customerId)
+    {
+        try {
+            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
+                \Packlink\PrestaShop\Classes\Entities\CustomerCustomsData::CLASS_NAME
+            );
+
+            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
+            $query->where('customerId', '=', (int)$customerId);
+
+            /** @var \Packlink\PrestaShop\Classes\Entities\CustomerCustomsData|null $data */
+            $data = $repository->selectOne($query);
+
+            return ($data !== null && !empty($data->taxId)) ? $data->taxId : '';
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
+    /**
+     * Creates or updates the customs Tax ID for a customer from the submitted form data. (CR-SET-66)
+     *
+     * @param array $params Hook parameters (id, form_data).
+     *
+     * @return void
+     */
+    private function persistCustomerTaxId($params)
+    {
+        if (empty($params['id']) || !isset($params['form_data']) || !is_array($params['form_data'])) {
+            return;
+        }
+        if (!array_key_exists('packlink_tax_id', $params['form_data'])) {
+            return;
+        }
+
+        \Packlink\PrestaShop\Classes\Bootstrap::init();
+
+        $customerId = (int)$params['id'];
+        $taxId = trim((string)$params['form_data']['packlink_tax_id']);
+
+        try {
+            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
+                \Packlink\PrestaShop\Classes\Entities\CustomerCustomsData::CLASS_NAME
+            );
+
+            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
+            $query->where('customerId', '=', $customerId);
+
+            /** @var \Packlink\PrestaShop\Classes\Entities\CustomerCustomsData|null $data */
+            $data = $repository->selectOne($query);
+
+            if ($data === null) {
+                $data = new \Packlink\PrestaShop\Classes\Entities\CustomerCustomsData();
+                $data->customerId = $customerId;
+                $data->taxId = $taxId;
+                $repository->save($data);
+            } else {
+                $data->taxId = $taxId;
+                $repository->update($data);
+            }
+        } catch (\Exception $e) {
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Failed to save Packlink customer customs tax id: ' . $e->getMessage()
+            );
+        }
+    }
+
+    /**
      * Frontend hook for order creation.
      *
      * @param array $params Hook parameters.
@@ -701,7 +976,12 @@ class Packlink extends CarrierModule
 
             $record['draftStatus'] = $status;
             $record['draftDeleted'] = $draftCreated ? $shipmentDetails->isDeleted() : false;
-            $record['isLabelAvailable'] = $shipmentDetails ? $orderService->isReadyToFetchShipmentLabels($shipmentDetails->getStatus()) : false;
+            // Show the label in the orders list whenever a label actually exists (stored locally by
+            // the sync sidecar), not only when the status is label-ready — consistent with the
+            // order-details Documents section. Falls back to the status check when none is stored yet.
+            $record['isLabelAvailable'] = $shipmentDetails
+                && (!empty($shipmentLabels)
+                    || $orderService->isReadyToFetchShipmentLabels($shipmentDetails->getStatus()));
             $record['isLabelPrinted'] = !empty($shipmentLabels) && $shipmentLabels[0]->isPrinted();
             $record['draftLink'] = $draftCreated ? $shipmentDetails->getShipmentUrl() : '#';
         }
@@ -989,6 +1269,7 @@ class Packlink extends CarrierModule
                 $this->getPathUri() . 'views/js/core/DefaultParcelController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/DefaultWarehouseController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/CashOnDeliveryController.js?v=' . $this->version,
+                $this->getPathUri() . 'views/js/core/CustomsController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/EditServiceController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/SingleStorePricePolicyController.js?v=' . $this->version,
                 $this->getPathUri() . 'views/js/core/LoginController.js?v=' . $this->version,
@@ -1163,6 +1444,9 @@ class Packlink extends CarrierModule
             'pl-cod-page' => array(
                 'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'cash-on-delivery.html'),
             ),
+            'pl-customs-page' => array(
+                'pl-main-page-holder' => Tools::file_get_contents($baseDir . 'customs.html'),
+            ),
         );
     }
 
@@ -1209,6 +1493,12 @@ class Packlink extends CarrierModule
             'configuration' => array(
                 'getDataUrl' => $this->getAction('Configuration', 'getData'),
                 'getPromotionalBannerUrl' => $this->getAction('Subscription', 'getPromotionalBanner'),
+            ),
+            'customs' => array(
+                'getUrl' => $this->getAction('Customs', 'getData'),
+                'submitUrl' => $this->getAction('Customs', 'submitData'),
+                'getSupportedCountriesUrl' => $this->getAction('Customs', 'getSupportedCountries'),
+                'getCustomData' => $this->getAction('Customs', 'getCustomData'),
             ),
             'system-info' => array(
                 'getStatusUrl' => $this->getAction('Debug', 'getStatus'),

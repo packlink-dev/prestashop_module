@@ -3,30 +3,28 @@
     <p id="pl-label-printed" hidden>{{ 'Printed'|trans({}, 'Modules.Packlink.Admin') }}</p>
     <p id="pl-label-ready" hidden>{{ 'Ready'|trans({}, 'Modules.Packlink.Admin') }}</p>
     <p id="pl-print-labels-url" hidden>
-        {{ printLabelsUrl }}
+        {{ printLabelsUrl|default('') }}
     </p>
-    <p id="pl-document-download-url" hidden>{{ documentDownloadUrl }}</p>
-    <p id="pl-document-print-url" hidden>{{ documentPrintUrl }}</p>
+    <p id="pl-document-download-url" hidden>{{ documentDownloadUrl|default('') }}</p>
+    <p id="pl-document-print-url" hidden>{{ documentPrintUrl|default('') }}</p>
     <div class="tab-pane" id="packlink-shipping">
         {% if shipping is not empty and shipping.reference != '' %}
-            {% if hasDocuments %}
-                <h4>{{ 'Documents'|trans({}, 'Modules.Packlink.Admin') }}</h4>
+            {% if hasShipmentLabelDocuments|default(false) %}
+                <h4>{{ 'Shipment labels'|trans({}, 'Modules.Packlink.Admin') }}</h4>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                         <tr>
-                            <th>
-                                <span class="title_box ">{{ 'Number'|trans({}, 'Modules.Packlink.Admin') }}</span>
-                            </th>
-                            <th>
-                                <span class="title_box ">{{ 'Status'|trans({}, 'Modules.Packlink.Admin') }}</span>
-                            </th>
+                            <th><span class="title_box ">{{ 'Date'|trans({}, 'Modules.Packlink.Admin') }}</span></th>
+                            <th><span class="title_box ">{{ 'Number'|trans({}, 'Modules.Packlink.Admin') }}</span></th>
+                            <th><span class="title_box ">{{ 'Status'|trans({}, 'Modules.Packlink.Admin') }}</span></th>
                             <th></th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for doc in documents %}
+                        {% for doc in shipmentLabelDocuments %}
                             <tr data-type="{{ doc.type }}">
+                                <td>{{ doc.date }}</td>
                                 <td>{{ doc.name }}</td>
                                 <td class="pl-document-status {% if doc.printed %}pl-printed{% endif %}">
                                     {{ doc.statusLabel }}
@@ -34,23 +32,67 @@
                                 <td class="text-right">
                                     <a class="btn btn-default"
                                        href="#"
-                                       title="{{ 'Download'|trans({}, 'Modules.Packlink.Admin') }}"
-                                       data-order="{{ orderId }}"
-                                       data-type="{{ doc.type }}"
-                                       data-link="{{ doc.link }}"
-                                       onclick="plDownloadDocument(this); return false;">
-                                        <i class="material-icons">file_download</i>
-                                        {{ 'Download'|trans({}, 'Modules.Packlink.Admin') }}
-                                    </a>
-                                    <a class="btn btn-default"
-                                       href="#"
-                                       title="{{ 'Print'|trans({}, 'Modules.Packlink.Admin') }}"
+                                       title="{{ 'Print label'|trans({}, 'Modules.Packlink.Admin') }}"
                                        data-order="{{ orderId }}"
                                        data-type="{{ doc.type }}"
                                        data-link="{{ doc.link }}"
                                        onclick="plPrintDocument(this); return false;">
                                         <i class="material-icons">print</i>
-                                        {{ 'Print'|trans({}, 'Modules.Packlink.Admin') }}
+                                        {{ 'Print label'|trans({}, 'Modules.Packlink.Admin') }}
+                                    </a>
+                                    <a class="btn btn-default"
+                                       href="#"
+                                       title="{{ 'Download label'|trans({}, 'Modules.Packlink.Admin') }}"
+                                       data-order="{{ orderId }}"
+                                       data-type="{{ doc.type }}"
+                                       data-link="{{ doc.link }}"
+                                       onclick="plDownloadDocument(this); return false;">
+                                        <i class="material-icons">file_download</i>
+                                        {{ 'Download label'|trans({}, 'Modules.Packlink.Admin') }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            {% if hasCustomsInvoiceDocuments|default(false) %}
+                <h4>{{ 'Customs'|trans({}, 'Modules.Packlink.Admin') }}</h4>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th><span class="title_box ">{{ 'Date'|trans({}, 'Modules.Packlink.Admin') }}</span></th>
+                            <th><span class="title_box ">{{ 'Invoice Number'|trans({}, 'Modules.Packlink.Admin') }}</span></th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for doc in customsInvoiceDocuments %}
+                            <tr data-type="{{ doc.type }}">
+                                <td>{{ doc.date }}</td>
+                                <td>{{ doc.name }}</td>
+                                <td class="text-right">
+                                    <a class="btn btn-default"
+                                       href="#"
+                                       title="{{ 'Print customs invoice'|trans({}, 'Modules.Packlink.Admin') }}"
+                                       data-order="{{ orderId }}"
+                                       data-type="{{ doc.type }}"
+                                       data-link="{{ doc.link }}"
+                                       onclick="plPrintDocument(this); return false;">
+                                        <i class="material-icons">print</i>
+                                        {{ 'Print customs invoice'|trans({}, 'Modules.Packlink.Admin') }}
+                                    </a>
+                                    <a class="btn btn-default"
+                                       href="#"
+                                       title="{{ 'Download customs invoice'|trans({}, 'Modules.Packlink.Admin') }}"
+                                       data-order="{{ orderId }}"
+                                       data-type="{{ doc.type }}"
+                                       data-link="{{ doc.link }}"
+                                       onclick="plDownloadDocument(this); return false;">
+                                        <i class="material-icons">file_download</i>
+                                        {{ 'Download customs invoice'|trans({}, 'Modules.Packlink.Admin') }}
                                     </a>
                                 </td>
                             </tr>

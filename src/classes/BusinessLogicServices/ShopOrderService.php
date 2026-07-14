@@ -17,6 +17,8 @@ use Packlink\BusinessLogic\Order\Objects\Item;
 use Packlink\BusinessLogic\Order\Objects\Order;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
+use Packlink\PrestaShop\Classes\Entities\CustomerCustomsData;
+use Packlink\PrestaShop\Classes\Entities\ProductCustomsData;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
@@ -105,8 +107,24 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
 
             $order->setShippingAddress($this->getAddress($sourceOrder));
 
+            // Customs receiver data (CR-SET-66). Only set when present; the core customs
+            // invoice build falls back to the configured mapping defaults otherwise.
+            $vatNumber = $this->getDeliveryVatNumber($sourceOrder);
+            if ($vatNumber !== '') {
+                $order->setVatNumber($vatNumber);
+            }
+            $taxId = $this->getCustomerTaxId((int)$sourceOrder->id_customer);
+            if ($taxId !== '') {
+                $order->setTaxId($taxId);
+            }
+
             $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
-            $order->setItems($this->getOrderItems($sourceOrder));
+            $items = $this->getOrderItems($sourceOrder);
+            $order->setItems($items);
+            // Customs (CR-SET-66): the customs-invoice request sends order-level parcels weight,
+            // which Packlink rejects at 0 (causing the shipment to be sent without customs and the
+            // carrier to reject international shipments). Populate it from the built items.
+            $order->setTotalWeight($this->calculateTotalWeight($items));
         } catch (OrderNotFound $e) {
             Logger::logWarning(TranslationUtility::__('Source order not found'), 'Integration');
         }
@@ -256,6 +274,23 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
     }
 
     /**
+     * Sums the total shipment weight from the built order items (weight x quantity). (CR-SET-66)
+     *
+     * @param \Packlink\BusinessLogic\Order\Objects\Item[] $items
+     *
+     * @return float
+     */
+    private function calculateTotalWeight(array $items)
+    {
+        $total = 0;
+        foreach ($items as $item) {
+            $total += (float)$item->getWeight() * (int)$item->getQuantity();
+        }
+
+        return round($total, 2);
+    }
+
+    /**
      * Sets additional order item information (title, quantity, category...).
      *
      * @param array $sourceOrderItem PrestaShop order item.
@@ -311,6 +346,17 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $orderItem->setPictureUrl($productImageUrl);
         }
 
+        // Customs item attributes (CR-SET-66). Empty values fall back to the mapping defaults.
+        $productCustoms = $this->getProductCustomsData((int)$product->id);
+        if ($productCustoms !== null) {
+            if (!empty($productCustoms->hsCode)) {
+                $orderItem->setTariffNumber($productCustoms->hsCode);
+            }
+            if (!empty($productCustoms->countryOfOrigin)) {
+                $orderItem->setCountryOfOrigin($productCustoms->countryOfOrigin);
+            }
+        }
+
         return $orderItem;
     }
 
@@ -336,5 +382,71 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         }
 
         return $order;
+    }
+
+    /**
+     * Returns the module-owned customs data for a product, or null when none is stored.
+     *
+     * @param int $productId
+     *
+     * @return ProductCustomsData|null
+     */
+    private function getProductCustomsData($productId)
+    {
+        try {
+            $repository = RepositoryRegistry::getRepository(ProductCustomsData::CLASS_NAME);
+
+            $query = new QueryFilter();
+            $query->where('productId', '=', $productId);
+
+            /** @var ProductCustomsData|null $data */
+            $data = $repository->selectOne($query);
+
+            return $data;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the private-person tax id stored for a customer, or an empty string.
+     *
+     * @param int $customerId
+     *
+     * @return string
+     */
+    private function getCustomerTaxId($customerId)
+    {
+        try {
+            $repository = RepositoryRegistry::getRepository(CustomerCustomsData::CLASS_NAME);
+
+            $query = new QueryFilter();
+            $query->where('customerId', '=', $customerId);
+
+            /** @var CustomerCustomsData|null $data */
+            $data = $repository->selectOne($query);
+
+            return ($data !== null && !empty($data->taxId)) ? $data->taxId : '';
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
+    /**
+     * Returns the VAT number from the order delivery address (native PrestaShop field).
+     *
+     * @param PrestaShopOrder $sourceOrder
+     *
+     * @return string
+     */
+    private function getDeliveryVatNumber(PrestaShopOrder $sourceOrder)
+    {
+        try {
+            $deliveryAddress = new PrestaShopAddress((int)$sourceOrder->id_address_delivery);
+
+            return !empty($deliveryAddress->vat_number) ? $deliveryAddress->vat_number : '';
+        } catch (\Exception $e) {
+            return '';
+        }
     }
 }

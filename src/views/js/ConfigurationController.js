@@ -150,6 +150,17 @@ if (!window.Packlink) {
                 });
             }
 
+            let customs = mainPage.querySelector('#pl-navigate-customs');
+            if (customs) {
+                customs.addEventListener('click', () => {
+                    state.goToState('customs', {
+                        'code': 'config',
+                        'prevState': 'configuration',
+                        'nextState': 'configuration',
+                    });
+                });
+            }
+
             ajaxService.get(config.getDataUrl, setConfigParams);
             setupUpgrade();
         };
