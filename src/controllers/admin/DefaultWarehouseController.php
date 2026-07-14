@@ -1,8 +1,11 @@
 <?php
 
+use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Controllers\LocationsController;
 use Packlink\BusinessLogic\Controllers\WarehouseController;
+use Packlink\BusinessLogic\Country\Interfaces\CountryServiceInterface;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
+use Packlink\BusinessLogic\Warehouse\Interfaces\WarehouseServiceInterface;
 use Packlink\BusinessLogic\Configuration;
 
 /** @noinspection PhpIncludeInspection */
@@ -14,11 +17,26 @@ require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
 class DefaultWarehouseController extends PacklinkBaseController
 {
     /**
+     * Builds the core WarehouseController with its V2 service dependencies resolved from the registry.
+     *
+     * @return WarehouseController
+     */
+    private function getWarehouseController()
+    {
+        /** @var WarehouseServiceInterface $service */
+        $service = ServiceRegister::getService(WarehouseServiceInterface::class);
+        /** @var CountryServiceInterface $countryService */
+        $countryService = ServiceRegister::getService(CountryServiceInterface::class);
+
+        return new WarehouseController($service, $countryService);
+    }
+
+    /**
      * Retrieves default warehouse data.
      */
     public function displayAjaxGetDefaultWarehouse()
     {
-        $warehouseController = new WarehouseController();
+        $warehouseController = $this->getWarehouseController();
 
         $warehouse = $warehouseController->getWarehouse();
 
@@ -32,7 +50,7 @@ class DefaultWarehouseController extends PacklinkBaseController
      */
     public function displayAjaxGetSupportedCountries()
     {
-        $warehouseController = new WarehouseController();
+        $warehouseController = $this->getWarehouseController();
 
         Configuration::setUICountryCode($this->context->language->iso_code);
         $countries = $warehouseController->getWarehouseCountries();
@@ -51,7 +69,7 @@ class DefaultWarehouseController extends PacklinkBaseController
     {
         $data = PacklinkPrestaShopUtility::getPacklinkPostData();
         $data['default'] = true;
-        $warehouseController = new WarehouseController();
+        $warehouseController = $this->getWarehouseController();
 
         try {
             $warehouse = $warehouseController->updateWarehouse($data);

@@ -7,7 +7,7 @@ use Logeecom\Infrastructure\ORM\Interfaces\QueueItemRepository as QueueItemRepos
 use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\TaskExecution\Exceptions\QueueItemSaveException;
-use Logeecom\Infrastructure\TaskExecution\Interfaces\Priority;
+use Logeecom\Infrastructure\TaskExecutor\Interfaces\Priority;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
 
 class QueueItemRepository extends BaseRepository implements QueueItemRepositoryInterface

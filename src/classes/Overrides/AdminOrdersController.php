@@ -4,7 +4,7 @@ namespace Packlink\PrestaShop\Classes\Overrides;
 
 use Logeecom\Infrastructure\Configuration\Configuration;
 use Logeecom\Infrastructure\ServiceRegister;
-use Logeecom\Infrastructure\TaskExecution\QueueItem;
+use Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus;
 use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
@@ -166,8 +166,12 @@ class AdminOrdersController
 
         $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
         $draftStatus = $draftService->getDraftStatus((string)$orderId);
-        $status = $draftStatus->status === QueueItem::IN_PROGRESS ? QueueItem::QUEUED : $draftStatus->status;
-        $draftCreated = $status === QueueItem::COMPLETED && $shipmentDetails;
+        // Core V2 exposes DraftStatus values; collapse the "being created" states to the
+        // 'queued' string the order-draft template already renders as an in-progress spinner.
+        $status = in_array($draftStatus->status, array(DraftStatus::PROCESSING, DraftStatus::DELAYED), true)
+            ? 'queued'
+            : $draftStatus->status;
+        $draftCreated = $status === DraftStatus::COMPLETED && $shipmentDetails;
 
         $context->smarty->assign(
             array(

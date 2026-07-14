@@ -420,9 +420,12 @@ class PacklinkInstaller
     private function addDefaultPluginConfiguration()
     {
         try {
-            /** @var ConfigurationService $configService */
-            $configService = ServiceRegister::getService(\Packlink\BusinessLogic\Configuration::CLASS_NAME);
-            $configService->setTaskRunnerStatus('', null);
+            // Core V2 moved task-runner status off the Configuration service onto TaskRunnerConfig.
+            /** @var \Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerConfigInterface $taskRunnerConfig */
+            $taskRunnerConfig = ServiceRegister::getService(
+                \Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerConfigInterface::CLASS_NAME
+            );
+            $taskRunnerConfig->setTaskRunnerStatus('', null);
         } catch (TaskRunnerStatusStorageUnavailableException $e) {
             Logger::logError(
                 $this->module->l('Error creating default task runner status configuration.'),

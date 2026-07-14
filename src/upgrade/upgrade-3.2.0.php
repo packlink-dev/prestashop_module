@@ -132,18 +132,18 @@ function getSystemSpecificPricingPolicies($service, $systemDetails)
  */
 function updateServices320()
 {
-    /** @var \Logeecom\Infrastructure\TaskExecution\QueueService $queueService */
-    $queueService = \Logeecom\Infrastructure\ServiceRegister::getService(
-        \Logeecom\Infrastructure\TaskExecution\QueueService::CLASS_NAME
+    /** @var \Logeecom\Infrastructure\TaskExecutor\Interfaces\TaskStatusProviderInterface $statusProvider */
+    $statusProvider = \Logeecom\Infrastructure\ServiceRegister::getService(
+        \Logeecom\Infrastructure\TaskExecutor\Interfaces\TaskStatusProviderInterface::CLASS_NAME
     );
-    /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-    $configService = \Logeecom\Infrastructure\ServiceRegister::getService(
-        \Logeecom\Infrastructure\Configuration\Configuration::CLASS_NAME
+    /** @var \Logeecom\Infrastructure\TaskExecutor\Interfaces\TaskExecutorInterface $taskExecutor */
+    $taskExecutor = \Logeecom\Infrastructure\ServiceRegister::getService(
+        \Logeecom\Infrastructure\TaskExecutor\Interfaces\TaskExecutorInterface::CLASS_NAME
     );
-    if ($queueService->findLatestByType('UpdateShippingServicesTask') !== null) {
-        $queueService->enqueue(
-            $configService->getDefaultQueueName(),
-            new \Packlink\BusinessLogic\Tasks\UpdateShippingServicesTask()
-        );
+
+    // Re-enqueue the service refresh only for stores that had it before (legacy queue-item type).
+    $status = $statusProvider->getLatestStatus('UpdateShippingServicesTask');
+    if ($status->getStatus() !== \Logeecom\Infrastructure\TaskExecutor\Model\TaskStatus::NOT_FOUND) {
+        $taskExecutor->enqueue(new \Packlink\BusinessLogic\Tasks\BusinessTasks\UpdateShippingServicesBusinessTask());
     }
 }

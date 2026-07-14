@@ -3,16 +3,14 @@
 use Logeecom\Infrastructure\Configuration\Configuration;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
-use Logeecom\Infrastructure\TaskExecution\QueueItem;
-use Logeecom\Infrastructure\TaskExecution\QueueService;
+use Logeecom\Infrastructure\TaskExecutor\Interfaces\TaskExecutorInterface;
+use Logeecom\Infrastructure\TaskExecutor\Interfaces\TaskStatusProviderInterface;
+use Logeecom\Infrastructure\TaskExecutor\Model\TaskStatus;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
-use Packlink\BusinessLogic\Scheduler\Models\HourlySchedule;
-use Packlink\BusinessLogic\Scheduler\Models\Schedule;
-use Packlink\BusinessLogic\Scheduler\ScheduleCheckTask;
 use Packlink\BusinessLogic\ShipmentDraft\Models\OrderSendDraftTaskMap;
-use Packlink\BusinessLogic\Tasks\TaskCleanupTask;
-use Packlink\BusinessLogic\Tasks\UpdateShippingServicesTask;
+use Packlink\BusinessLogic\Tasks\BusinessTasks\UpdateShippingServicesBusinessTask;
 use Packlink\PrestaShop\Classes\Bootstrap;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\CleanupTaskSchedulerService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
 
@@ -35,6 +33,8 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_2_2_0($module)
 {
     $previousShopContext = \Shop::getContext();
+    $previousShopId = \Shop::getContextShopID();
+    $previousGroupId = \Shop::getContextShopGroupID(true);
     \Shop::setContext(\Shop::CONTEXT_ALL);
 
     Bootstrap::init();
@@ -46,7 +46,13 @@ function upgrade_module_2_2_0($module)
 
     $module->enable();
 
-    \Shop::setContext($previousShopContext);
+    if ($previousShopContext === \Shop::CONTEXT_SHOP) {
+        \Shop::setContext(\Shop::CONTEXT_SHOP, $previousShopId);
+    } elseif ($previousShopContext === \Shop::CONTEXT_GROUP) {
+        \Shop::setContext(\Shop::CONTEXT_GROUP, $previousGroupId);
+    } else {
+        \Shop::setContext(\Shop::CONTEXT_ALL);
+    }
 
     return true;
 }
@@ -58,17 +64,8 @@ function upgrade_module_2_2_0($module)
  */
 function clearCompletedSchedulers()
 {
-    $configuration = ServiceRegister::getService(Configuration::CLASS_NAME);
-    $scheduleRepository = RepositoryRegistry::getRepository(Schedule::getClassName());
-
-    $schedule = new HourlySchedule(
-        new TaskCleanupTask(ScheduleCheckTask::getClassName(), array(QueueItem::COMPLETED), 3600),
-        $configuration->getDefaultQueueName()
-    );
-
-    $schedule->setMinute(10);
-    $schedule->setNextSchedule();
-    $scheduleRepository->save($schedule);
+    // Core V2 scheduler contract; TaskCleanupTask is scheduled via the shared service.
+    CleanupTaskSchedulerService::scheduleTaskCleanupTask();
 }
 
 /**
@@ -128,12 +125,15 @@ function migrateShopOrderDetailEntities()
  */
 function updateServices()
 {
-    /** @var \Logeecom\Infrastructure\TaskExecution\QueueService $queueService */
-    $queueService = ServiceRegister::getService(QueueService::CLASS_NAME);
-    /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService $configService */
-    $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
-    if ($queueService->findLatestByType('UpdateShippingServicesTask') !== null) {
-        $queueService->enqueue($configService->getDefaultQueueName(), new UpdateShippingServicesTask());
+    /** @var TaskStatusProviderInterface $statusProvider */
+    $statusProvider = ServiceRegister::getService(TaskStatusProviderInterface::CLASS_NAME);
+    /** @var TaskExecutorInterface $taskExecutor */
+    $taskExecutor = ServiceRegister::getService(TaskExecutorInterface::CLASS_NAME);
+
+    // Re-enqueue the service refresh only for stores that had it before (legacy queue-item type).
+    $status = $statusProvider->getLatestStatus('UpdateShippingServicesTask');
+    if ($status->getStatus() !== TaskStatus::NOT_FOUND) {
+        $taskExecutor->enqueue(new UpdateShippingServicesBusinessTask());
     }
 }
 

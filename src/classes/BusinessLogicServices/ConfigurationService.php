@@ -16,10 +16,6 @@ class ConfigurationService extends Configuration
      */
     const MIN_LOG_LEVEL = Logger::ERROR;
     /**
-     * Max inactivity period for a task in seconds
-     */
-    const MAX_TASK_INACTIVITY_PERIOD = 60;
-    /**
      * Default HTTP method to use for async call.
      */
     const ASYNC_CALL_METHOD = 'GET';
@@ -42,17 +38,6 @@ class ConfigurationService extends Configuration
     public function getCurrentSystemId()
     {
         return \Configuration::get('PS_SHOP_DEFAULT');
-    }
-
-    /**
-     * Gets max inactivity period for a task in seconds.
-     * After inactivity period is passed, system will fail such task as expired.
-     *
-     * @return int Max task inactivity period in seconds if set; otherwise, self::MAX_TASK_INACTIVITY_PERIOD.
-     */
-    public function getMaxTaskInactivityPeriod()
-    {
-        return parent::getMaxTaskInactivityPeriod() ?: self::MAX_TASK_INACTIVITY_PERIOD;
     }
 
     /**

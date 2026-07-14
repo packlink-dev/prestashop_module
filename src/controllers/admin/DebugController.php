@@ -1,6 +1,6 @@
 <?php
 
-use Logeecom\Infrastructure\Configuration\Configuration;
+use Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerConfigInterface;
 use Logeecom\Infrastructure\Http\Exceptions\HttpAuthenticationException;
 use Logeecom\Infrastructure\Http\Exceptions\HttpCommunicationException;
 use Logeecom\Infrastructure\Http\Exceptions\HttpRequestException;
@@ -9,7 +9,6 @@ use Packlink\BusinessLogic\Http\Proxy;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\PrestaShop\Classes\Utility\SystemInfoUtility;
 use Packlink\BusinessLogic\Controllers\DebugController as BaseDebugController;
-use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -128,7 +127,7 @@ class DebugController extends PacklinkBaseController
             PacklinkPrestaShopUtility::die400();
         }
 
-        $this->getConfigurationService()->setTaskRunnerWakeupDelay($data['taskRunnerWakeupDelay']);
+        $this->getTaskRunnerConfig()->setTaskRunnerWakeupDelay($data['taskRunnerWakeupDelay']);
 
         PacklinkPrestaShopUtility::dieJson(array('taskRunnerWakeupDelay' => $data['taskRunnerWakeupDelay']));
     }
@@ -139,7 +138,7 @@ class DebugController extends PacklinkBaseController
     public function displayAjaxGetTaskRunnerWakeUpDelay()
     {
         PacklinkPrestaShopUtility::dieJson(array(
-            'taskRunnerWakeupDelay' => $this->getConfigurationService()->getTaskRunnerWakeupDelay(),
+            'taskRunnerWakeupDelay' => $this->getTaskRunnerConfig()->getTaskRunnerWakeupDelay(),
         ));
     }
 
@@ -155,7 +154,7 @@ class DebugController extends PacklinkBaseController
             PacklinkPrestaShopUtility::die400();
         }
 
-        $this->getConfigurationService()->setAsyncRequestTimeout($data['asyncProcessTimeout']);
+        $this->getTaskRunnerConfig()->setAsyncRequestTimeout($data['asyncProcessTimeout']);
 
         PacklinkPrestaShopUtility::dieJson(array('asyncProcessTimeout' => $data['asyncProcessTimeout']));
     }
@@ -166,7 +165,7 @@ class DebugController extends PacklinkBaseController
     public function displayAjaxGetAsyncTimeout()
     {
         PacklinkPrestaShopUtility::dieJson(array(
-            'ASYNC_PROCESS_TIMEOUT' => $this->getConfigurationService()
+            'ASYNC_PROCESS_TIMEOUT' => $this->getTaskRunnerConfig()
                 ->getAsyncRequestTimeout(),
         ));
     }
@@ -189,12 +188,15 @@ class DebugController extends PacklinkBaseController
     }
 
     /**
-     * @return ConfigurationService
+     * Core V2 exposes the task-runner knobs (wakeup delay, async timeout) on TaskRunnerConfig
+     * rather than on the Configuration service.
+     *
+     * @return TaskRunnerConfigInterface
      */
-    private function getConfigurationService()
+    private function getTaskRunnerConfig()
     {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return ServiceRegister::getService(Configuration::CLASS_NAME);
+        return ServiceRegister::getService(TaskRunnerConfigInterface::CLASS_NAME);
     }
 
     /**

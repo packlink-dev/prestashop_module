@@ -3,14 +3,13 @@
 namespace Packlink\PrestaShop\Classes\Utility;
 
 use Logeecom\Infrastructure\ServiceRegister;
-use Logeecom\Infrastructure\TaskExecution\QueueItem;
+use Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus;
 use Logeecom\Infrastructure\Utility\TimeProvider;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Language\Translator;
 use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
-use Packlink\BusinessLogic\ShipmentDraft\Objects\ShipmentDraftStatus;
 use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShipmentDocument\Interfaces\ShipmentDocumentServiceInterface;
@@ -305,10 +304,10 @@ class AdminShippingTabDataProvider
         $displayDraftButton = true;
 
         switch ($draftStatus->status) {
-            case ShipmentDraftStatus::NOT_QUEUED:
+            case DraftStatus::NOT_QUEUED:
                 $message = Translator::translate('orderListAndDetails.createOrderDraft');
                 break;
-            case QueueItem::FAILED:
+            case DraftStatus::FAILED:
                 $message = Translator::translate(
                     'orderListAndDetails.draftCreateFailed',
                     array($draftStatus->message)

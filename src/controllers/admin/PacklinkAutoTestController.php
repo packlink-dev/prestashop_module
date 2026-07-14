@@ -133,7 +133,8 @@ class PacklinkAutoTestController extends PacklinkBaseController
      */
     protected function checkStatus()
     {
-        $status = $this->autoTestController->checkStatus(Tools::getValue('queueItemId', 0));
+        // Core V2 resolves the auto-test status by task type, not by a queue-item id.
+        $status = $this->autoTestController->checkStatus(0);
 
         if ($status['finished']) {
             $this->autoTestController->stop(

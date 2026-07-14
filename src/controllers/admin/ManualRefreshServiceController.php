@@ -1,6 +1,9 @@
 <?php
 
+use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Controllers\ManualRefreshController as CoreController;
+use Packlink\BusinessLogic\UpdateShippingServices\Interfaces\UpdateShippingServicesOrchestratorInterface;
+use Packlink\BusinessLogic\UpdateShippingServices\Interfaces\UpdateShippingServiceTaskStatusServiceInterface;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /** @noinspection PhpIncludeInspection */
@@ -20,7 +23,12 @@ class ManualRefreshServiceController extends PacklinkBaseController
     {
         parent::__construct();
 
-        $this->controller = new CoreController();
+        /** @var UpdateShippingServiceTaskStatusServiceInterface $statusService */
+        $statusService = ServiceRegister::getService(UpdateShippingServiceTaskStatusServiceInterface::class);
+        /** @var UpdateShippingServicesOrchestratorInterface $orchestrator */
+        $orchestrator = ServiceRegister::getService(UpdateShippingServicesOrchestratorInterface::class);
+
+        $this->controller = new CoreController($statusService, $orchestrator);
     }
 
     public function displayAjaxRefreshService()

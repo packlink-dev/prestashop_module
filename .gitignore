@@ -4,6 +4,7 @@
 !.idea/inspectionProfiles
 
 vendor
+/packlink/
 *.log
 *.zip
 !PluginInstallation/**/*.zip

@@ -17,6 +17,8 @@ use Packlink\PrestaShop\Classes\Bootstrap;
 function upgrade_module_2_0_2($module)
 {
     $previousShopContext = Shop::getContext();
+    $previousShopId = Shop::getContextShopID();
+    $previousGroupId = Shop::getContextShopGroupID(true);
     Shop::setContext(Shop::CONTEXT_ALL);
 
     Bootstrap::init();
@@ -27,7 +29,13 @@ function upgrade_module_2_0_2($module)
 
     $module->enable();
 
-    Shop::setContext($previousShopContext);
+    if ($previousShopContext === Shop::CONTEXT_SHOP) {
+        Shop::setContext(Shop::CONTEXT_SHOP, $previousShopId);
+    } elseif ($previousShopContext === Shop::CONTEXT_GROUP) {
+        Shop::setContext(Shop::CONTEXT_GROUP, $previousGroupId);
+    } else {
+        Shop::setContext(Shop::CONTEXT_ALL);
+    }
 
     return true;
 }

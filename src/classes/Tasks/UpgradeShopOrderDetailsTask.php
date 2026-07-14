@@ -2,20 +2,28 @@
 
 namespace Packlink\PrestaShop\Classes\Tasks;
 
-use Logeecom\Infrastructure\Http\Exceptions\HttpUnhandledException;
 use Logeecom\Infrastructure\Logger\Logger;
-use Logeecom\Infrastructure\Serializer\Serializer;
 use Logeecom\Infrastructure\ServiceRegister;
-use Logeecom\Infrastructure\TaskExecution\Task;
 use Logeecom\Infrastructure\Utility\TimeProvider;
 use Packlink\BusinessLogic\Http\DTO\Shipment;
 use Packlink\BusinessLogic\Http\Proxy;
 use Packlink\BusinessLogic\Order\OrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
+use Packlink\BusinessLogic\Tasks\Interfaces\BusinessTask;
+use Packlink\BusinessLogic\Tasks\TaskExecutionConfig;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
-class UpgradeShopOrderDetailsTask extends Task
+/**
+ * Class UpgradeShopOrderDetailsTask.
+ *
+ * Backfills shipment details (references, tracking, status) for orders created before the module
+ * persisted them. Refactored onto the core V2 business-task contract: it implements BusinessTask,
+ * reports progress by yielding from execute(), and is enqueued through the TaskExecutor.
+ *
+ * @package Packlink\PrestaShop\Classes\Tasks
+ */
+class UpgradeShopOrderDetailsTask implements BusinessTask
 {
     const INITIAL_PROGRESS_PERCENT = 5;
     const DEFAULT_BATCH_SIZE = 100;
@@ -32,9 +40,13 @@ class UpgradeShopOrderDetailsTask extends Task
      */
     private $numberOfOrders;
     /**
-     * @var int
+     * @var int|float
      */
     private $currentProgress;
+    /**
+     * @var TaskExecutionConfig|null
+     */
+    private $executionConfig;
     /**
      * @var OrderShipmentDetailsService
      */
@@ -52,53 +64,15 @@ class UpgradeShopOrderDetailsTask extends Task
      * UpgradeShopOrderDetailsTask constructor.
      *
      * @param array $oldOrders
+     * @param TaskExecutionConfig|null $executionConfig
      */
-    public function __construct(array $oldOrders)
+    public function __construct(array $oldOrders, TaskExecutionConfig $executionConfig = null)
     {
         $this->ordersToSync = $oldOrders;
         $this->batchSize = self::DEFAULT_BATCH_SIZE;
         $this->numberOfOrders = count($this->ordersToSync);
         $this->currentProgress = self::INITIAL_PROGRESS_PERCENT;
-        $this->orderShipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
-        $this->orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
-        $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function __serialize()
-    {
-        return $this->toArray();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function __unserialize($data)
-    {
-        $this->ordersToSync = $data['ordersToSync'];
-        $this->batchSize = $data['batchSize'];
-        $this->numberOfOrders = $data['numberOfOrders'];
-        $this->currentProgress = $data['currentProgress'];
-    }
-
-    /**
-     * Transforms array into a serializable object,
-     *
-     * @param array $array Data that is used to instantiate serializable object.
-     *
-     * @return \Logeecom\Infrastructure\Serializer\Interfaces\Serializable
-     *      Instance of serialized object.
-     */
-    public static function fromArray(array $array)
-    {
-        $entity = new static($array['ordersToSync']);
-        $entity->batchSize = $array['batchSize'];
-        $entity->numberOfOrders = $array['numberOfOrders'];
-        $entity->currentProgress = $array['currentProgress'];
-
-        return $entity;
+        $this->executionConfig = $executionConfig;
     }
 
     /**
@@ -106,25 +80,63 @@ class UpgradeShopOrderDetailsTask extends Task
      *
      * @return array Array representation of a serializable object.
      */
-    public function toArray()
+    public function toArray(): array
     {
-        return array(
+        $data = array(
             'ordersToSync' => $this->ordersToSync,
             'batchSize' => $this->batchSize,
             'numberOfOrders' => $this->numberOfOrders,
             'currentProgress' => $this->currentProgress,
         );
+
+        if ($this->executionConfig !== null) {
+            $data['execution_config'] = $this->executionConfig->toArray();
+        }
+
+        return $data;
     }
 
     /**
-     * @inheritdoc
+     * Transforms array into a BusinessTask instance.
+     *
+     * @param array $data Data that is used to instantiate the task.
+     *
+     * @return BusinessTask
      */
-    public function execute()
+    public static function fromArray(array $data): BusinessTask
     {
-        $this->reportProgress($this->currentProgress);
+        $executionConfig = null;
+        if (!empty($data['execution_config']) && is_array($data['execution_config'])) {
+            $executionConfig = TaskExecutionConfig::fromArray($data['execution_config']);
+        }
+
+        $entity = new self($data['ordersToSync'], $executionConfig);
+        $entity->batchSize = $data['batchSize'];
+        $entity->numberOfOrders = $data['numberOfOrders'];
+        $entity->currentProgress = $data['currentProgress'];
+
+        return $entity;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getExecutionConfig()
+    {
+        return $this->executionConfig;
+    }
+
+    /**
+     * Executes the batch backfill, yielding progress to the task executor.
+     *
+     * @return \Generator
+     */
+    public function execute(): \Generator
+    {
+        yield $this->currentProgress;
 
         if ($this->numberOfOrders === 0) {
-            $this->reportProgress(100);
+            yield 100;
 
             return;
         }
@@ -136,7 +148,7 @@ class UpgradeShopOrderDetailsTask extends Task
 
         while ($count > 0) {
             $orders = $this->getBatchOrders();
-            $this->reportAlive();
+            yield;
 
             foreach ($orders as $order) {
                 if (!$this->setReference($order['id_order'], $order['draft_reference'])) {
@@ -152,7 +164,7 @@ class UpgradeShopOrderDetailsTask extends Task
                 }
 
                 try {
-                    $shipment = $this->proxy->getShipment($order['draft_reference']);
+                    $shipment = $this->getProxy()->getShipment($order['draft_reference']);
                 } catch (\Exception $e) {
                     $shipment = null;
                 }
@@ -166,39 +178,13 @@ class UpgradeShopOrderDetailsTask extends Task
             }
 
             $this->removeFinishedBatch();
-            $this->reportProgressForBatch();
+
+            yield $this->calculateBatchProgress();
+
             $count = count($this->ordersToSync);
         }
 
-        $this->reportProgress(100);
-    }
-
-    /**
-     * Reduces batch size.
-     *
-     * @throws \Logeecom\Infrastructure\Http\Exceptions\HttpUnhandledException
-     */
-    public function reconfigure()
-    {
-        if ($this->batchSize >= 100) {
-            $this->batchSize -= 50;
-        } elseif ($this->batchSize > 10 && $this->batchSize < 100) {
-            $this->batchSize -= 10;
-        } elseif ($this->batchSize > 1 && $this->batchSize <= 10) {
-            --$this->batchSize;
-        } else {
-            throw new HttpUnhandledException(TranslationUtility::__('Batch size can not be smaller than 1'));
-        }
-    }
-
-    /**
-     * Determines whether task can be reconfigured.
-     *
-     * @return bool TRUE if task can be reconfigured; otherwise, FALSE.
-     */
-    public function canBeReconfigured()
-    {
-        return $this->batchSize > 1;
+        yield 100;
     }
 
     /**
@@ -212,7 +198,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setReference($orderId, $referenceId)
     {
         try {
-            $this->orderService->setReference($orderId, $referenceId);
+            $this->getOrderService()->setReference($orderId, $referenceId);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Failed to create reference for order %d', array($orderId)),
@@ -234,7 +220,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setTrackingInfo($reference, $shipment)
     {
         try {
-            $this->orderService->updateTrackingInfo($shipment);
+            $this->getOrderService()->updateTrackingInfo($shipment);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__(
@@ -255,7 +241,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setShipmentStatusAndPrice($reference, $shipment)
     {
         try {
-            $this->orderService->updateShippingStatus(
+            $this->getOrderService()->updateShippingStatus(
                 $shipment,
                 ShipmentStatus::getStatus($shipment->status)
             );
@@ -275,7 +261,7 @@ class UpgradeShopOrderDetailsTask extends Task
     protected function setDeleted($reference)
     {
         try {
-            $this->orderShipmentDetailsService->markShipmentDeleted($reference);
+            $this->getOrderShipmentDetailsService()->markShipmentDeleted($reference);
         } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__('Order with reference %s not found.', array($reference)),
@@ -303,13 +289,52 @@ class UpgradeShopOrderDetailsTask extends Task
     }
 
     /**
-     * Reports progress for a batch.
+     * Calculates progress after a processed batch.
+     *
+     * @return int|float
      */
-    private function reportProgressForBatch()
+    private function calculateBatchProgress()
     {
         $synced = $this->numberOfOrders - count($this->ordersToSync);
         $progressStep = $synced * (100 - self::INITIAL_PROGRESS_PERCENT) / $this->numberOfOrders;
         $this->currentProgress = self::INITIAL_PROGRESS_PERCENT + $progressStep;
-        $this->reportProgress($this->currentProgress);
+
+        return $this->currentProgress;
+    }
+
+    /**
+     * @return OrderService
+     */
+    private function getOrderService()
+    {
+        if ($this->orderService === null) {
+            $this->orderService = ServiceRegister::getService(OrderService::CLASS_NAME);
+        }
+
+        return $this->orderService;
+    }
+
+    /**
+     * @return OrderShipmentDetailsService
+     */
+    private function getOrderShipmentDetailsService()
+    {
+        if ($this->orderShipmentDetailsService === null) {
+            $this->orderShipmentDetailsService = ServiceRegister::getService(OrderShipmentDetailsService::CLASS_NAME);
+        }
+
+        return $this->orderShipmentDetailsService;
+    }
+
+    /**
+     * @return Proxy
+     */
+    private function getProxy()
+    {
+        if ($this->proxy === null) {
+            $this->proxy = ServiceRegister::getService(Proxy::CLASS_NAME);
+        }
+
+        return $this->proxy;
     }
 }

@@ -1,7 +1,9 @@
 <?php
 
+use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 use Packlink\BusinessLogic\Controllers\DefaultParcelController as BaseParcelController;
+use Packlink\BusinessLogic\UpdateShippingServices\Interfaces\UpdateShippingServicesOrchestratorInterface;
 
 /** @noinspection PhpIncludeInspection */
 require_once rtrim(_PS_MODULE_DIR_, '/') . '/packlink/vendor/autoload.php';
@@ -18,7 +20,10 @@ class DefaultParcelController extends PacklinkBaseController
     {
         parent::__construct();
 
-        $this->parcelController = new BaseParcelController();
+        /** @var UpdateShippingServicesOrchestratorInterface $orchestrator */
+        $orchestrator = ServiceRegister::getService(UpdateShippingServicesOrchestratorInterface::class);
+
+        $this->parcelController = new BaseParcelController($orchestrator);
     }
 
     /**

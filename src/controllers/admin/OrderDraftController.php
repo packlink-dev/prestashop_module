@@ -2,8 +2,8 @@
 
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
+use Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
-use Logeecom\Infrastructure\TaskExecution\QueueItem;
 use Packlink\BusinessLogic\OrderShipmentDetails\OrderShipmentDetailsService;
 
 /** @noinspection PhpIncludeInspection */
@@ -59,7 +59,7 @@ class OrderDraftController extends PacklinkBaseController
 
         $draftStatus = $this->getShipmentDraftService()->getDraftStatus($orderId);
 
-        if ($draftStatus->status === QueueItem::COMPLETED) {
+        if ($draftStatus->status === DraftStatus::COMPLETED) {
             $shipmentDetails = $this->getOrderShipmentDetailsService()->getDetailsByOrderId($orderId);
 
             if ($shipmentDetails === null) {

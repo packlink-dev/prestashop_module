@@ -2,14 +2,13 @@
 
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
-use Logeecom\Infrastructure\Configuration\Configuration;
-use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
+use Logeecom\Infrastructure\TaskExecution\LegacyTaskAdapter;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
-use Packlink\BusinessLogic\Scheduler\Models\HourlySchedule;
-use Packlink\BusinessLogic\Scheduler\Models\Schedule;
-use Packlink\BusinessLogic\Scheduler\ScheduleCheckTask;
-use Packlink\BusinessLogic\Tasks\TaskCleanupTask;
+use Logeecom\Infrastructure\TaskExecution\Scheduler\ScheduleCheckTask;
+use Logeecom\Infrastructure\TaskExecution\Tasks\TaskCleanupTask;
+use Packlink\BusinessLogic\Scheduler\DTO\ScheduleConfig;
+use Packlink\BusinessLogic\Scheduler\Interfaces\SchedulerInterface;
 
 /**
  * Class CleanupTaskSchedulerService
@@ -21,21 +20,25 @@ class CleanupTaskSchedulerService
     /**
      * Schedules a new task in charge of deleting old schedule check tasks.
      *
+     * Uses the core V2 scheduler contract. TaskCleanupTask is a legacy infrastructure task, so it is
+     * wrapped in a LegacyTaskAdapter to be scheduled through the new SchedulerInterface.
+     *
      * @return void
-     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
     public static function scheduleTaskCleanupTask()
     {
-        $configuration = ServiceRegister::getService(Configuration::CLASS_NAME);
-        $scheduleRepository = RepositoryRegistry::getRepository(Schedule::getClassName());
+        /** @var SchedulerInterface $scheduler */
+        $scheduler = ServiceRegister::getService(SchedulerInterface::CLASS_NAME);
 
-        $schedule = new HourlySchedule(
-            new TaskCleanupTask(ScheduleCheckTask::getClassName(), array(QueueItem::COMPLETED), 3600),
-            $configuration->getDefaultQueueName()
+        $cleanupTask = new TaskCleanupTask(
+            ScheduleCheckTask::getClassName(),
+            array(QueueItem::COMPLETED),
+            3600
         );
 
-        $schedule->setMinute(10);
-        $schedule->setNextSchedule();
-        $scheduleRepository->save($schedule);
+        $scheduler->scheduleHourly(
+            new LegacyTaskAdapter($cleanupTask),
+            new ScheduleConfig(0, 0, 10)
+        );
     }
 }

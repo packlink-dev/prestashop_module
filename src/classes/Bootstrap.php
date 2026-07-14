@@ -14,21 +14,28 @@ use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\Serializer\Concrete\NativeSerializer;
 use Logeecom\Infrastructure\Serializer\Serializer;
 use Logeecom\Infrastructure\ServiceRegister;
+use Logeecom\Infrastructure\TaskExecution\DefaultTaskMetadataProvider;
+use Logeecom\Infrastructure\TaskExecution\Interfaces\AsyncProcessUrlProviderInterface;
+use Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerConfigInterface;
 use Logeecom\Infrastructure\TaskExecution\Process;
 use Logeecom\Infrastructure\TaskExecution\QueueItem;
+use Logeecom\Infrastructure\TaskExecution\Scheduler\Models\Schedule;
+use Logeecom\Infrastructure\TaskExecution\TaskExecutionBootstrap;
 use Packlink\Brands\Packlink\PacklinkConfigurationService;
 use Packlink\BusinessLogic\BootstrapComponent;
 use Packlink\BusinessLogic\Brand\BrandConfigurationService;
 use Packlink\BusinessLogic\CashOnDelivery\Model\CashOnDelivery;
 use Packlink\BusinessLogic\Configuration;
+use Packlink\BusinessLogic\Country\Interfaces\CountryServiceInterface;
 use Packlink\BusinessLogic\Country\WarehouseCountryService;
 use Packlink\BusinessLogic\FileResolver\FileResolverService;
 use Packlink\BusinessLogic\IntegrationRegistration\Interfaces\IntegrationRegistrationDataProviderInterface;
 use Packlink\BusinessLogic\IntegrationRegistration\Interfaces\ModuleResetServiceInterface;
 use Packlink\BusinessLogic\Order\Interfaces\ShopOrderService as ShopOrderServiceInterface;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
-use Packlink\BusinessLogic\Scheduler\Models\Schedule;
 use Packlink\BusinessLogic\ShipmentDraft\Models\OrderSendDraftTaskMap;
+use Packlink\BusinessLogic\Tasks\Interfaces\TaskMetadataProviderInterface;
+use Packlink\BusinessLogic\UpdateShippingServices\Models\UpdateShippingServiceTaskStatus;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
@@ -53,6 +60,20 @@ use Packlink\BusinessLogic\SystemInformation\SystemInfoService as SystemInfoInte
  */
 class Bootstrap extends BootstrapComponent
 {
+    /**
+     * Initializes infrastructure components.
+     *
+     * Under core V2 the task-execution stack (queue, task runner, scheduler) is no longer
+     * registered by the business-logic bootstrap; PrestaShop runs in Standalone / TaskRunner mode,
+     * so the platform must register that stack explicitly.
+     */
+    public static function init()
+    {
+        parent::init();
+
+        TaskExecutionBootstrap::init();
+    }
+
     /**
      * Initializes infrastructure services and utilities.
      */
@@ -157,6 +178,37 @@ class Bootstrap extends BootstrapComponent
                 return BusinessLogicServices\WarehouseCountryService::getInstance();
             }
         );
+
+        // Core V2's WarehouseController type-hints CountryServiceInterface. The core registers
+        // WarehouseServiceInterface but not this one, so the platform country service (which is a
+        // CountryServiceInterface) is wired here so the controller's dependency resolves.
+        ServiceRegister::registerService(
+            CountryServiceInterface::class,
+            function () {
+                return BusinessLogicServices\WarehouseCountryService::getInstance();
+            }
+        );
+
+        // Core V2 resolves the async-process endpoint through this contract (Standalone mode).
+        ServiceRegister::registerService(
+            AsyncProcessUrlProviderInterface::CLASS_NAME,
+            function () {
+                return new BusinessLogicServices\AsyncProcessUrlProvider();
+            }
+        );
+
+        // Core V2 resolves each task's queue name / priority / context through this provider.
+        ServiceRegister::registerService(
+            TaskMetadataProviderInterface::CLASS_NAME,
+            function () {
+                /** @var Configuration $config */
+                $config = ServiceRegister::getService(Configuration::CLASS_NAME);
+                /** @var TaskRunnerConfigInterface $taskRunnerConfig */
+                $taskRunnerConfig = ServiceRegister::getService(TaskRunnerConfigInterface::CLASS_NAME);
+
+                return new DefaultTaskMetadataProvider($config, $taskRunnerConfig);
+            }
+        );
     }
 
     /**
@@ -180,5 +232,9 @@ class Bootstrap extends BootstrapComponent
         );
         RepositoryRegistry::registerRepository(LogData::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(OrderSendDraftTaskMap::CLASS_NAME, BaseRepository::getClassName());
+        RepositoryRegistry::registerRepository(
+            UpdateShippingServiceTaskStatus::CLASS_NAME,
+            BaseRepository::getClassName()
+        );
     }
 }

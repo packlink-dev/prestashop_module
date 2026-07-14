@@ -6,7 +6,7 @@ if (!defined('_PS_VERSION_')) {
 
 use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
-use Logeecom\Infrastructure\TaskExecution\QueueService;
+use Logeecom\Infrastructure\TaskExecutor\Interfaces\TaskExecutorInterface;
 use Packlink\BusinessLogic\User\UserAccountService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Tasks\UpgradeShopOrderDetailsTask;
@@ -28,6 +28,8 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 function upgrade_module_2_0_0($module)
 {
     $previousShopContext = Shop::getContext();
+    $previousShopId = Shop::getContextShopID();
+    $previousGroupId = Shop::getContextShopGroupID(true);
     Shop::setContext(Shop::CONTEXT_ALL);
 
     Bootstrap::init();
@@ -69,7 +71,13 @@ function upgrade_module_2_0_0($module)
     removePreviousData();
 
     $module->enable();
-    Shop::setContext($previousShopContext);
+    if ($previousShopContext === Shop::CONTEXT_SHOP) {
+        Shop::setContext(Shop::CONTEXT_SHOP, $previousShopId);
+    } elseif ($previousShopContext === Shop::CONTEXT_GROUP) {
+        Shop::setContext(Shop::CONTEXT_GROUP, $previousGroupId);
+    } else {
+        Shop::setContext(Shop::CONTEXT_ALL);
+    }
 
     \Configuration::loadConfiguration();
 
@@ -174,13 +182,11 @@ function transferOrderReferences()
 {
     $packlinkOrders = getPacklinkOrders();
     if (!empty($packlinkOrders)) {
-        $config = getConfigService();
-
-        /** @var QueueService $queue */
-        $queue = ServiceRegister::getService(QueueService::CLASS_NAME);
+        /** @var TaskExecutorInterface $taskExecutor */
+        $taskExecutor = ServiceRegister::getService(TaskExecutorInterface::CLASS_NAME);
         try {
-            $queue->enqueue($config->getDefaultQueueName(), new UpgradeShopOrderDetailsTask($packlinkOrders));
-        } catch (\Logeecom\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException $e) {
+            $taskExecutor->enqueue(new UpgradeShopOrderDetailsTask($packlinkOrders));
+        } catch (\Exception $e) {
             Logger::logError(
                 TranslationUtility::__(
                     'Cannot enqueue UpgradeShopDetailsTask because: %s',

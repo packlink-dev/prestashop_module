@@ -48,7 +48,7 @@ class Packlink extends CarrierModule
         $this->module_key = 'a7a3a395043ca3a09d703f7d1c74a107';
         $this->name = 'packlink';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.6.0';
+        $this->version = '3.7.0';
         $this->author = $this->l('Packlink Shipping S.L.');
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.6.0.14', 'max' => '9.1.4');
@@ -687,10 +687,16 @@ class Packlink extends CarrierModule
         foreach ($records as &$record) {
             $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$record['id_order']);
             $draftStatus = $draftService->getDraftStatus((string)$record['id_order']);
-            $status = $draftStatus->status === \Logeecom\Infrastructure\TaskExecution\QueueItem::IN_PROGRESS
-                ? \Logeecom\Infrastructure\TaskExecution\QueueItem::QUEUED
-                : $draftStatus->status;
-            $draftCreated = $status === \Logeecom\Infrastructure\TaskExecution\QueueItem::COMPLETED && $shipmentDetails;
+            $status = in_array(
+                $draftStatus->status,
+                array(
+                    \Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus::PROCESSING,
+                    \Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus::DELAYED,
+                ),
+                true
+            ) ? 'queued' : $draftStatus->status;
+            $draftCreated = $status === \Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus::COMPLETED
+                && $shipmentDetails;
             $shipmentLabels = $shipmentDetails ? $shipmentDetails->getShipmentLabels() : array();
 
             $record['draftStatus'] = $status;

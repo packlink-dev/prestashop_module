@@ -1,12 +1,13 @@
 <?php
 
 use Logeecom\Infrastructure\ServiceRegister;
-use Logeecom\Infrastructure\TaskExecution\QueueItem;
+use Logeecom\Infrastructure\TaskExecutor\Model\TaskStatus;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodConfiguration;
 use Packlink\BusinessLogic\Controllers\DTO\ShippingMethodResponse;
 use Packlink\BusinessLogic\Controllers\ShippingMethodController;
 use Packlink\BusinessLogic\Controllers\UpdateShippingServicesTaskStatusController;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Packlink\BusinessLogic\UpdateShippingServices\Interfaces\UpdateShippingServiceTaskStatusServiceInterface;
 use Packlink\BusinessLogic\Tax\TaxClass;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
@@ -90,11 +91,22 @@ class ShippingMethodsController extends PacklinkBaseController
      */
     public function displayAjaxGetTaskStatus()
     {
-        $status = QueueItem::FAILED;
+        $status = TaskStatus::FAILED;
         try {
-            $controller = new UpdateShippingServicesTaskStatusController();
+            /** @var UpdateShippingServiceTaskStatusServiceInterface $statusService */
+            $statusService = ServiceRegister::getService(UpdateShippingServiceTaskStatusServiceInterface::class);
+            $controller = new UpdateShippingServicesTaskStatusController($statusService);
             $status = $controller->getLastTaskStatus();
         } catch (\Logeecom\Infrastructure\Exceptions\BaseException $e) {
+        }
+
+        // Core V2 returns NOT_FOUND when no update-services task is tracked (e.g. services were
+        // already fetched, or none has been enqueued this session). The shipping-services poller JS
+        // only understands queued/in_progress/created/completed/failed, so an unhandled NOT_FOUND
+        // leaves the page spinning forever. Present it as COMPLETED so the services already in
+        // storage are rendered and the loading state resolves.
+        if ($status === TaskStatus::NOT_FOUND) {
+            $status = TaskStatus::COMPLETED;
         }
 
         PacklinkPrestaShopUtility::dieJson(array('status' => $status));

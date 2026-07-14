@@ -1,6 +1,9 @@
 <?php
 
+use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Controllers\AutoConfigurationController;
+use Packlink\BusinessLogic\UpdateShippingServices\Interfaces\UpdateShippingServicesOrchestratorInterface;
+use Packlink\BusinessLogic\UpdateShippingServices\Interfaces\UpdateShippingServiceTaskStatusServiceInterface;
 use Packlink\PrestaShop\Classes\Utility\PacklinkPrestaShopUtility;
 
 /** @noinspection PhpIncludeInspection */
@@ -16,7 +19,12 @@ class PacklinkAutoConfigureController extends PacklinkBaseController
      */
     public function initContent()
     {
-        $controller = new AutoConfigurationController();
+        /** @var UpdateShippingServicesOrchestratorInterface $orchestrator */
+        $orchestrator = ServiceRegister::getService(UpdateShippingServicesOrchestratorInterface::class);
+        /** @var UpdateShippingServiceTaskStatusServiceInterface $service */
+        $service = ServiceRegister::getService(UpdateShippingServiceTaskStatusServiceInterface::class);
+
+        $controller = new AutoConfigurationController($orchestrator, $service);
 
         PacklinkPrestaShopUtility::dieJson(array('success' => $controller->start(true)));
     }

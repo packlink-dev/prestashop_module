@@ -41,7 +41,8 @@ class PacklinkAsyncProcessModuleFrontController extends ModuleFrontController
         $autoTest = Tools::getValue('auto-test');
 
         if ($autoTest !== false) {
-            $autoTestService = new AutoTestService();
+            /** @var AutoTestService $autoTestService */
+            $autoTestService = ServiceRegister::getService(AutoTestService::CLASS_NAME);
             $autoTestService->setAutoTestMode();
             Logger::logInfo('Received auto-test async process request.', 'Integration', array('guid' => $guid));
         } else {
