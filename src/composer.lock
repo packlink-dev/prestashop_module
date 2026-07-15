@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bed546d117631d8c249bc636c6ed0bb0",
+    "content-hash": "2364d17c9989862ff7a5a61f42801333",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -62,16 +62,16 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "v3.9.0",
+            "version": "v3.9.1",
             "source": {
                 "type": "git",
                 "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "c11bb42eb1084a38df6e4700120230411dd6a642"
+                "reference": "5e281b6b6c0f3a6223c0b53effd4779d8604ada0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/c11bb42eb1084a38df6e4700120230411dd6a642",
-                "reference": "c11bb42eb1084a38df6e4700120230411dd6a642",
+                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/5e281b6b6c0f3a6223c0b53effd4779d8604ada0",
+                "reference": "5e281b6b6c0f3a6223c0b53effd4779d8604ada0",
                 "shasum": ""
             },
             "require": {
@@ -111,7 +111,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2026-07-06T12:14:58+00:00"
+            "time": "2026-07-08T09:04:51+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -1395,7 +1395,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -1406,9 +1406,9 @@
         "ext-fileinfo": "*",
         "ext-openssl": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "5.3.29"
     },
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.9.0"
 }
