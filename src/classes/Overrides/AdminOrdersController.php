@@ -11,6 +11,7 @@ use Packlink\BusinessLogic\ShipmentDraft\ShipmentDraftService;
 use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
+use Packlink\PrestaShop\Classes\Utility\DraftStatusMapper;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -166,11 +167,7 @@ class AdminOrdersController
 
         $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$orderId);
         $draftStatus = $draftService->getDraftStatus((string)$orderId);
-        // Core V2 exposes DraftStatus values; collapse the "being created" states to the
-        // 'queued' string the order-draft template already renders as an in-progress spinner.
-        $status = in_array($draftStatus->status, array(DraftStatus::PROCESSING, DraftStatus::DELAYED), true)
-            ? 'queued'
-            : $draftStatus->status;
+        $status = DraftStatusMapper::toDisplayStatus($draftStatus->status);
         $draftCreated = $status === DraftStatus::COMPLETED && $shipmentDetails;
 
         $context->smarty->assign(

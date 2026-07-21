@@ -17,9 +17,9 @@ use Packlink\BusinessLogic\Order\Objects\Item;
 use Packlink\BusinessLogic\Order\Objects\Order;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
-use Packlink\PrestaShop\Classes\Entities\CustomerCustomsData;
 use Packlink\PrestaShop\Classes\Entities\ProductCustomsData;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
+use Packlink\PrestaShop\Classes\Utility\CustomsDataProvider;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -29,6 +29,28 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
  */
 class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopOrderService
 {
+    /**
+     * Per-order cache of module-owned product customs data, keyed by product id. Preloaded once per
+     * order build in a single query to avoid an N+1 lookup per order line. Null until preloaded.
+     *
+     * @var ProductCustomsData[]|null
+     */
+    private $productCustomsCache;
+    /**
+     * Per-request cache of loaded PrestaShop delivery addresses, keyed by address id, so the same
+     * address is not hydrated more than once during an order build.
+     *
+     * @var PrestaShopAddress[]
+     */
+    private $deliveryAddressCache = array();
+    /**
+     * The stored customs mapping for the current order build (which PrestaShop source feeds each
+     * customs field), or null when none is configured.
+     *
+     * @var \Packlink\BusinessLogic\Customs\Models\CustomsMapping|null
+     */
+    private $customsMapping;
+
     /**
      * Handles updated tracking info for order with a given ID.
      *
@@ -107,21 +129,24 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
 
             $order->setShippingAddress($this->getAddress($sourceOrder));
 
-            // Customs receiver data (CR-SET-66). Only set when present; the core customs
-            // invoice build falls back to the configured mapping defaults otherwise.
-            $vatNumber = $this->getDeliveryVatNumber($sourceOrder);
-            if ($vatNumber !== '') {
-                $order->setVatNumber($vatNumber);
+            // Customs receiver data. Honor the merchant's data-mapping selections (which PrestaShop
+            // source feeds each customs field); the core invoice build falls back to the configured
+            // mapping defaults when a value is absent.
+            $this->customsMapping = $this->loadCustomsMapping();
+
+            $receiverTaxId = $this->resolveReceiverTaxId($sourceOrder);
+            if ($receiverTaxId !== '') {
+                $order->setTaxId($receiverTaxId);
             }
-            $taxId = $this->getCustomerTaxId((int)$sourceOrder->id_customer);
-            if ($taxId !== '') {
-                $order->setTaxId($taxId);
+            $companyVat = $this->resolveCompanyVat($sourceOrder);
+            if ($companyVat !== '') {
+                $order->setVatNumber($companyVat);
             }
 
             $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
             $items = $this->getOrderItems($sourceOrder);
             $order->setItems($items);
-            // Customs (CR-SET-66): the customs-invoice request sends order-level parcels weight,
+            // Customs: the customs-invoice request sends order-level parcels weight,
             // which Packlink rejects at 0 (causing the shipment to be sent without customs and the
             // carrier to reject international shipments). Populate it from the built items.
             $order->setTotalWeight($this->calculateTotalWeight($items));
@@ -184,7 +209,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $deliveryAddressId = (int)$shopOrder->id_address_delivery;
 
         $shippingAddress = new Address();
-        $deliveryAddress = new PrestaShopAddress($deliveryAddressId);
+        $deliveryAddress = $this->loadDeliveryAddress($deliveryAddressId);
         $country = new \Country($deliveryAddress->id_country);
 
         if (\Validate::isLoadedObject($country)) {
@@ -256,6 +281,13 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         $defaultParcel = $configService->getDefaultParcel();
 
         $sourceOrderItems = $sourceOrder->getOrderDetailList();
+
+        $productIds = array();
+        foreach ($sourceOrderItems as $sourceOrderItem) {
+            $productIds[] = (int)$sourceOrderItem['product_id'];
+        }
+        $this->preloadProductCustomsData($productIds);
+
         $orderItems = array();
         /** @var array $sourceOrderItem */
         foreach ($sourceOrderItems as $sourceOrderItem) {
@@ -274,8 +306,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
     }
 
     /**
-     * Sums the total shipment weight from the built order items (weight x quantity). (CR-SET-66)
-     *
+     * Sums the total shipment weight from the built order items (weight x quantity).     *
      * @param \Packlink\BusinessLogic\Order\Objects\Item[] $items
      *
      * @return float
@@ -346,10 +377,13 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $orderItem->setPictureUrl($productImageUrl);
         }
 
-        // Customs item attributes (CR-SET-66). Empty values fall back to the mapping defaults.
+        // Customs item attributes. The tariff-number source is driven by the customs mapping
+        // (mapping_tariff_number); empty values fall back to the mapping defaults in the core build.
         $productCustoms = $this->getProductCustomsData((int)$product->id);
         if ($productCustoms !== null) {
-            if (!empty($productCustoms->hsCode)) {
+            if (!empty($productCustoms->hsCode)
+                && $this->tariffNumberSource() === CustomsMappingService::SOURCE_PRODUCT_HS_CODE
+            ) {
                 $orderItem->setTariffNumber($productCustoms->hsCode);
             }
             if (!empty($productCustoms->countryOfOrigin)) {
@@ -358,6 +392,73 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         }
 
         return $orderItem;
+    }
+
+    /**
+     * Loads the stored customs data-source mapping for the current order build, or null when none is
+     * configured. Reads the raw stored mapping (no Packlink proxy call).
+     *
+     * @return \Packlink\BusinessLogic\Customs\Models\CustomsMapping|null
+     */
+    private function loadCustomsMapping()
+    {
+        try {
+            /** @var ConfigurationService $configService */
+            $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+
+            return $configService->getCustomsMappings();
+        } catch (\Exception $e) {
+            Logger::logWarning('Failed to load customs mapping: ' . $e->getMessage(), 'Integration');
+
+            return null;
+        }
+    }
+
+    /**
+     * Resolves the receiver tax id from the source the merchant selected in the customs mapping
+     * (mapping_receiver_tax_id); defaults to the module customer Tax ID field.
+     *
+     * @param PrestaShopOrder $sourceOrder
+     *
+     * @return string
+     */
+    private function resolveReceiverTaxId(PrestaShopOrder $sourceOrder)
+    {
+        $source = ($this->customsMapping !== null && !empty($this->customsMapping->mappingReceiverTaxId))
+            ? $this->customsMapping->mappingReceiverTaxId
+            : CustomsMappingService::SOURCE_CUSTOMER_TAX_ID;
+
+        if ($source === CustomsMappingService::SOURCE_ADDRESS_VAT) {
+            return $this->getDeliveryVatNumber($sourceOrder);
+        }
+
+        return $this->getCustomerTaxId((int)$sourceOrder->id_customer);
+    }
+
+    /**
+     * Resolves the company VAT from the source selected in the customs mapping (mapping_company_vat);
+     * the native address VAT number is the only supported source today and is the default.
+     *
+     * @param PrestaShopOrder $sourceOrder
+     *
+     * @return string
+     */
+    private function resolveCompanyVat(PrestaShopOrder $sourceOrder)
+    {
+        return $this->getDeliveryVatNumber($sourceOrder);
+    }
+
+    /**
+     * Returns the tariff-number source selected in the customs mapping (mapping_tariff_number);
+     * defaults to the product HS code field.
+     *
+     * @return string
+     */
+    private function tariffNumberSource()
+    {
+        return ($this->customsMapping !== null && !empty($this->customsMapping->mappingTariffNumber))
+            ? $this->customsMapping->mappingTariffNumber
+            : CustomsMappingService::SOURCE_PRODUCT_HS_CODE;
     }
 
     /**
@@ -393,18 +494,44 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      */
     private function getProductCustomsData($productId)
     {
+        $productId = (int)$productId;
+
+        if (is_array($this->productCustomsCache)) {
+            return isset($this->productCustomsCache[$productId]) ? $this->productCustomsCache[$productId] : null;
+        }
+
+        // Fallback single lookup for callers outside the preloaded order-build path.
+        return CustomsDataProvider::getProductCustomsData($productId);
+    }
+
+    /**
+     * Loads the module-owned customs data for every given product id in a single query and caches it
+     * for the current order build, replacing a per-line N+1 lookup.
+     *
+     * @param int[] $productIds
+     */
+    private function preloadProductCustomsData(array $productIds)
+    {
+        $this->productCustomsCache = array();
+
+        $productIds = array_values(array_unique(array_map('intval', $productIds)));
+        if (empty($productIds)) {
+            return;
+        }
+
         try {
             $repository = RepositoryRegistry::getRepository(ProductCustomsData::CLASS_NAME);
 
             $query = new QueryFilter();
-            $query->where('productId', '=', $productId);
+            $query->where('productId', 'IN', $productIds);
 
-            /** @var ProductCustomsData|null $data */
-            $data = $repository->selectOne($query);
-
-            return $data;
+            /** @var ProductCustomsData[] $rows */
+            $rows = $repository->select($query);
+            foreach ($rows as $row) {
+                $this->productCustomsCache[(int)$row->productId] = $row;
+            }
         } catch (\Exception $e) {
-            return null;
+            Logger::logWarning('Failed to preload product customs data: ' . $e->getMessage(), 'Integration');
         }
     }
 
@@ -417,19 +544,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      */
     private function getCustomerTaxId($customerId)
     {
-        try {
-            $repository = RepositoryRegistry::getRepository(CustomerCustomsData::CLASS_NAME);
-
-            $query = new QueryFilter();
-            $query->where('customerId', '=', $customerId);
-
-            /** @var CustomerCustomsData|null $data */
-            $data = $repository->selectOne($query);
-
-            return ($data !== null && !empty($data->taxId)) ? $data->taxId : '';
-        } catch (\Exception $e) {
-            return '';
-        }
+        return CustomsDataProvider::getCustomerTaxId($customerId);
     }
 
     /**
@@ -442,11 +557,35 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
     private function getDeliveryVatNumber(PrestaShopOrder $sourceOrder)
     {
         try {
-            $deliveryAddress = new PrestaShopAddress((int)$sourceOrder->id_address_delivery);
+            $deliveryAddress = $this->loadDeliveryAddress((int)$sourceOrder->id_address_delivery);
 
             return !empty($deliveryAddress->vat_number) ? $deliveryAddress->vat_number : '';
         } catch (\Exception $e) {
+            Logger::logWarning(
+                'Failed to read delivery VAT number for order ' . (int)$sourceOrder->id . ': ' . $e->getMessage(),
+                'Integration'
+            );
+
             return '';
         }
+    }
+
+    /**
+     * Loads (and caches for the current request) a PrestaShop delivery address by id, so the same
+     * address is hydrated once across the order build instead of per accessor.
+     *
+     * @param int $addressId
+     *
+     * @return PrestaShopAddress
+     */
+    private function loadDeliveryAddress($addressId)
+    {
+        $addressId = (int)$addressId;
+
+        if (!isset($this->deliveryAddressCache[$addressId])) {
+            $this->deliveryAddressCache[$addressId] = new PrestaShopAddress($addressId);
+        }
+
+        return $this->deliveryAddressCache[$addressId];
     }
 }

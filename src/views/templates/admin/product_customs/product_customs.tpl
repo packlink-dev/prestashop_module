@@ -1,5 +1,5 @@
 {*
-* Packlink customs product attributes (CR-SET-66).
+* Packlink customs product attributes.
 * Rendered in the product edit page via the displayAdminProductsExtra hook.
 * HS code + country of origin are persisted per product in ProductCustomsData and fed
 * into the core customs invoice during draft creation; empty values fall back to the

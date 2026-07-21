@@ -18,8 +18,8 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
  * Class UpgradeShopOrderDetailsTask.
  *
  * Backfills shipment details (references, tracking, status) for orders created before the module
- * persisted them. Refactored onto the core V2 business-task contract: it implements BusinessTask,
- * reports progress by yielding from execute(), and is enqueued through the TaskExecutor.
+ * persisted them. Implements the core V2 business-task contract (BusinessTask): it reports progress
+ * by yielding from execute() and is enqueued through the TaskExecutor.
  *
  * @package Packlink\PrestaShop\Classes\Tasks
  */

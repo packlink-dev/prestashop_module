@@ -73,6 +73,10 @@ class Packlink extends CarrierModule
      */
     public function install()
     {
+        if (!$this->isPhpVersionSupported()) {
+            return false;
+        }
+
         $installer = new \Packlink\PrestaShop\Classes\Utility\PacklinkInstaller($this);
         $previousShopContext = Shop::getContext();
         $previousShopId  = Shop::getContextShopID();
@@ -93,6 +97,25 @@ class Packlink extends CarrierModule
         }
 
         return $result;
+    }
+
+    /**
+     * The module targets core V2, whose classes use PHP 7.0+ syntax (scalar/return type hints), so on
+     * older PHP they fatal at parse time. PrestaShop does not enforce the composer php constraint at
+     * runtime, so guard explicitly here (before any V2 class is autoloaded) and surface a clean
+     * warning in the module manager instead of a white screen.
+     *
+     * @return bool
+     */
+    private function isPhpVersionSupported()
+    {
+        if (version_compare(PHP_VERSION, '7.0.0', '<')) {
+            $this->warning = $this->l('Packlink PRO Shipping requires PHP 7.0 or newer.');
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -298,7 +321,6 @@ class Packlink extends CarrierModule
 
     /**
      * Renders the Packlink customs attributes (HS code + country of origin) on the product edit page.
-     * (CR-SET-66)
      *
      * @param array $params Hook parameters.
      *
@@ -340,8 +362,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Persists the Packlink customs attributes when a product is saved. (CR-SET-66)
-     *
+     * Persists the Packlink customs attributes when a product is saved.     *
      * Only acts when the customs tab was part of the submission (marker field), so unrelated
      * product saves do not wipe the stored values. Blank values are allowed and mean "use the
      * configured customs defaults".
@@ -366,42 +387,41 @@ class Packlink extends CarrierModule
         $hsCode = trim((string)Tools::getValue('packlink_hs_code'));
         $country = trim((string)Tools::getValue('packlink_country_of_origin'));
 
+        $existing = $this->getProductCustomsData($productId);
+
+        // On invalid (non-empty but malformed) input keep the previously stored value instead of
+        // silently erasing it, and log. A deliberately blank field still clears it (use customs
+        // defaults) — otherwise a typo would persist as '' and fall back to the seeded default tariff.
         if ($hsCode !== '' && !preg_match('/^[0-9]{6,8}$/', $hsCode)) {
-            $hsCode = '';
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Invalid HS code "' . $hsCode . '" submitted for product ' . $productId . '; keeping stored value.'
+            );
+            $hsCode = $existing !== null ? (string)$existing->hsCode : '';
         }
         if ($country !== '' && !in_array($country, \Packlink\BusinessLogic\Country\CountryCodes::$countryCodes, true)) {
-            $country = '';
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Invalid country of origin "' . $country . '" submitted for product ' . $productId
+                . '; keeping stored value.'
+            );
+            $country = $existing !== null ? (string)$existing->countryOfOrigin : '';
         }
 
         $this->saveProductCustomsData($productId, $hsCode, $country);
     }
 
     /**
-     * Loads stored customs data for a product, or null when none exists. (CR-SET-66)
-     *
+     * Loads stored customs data for a product, or null when none exists.     *
      * @param int $productId
      *
      * @return \Packlink\PrestaShop\Classes\Entities\ProductCustomsData|null
      */
     private function getProductCustomsData($productId)
     {
-        try {
-            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
-                \Packlink\PrestaShop\Classes\Entities\ProductCustomsData::CLASS_NAME
-            );
-
-            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
-            $query->where('productId', '=', (int)$productId);
-
-            return $repository->selectOne($query);
-        } catch (\Exception $e) {
-            return null;
-        }
+        return \Packlink\PrestaShop\Classes\Utility\CustomsDataProvider::getProductCustomsData($productId);
     }
 
     /**
-     * Creates or updates the customs data for a product. (CR-SET-66)
-     *
+     * Creates or updates the customs data for a product.     *
      * @param int $productId
      * @param string $hsCode
      * @param string $country
@@ -440,7 +460,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Adds the Packlink customs "Tax ID" field to the customer edit form. (CR-SET-66; PS 1.7.4+/8/9)
+     * Adds the Packlink customs "Tax ID" field to the customer edit form. (PS 1.7.4+/8/9)
      *
      * The private-person tax id feeds the customs receiver tax id during draft creation. Company VAT
      * stays on the native Address `vat_number` field and is not duplicated here.
@@ -474,8 +494,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Persists the Packlink customs Tax ID when a customer is created. (CR-SET-66)
-     *
+     * Persists the Packlink customs Tax ID when a customer is created.     *
      * @param array $params Hook parameters (id, form_data).
      *
      * @return void
@@ -486,8 +505,7 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Persists the Packlink customs Tax ID when a customer is updated. (CR-SET-66)
-     *
+     * Persists the Packlink customs Tax ID when a customer is updated.     *
      * @param array $params Hook parameters (id, form_data).
      *
      * @return void
@@ -498,33 +516,18 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Loads the stored private-person tax id for a customer, or an empty string. (CR-SET-66)
-     *
+     * Loads the stored private-person tax id for a customer, or an empty string.     *
      * @param int $customerId
      *
      * @return string
      */
     private function getCustomerTaxId($customerId)
     {
-        try {
-            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
-                \Packlink\PrestaShop\Classes\Entities\CustomerCustomsData::CLASS_NAME
-            );
-
-            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
-            $query->where('customerId', '=', (int)$customerId);
-
-            /** @var \Packlink\PrestaShop\Classes\Entities\CustomerCustomsData|null $data */
-            $data = $repository->selectOne($query);
-
-            return ($data !== null && !empty($data->taxId)) ? $data->taxId : '';
-        } catch (\Exception $e) {
-            return '';
-        }
+        return \Packlink\PrestaShop\Classes\Utility\CustomsDataProvider::getCustomerTaxId($customerId);
     }
 
     /**
-     * Creates or updates the customs Tax ID for a customer from the submitted form data. (CR-SET-66)
+     * Creates or updates the customs Tax ID for a customer from the submitted form data.
      *
      * @param array $params Hook parameters (id, form_data).
      *
@@ -543,6 +546,16 @@ class Packlink extends CarrierModule
 
         $customerId = (int)$params['id'];
         $taxId = trim((string)$params['form_data']['packlink_tax_id']);
+
+        // Light trust-boundary guard: a tax id / VAT number is never this long, so reject an
+        // over-long value (keep whatever is stored) instead of persisting arbitrary input.
+        if ($taxId !== '' && Tools::strlen($taxId) > 50) {
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Submitted customs tax id for customer ' . $customerId . ' exceeds 50 characters; ignoring it.'
+            );
+
+            return;
+        }
 
         try {
             $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
@@ -962,23 +975,16 @@ class Packlink extends CarrierModule
         foreach ($records as &$record) {
             $shipmentDetails = $shipmentDetailsService->getDetailsByOrderId((string)$record['id_order']);
             $draftStatus = $draftService->getDraftStatus((string)$record['id_order']);
-            $status = in_array(
-                $draftStatus->status,
-                array(
-                    \Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus::PROCESSING,
-                    \Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus::DELAYED,
-                ),
-                true
-            ) ? 'queued' : $draftStatus->status;
+            $status = \Packlink\PrestaShop\Classes\Utility\DraftStatusMapper::toDisplayStatus($draftStatus->status);
             $draftCreated = $status === \Packlink\BusinessLogic\ShipmentDraft\Utility\DraftStatus::COMPLETED
                 && $shipmentDetails;
             $shipmentLabels = $shipmentDetails ? $shipmentDetails->getShipmentLabels() : array();
 
             $record['draftStatus'] = $status;
             $record['draftDeleted'] = $draftCreated ? $shipmentDetails->isDeleted() : false;
-            // Show the label in the orders list whenever a label actually exists (stored locally by
-            // the sync sidecar), not only when the status is label-ready — consistent with the
-            // order-details Documents section. Falls back to the status check when none is stored yet.
+            // Show the label in the orders list whenever a label has actually been stored for the
+            // order, not only when the status is label-ready — consistent with the order-details
+            // Documents section. Falls back to the status check when no label is stored yet.
             $record['isLabelAvailable'] = $shipmentDetails
                 && (!empty($shipmentLabels)
                     || $orderService->isReadyToFetchShipmentLabels($shipmentDetails->getStatus()));

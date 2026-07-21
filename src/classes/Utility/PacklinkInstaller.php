@@ -426,7 +426,7 @@ class PacklinkInstaller
     private function addDefaultPluginConfiguration()
     {
         try {
-            // Core V2 moved task-runner status off the Configuration service onto TaskRunnerConfig.
+            // Task-runner status lives on core V2's TaskRunnerConfig, not the Configuration service.
             /** @var \Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerConfigInterface $taskRunnerConfig */
             $taskRunnerConfig = ServiceRegister::getService(
                 \Logeecom\Infrastructure\TaskExecution\Interfaces\TaskRunnerConfigInterface::CLASS_NAME
@@ -448,7 +448,7 @@ class PacklinkInstaller
 
     /**
      * Seeds a default customs mapping so international shipments build a customs invoice out of the
-     * box (CR-SET-66). Guarded: never overwrites an existing merchant-configured mapping. The
+     * box. Guarded: never overwrites an existing merchant-configured mapping. The
      * default tariff number is a valid 6-8 digit placeholder required by core validation.
      *
      * @return void
@@ -464,13 +464,18 @@ class PacklinkInstaller
             }
 
             $mapping = new \Packlink\BusinessLogic\Customs\Models\CustomsMapping();
-            $mapping->defaultReason = 'sale_of_goods';
+            $mapping->defaultReason = 'purchase_or_sale';
             $mapping->defaultSenderTaxId = '';
             $mapping->defaultReceiverUserType = \Packlink\BusinessLogic\Customs\CustomsService::PRIVATE_PERSON;
             $mapping->defaultReceiverTaxId = '';
             $mapping->defaultTariffNumber = '61091000';
             $mapping->defaultCountry = '';
+            // Default data-mapping sources; match CustomsMappingService::SOURCE_* and preserve the
+            // module's prior behaviour (receiver tax id from the customer Tax ID field, company VAT
+            // from the address, tariff number from the product HS code).
             $mapping->mappingReceiverTaxId = 'tax_id';
+            $mapping->mappingCompanyVat = 'vat_number';
+            $mapping->mappingTariffNumber = 'product_hs_code';
 
             $configService->setCustomsMappings($mapping);
         } catch (\Exception $e) {

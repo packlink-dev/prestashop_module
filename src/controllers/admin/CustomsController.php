@@ -1,5 +1,6 @@
 <?php
 
+use Logeecom\Infrastructure\Logger\Logger;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Controllers\CustomsController as CoreController;
 use Packlink\BusinessLogic\Customs\CustomsMappingService as CoreCustomsMappingService;
@@ -33,7 +34,18 @@ class CustomsController extends PacklinkBaseController
      */
     public function displayAjaxGetData()
     {
-        $mapping = $this->controller->getData();
+        try {
+            $mapping = $this->controller->getData();
+        } catch (\Exception $e) {
+            Logger::logWarning(
+                'Failed to load customs mapping data: ' . $e->getMessage(),
+                'Integration'
+            );
+            PacklinkPrestaShopUtility::die500();
+
+            return;
+        }
+
         $data = $mapping ? $mapping->toArray() : array();
         $data['system'] = 'PrestaShop';
 
@@ -49,16 +61,17 @@ class CustomsController extends PacklinkBaseController
     }
 
     /**
-     * Returns the options for the receiver tax id mapping select.
+     * Returns the data-mapping field definitions for the customs settings page (one per mappable
+     * customs field, each with its selectable PrestaShop sources).
      */
     public function displayAjaxGetCustomData()
     {
-        $options = array();
-        foreach ($this->controller->getReceiverTaxIdOptions() as $option) {
-            $options[] = $option->toArray();
+        $fields = array();
+        foreach ($this->controller->getMappingFieldsOptions() as $fieldOptions) {
+            $fields[] = $fieldOptions->toArray();
         }
 
-        PacklinkPrestaShopUtility::dieJson($options);
+        PacklinkPrestaShopUtility::dieJson($fields);
     }
 
     /**
@@ -66,8 +79,17 @@ class CustomsController extends PacklinkBaseController
      */
     public function displayAjaxSubmitData()
     {
+        $data = PacklinkPrestaShopUtility::getPacklinkPostData();
+        if (!is_array($data)) {
+            // getPacklinkPostData() returns null on absent/invalid JSON; core save() type-hints
+            // array and would throw an uncatchable TypeError, so reject the request cleanly.
+            PacklinkPrestaShopUtility::die400();
+
+            return;
+        }
+
         try {
-            $this->controller->save(PacklinkPrestaShopUtility::getPacklinkPostData());
+            $this->controller->save($data);
             PacklinkPrestaShopUtility::dieJson();
         } catch (FrontDtoValidationException $e) {
             PacklinkPrestaShopUtility::die400WithValidationErrors($e->getValidationErrors());

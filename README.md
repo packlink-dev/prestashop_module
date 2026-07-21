@@ -21,5 +21,5 @@ Packlink module or by using _Shipping > Packlink PRO_ menu.
 PrestaShop 1.6.0.14+ and 1.7.x versions.
 
 ## Prerequisites
-- PHP 5.3 or newer
+- PHP 7.0 or newer
 - MySQL 5.0 or newer
