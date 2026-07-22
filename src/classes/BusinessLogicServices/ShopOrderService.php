@@ -129,6 +129,13 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
 
             $order->setShippingAddress($this->getAddress($sourceOrder));
 
+            // Ensure the customs defaults are derived from real shipment data before the invoice is
+            // built: country of origin from the default warehouse (where the goods ship from) and the
+            // sender tax id from the connected Packlink account. Without these, international customs
+            // invoices are rejected by Packlink (blank country_of_origin / sender tax_id) and silently
+            // skipped, so no customs document is ever generated.
+            $this->ensureCustomsDefaults();
+
             // Customs receiver data. Honor the merchant's data-mapping selections (which PrestaShop
             // source feeds each customs field); the core invoice build falls back to the configured
             // mapping defaults when a value is absent.
@@ -411,6 +418,73 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             Logger::logWarning('Failed to load customs mapping: ' . $e->getMessage(), 'Integration');
 
             return null;
+        }
+    }
+
+    /**
+     * Backfills the customs mapping defaults from real, shipment-derived data so that international
+     * customs invoices are not rejected by Packlink for blank required fields:
+     *  - defaultCountry     (item country_of_origin fallback) <- default warehouse/sender country
+     *  - defaultSenderTaxId (sender tax id)                    <- connected Packlink account tax id
+     *
+     * Only fills values that are currently empty (never overwrites a merchant-set value) and persists
+     * the mapping so the core customs-invoice build (which reads these defaults) picks them up.
+     *
+     * @return void
+     */
+    private function ensureCustomsDefaults()
+    {
+        try {
+            /** @var ConfigurationService $configService */
+            $configService = ServiceRegister::getService(Configuration::CLASS_NAME);
+
+            $mapping = $configService->getCustomsMappings();
+            if ($mapping === null) {
+                return;
+            }
+
+            $changed = false;
+
+            if (empty($mapping->defaultCountry)) {
+                $warehouse = $configService->getDefaultWarehouse();
+                if ($warehouse !== null && !empty($warehouse->country)) {
+                    $mapping->defaultCountry = $warehouse->country;
+                    $changed = true;
+                }
+            }
+
+            if (empty($mapping->defaultSenderTaxId)) {
+                $user = $configService->getUserInfo();
+                $taxId = ($user !== null && !empty($user->taxId)) ? $user->taxId : '';
+
+                // The stored account info may predate the merchant adding their tax number in Packlink,
+                // so when it is missing refresh it from Packlink. This lets a newly-set sender tax id
+                // flow into customs invoices without requiring the merchant to reconnect the account.
+                if ($taxId === '') {
+                    try {
+                        /** @var \Packlink\BusinessLogic\Http\Proxy $proxy */
+                        $proxy = ServiceRegister::getService(\Packlink\BusinessLogic\Http\Proxy::CLASS_NAME);
+                        $fresh = $proxy->getUserData();
+                        if ($fresh !== null && !empty($fresh->taxId)) {
+                            $taxId = $fresh->taxId;
+                            $configService->setUserInfo($fresh);
+                        }
+                    } catch (\Exception $e) {
+                        Logger::logWarning('Failed to refresh account tax id: ' . $e->getMessage(), 'Integration');
+                    }
+                }
+
+                if ($taxId !== '') {
+                    $mapping->defaultSenderTaxId = $taxId;
+                    $changed = true;
+                }
+            }
+
+            if ($changed) {
+                $configService->setCustomsMappings($mapping);
+            }
+        } catch (\Exception $e) {
+            Logger::logWarning('Failed to backfill customs defaults: ' . $e->getMessage(), 'Integration');
         }
     }
 
