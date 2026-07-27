@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.6.2](https://github.com/packlink-dev/prestashop_module/compare/v3.6.1...v3.6.2)
+### Changed
+- Updated integration core to 3.9.2, which replaces the hardcoded browser user agent with a descriptive integration user agent (`Packlink-PrestaShop/3.6.2`)
+
 ## [3.6.1](https://github.com/packlink-dev/prestashop_module/compare/v3.6.0...v3.6.1)
 ### Changed
 - Added Brazil postal code transformer
