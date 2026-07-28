@@ -31,6 +31,13 @@ class ConfigurationService extends Configuration
     private $moduleVersion;
 
     /**
+     * Config key older module versions used for customs mapping rows core's CustomsMapping did not
+     * declare. Core now declares them all; this remains only so PacklinkInstaller can migrate a
+     * merchant's existing selection into the core mapping.
+     */
+    const CUSTOMS_MAPPING_EXTRAS = 'customsMappingExtras';
+
+    /**
      * Returns current system identifier.
      *
      * @return string Current system identifier.
@@ -39,6 +46,24 @@ class ConfigurationService extends Configuration
     {
         return \Configuration::get('PS_SHOP_DEFAULT');
     }
+
+    /**
+     * Returns the customs mapping selections stored by older module versions. Migration source only.
+     *
+     * @return array Map of mapping field name => selected source key.
+     */
+    public function getCustomsMappingExtras()
+    {
+        $raw = $this->getConfigValue(self::CUSTOMS_MAPPING_EXTRAS);
+        if (empty($raw)) {
+            return array();
+        }
+
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : array();
+    }
+
 
     /**
      * Returns web-hook callback URL for current system.

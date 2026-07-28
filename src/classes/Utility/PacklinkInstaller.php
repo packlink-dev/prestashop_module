@@ -11,6 +11,7 @@ use Packlink\BusinessLogic\ShippingMethod\Utility\ShipmentStatus;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\CustomsMappingService;
 use Packlink\PrestaShop\Classes\Repositories\BaseRepository;
 use Tools;
 
@@ -37,6 +38,9 @@ class PacklinkInstaller
         'actionOrderStatusUpdate',
         'displayOrderDetail',
         'displayAdminProductsExtra',
+        // Places the customs fields in the product Shipping tab on the legacy product form; never
+        // called on the new product page (8.1+), where displayAdminProductsExtra is used instead.
+        'displayAdminProductsShippingStepBottom',
         'actionProductUpdate',
         'actionCustomerFormBuilderModifier',
         'actionAfterCreateCustomerFormHandler',
@@ -472,10 +476,13 @@ class PacklinkInstaller
             $mapping->defaultCountry = '';
             // Default data-mapping sources; match CustomsMappingService::SOURCE_* and preserve the
             // module's prior behaviour (receiver tax id from the customer Tax ID field, company VAT
-            // from the address, tariff number from the product HS code).
-            $mapping->mappingReceiverTaxId = 'tax_id';
-            $mapping->mappingCompanyVat = 'vat_number';
-            $mapping->mappingTariffNumber = 'product_hs_code';
+            // from the address, tariff number from the product HS code). The two product fields
+            // default to the fields this module adds to the product Shipping tab, so customs works
+            // out of the box before the merchant maps anything of their own.
+            $mapping->mappingReceiverTaxId = CustomsMappingService::SOURCE_CUSTOMER_TAX_ID;
+            $mapping->mappingCompanyVat = CustomsMappingService::SOURCE_ADDRESS_VAT;
+            $mapping->mappingTariffNumber = CustomsMappingService::SOURCE_PRODUCT_HS_CODE;
+            $mapping->mappingCountryOfOrigin = CustomsMappingService::SOURCE_PRODUCT_COUNTRY_OF_ORIGIN;
 
             $configService->setCustomsMappings($mapping);
         } catch (\Exception $e) {
@@ -484,6 +491,88 @@ class PacklinkInstaller
                 'Integration'
             );
         }
+    }
+
+    /**
+     * Fills any data-mapping selection that is still empty with the module's own product/customer
+     * fields.
+     *
+     * addDefaultCustomsMapping() only seeds a store that has no customs mapping at all, so a store
+     * configured before a mapping row existed keeps that row empty - which the settings page shows as
+     * the blank "not mapped" option, and which makes the order build fall back to the customs
+     * defaults instead of the product's own data. Never overwrites a selection the merchant made.
+     *
+     * @return void
+     */
+    public function backfillCustomsMappingSources()
+    {
+        try {
+            /** @var ConfigurationService $configService */
+            $configService = ServiceRegister::getService(\Packlink\BusinessLogic\Configuration::CLASS_NAME);
+
+            $mapping = $configService->getCustomsMappings();
+            if (!$mapping) {
+                // Nothing configured yet: the fresh-install seeding path already covers this.
+                $this->addDefaultCustomsMapping();
+
+                return;
+            }
+
+            $changed = false;
+
+            // The country-of-origin row used to be stored by the module, before core's CustomsMapping
+            // declared mapping_country_of_origin. Carry a merchant's existing selection over once, so
+            // upgrading does not silently reset it to the default.
+            $legacySource = $this->getLegacyCountryOfOriginSource($configService);
+            if ($legacySource !== '' && empty($mapping->mappingCountryOfOrigin)) {
+                $mapping->mappingCountryOfOrigin = $legacySource;
+                $changed = true;
+            }
+
+            $defaults = array(
+                'mappingTariffNumber' => CustomsMappingService::SOURCE_PRODUCT_HS_CODE,
+                'mappingReceiverTaxId' => CustomsMappingService::SOURCE_CUSTOMER_TAX_ID,
+                'mappingCompanyVat' => CustomsMappingService::SOURCE_ADDRESS_VAT,
+                'mappingCountryOfOrigin' => CustomsMappingService::SOURCE_PRODUCT_COUNTRY_OF_ORIGIN,
+            );
+
+            foreach ($defaults as $property => $default) {
+                if (property_exists($mapping, $property) && empty($mapping->{$property})) {
+                    $mapping->{$property} = $default;
+                    $changed = true;
+                }
+            }
+
+            if ($changed) {
+                $configService->setCustomsMappings($mapping);
+            }
+        } catch (\Exception $e) {
+            Logger::logWarning(
+                'Failed to seed default customs mapping: ' . $e->getMessage(),
+                'Integration'
+            );
+        }
+    }
+
+    /**
+     * Returns the country-of-origin source stored by older module versions, or an empty string.
+     *
+     * Kept only as the migration source for backfillCustomsMappingSources(); the mapping now lives in
+     * core's CustomsMapping.
+     *
+     * @param ConfigurationService $configService
+     *
+     * @return string
+     */
+    private function getLegacyCountryOfOriginSource(ConfigurationService $configService)
+    {
+        try {
+            $legacy = $configService->getCustomsMappingExtras();
+        } catch (\Exception $e) {
+            return '';
+        }
+
+        return isset($legacy['mapping_country_of_origin']) ? (string)$legacy['mapping_country_of_origin'] : '';
     }
 
     /**

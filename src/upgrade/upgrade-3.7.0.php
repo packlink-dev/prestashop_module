@@ -119,6 +119,7 @@ function registerCustomsPlatform($module)
 
         $customsHooks = array(
             'displayAdminProductsExtra',
+            'displayAdminProductsShippingStepBottom',
             'actionProductUpdate',
             'actionCustomerFormBuilderModifier',
             'actionAfterCreateCustomerFormHandler',
@@ -129,6 +130,10 @@ function registerCustomsPlatform($module)
         }
 
         $installer->addDefaultCustomsMapping();
+
+        // A store configured before the product/country mapping rows existed keeps them empty, which
+        // the settings page renders as the blank "not mapped" option. Fill only what is still empty.
+        $installer->backfillCustomsMappingSources();
     } catch (\Exception $e) {
         Logger::logWarning(
             TranslationUtility::__('Failed to register customs platform: %s', array($e->getMessage())),

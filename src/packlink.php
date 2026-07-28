@@ -39,6 +39,13 @@ class Packlink extends CarrierModule
      * @var int
      */
     public $id_carrier = -1;
+    /**
+     * Guards against rendering the product customs panel twice when both product-page hooks
+     * (Shipping tab + Modules tab) fire in the same request.
+     *
+     * @var bool
+     */
+    private $productCustomsPanelRendered = false;
 
     /**
      * Packlink constructor.
@@ -320,7 +327,27 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Renders the Packlink customs attributes inside the product Shipping tab.
+     *
+     * Only the legacy product form (PrestaShop 1.7.x - 8.0) exposes a hook in that tab; on the new
+     * product page (8.1+) this hook is never called and displayAdminProductsExtra takes over, with
+     * the template relocating the panel into the Shipping tab client-side.
+     *
+     * @param array $params Hook parameters.
+     *
+     * @return string Rendered template output.
+     */
+    public function hookDisplayAdminProductsShippingStepBottom($params)
+    {
+        return $this->renderProductCustomsPanel($params);
+    }
+
+    /**
      * Renders the Packlink customs attributes (HS code + country of origin) on the product edit page.
+     *
+     * Fallback placement: on PrestaShop 1.6 and on the new product page (8.1+) this is the only
+     * available extension point. When the Shipping tab hook already rendered the panel in this
+     * request it returns nothing, so the fields never show up twice.
      *
      * @param array $params Hook parameters.
      *
@@ -328,6 +355,22 @@ class Packlink extends CarrierModule
      */
     public function hookDisplayAdminProductsExtra($params)
     {
+        return $this->renderProductCustomsPanel($params);
+    }
+
+    /**
+     * Renders the product customs panel once per request, whichever product-page hook fires first.
+     *
+     * @param array $params Hook parameters.
+     *
+     * @return string Rendered template output.
+     */
+    private function renderProductCustomsPanel($params)
+    {
+        if ($this->productCustomsPanelRendered) {
+            return '';
+        }
+
         \Packlink\PrestaShop\Classes\Bootstrap::init();
 
         $productId = isset($params['id_product']) ? (int)$params['id_product'] : (int)Tools::getValue('id_product');
@@ -342,18 +385,23 @@ class Packlink extends CarrierModule
                 'hsCode' => $customs !== null ? $customs->hsCode : '',
                 'countryOfOrigin' => $customs !== null ? $customs->countryOfOrigin : '',
             ),
-            'packlinkCountryCodes' => \Packlink\BusinessLogic\Country\CountryCodes::$countryCodes,
+            'packlinkCountryOptions' => \Packlink\PrestaShop\Classes\Utility\CountryOriginOptions::get(
+                (int)$this->context->language->id
+            ),
             'packlinkCustomsLabels' => array(
                 'title' => $this->l('Packlink customs'),
                 'description' => $this->l('Customs attributes used when creating an international shipment. Leave empty to use the customs defaults.'),
                 'hsCode' => $this->l('HS code (tariff number)'),
                 'hsCodePlaceholder' => $this->l('e.g. 61091000'),
                 'hsCodeHelp' => $this->l('6 to 8 digit Harmonized System code.'),
+                'hsCodeInvalid' => $this->l('Enter 6 to 8 digits, or leave the field empty to use the customs default.'),
                 'country' => $this->l('Country of origin'),
                 'countryNone' => $this->l('Use default'),
-                'countryHelp' => $this->l('ISO 3166-1 alpha-2 country code.'),
+                'countryHelp' => $this->l('Country where the product was manufactured.'),
             ),
         ));
+
+        $this->productCustomsPanelRendered = true;
 
         return $this->context->smarty->createTemplate(
             $this->getLocalPath() . 'views/templates/admin/product_customs/product_customs.tpl',

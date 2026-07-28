@@ -19,7 +19,10 @@ use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
 use Packlink\PrestaShop\Classes\Entities\ProductCustomsData;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
+use Packlink\PrestaShop\Classes\Utility\CountryOriginOptions;
 use Packlink\PrestaShop\Classes\Utility\CustomsDataProvider;
+use Packlink\PrestaShop\Classes\Utility\CustomsInvoiceSynchronizer;
+use Packlink\PrestaShop\Classes\Utility\ProductFeatureSources;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -65,6 +68,14 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         if (!empty($shipment->trackingCodes)) {
             $repository = new OrderRepository();
             $repository->setTrackingNumber((int)$orderId, $shipment->trackingCodes[0]);
+        }
+
+        // A customs invoice created or replaced in the Packlink UI - which is what happens when the
+        // draft could not be completed from the shop and the merchant finished it there - carries an id
+        // the module never saw, leaving the order page with no Customs row. Pick up whichever invoice
+        // the shipment currently points at, i.e. the last one created for it.
+        if (!empty($shipment->reference)) {
+            CustomsInvoiceSynchronizer::sync($shipment->reference);
         }
     }
 
@@ -384,18 +395,18 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             $orderItem->setPictureUrl($productImageUrl);
         }
 
-        // Customs item attributes. The tariff-number source is driven by the customs mapping
-        // (mapping_tariff_number); empty values fall back to the mapping defaults in the core build.
-        $productCustoms = $this->getProductCustomsData((int)$product->id);
-        if ($productCustoms !== null) {
-            if (!empty($productCustoms->hsCode)
-                && $this->tariffNumberSource() === CustomsMappingService::SOURCE_PRODUCT_HS_CODE
-            ) {
-                $orderItem->setTariffNumber($productCustoms->hsCode);
-            }
-            if (!empty($productCustoms->countryOfOrigin)) {
-                $orderItem->setCountryOfOrigin($productCustoms->countryOfOrigin);
-            }
+        // Customs item attributes, both driven by the merchant's data mapping on the customs settings
+        // page: either the fields this module adds to the product Shipping tab, or any product
+        // feature the merchant created. Values left empty here fall back to the configured customs
+        // defaults in the core build.
+        $tariffNumber = $this->resolveTariffNumber((int)$product->id);
+        if ($tariffNumber !== '') {
+            $orderItem->setTariffNumber($tariffNumber);
+        }
+
+        $countryOfOrigin = $this->resolveCountryOfOrigin((int)$product->id);
+        if ($countryOfOrigin !== '') {
+            $orderItem->setCountryOfOrigin($countryOfOrigin);
         }
 
         return $orderItem;
@@ -533,6 +544,104 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
         return ($this->customsMapping !== null && !empty($this->customsMapping->mappingTariffNumber))
             ? $this->customsMapping->mappingTariffNumber
             : CustomsMappingService::SOURCE_PRODUCT_HS_CODE;
+    }
+
+    /**
+     * Source configured for the item country of origin, defaulting to the module's own product field.
+     *
+     * @return string
+     */
+    private function countryOfOriginSource()
+    {
+        return ($this->customsMapping !== null && !empty($this->customsMapping->mappingCountryOfOrigin))
+            ? $this->customsMapping->mappingCountryOfOrigin
+            : CustomsMappingService::SOURCE_PRODUCT_COUNTRY_OF_ORIGIN;
+    }
+
+    /**
+     * Resolves the item tariff number from whichever source the merchant mapped.
+     *
+     * A malformed value is dropped rather than sent: Packlink rejects a customs invoice whose tariff
+     * number is not 6 to 8 digits, and dropping it lets the configured default apply instead of
+     * failing the whole draft. Digits are extracted first, so a feature holding "6109 10 00" or
+     * "HS 61091000" still maps cleanly.
+     *
+     * @param int $productId
+     *
+     * @return string Empty string when nothing usable is configured for this product.
+     */
+    private function resolveTariffNumber($productId)
+    {
+        $source = $this->tariffNumberSource();
+
+        if ($source === CustomsMappingService::SOURCE_PRODUCT_HS_CODE) {
+            $customs = $this->getProductCustomsData($productId);
+            $value = ($customs !== null && !empty($customs->hsCode)) ? $customs->hsCode : '';
+        } else {
+            $value = ProductFeatureSources::getValue($source, $productId, ProductFeatureSources::resolveLanguageId());
+        }
+
+        $digits = preg_replace('/[^0-9]/', '', (string)$value);
+        if ($digits === '' ) {
+            return '';
+        }
+
+        if (!preg_match('/^[0-9]{6,8}$/', $digits)) {
+            Logger::logWarning(
+                TranslationUtility::__(
+                    'Ignoring mapped tariff number "%s" for product %s: expected 6 to 8 digits.',
+                    array((string)$value, (string)$productId)
+                ),
+                'Integration'
+            );
+
+            return '';
+        }
+
+        return $digits;
+    }
+
+    /**
+     * Resolves the item country of origin from whichever source the merchant mapped, as an ISO
+     * 3166-1 alpha-2 code.
+     *
+     * A merchant-created feature usually holds a country name ("Germany"), not a code, so the value
+     * is resolved through the shop's country table as well as being accepted as a code.
+     *
+     * @param int $productId
+     *
+     * @return string Empty string when nothing usable is configured for this product.
+     */
+    private function resolveCountryOfOrigin($productId)
+    {
+        $source = $this->countryOfOriginSource();
+
+        if ($source === CustomsMappingService::SOURCE_PRODUCT_COUNTRY_OF_ORIGIN) {
+            $customs = $this->getProductCustomsData($productId);
+
+            // Already stored as an ISO code by the product page, so no resolution needed.
+            return ($customs !== null && !empty($customs->countryOfOrigin)) ? $customs->countryOfOrigin : '';
+        }
+
+        $languageId = ProductFeatureSources::resolveLanguageId();
+
+        $value = ProductFeatureSources::getValue($source, $productId, $languageId);
+        if ($value === '') {
+            return '';
+        }
+
+        $iso = CountryOriginOptions::resolveIso($value, $languageId);
+        if ($iso === '') {
+            Logger::logWarning(
+                TranslationUtility::__(
+                    'Ignoring mapped country of origin "%s" for product %s: not a known country name or ISO code.',
+                    array($value, (string)$productId)
+                ),
+                'Integration'
+            );
+        }
+
+        return $iso;
     }
 
     /**
