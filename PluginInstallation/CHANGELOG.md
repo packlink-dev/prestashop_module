@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.7.0](https://github.com/packlink-dev/prestashop_module/compare/v3.6.2...v3.7.0)
+### Added
+- Added customs support for international shipments: HS code and country of origin per product, customer tax ID data, and a customs data mapping screen in the module configuration
+- Added automatic customs invoice generation and synchronization for international drafts
+
+### Changed
+- Migrated the module to integration core V2
+
+## [3.6.2](https://github.com/packlink-dev/prestashop_module/compare/v3.6.1...v3.6.2)
+### Changed
+- Updated integration core to 3.9.2, which replaces the hardcoded browser user agent with a descriptive integration user agent (`Packlink-PrestaShop/3.6.2`)
+
+## [3.6.1](https://github.com/packlink-dev/prestashop_module/compare/v3.6.0...v3.6.1)
+### Changed
+- Added Brazil postal code transformer
+
 ## [3.5.4](https://github.com/packlink-dev/prestashop_module/compare/v3.5.3...v3.5.4)
 ### Changed
 - Added compatibility with presta 9.1.4
