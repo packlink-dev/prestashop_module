@@ -327,22 +327,6 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Renders the Packlink customs attributes inside the product Shipping tab.
-     *
-     * Only the legacy product form (PrestaShop 1.7.x - 8.0) exposes a hook in that tab; on the new
-     * product page (8.1+) this hook is never called and displayAdminProductsExtra takes over, with
-     * the template relocating the panel into the Shipping tab client-side.
-     *
-     * @param array $params Hook parameters.
-     *
-     * @return string Rendered template output.
-     */
-    public function hookDisplayAdminProductsShippingStepBottom($params)
-    {
-        return $this->renderProductCustomsPanel($params);
-    }
-
-    /**
      * Renders the Packlink customs attributes (HS code + country of origin) on the product edit page.
      *
      * Fallback placement: on PrestaShop 1.6 and on the new product page (8.1+) this is the only
