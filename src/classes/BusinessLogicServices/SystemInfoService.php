@@ -68,13 +68,19 @@ class SystemInfoService implements SystemInfoInterface
             return array();
         }
 
-        $currency = new \Currency(\Configuration::get(
-            'PS_CURRENCY_DEFAULT',
-            null,
-            null,
-            $systemId
-        ));
+        $currencies = \Currency::getCurrenciesByIdShop((int) $systemId);
+        $isoCodes = array();
 
-        return array($currency->iso_code);
+        foreach ($currencies as $currency) {
+            if (empty($currency['active']) || !empty($currency['deleted'])) {
+                continue;
+            }
+
+            if (!empty($currency['iso_code'])) {
+                $isoCodes[] = $currency['iso_code'];
+            }
+        }
+
+        return array_values(array_unique($isoCodes));
     }
 }
