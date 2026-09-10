@@ -148,13 +148,14 @@
   </div>
 </location-picker-template>
 
+<input type="hidden" id="pl-checkout-configuration"
+       value="{$configurationJson|escape:'html':'UTF-8'}">
+
 <script>
     (function () {
         let selectBtn = document.getElementById('pl-dropoff-button');
         let confirmMask = document.getElementById('pl-confirm-mask');
-        {* $configurationJson is JSON_HEX_*-encoded in PHP, so it contains no ', no < and no newline;
-           raw emission cannot break out of this single-quoted string or the script element. *}
-        let configuration = JSON.parse('{$configurationJson nofilter}');
+        let configuration = JSON.parse(document.getElementById('pl-checkout-configuration').value);
         let closeMessageBoxBtn = document.getElementById('pl-close-message-box-btn');
 
         selectBtn.addEventListener('click', onSelectButtonClicked);

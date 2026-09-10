@@ -87,6 +87,9 @@
   </div>
 </div>
 
+<input type="hidden" id="pl-checkout-configuration"
+       value="{$configurationJson|escape:'html':'UTF-8'}">
+
 <script>
   Packlink.trans = {
     select: "{l s='Select drop-off location' mod='packlink'}",
@@ -95,10 +98,8 @@
     wrongAddress: "{l s='There are no delivery locations available for your delivery address. Please change your address.' mod='packlink'}"
   };
 
-  {* $configurationJson is JSON_HEX_*-encoded in PHP, so it contains no ', no < and no newline;
-     raw emission cannot break out of this single-quoted string or the script element. *}
   Packlink.checkOut = new Packlink.CheckOutController(
-      JSON.parse('{$configurationJson nofilter}')
+      JSON.parse(document.getElementById('pl-checkout-configuration').value)
   )
 
   function checkLoadStatus() {

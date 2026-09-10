@@ -259,7 +259,7 @@ class Packlink extends CarrierModule
 
         $this->context->smarty->assign(array(
             'configuration' => $configuration,
-            'configurationJson' => $this->encodeConfigurationForJs($configuration),
+            'configurationJson' => $this->encodeConfigurationForHtmlAttribute($configuration),
         ));
 
         return $this->display(__FILE__, 'shipping_methods_17.tpl');
@@ -649,7 +649,7 @@ class Packlink extends CarrierModule
             $configuration['cartId'] = $order->id_cart;
 
             $this->context->smarty->assign(
-                array('configurationJson' => $this->encodeConfigurationForJs($configuration))
+                array('configurationJson' => $this->encodeConfigurationForHtmlAttribute($configuration))
             );
 
             $output = $this->getLocationPickerFilesLinks();
@@ -1994,34 +1994,28 @@ class Packlink extends CarrierModule
     }
 
     /**
-     * Encodes the checkout configuration for raw emission inside a single-quoted JS string literal
-     * in a script element (the templates pass that literal to JSON.parse).
+     * Encodes the checkout configuration for emission in an HTML attribute, from which the
+     * templates read it back with JSON.parse.
      *
-     * The HEX flags turn <, >, &, ' and " inside values into \uXXXX escapes, and json_encode never
-     * emits raw control characters, so the emitted text cannot contain any character able to
-     * terminate the surrounding single-quoted JS string literal or the script element (no ', no <,
-     * no newline; the JSON's structural double quotes are inert in both). That is why the templates
-     * emit it with `nofilter`: HTML-escaping it again and then decoding (as the old
-     * escape:'htmlall'|htmlspecialchars_decode chain did) put decoded quotes back into the JS sink,
-     * so any apostrophe in a translated value (e.g. ddpLabel in French) broke the script.
+     * The JSON is emitted through `escape:'html':'UTF-8'` in the templates, never unescaped.
+     * That single modifier is correct on every supported PrestaShop version: 1.6 has no Smarty
+     * auto-escaping and applies the modifier itself, while 1.7+ sets `$smarty->escape_html = true`
+     * and overrides the `escape` modifier so that an explicit 'html' request becomes a no-op and
+     * only the automatic htmlspecialchars() runs. Either way the attribute value is HTML-escaped
+     * exactly once, the HTML parser decodes it back, and JSON.parse receives this exact output.
      *
-     * Backslashes are doubled because the JS tokenizer unescapes the string literal once before
-     * JSON.parse runs: without doubling, json_encode's escape sequences (e.g. the \u0022 that
-     * HEX_QUOT produces for a quote inside a value) would be consumed by the tokenizer into raw
-     * characters and JSON.parse would receive broken JSON. With doubling, the tokenizer restores
-     * the exact json_encode output.
-     *
-     * All four JSON_HEX_* constants exist since PHP 5.3.0.
+     * An attribute is used rather than a script body because a JS string literal needs escaping
+     * that Smarty cannot express safely here: `escape:'javascript'` runs *before* 1.7's automatic
+     * HTML escaping and therefore comes out double-escaped, and hand-rolling the escaping is what
+     * previously broke on an apostrophe in a translated value (e.g. the French ddpLabel).
      *
      * @param array $configuration
      *
-     * @return string JSON safe for raw output inside a single-quoted JS string literal.
+     * @return string JSON to be emitted with escape:'html':'UTF-8' in an HTML attribute.
      */
-    protected function encodeConfigurationForJs($configuration)
+    protected function encodeConfigurationForHtmlAttribute($configuration)
     {
-        $json = json_encode($configuration, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
-
-        return str_replace('\\', '\\\\', $json);
+        return json_encode($configuration);
     }
 
     /**
@@ -2042,7 +2036,7 @@ class Packlink extends CarrierModule
         $configuration = $this->getShippingStepConfiguration($params);
 
         $this->context->smarty->assign(array(
-            'configurationJson' => $this->encodeConfigurationForJs($configuration),
+            'configurationJson' => $this->encodeConfigurationForHtmlAttribute($configuration),
             'stylesPath' => $this->_path . 'views/css/packlink-shipping-methods.css?v=' . $this->version,
             'shippingServicePath' => $this->_path . 'views/js/ShippingService16.js?v=' . $this->version,
         ));
