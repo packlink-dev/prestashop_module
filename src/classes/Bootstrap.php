@@ -32,6 +32,7 @@ use Packlink\BusinessLogic\FileResolver\FileResolverService;
 use Packlink\BusinessLogic\IntegrationRegistration\Interfaces\IntegrationRegistrationDataProviderInterface;
 use Packlink\BusinessLogic\IntegrationRegistration\Interfaces\ModuleResetServiceInterface;
 use Packlink\BusinessLogic\Order\Interfaces\ShopOrderService as ShopOrderServiceInterface;
+use Packlink\BusinessLogic\Order\OrderService as CoreOrderService;
 use Packlink\BusinessLogic\OrderShipmentDetails\Models\OrderShipmentDetails;
 use Packlink\BusinessLogic\ShipmentDraft\Models\OrderSendDraftTaskMap;
 use Packlink\BusinessLogic\Tasks\Interfaces\TaskMetadataProviderInterface;
@@ -43,6 +44,7 @@ use Packlink\PrestaShop\Classes\BusinessLogicServices\ConfigurationService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\IntegrationRegistrationDataProvider;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ModuleResetService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\RegistrationInfoService;
+use Packlink\PrestaShop\Classes\BusinessLogicServices\OrderService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\ShopOrderService;
 use Packlink\PrestaShop\Classes\BusinessLogicServices\SystemInfoService;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
@@ -155,6 +157,17 @@ class Bootstrap extends BootstrapComponent
             }
         );
 
+        // Overrides the registration core made in parent::initServices() above, purely to declare the
+        // GOODS as the shipment's content value instead of the order total - see OrderService. The
+        // registry keeps the last delegate for a key, and this key is core's own class name because
+        // every caller resolves the service by it.
+        ServiceRegister::registerService(
+            CoreOrderService::CLASS_NAME,
+            function () {
+                return OrderService::getInstance();
+            }
+        );
+
         ServiceRegister::registerService(
             RegistrationInfoServiceInterface::CLASS_NAME,
             function () {
@@ -243,6 +256,14 @@ class Bootstrap extends BootstrapComponent
         RepositoryRegistry::registerRepository(Schedule::CLASS_NAME, BaseRepository::getClassName());
         RepositoryRegistry::registerRepository(
             CartCarrierDropOffMapping::getClassName(),
+            BaseRepository::getClassName()
+        );
+        RepositoryRegistry::registerRepository(
+            \Packlink\PrestaShop\Classes\Entities\CartDdpSelection::getClassName(),
+            BaseRepository::getClassName()
+        );
+        RepositoryRegistry::registerRepository(
+            \Packlink\PrestaShop\Classes\Entities\CartDdpQuote::getClassName(),
             BaseRepository::getClassName()
         );
         RepositoryRegistry::registerRepository(LogData::CLASS_NAME, BaseRepository::getClassName());

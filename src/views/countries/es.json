@@ -495,7 +495,20 @@
     "atLeastOneCountry": "",
     "misconfiguration": "Debido al cambio de moneda de la tienda, debe establecer un valor de precio fijo haciendo clic en editar en el servicio de envío.",
     "refreshServiceList" : "Actualizar la lista de servicios",
-    "refreshError": "Ocurrió un error al actualizar la lista de servicios"
+    "refreshError": "Ocurrió un error al actualizar la lista de servicios",
+    "ddpBadge": "Aduanas y aranceles pagados",
+    "dutiesCostAtCheckout": "Coste de aranceles en el checkout",
+    "ddpBehaviorLabel": "Comportamiento",
+    "noDutiesCharged": "No se cobran aranceles en el checkout",
+    "offerDutiesOptionally": "Ofrecer el coste de aranceles en el checkout de forma opcional",
+    "enforceDutiesCost": "Aplicar el coste de aranceles en el checkout de forma obligatoria",
+    "ddpMandatoryNotice": "Este es un servicio que incluye obligatoriamente el coste de aranceles en el checkout. Activa este servicio solo si estás de acuerdo con ofrecerlo con el coste de aranceles incluido en el checkout.",
+    "ddpConfigureCustomsNotice": "Para ofrecer este servicio a tus clientes, configura la información de aduanas dentro de este módulo.",
+    "adjustDdpCost": "Ajustar el coste DDP",
+    "ddpAdjustmentLabel": "Ajuste",
+    "fixedAdjustment": "Ajuste fijo",
+    "percentageAdjustment": "Ajuste porcentual",
+    "adjustmentAmount": "Importe del ajuste"
   },
   "orderListAndDetails": {
     "printed": "Impreso",

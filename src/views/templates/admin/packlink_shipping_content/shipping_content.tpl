@@ -129,6 +129,10 @@
             <dt>{l s='Packlink shipping price' mod='packlink'}</dt>
             <dd style="margin-bottom: 10px">{$shipping->packlink_shipping_price|escape:'html':'UTF-8'}</dd>
           {/if}
+          {if $shipping->ddp_cost}
+            <dt>{l s='DDP cost' mod='packlink'}</dt>
+            <dd style="margin-bottom: 10px">{$shipping->ddp_cost|escape:'html':'UTF-8'}</dd>
+          {/if}
       </dl>
         {if $shipping->link && !$shipping->deleted}
           <a

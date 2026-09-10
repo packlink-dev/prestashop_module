@@ -2,11 +2,13 @@
 
 namespace Packlink\PrestaShop\Classes\Utility;
 
+use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\Http\DTO\Package;
 use Packlink\BusinessLogic\Http\DTO\ParcelInfo;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
 
 /**
  * Class CachingUtility
@@ -19,6 +21,19 @@ class CachingUtility
      * @var array
      */
     protected static $costCache;
+    /**
+     * Composed duty amounts for this request, keyed by shipping method id. Null until fetched.
+     *
+     * @var array|null
+     */
+    protected static $ddpCostCache;
+    /**
+     * Transport portion of each duties-paid carrier's price for this request, keyed by method id.
+     * Filled while pricing, read by the checkout presentation so it never has to price again.
+     *
+     * @var array
+     */
+    protected static $ddpTransportCache = array();
     /**
      * @var float
      */
@@ -55,6 +70,13 @@ class CachingUtility
      * @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService
      */
     protected static $carrierService;
+    /**
+     * All carrier-service mapping rows for this request. Null until loaded; checkout pricing reads a
+     * mapping ~3 times per carrier row, so mappings are fetched with one select instead of one each.
+     *
+     * @var CarrierServiceMapping[]|null
+     */
+    protected static $carrierMappingCache;
 
     /**
      * Caches Carrier.
@@ -94,6 +116,54 @@ class CachingUtility
     public static function setCosts($calculatedCosts)
     {
         self::$costCache = $calculatedCosts;
+    }
+
+    /**
+     * Retrieves the composed duty amounts for this request, keyed by shipping method id.
+     *
+     * Distinguishes "not fetched yet" (FALSE) from "fetched, nothing available" (empty array), so a
+     * failed or inapplicable duty lookup is not retried once per carrier during the same render.
+     *
+     * @return array|bool Array of amounts keyed by method id, or FALSE when not yet fetched.
+     */
+    public static function getDdpCosts()
+    {
+        if (self::$ddpCostCache === null) {
+            return false;
+        }
+
+        return self::$ddpCostCache;
+    }
+
+    /**
+     * Sets the composed duty amounts for this request.
+     *
+     * @param array $ddpCosts Composed duty amounts keyed by shipping method id.
+     */
+    public static function setDdpCosts($ddpCosts)
+    {
+        self::$ddpCostCache = $ddpCosts;
+    }
+
+    /**
+     * Records the transport portion of a duties-paid carrier's price, as computed while pricing it.
+     *
+     * @param int $methodId Packlink shipping method id.
+     * @param float $transport Transport cost with shop cost settings already applied.
+     */
+    public static function setDdpTransport($methodId, $transport)
+    {
+        self::$ddpTransportCache[(int)$methodId] = (float)$transport;
+    }
+
+    /**
+     * Transport portions recorded while pricing, keyed by method id.
+     *
+     * @return array
+     */
+    public static function getDdpTransport()
+    {
+        return self::$ddpTransportCache;
     }
 
     /**
@@ -207,6 +277,32 @@ class CachingUtility
         }
 
         return self::$parcel;
+    }
+
+    /**
+     * Returns every carrier-service mapping row, loading all of them with a single select on first use.
+     *
+     * @return CarrierServiceMapping[]
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    public static function getCarrierServiceMappings()
+    {
+        if (self::$carrierMappingCache === null) {
+            $repository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
+            self::$carrierMappingCache = $repository->select();
+        }
+
+        return self::$carrierMappingCache;
+    }
+
+    /**
+     * Drops the mapping cache. Must be called after every mapping write so that reads later in the
+     * same request (e.g. syncDdpCarrier right after createCarrier) see the write.
+     */
+    public static function resetCarrierServiceMappings()
+    {
+        self::$carrierMappingCache = null;
     }
 
     /**

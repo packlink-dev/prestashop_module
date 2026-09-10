@@ -495,7 +495,20 @@
     "atLeastOneCountry": "",
     "misconfiguration": "A causa del cambio di valuta del negozio, devi impostare un valore di prezzo fisso cliccando “Modifica” sul servizio di spedizione.",
     "refreshServiceList" : "Aggiorna l'elenco dei servizi",
-    "refreshError": "Si è verificato un errore durante l'aggiornamento dell'elenco dei servizi"
+    "refreshError": "Si è verificato un errore durante l'aggiornamento dell'elenco dei servizi",
+    "ddpBadge": "Dogana e dazi pagati",
+    "dutiesCostAtCheckout": "Costo dei dazi al checkout",
+    "ddpBehaviorLabel": "Comportamento",
+    "noDutiesCharged": "Nessun dazio addebitato al checkout",
+    "offerDutiesOptionally": "Offri il costo dei dazi al checkout in modo opzionale",
+    "enforceDutiesCost": "Imponi il costo dei dazi al checkout",
+    "ddpMandatoryNotice": "Questo servizio include obbligatoriamente il costo dei dazi al checkout. Attiva questo servizio solo se accetti di offrirlo con il costo dei dazi incluso al checkout.",
+    "ddpConfigureCustomsNotice": "Per offrire questo servizio ai tuoi clienti, configura le informazioni doganali all'interno di questo modulo.",
+    "adjustDdpCost": "Rettifica il costo DDP",
+    "ddpAdjustmentLabel": "Rettifica",
+    "fixedAdjustment": "Rettifica fissa",
+    "percentageAdjustment": "Rettifica percentuale",
+    "adjustmentAmount": "Importo della rettifica"
   },
   "orderListAndDetails": {
     "printed": "Stampato",

@@ -172,6 +172,10 @@
                     <dt>{{ 'Packlink shipping price'|trans({}, 'Modules.Packlink.Admin') }}</dt>
                     <dd style="margin-bottom: 10px">{{ shipping.packlink_shipping_price }}</dd>
                 {% endif %}
+                {% if shipping.ddp_cost is not empty %}
+                    <dt>{{ 'DDP cost'|trans({}, 'Modules.Packlink.Admin') }}</dt>
+                    <dd style="margin-bottom: 10px">{{ shipping.ddp_cost }}</dd>
+                {% endif %}
             </dl>
             {% if shipping.link is not empty and not shipping.deleted %}
                 <a

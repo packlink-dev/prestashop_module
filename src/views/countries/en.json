@@ -517,7 +517,20 @@
     "atLeastOneCountry": "At least one country must be selected.",
     "misconfiguration": "Due to store currency change, you must set a Fixed Price value by clicking \"edit\" on the shipping service.",
     "refreshServiceList" : "Refresh service list",
-    "refreshError": "An error occurred while refreshing the service list"
+    "refreshError": "An error occurred while refreshing the service list",
+    "ddpBadge": "Customs and duties paid",
+    "dutiesCostAtCheckout": "Duties cost at checkout",
+    "ddpBehaviorLabel": "Behavior",
+    "noDutiesCharged": "No duties charged on checkout",
+    "offerDutiesOptionally": "Offer duties cost on checkout optionally",
+    "enforceDutiesCost": "Enforce duties cost on checkout",
+    "ddpMandatoryNotice": "This is a service that has mandatory duties cost included at checkout. Only activate this service if you consent with offering this service with duties cost included on the checkout.",
+    "ddpConfigureCustomsNotice": "In order to offer this service to your customers, please configure customs information within this module.",
+    "adjustDdpCost": "Adjust DDP cost",
+    "ddpAdjustmentLabel": "Adjustment",
+    "fixedAdjustment": "Fixed adjustment",
+    "percentageAdjustment": "Percentage adjustment",
+    "adjustmentAmount": "Adjustment amount"
   },
   "orderListAndDetails": {
     "printed": "Printed",

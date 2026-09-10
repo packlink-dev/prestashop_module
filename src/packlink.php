@@ -259,14 +259,8 @@ class Packlink extends CarrierModule
 
         $this->context->smarty->assign(array(
             'configuration' => $configuration,
+            'configurationJson' => $this->encodeConfigurationForJs($configuration),
         ));
-
-        // Register modifier function
-        $this->context->smarty->registerPlugin(
-            'modifier',
-            'htmlspecialchars_decode',
-            'htmlspecialchars_decode'
-        );
 
         return $this->display(__FILE__, 'shipping_methods_17.tpl');
     }
@@ -324,22 +318,6 @@ class Packlink extends CarrierModule
             $this->getLocalPath() . self::PACKLINK_SHIPPING_CONTENT,
             $this->context->smarty
         )->fetch();
-    }
-
-    /**
-     * Renders the Packlink customs attributes inside the product Shipping tab.
-     *
-     * Only the legacy product form (PrestaShop 1.7.x - 8.0) exposes a hook in that tab; on the new
-     * product page (8.1+) this hook is never called and displayAdminProductsExtra takes over, with
-     * the template relocating the panel into the Shipping tab client-side.
-     *
-     * @param array $params Hook parameters.
-     *
-     * @return string Rendered template output.
-     */
-    public function hookDisplayAdminProductsShippingStepBottom($params)
-    {
-        return $this->renderProductCustomsPanel($params);
     }
 
     /**
@@ -653,6 +631,11 @@ class Packlink extends CarrierModule
         $order = array_key_exists('order', $params) ? $params['order'] : $params['objOrder'];
         $cartId = $order->id_cart;
         $carrierId = $order->id_carrier;
+
+        // States the duty the shopper was charged, on an order that bought a duties-paid option. Read
+        // from what was recorded at order validation — never re-quoted.
+        $ddpOutput = $this->getDdpConfirmationBlock($order);
+
         if (\Packlink\PrestaShop\Classes\Utility\CarrierUtility::isDropOff((int)$carrierId)
             && !\Packlink\PrestaShop\Classes\Utility\CheckoutUtility::isDropOffSelected(
                 (string)$cartId,
@@ -666,14 +649,7 @@ class Packlink extends CarrierModule
             $configuration['cartId'] = $order->id_cart;
 
             $this->context->smarty->assign(
-                array('configuration' => $configuration)
-            );
-
-            // Register modifier function
-            $this->context->smarty->registerPlugin(
-                'modifier',
-                'htmlspecialchars_decode',
-                'htmlspecialchars_decode'
+                array('configurationJson' => $this->encodeConfigurationForJs($configuration))
             );
 
             $output = $this->getLocationPickerFilesLinks();
@@ -681,10 +657,57 @@ class Packlink extends CarrierModule
             $output .= $this->getCheckoutFilesLinks();
             $output .= $this->display(__FILE__, 'confirm.tpl');
 
-            return $output;
+            return $ddpOutput . $output;
         }
 
-        return '';
+        return $ddpOutput;
+    }
+
+    /**
+     * Renders the duty line for an order that bought a duties-paid shipping option.
+     *
+     * The amount comes from the selection persisted at order validation, so the confirmation page can
+     * never disagree with what was charged, and no lookup happens while rendering.
+     *
+     * @param \Order $order Placed order.
+     *
+     * @return string Empty string for an ordinary order, or on any failure.
+     */
+    protected function getDdpConfirmationBlock(\Order $order)
+    {
+        try {
+            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
+                \Packlink\PrestaShop\Classes\Entities\CartDdpSelection::getClassName()
+            );
+
+            $filter = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
+            $filter->where('orderId', \Logeecom\Infrastructure\ORM\QueryFilter\Operators::EQUALS, (string)$order->id);
+
+            /** @var \Packlink\PrestaShop\Classes\Entities\CartDdpSelection|null $selection */
+            $selection = $repository->selectOne($filter);
+
+            if ($selection === null) {
+                return '';
+            }
+
+            $this->context->smarty->assign(array(
+                'plDdpLabel' => $this->l('Delivery Duty Paid'),
+                'plDdpAmount' => \Packlink\PrestaShop\Classes\Utility\MoneyFormatter::format(
+                    (float)$selection->getAmount(),
+                    (string)$selection->getCurrency()
+                ),
+            ));
+
+            return $this->display(__FILE__, 'ddp_confirmation.tpl');
+        } catch (\Throwable $e) {
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Failed to render the DDP confirmation line for order ' . (int)$order->id . ': '
+                . $e->getMessage(),
+                'Integration'
+            );
+
+            return '';
+        }
     }
 
     /**
@@ -839,6 +862,8 @@ class Packlink extends CarrierModule
                 "Payment method is not valid for [{$order->id}]."
             );
         }
+
+        $this->persistDdpSelection($order, $carrier);
 
 
         $isDelayed = false;
@@ -1668,6 +1693,10 @@ class Packlink extends CarrierModule
         }
 
         $configuration['lang'] = $lang;
+        $ddpPresentation = $this->getDdpPresentationData($params['cart']);
+        $configuration['ddpCosts'] = $ddpPresentation['costs'];
+        $configuration['ddpTransport'] = $ddpPresentation['transport'];
+        $configuration['ddpLabel'] = $this->l('Delivery Duty Paid');
 
         /** @var \Cart $cart */
         $cart = $params['cart'];
@@ -1694,6 +1723,308 @@ class Packlink extends CarrierModule
     }
 
     /**
+     * Money-formats a duty amount across the supported PrestaShop versions.
+     *
+     * `Tools::displayPrice()` was deprecated in 1.7 and removed in 9, so the locale formatter is used
+     * where it exists and the legacy helper only as a fallback.
+     *
+     * @param float $amount
+     *
+     * @return string
+     */
+    protected function formatDdpPrice($amount)
+    {
+        return \Packlink\PrestaShop\Classes\Utility\MoneyFormatter::format($amount);
+    }
+
+    /**
+     * Records the duty amount charged when the shopper bought a duties-paid option.
+     *
+     * The amount comes from what was already quoted for this request, never from a fresh lookup: a
+     * re-quote would create another customs invoice and could return a different figure than the one
+     * the shopper agreed to. When the per-request cache lacks the amount (validation ran without the
+     * duty pricing path), it is derived from the persisted carrier price minus the transport portion
+     * (design §3.5) — still never an API call. Only when neither source yields an amount is the row
+     * not written, and the draft simply carries no DDP selection rather than a guessed one.
+     *
+     * Upserts by order id: PrestaShop can re-fire validation for the same order, and a duplicate row
+     * would make later selectOne() reads return an arbitrary one.
+     *
+     * @param \Order $order Placed PrestaShop order.
+     * @param \Carrier $carrier Carrier the order was placed with.
+     */
+    protected function persistDdpSelection(\Order $order, \Carrier $carrier)
+    {
+        try {
+            /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
+            $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
+                \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
+            );
+
+            $referenceId = (int)$carrier->id_reference;
+            if (!$carrierService->isDdpCarrier($referenceId)) {
+                return;
+            }
+
+            $methodId = $carrierService->getShippingMethodId($referenceId);
+            if ($methodId === null) {
+                \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                    'Bought a DDP option for order ' . (int)$order->id
+                    . ' but its shipping method could not be resolved, so no duty was recorded.',
+                    'Integration'
+                );
+
+                return;
+            }
+
+            $ddpCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDdpCosts();
+            $amount = is_array($ddpCosts) && isset($ddpCosts[$methodId]) ? (float)$ddpCosts[$methodId] : null;
+
+            if ($amount === null) {
+                $amount = $this->deriveDdpAmountFromOrder($order, $methodId);
+            }
+
+            if ($amount === null) {
+                \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                    'Bought a DDP option for order ' . (int)$order->id
+                    . ' but no quoted duty amount was available, so none was recorded.',
+                    'Integration'
+                );
+
+                return;
+            }
+
+            $currency = new \Currency((int)$order->id_currency);
+
+            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
+                \Packlink\PrestaShop\Classes\Entities\CartDdpSelection::getClassName()
+            );
+
+            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
+            $query->where('orderId', '=', (string)$order->id);
+
+            /** @var \Packlink\PrestaShop\Classes\Entities\CartDdpSelection|null $selection */
+            $selection = $repository->selectOne($query);
+            $isNew = $selection === null;
+
+            if ($isNew) {
+                $selection = new \Packlink\PrestaShop\Classes\Entities\CartDdpSelection();
+            }
+
+            $selection->setCartId((string)$order->id_cart);
+            $selection->setOrderId((string)$order->id);
+            $selection->setCarrierReferenceId((string)$referenceId);
+            $selection->setAmount($amount);
+            $selection->setCurrency(\Validate::isLoadedObject($currency) ? $currency->iso_code : '');
+
+            // Carried onto the selection now, because the quote rows holding it are dropped a few lines
+            // below and the draft is built in a later request that cannot ask Packlink for it again.
+            // This is the freight the draft must declare: what the shopper paid also contains Packlink's
+            // platform fee, which is not carrier freight and does not belong in a customs value.
+            $selection->setPorterage(
+                \Packlink\PrestaShop\Classes\ShippingServices\CheckoutDdpService::getQuotedPorterage(
+                    new \Cart((int)$order->id_cart),
+                    $methodId
+                )
+            );
+
+            if ($isNew) {
+                $repository->save($selection);
+            } else {
+                $repository->update($selection);
+            }
+
+            // The selection is the quote's only consumer past this point; drop the cart's quote row(s)
+            // so abandoned-then-reused cart ids can never serve a stale base.
+            $this->deleteDdpQuotes((string)$order->id_cart);
+        } catch (\Throwable $e) {
+            // Never break order placement over a bookkeeping row — Errors included.
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Failed to record the DDP selection for order ' . (int)$order->id . ': ' . $e->getMessage(),
+                'Integration'
+            );
+        }
+    }
+
+    /**
+     * Derives the duty amount from the persisted carrier price when the per-request quote cache is
+     * empty at validation time.
+     *
+     * The carrier price PrestaShop persisted on the order is transport + duty (DP6), so the duty is
+     * that price minus the transport portion recorded while pricing this request. Never an API call:
+     * a fresh quote here would create another customs invoice and could disagree with the figure the
+     * shopper paid (design §3.5).
+     *
+     * @param \Order $order Placed PrestaShop order.
+     * @param int $methodId Packlink shipping method id of the bought carrier.
+     *
+     * @return float|null Derived duty amount, or null when the transport portion is unavailable or
+     *     the subtraction yields nothing positive to record.
+     */
+    protected function deriveDdpAmountFromOrder(\Order $order, $methodId)
+    {
+        $transport = null;
+        $ddpTransport = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDdpTransport();
+
+        if (isset($ddpTransport[$methodId])) {
+            $transport = (float)$ddpTransport[$methodId];
+        } else {
+            $costs = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getCosts();
+            if (is_array($costs) && isset($costs[$methodId])) {
+                $transport = (float)$costs[$methodId];
+            }
+        }
+
+        if ($transport === null) {
+            return null;
+        }
+
+        $amount = max(0.0, (float)$order->total_shipping_tax_excl - $transport);
+
+        // Zero is indistinguishable from "no duty was in the price" — record nothing rather than a
+        // guessed zero (DP5).
+        return $amount > 0 ? $amount : null;
+    }
+
+    /**
+     * Deletes every persisted DDP quote row of a cart.
+     *
+     * @param string $cartId PrestaShop cart id.
+     */
+    protected function deleteDdpQuotes($cartId)
+    {
+        try {
+            $repository = \Logeecom\Infrastructure\ORM\RepositoryRegistry::getRepository(
+                \Packlink\PrestaShop\Classes\Entities\CartDdpQuote::getClassName()
+            );
+
+            $query = new \Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter();
+            $query->where('cartId', '=', (string)$cartId);
+
+            foreach ($repository->select($query) as $quote) {
+                $repository->delete($quote);
+            }
+        } catch (\Throwable $e) {
+            // A leftover quote row is inert (its signature stops matching on any cart change), so a
+            // failed cleanup is only logged.
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Failed to clean up DDP quote rows for cart ' . $cartId . ': ' . $e->getMessage(),
+                'Integration'
+            );
+        }
+    }
+
+    /**
+     * Returns the duty portion of each DDP carrier's price, keyed by the current carrier id
+     * (id_carrier) and money-formatted for display.
+     *
+     * Read from the per-request cache, so this adds no API call. An empty array means either that no
+     * duty applies to this cart, or that pricing did not run during this request (e.g. delivery
+     * options served from PrestaShop's cache); in both cases the checkout shows no duties note.
+     *
+     * The maps are keyed by id_carrier, not id_reference: the checkout delivery-option radio values
+     * carry id_carrier, and editing a carrier in the PrestaShop admin duplicates the row under a new
+     * id while keeping the reference, so reference-keyed maps would silently stop matching after any
+     * such edit.
+     *
+     * The amounts are presentation only. Each one is already inside its carrier's price (DP6), so it
+     * must never be added to a total anywhere.
+     *
+     * @param \Cart $cart Current cart.
+     *
+     * @return array Two maps keyed by current carrier id: 'costs' (formatted duty) and 'transport'
+     *     (formatted transport portion of that carrier's price). Splitting the shipping line into these
+     *     two keeps the panel arithmetic exact: transport + duty is the carrier price already in the
+     *     order total, so the displayed lines sum to that total instead of double-counting the duty.
+     */
+    protected function getDdpPresentationData($cart)
+    {
+        $result = array('costs' => array(), 'transport' => array());
+
+        try {
+            // Read-only: whatever pricing already computed for this request. Rendering must never
+            // trigger the duty lookup or price a carrier again — that put a Packlink round trip and two
+            // cost calculations on the critical path of every checkout page view.
+            $ddpCosts = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDdpCosts();
+            $ddpTransport = \Packlink\PrestaShop\Classes\Utility\CachingUtility::getDdpTransport();
+
+            if (!is_array($ddpCosts) || empty($ddpCosts)) {
+                return $result;
+            }
+
+            /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
+            $carrierService = \Logeecom\Infrastructure\ServiceRegister::getService(
+                \Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService::CLASS_NAME
+            );
+
+            foreach ($ddpCosts as $methodId => $amount) {
+                $referenceId = $carrierService->getDdpCarrierReferenceId($methodId);
+                if ($referenceId === null) {
+                    continue;
+                }
+
+                // Reference -> current id: the JS matches these keys against the delivery-option radio
+                // values, which carry id_carrier (see CarrierUtility::getDropOffCarrierReferenceIds()).
+                $carrier = \Carrier::getCarrierByReference((int)$referenceId);
+                if (!\Validate::isLoadedObject($carrier)) {
+                    continue;
+                }
+
+                $carrierId = (string)$carrier->id;
+                $result['costs'][$carrierId] = $this->formatDdpPrice($amount);
+
+                // Absent when this carrier was not priced in this request; the shipping line then keeps
+                // the combined figure rather than showing a guessed split.
+                if (isset($ddpTransport[$methodId])) {
+                    $result['transport'][$carrierId] =
+                        $this->formatDdpPrice($ddpTransport[$methodId]);
+                }
+            }
+            // Throwable, not Exception: a checkout note must not be able to fatal the shipping step.
+        } catch (\Throwable $e) {
+            \Logeecom\Infrastructure\Logger\Logger::logWarning(
+                'Failed to resolve DDP costs for the checkout step: ' . $e->getMessage(),
+                'Integration'
+            );
+
+            return array('costs' => array(), 'transport' => array());
+        }
+
+        return $result;
+    }
+
+    /**
+     * Encodes the checkout configuration for raw emission inside a single-quoted JS string literal
+     * in a script element (the templates pass that literal to JSON.parse).
+     *
+     * The HEX flags turn <, >, &, ' and " inside values into \uXXXX escapes, and json_encode never
+     * emits raw control characters, so the emitted text cannot contain any character able to
+     * terminate the surrounding single-quoted JS string literal or the script element (no ', no <,
+     * no newline; the JSON's structural double quotes are inert in both). That is why the templates
+     * emit it with `nofilter`: HTML-escaping it again and then decoding (as the old
+     * escape:'htmlall'|htmlspecialchars_decode chain did) put decoded quotes back into the JS sink,
+     * so any apostrophe in a translated value (e.g. ddpLabel in French) broke the script.
+     *
+     * Backslashes are doubled because the JS tokenizer unescapes the string literal once before
+     * JSON.parse runs: without doubling, json_encode's escape sequences (e.g. the \u0022 that
+     * HEX_QUOT produces for a quote inside a value) would be consumed by the tokenizer into raw
+     * characters and JSON.parse would receive broken JSON. With doubling, the tokenizer restores
+     * the exact json_encode output.
+     *
+     * All four JSON_HEX_* constants exist since PHP 5.3.0.
+     *
+     * @param array $configuration
+     *
+     * @return string JSON safe for raw output inside a single-quoted JS string literal.
+     */
+    protected function encodeConfigurationForJs($configuration)
+    {
+        $json = json_encode($configuration, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+        return str_replace('\\', '\\\\', $json);
+    }
+
+    /**
      * Returns additional content that has to be injected in shipping step during checkout in PrestaShop 1.6.
      *
      * @param array $params
@@ -1711,17 +2042,10 @@ class Packlink extends CarrierModule
         $configuration = $this->getShippingStepConfiguration($params);
 
         $this->context->smarty->assign(array(
-            'configuration' => $configuration,
+            'configurationJson' => $this->encodeConfigurationForJs($configuration),
             'stylesPath' => $this->_path . 'views/css/packlink-shipping-methods.css?v=' . $this->version,
             'shippingServicePath' => $this->_path . 'views/js/ShippingService16.js?v=' . $this->version,
         ));
-
-        // Register modifier function
-        $this->context->smarty->registerPlugin(
-            'modifier',
-            'htmlspecialchars_decode',
-            'htmlspecialchars_decode'
-        );
 
         $output = $this->display(__FILE__, 'getPresta16ShippingStepPage.tpl');
 

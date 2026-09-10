@@ -7,8 +7,14 @@ use Carrier;
 use Cart;
 use Context;
 use Customer;
+use Logeecom\Infrastructure\Logger\Logger;
+use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
+use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
+use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
+use Packlink\BusinessLogic\DDP\DdpBehavior;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\BusinessLogic\ShippingMethod\ShippingCostCalculator;
 use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\PrestaShop\Classes\Bootstrap;
@@ -21,6 +27,14 @@ use Packlink\PrestaShop\Classes\Utility\CachingUtility;
  */
 class PackageCostCalculator
 {
+    /**
+     * Effective DDP behaviour per shipping method for this request. Pricing runs once per carrier row
+     * and twice per method (base + DDP row), so the behaviour lookup is memoized per request.
+     *
+     * @var array
+     */
+    private static $ddpBehaviorCache = array();
+
     /**
      * Returns shipping cost for current cart and selected carrier.
      *
@@ -68,7 +82,8 @@ class PackageCostCalculator
 
         if ($calculatedCosts !== false) {
             return isset($calculatedCosts[$methodId])
-                ? self::applyShopCostCalculationSettings($calculatedCosts[$methodId], $cart) : false;
+                ? self::resolveCost($cart, $calculatedCosts[$methodId], $methodId, $carrierReferenceId, $shippingProducts)
+                : false;
         }
 
         $warehouse = CachingUtility::getDefaultWarehouse();
@@ -98,7 +113,159 @@ class PackageCostCalculator
         CachingUtility::setCosts($calculatedCosts);
 
         return isset($calculatedCosts[$methodId])
-            ? self::applyShopCostCalculationSettings($calculatedCosts[$methodId], $cart) : false;
+            ? self::resolveCost($cart, $calculatedCosts[$methodId], $methodId, $carrierReferenceId, $shippingProducts)
+            : false;
+    }
+
+    /**
+     * Resolves the price of one carrier row, which for a duties-charging method is two rows: the base
+     * (transport-only) carrier and its DDP carrier.
+     *
+     * The duty amount rides inside the carrier price (DP6) so it is taxed by that carrier's tax rules
+     * group and refunded natively. Shop cost-calculation settings are applied to the transport portion
+     * only (DP9): a met free-shipping threshold zeroes transport while duty stays owed.
+     *
+     * @param Cart $cart PrestaShop cart object.
+     * @param float $transportCost Raw calculated transport cost for the method.
+     * @param int $methodId Packlink shipping method id.
+     * @param int $carrierReferenceId PrestaShop carrier reference id of the row being priced.
+     * @param array $shippingProducts Non-virtual cart product rows.
+     *
+     * @return float|bool Price for this carrier row, or FALSE when the row must not be offered.
+     *
+     * @throws \Exception Only from the pre-existing transport pricing; the DDP surface never throws.
+     */
+    private static function resolveCost(
+        Cart $cart,
+        $transportCost,
+        $methodId,
+        $carrierReferenceId,
+        array $shippingProducts
+    ) {
+        // Transport pricing stays outside the guard below: its failures behaved the same before DDP
+        // support and must keep doing so.
+        $transport = self::applyShopCostCalculationSettings($transportCost, $cart);
+
+        // PrestaShop calls the shipping-cost hook unwrapped, so nothing from the DDP surface may
+        // escape it: any failure degrades this row to the transport-only price (fail-soft, DP5).
+        try {
+            return self::resolveDdpAwareCost($cart, $transport, $methodId, $carrierReferenceId, $shippingProducts);
+        } catch (\Exception $e) {
+            Logger::logWarning(
+                'Failed to resolve DDP pricing for carrier reference ' . (int)$carrierReferenceId
+                . ': ' . $e->getMessage(),
+                'Integration'
+            );
+
+            return $transport;
+        }
+    }
+
+    /**
+     * Applies the DDP pricing rules to one carrier row.
+     *
+     * @param Cart $cart PrestaShop cart object.
+     * @param float $transport Transport cost with shop cost settings already applied.
+     * @param int $methodId Packlink shipping method id.
+     * @param int $carrierReferenceId PrestaShop carrier reference id of the row being priced.
+     * @param array $shippingProducts Non-virtual cart product rows.
+     *
+     * @return float|bool Price for this carrier row, or FALSE when the row must not be offered.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private static function resolveDdpAwareCost(
+        Cart $cart,
+        $transport,
+        $methodId,
+        $carrierReferenceId,
+        array $shippingProducts
+    ) {
+        /** @var \Packlink\PrestaShop\Classes\BusinessLogicServices\CarrierService $carrierService */
+        $carrierService = ServiceRegister::getService(ShopShippingMethodService::CLASS_NAME);
+        $isDdpCarrier = $carrierService->isDdpCarrier($carrierReferenceId);
+
+        // Domestic (or otherwise inapplicable) shipment: no duty is owed, so the DDP row is not offered
+        // and the base row prices normally regardless of the merchant's behaviour setting.
+        if (!CheckoutDdpService::isApplicable($cart)) {
+            return $isDdpCarrier ? false : $transport;
+        }
+
+        $behavior = self::getEffectiveDdpBehavior($methodId);
+        if ($behavior === DdpBehavior::NONE) {
+            return $isDdpCarrier ? false : $transport;
+        }
+
+        $ddp = CheckoutDdpService::getAdjustedAmount($cart, $methodId, $shippingProducts);
+        $dutyAvailable = $ddp !== null;
+
+        if ($isDdpCarrier) {
+            if (!$dutyAvailable) {
+                return false;
+            }
+
+            // Record the split here, where both halves are already known. The checkout presentation
+            // reads this instead of pricing the carrier again while rendering.
+            CachingUtility::setDdpTransport($methodId, $transport);
+
+            return $transport + $ddp;
+        }
+
+        // Duty is only offerable through an existing DDP twin carrier: if that row is missing
+        // (creation failed, merchant deleted it), hiding the base row would drop the whole service
+        // from checkout, so the base row stays visible instead (fail-soft, DP5).
+        $twinExists = $carrierService->getDdpCarrierReferenceId($methodId) !== null;
+
+        return CheckoutDdpService::shouldHideBaseCarrier($behavior, $dutyAvailable && $twinExists)
+            ? false : $transport;
+    }
+
+    /**
+     * Returns the effective DDP behaviour of a shipping method, defaulting to NONE when the method
+     * cannot be loaded.
+     *
+     * @param int $methodId Packlink shipping method id.
+     *
+     * @return string One of DdpBehavior::NONE, OPTIONAL, ENFORCED, MANDATORY.
+     */
+    private static function getEffectiveDdpBehavior($methodId)
+    {
+        $methodId = (int)$methodId;
+        if (array_key_exists($methodId, self::$ddpBehaviorCache)) {
+            return self::$ddpBehaviorCache[$methodId];
+        }
+
+        return self::$ddpBehaviorCache[$methodId] = self::fetchEffectiveDdpBehavior($methodId);
+    }
+
+    /**
+     * Loads the effective DDP behaviour of a shipping method from storage.
+     *
+     * @param int $methodId Packlink shipping method id.
+     *
+     * @return string One of DdpBehavior::NONE, OPTIONAL, ENFORCED, MANDATORY.
+     */
+    private static function fetchEffectiveDdpBehavior($methodId)
+    {
+        try {
+            $repository = RepositoryRegistry::getRepository(ShippingMethod::getClassName());
+
+            $filter = new QueryFilter();
+            $filter->where('id', Operators::EQUALS, (int)$methodId);
+
+            /** @var ShippingMethod|null $method */
+            $method = $repository->selectOne($filter);
+
+            return $method !== null ? $method->getEffectiveDdpBehavior() : DdpBehavior::NONE;
+        } catch (\Exception $e) {
+            Logger::logWarning(
+                'Failed to resolve DDP behaviour for method ' . (int)$methodId . ': ' . $e->getMessage(),
+                'Integration'
+            );
+
+            return DdpBehavior::NONE;
+        }
     }
 
     /**

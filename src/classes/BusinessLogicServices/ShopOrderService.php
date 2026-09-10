@@ -16,13 +16,12 @@ use Packlink\BusinessLogic\Order\Objects\Address;
 use Packlink\BusinessLogic\Order\Objects\Item;
 use Packlink\BusinessLogic\Order\Objects\Order;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
+use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
 use Packlink\PrestaShop\Classes\Entities\CartCarrierDropOffMapping;
-use Packlink\PrestaShop\Classes\Entities\ProductCustomsData;
+use Packlink\PrestaShop\Classes\Entities\CartDdpSelection;
 use Packlink\PrestaShop\Classes\Repositories\OrderRepository;
-use Packlink\PrestaShop\Classes\Utility\CountryOriginOptions;
 use Packlink\PrestaShop\Classes\Utility\CustomsDataProvider;
 use Packlink\PrestaShop\Classes\Utility\CustomsInvoiceSynchronizer;
-use Packlink\PrestaShop\Classes\Utility\ProductFeatureSources;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -33,12 +32,12 @@ use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopOrderService
 {
     /**
-     * Per-order cache of module-owned product customs data, keyed by product id. Preloaded once per
-     * order build in a single query to avoid an N+1 lookup per order line. Null until preloaded.
+     * Resolves the customs values (tariff number, country of origin, receiver tax id) for the current
+     * order build. Shared with the checkout duty-estimate path so both read identical data.
      *
-     * @var ProductCustomsData[]|null
+     * @var CustomsDataProvider|null
      */
-    private $productCustomsCache;
+    private $customsDataProvider;
     /**
      * Per-request cache of loaded PrestaShop delivery addresses, keyed by address id, so the same
      * address is not hydrated more than once during an order build.
@@ -151,6 +150,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
             // source feeds each customs field); the core invoice build falls back to the configured
             // mapping defaults when a value is absent.
             $this->customsMapping = $this->loadCustomsMapping();
+            $this->customsDataProvider = new CustomsDataProvider($this->customsMapping);
 
             $receiverTaxId = $this->resolveReceiverTaxId($sourceOrder);
             if ($receiverTaxId !== '') {
@@ -163,6 +163,8 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
 
             $this->setOrderShippingDetails($order, $sourceOrder->id_carrier);
             $items = $this->getOrderItems($sourceOrder);
+            $this->applyDdpSelection($order, $sourceOrder);
+
             $order->setItems($items);
             // Customs: the customs-invoice request sends order-level parcels weight,
             // which Packlink rejects at 0 (causing the shipment to be sent without customs and the
@@ -509,15 +511,102 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      */
     private function resolveReceiverTaxId(PrestaShopOrder $sourceOrder)
     {
-        $source = ($this->customsMapping !== null && !empty($this->customsMapping->mappingReceiverTaxId))
-            ? $this->customsMapping->mappingReceiverTaxId
-            : CustomsMappingService::SOURCE_CUSTOMER_TAX_ID;
+        return $this->customsDataProvider()->resolveReceiverTaxId(
+            (int)$sourceOrder->id_customer,
+            $this->getDeliveryVatNumber($sourceOrder)
+        );
+    }
 
-        if ($source === CustomsMappingService::SOURCE_ADDRESS_VAT) {
-            return $this->getDeliveryVatNumber($sourceOrder);
+    /**
+     * Marks the draft as duties-paid when the shopper bought a DDP option, using the amount recorded at
+     * order validation. Orders without a recorded selection are left untouched, so a non-DDP draft
+     * carries no DDP keys at all.
+     *
+     * @param Order $order Core order being built.
+     * @param PrestaShopOrder $sourceOrder Placed shop order.
+     */
+    private function applyDdpSelection(Order $order, PrestaShopOrder $sourceOrder)
+    {
+        try {
+            // Freight for the customs invoice's shipment cost (C8): the transport alone, TAX-EXCLUDED,
+            // minus the duty inside it when a duties-paid option was bought. Never the order total —
+            // customs value is goods + freight, and the goods are already itemised on the invoice.
+            //
+            // Tax-excluded because that is the unit the checkout quote declared: CheckoutDdpService
+            // sends the module's own hook cost, which PrestaShop takes tax-excluded and taxes itself.
+            // Packlink prices the duty from goods + freight, so declaring a tax-INCLUDED freight here
+            // while the quote declared a tax-excluded one has Packlink price the real shipment on a
+            // higher customs value than it quoted, and bill a duty the shopper was never charged. The
+            // shortfall is the merchant's. Both sides must be the same unit; this is that unit.
+            $freight = (float)$sourceOrder->total_shipping_tax_excl;
+
+            $repository = RepositoryRegistry::getRepository(CartDdpSelection::getClassName());
+
+            $filter = new QueryFilter();
+            $filter->where('orderId', Operators::EQUALS, (string)$sourceOrder->id);
+
+            /** @var CartDdpSelection|null $selection */
+            $selection = $repository->selectOne($filter);
+
+            if ($selection !== null) {
+                $order->setDdpSelected(true);
+                $order->setDdpCost((float)$selection->getAmount());
+
+                $porterage = $selection->getPorterage();
+
+                if ($porterage !== null && (float)$porterage > 0.0) {
+                    // Packlink's OWN carrier price for the chosen service, recorded when the shopper
+                    // bought the option. Preferred over any derivation because it is the exact figure
+                    // the checkout quote was made against, so the draft now declares the same freight
+                    // the shopper was priced on.
+                    //
+                    // The subtraction below cannot reach it: what the shopper paid for shipping is
+                    // porterage PLUS Packlink's platform fee, and the fee is not carrier freight.
+                    // Measured on order #84 - paid 71.39, duty 26.40, so the derivation gave 44.99
+                    // against a real carrier price of 44.00. Packlink bills on porterage either way, so
+                    // the money was right, but the draft screen showed 26.49 where the shopper was
+                    // charged 26.40, and the customs invoice declared a transport cost 0.99 too high.
+                    $freight = (float)$porterage;
+                } else {
+                    // No recorded carrier price: a selection from before this was carried, or a quote
+                    // that never produced one. Derive it as before - wrong by the platform fee, which is
+                    // far better than declaring the whole shipping line or nothing at all.
+                    //
+                    // No tax factor. The duty rides inside the carrier price, so it is already part of
+                    // total_shipping_tax_excl and comes out in that same tax-excluded unit.
+                    //
+                    // Scaling it by the shipping tax factor was what produced the earlier mismatch:
+                    // subtracting amount x (1+t) from total_shipping_tax_incl reduces algebraically to
+                    // T x (1+t), so the draft declared a tax-included transport no matter how right the
+                    // subtraction looked.
+                    $freight = max(0.0, $freight - (float)$selection->getAmount());
+                }
+            }
+
+            if (method_exists($order, 'setShippingCost')) {
+                $order->setShippingCost($freight);
+            }
+        } catch (\Exception $e) {
+            Logger::logWarning(
+                'Failed to read the DDP selection for order ' . (int)$sourceOrder->id . ': ' . $e->getMessage(),
+                'Integration'
+            );
+        }
+    }
+
+    /**
+     * Returns the customs data provider for the current build, creating it on demand for callers that
+     * run outside getOrderAndShippingData().
+     *
+     * @return CustomsDataProvider
+     */
+    private function customsDataProvider()
+    {
+        if ($this->customsDataProvider === null) {
+            $this->customsDataProvider = new CustomsDataProvider($this->customsMapping);
         }
 
-        return $this->getCustomerTaxId((int)$sourceOrder->id_customer);
+        return $this->customsDataProvider;
     }
 
     /**
@@ -534,31 +623,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
     }
 
     /**
-     * Returns the tariff-number source selected in the customs mapping (mapping_tariff_number);
-     * defaults to the product HS code field.
-     *
-     * @return string
-     */
-    private function tariffNumberSource()
-    {
-        return ($this->customsMapping !== null && !empty($this->customsMapping->mappingTariffNumber))
-            ? $this->customsMapping->mappingTariffNumber
-            : CustomsMappingService::SOURCE_PRODUCT_HS_CODE;
-    }
-
-    /**
-     * Source configured for the item country of origin, defaulting to the module's own product field.
-     *
-     * @return string
-     */
-    private function countryOfOriginSource()
-    {
-        return ($this->customsMapping !== null && !empty($this->customsMapping->mappingCountryOfOrigin))
-            ? $this->customsMapping->mappingCountryOfOrigin
-            : CustomsMappingService::SOURCE_PRODUCT_COUNTRY_OF_ORIGIN;
-    }
-
-    /**
      * Resolves the item tariff number from whichever source the merchant mapped.
      *
      * A malformed value is dropped rather than sent: Packlink rejects a customs invoice whose tariff
@@ -572,33 +636,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      */
     private function resolveTariffNumber($productId)
     {
-        $source = $this->tariffNumberSource();
-
-        if ($source === CustomsMappingService::SOURCE_PRODUCT_HS_CODE) {
-            $customs = $this->getProductCustomsData($productId);
-            $value = ($customs !== null && !empty($customs->hsCode)) ? $customs->hsCode : '';
-        } else {
-            $value = ProductFeatureSources::getValue($source, $productId, ProductFeatureSources::resolveLanguageId());
-        }
-
-        $digits = preg_replace('/[^0-9]/', '', (string)$value);
-        if ($digits === '' ) {
-            return '';
-        }
-
-        if (!preg_match('/^[0-9]{6,8}$/', $digits)) {
-            Logger::logWarning(
-                TranslationUtility::__(
-                    'Ignoring mapped tariff number "%s" for product %s: expected 6 to 8 digits.',
-                    array((string)$value, (string)$productId)
-                ),
-                'Integration'
-            );
-
-            return '';
-        }
-
-        return $digits;
+        return $this->customsDataProvider()->resolveTariffNumber($productId);
     }
 
     /**
@@ -614,34 +652,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      */
     private function resolveCountryOfOrigin($productId)
     {
-        $source = $this->countryOfOriginSource();
-
-        if ($source === CustomsMappingService::SOURCE_PRODUCT_COUNTRY_OF_ORIGIN) {
-            $customs = $this->getProductCustomsData($productId);
-
-            // Already stored as an ISO code by the product page, so no resolution needed.
-            return ($customs !== null && !empty($customs->countryOfOrigin)) ? $customs->countryOfOrigin : '';
-        }
-
-        $languageId = ProductFeatureSources::resolveLanguageId();
-
-        $value = ProductFeatureSources::getValue($source, $productId, $languageId);
-        if ($value === '') {
-            return '';
-        }
-
-        $iso = CountryOriginOptions::resolveIso($value, $languageId);
-        if ($iso === '') {
-            Logger::logWarning(
-                TranslationUtility::__(
-                    'Ignoring mapped country of origin "%s" for product %s: not a known country name or ISO code.',
-                    array($value, (string)$productId)
-                ),
-                'Integration'
-            );
-        }
-
-        return $iso;
+        return $this->customsDataProvider()->resolveCountryOfOrigin($productId);
     }
 
     /**
@@ -669,25 +680,6 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
     }
 
     /**
-     * Returns the module-owned customs data for a product, or null when none is stored.
-     *
-     * @param int $productId
-     *
-     * @return ProductCustomsData|null
-     */
-    private function getProductCustomsData($productId)
-    {
-        $productId = (int)$productId;
-
-        if (is_array($this->productCustomsCache)) {
-            return isset($this->productCustomsCache[$productId]) ? $this->productCustomsCache[$productId] : null;
-        }
-
-        // Fallback single lookup for callers outside the preloaded order-build path.
-        return CustomsDataProvider::getProductCustomsData($productId);
-    }
-
-    /**
      * Loads the module-owned customs data for every given product id in a single query and caches it
      * for the current order build, replacing a per-line N+1 lookup.
      *
@@ -695,39 +687,7 @@ class ShopOrderService implements \Packlink\BusinessLogic\Order\Interfaces\ShopO
      */
     private function preloadProductCustomsData(array $productIds)
     {
-        $this->productCustomsCache = array();
-
-        $productIds = array_values(array_unique(array_map('intval', $productIds)));
-        if (empty($productIds)) {
-            return;
-        }
-
-        try {
-            $repository = RepositoryRegistry::getRepository(ProductCustomsData::CLASS_NAME);
-
-            $query = new QueryFilter();
-            $query->where('productId', 'IN', $productIds);
-
-            /** @var ProductCustomsData[] $rows */
-            $rows = $repository->select($query);
-            foreach ($rows as $row) {
-                $this->productCustomsCache[(int)$row->productId] = $row;
-            }
-        } catch (\Exception $e) {
-            Logger::logWarning('Failed to preload product customs data: ' . $e->getMessage(), 'Integration');
-        }
-    }
-
-    /**
-     * Returns the private-person tax id stored for a customer, or an empty string.
-     *
-     * @param int $customerId
-     *
-     * @return string
-     */
-    private function getCustomerTaxId($customerId)
-    {
-        return CustomsDataProvider::getCustomerTaxId($customerId);
+        $this->customsDataProvider()->preloadProducts($productIds);
     }
 
     /**

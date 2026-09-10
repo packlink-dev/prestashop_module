@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "419ed9d71ae0179df1dfc47a90c1bea3",
+    "content-hash": "ae2ab3620eb964e24d165470d884dc98",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -62,16 +62,16 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "dev-CR-SET-66-Customs",
+            "version": "dev-feature/cr-set-68-ddp-support",
             "source": {
                 "type": "git",
                 "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "74b7d3e1568dcf27ce02c8714a78468a58761fe9"
+                "reference": "19174531e7f92b960e256082d0000a5a794ad0a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/74b7d3e1568dcf27ce02c8714a78468a58761fe9",
-                "reference": "74b7d3e1568dcf27ce02c8714a78468a58761fe9",
+                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/19174531e7f92b960e256082d0000a5a794ad0a4",
+                "reference": "19174531e7f92b960e256082d0000a5a794ad0a4",
                 "shasum": ""
             },
             "require": {
@@ -80,7 +80,6 @@
                 "php": ">=7.0"
             },
             "require-dev": {
-                "codacy/coverage": "dev-master",
                 "leafo/scssphp": "0.0.12",
                 "phpunit/phpunit": "^4.8 || ^9.6 || ^11.0"
             },
@@ -114,7 +113,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2026-07-28T12:14:03+00:00"
+            "time": "2026-09-04T07:32:39+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -1578,9 +1577,9 @@
         "ext-fileinfo": "*",
         "ext-openssl": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "7.0"
     },
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.9.0"
 }

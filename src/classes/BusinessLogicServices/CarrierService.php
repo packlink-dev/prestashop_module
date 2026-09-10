@@ -3,16 +3,16 @@
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
 use Logeecom\Infrastructure\Logger\Logger;
-use Logeecom\Infrastructure\ORM\QueryFilter\Operators;
-use Logeecom\Infrastructure\ORM\QueryFilter\QueryFilter;
 use Logeecom\Infrastructure\ORM\RepositoryRegistry;
 use Logeecom\Infrastructure\ServiceRegister;
 use Packlink\BusinessLogic\Configuration;
 use Packlink\BusinessLogic\Configuration as ConfigurationInterface;
 use Packlink\BusinessLogic\Controllers\AnalyticsController;
+use Packlink\BusinessLogic\DDP\DdpBehavior;
 use Packlink\BusinessLogic\ShippingMethod\Interfaces\ShopShippingMethodService;
 use Packlink\BusinessLogic\ShippingMethod\Models\ShippingMethod;
 use Packlink\PrestaShop\Classes\Entities\CarrierServiceMapping;
+use Packlink\PrestaShop\Classes\Utility\CachingUtility;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
 /**
@@ -24,6 +24,11 @@ class CarrierService implements ShopShippingMethodService
 {
     const DEFAULT_TAX_CLASS = 0;
     const DEFAULT_TAX_CLASS_LABEL = 'No tax';
+    /**
+     * Translatable suffix appended to the title of the duties-paid carrier. This is the only place a DDP
+     * carrier name is composed; never derive one carrier's name from the other by stripping strings.
+     */
+    const DDP_TITLE_SUFFIX = 'Delivery Duty Paid';
 
     /**
      * Adds / Activates shipping method in shop integration.
@@ -45,10 +50,32 @@ class CarrierService implements ShopShippingMethodService
             return true;
         }
 
+        if (!$this->createCarrier($shippingMethod, false)) {
+            return false;
+        }
+
+        $this->syncDdpCarrier($shippingMethod);
+
+        return true;
+    }
+
+    /**
+     * Creates a PrestaShop carrier for the given shipping method and maps it to that method.
+     *
+     * @param ShippingMethod $shippingMethod Packlink shipping method entity.
+     * @param bool $isDdp Whether the duties-paid variant is being created.
+     *
+     * @return bool TRUE if the carrier has been created; otherwise, FALSE.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopException
+     */
+    private function createCarrier(ShippingMethod $shippingMethod, $isDdp)
+    {
         /** @var \Carrier $carrier PrestaShop carrier object. */
         $carrier = new \Carrier();
 
-        $this->setCarrierData($carrier, $shippingMethod);
+        $this->setCarrierData($carrier, $shippingMethod, $isDdp);
 
         try {
             if ($carrier->add()) {
@@ -64,7 +91,7 @@ class CarrierService implements ShopShippingMethodService
                     $this->updateCarrierLogo($shippingMethod, $carrier);
                 }
 
-                $this->saveCarrierServiceMapping((int)$carrier->id, $shippingMethod->getId());
+                $this->saveCarrierServiceMapping((int)$carrier->id, $shippingMethod->getId(), $isDdp);
 
                 return true;
             }
@@ -74,6 +101,47 @@ class CarrierService implements ShopShippingMethodService
         }
 
         return false;
+    }
+
+    /**
+     * Creates, refreshes or removes the duties-paid carrier so that it exists exactly when the shipping
+     * method's effective DDP behavior is not NONE.
+     *
+     * @param ShippingMethod $shippingMethod Packlink shipping method entity.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     * @throws \PrestaShopException
+     */
+    private function syncDdpCarrier(ShippingMethod $shippingMethod)
+    {
+        $ddpReferenceId = $this->getDdpCarrierReferenceId($shippingMethod->getId());
+        $shouldExist = $shippingMethod->getEffectiveDdpBehavior() !== DdpBehavior::NONE;
+
+        if (!$shouldExist) {
+            if ($ddpReferenceId !== null) {
+                $this->removeCarrier($ddpReferenceId);
+                $this->deleteCarrierServiceMappingByReferenceId($ddpReferenceId);
+            }
+
+            return;
+        }
+
+        if ($ddpReferenceId === null) {
+            if (!$this->createCarrier($shippingMethod, true)) {
+                // Not fatal: pricing keeps the base carrier visible while the twin is missing (DP5),
+                // but the merchant's behaviour setting is silently not honoured until the next sync.
+                Logger::logWarning(
+                    'Failed to create the duties-paid carrier for shipping method '
+                    . (int)$shippingMethod->getId(),
+                    'Integration'
+                );
+            }
+
+            return;
+        }
+
+        $this->refreshCarrier($ddpReferenceId, $shippingMethod, true);
     }
 
     /**
@@ -90,30 +158,49 @@ class CarrierService implements ShopShippingMethodService
         $referenceId = $this->getCarrierReferenceId($shippingMethod->getId());
         if ($referenceId === null) {
             $this->add($shippingMethod);
-        } else {
-            /** @var \Carrier $carrier PrestaShop carrier object. */
-            $carrier = \Carrier::getCarrierByReference($referenceId);
 
-            if ($carrier) {
-                try {
-                    $this->setCarrierData($carrier, $shippingMethod);
-                    $ranges = $this->setCarrierRanges($carrier);
-                    $this->setCarrierZones($carrier, $shippingMethod, $ranges);
+            return;
+        }
 
-                    $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
-                    $logoUrl = $shippingMethod->getLogoUrl();
-                    $isDisplay = $this->validateLogoUrl($logoUrl);
-                    if ($isDisplay) {
-                        $this->updateCarrierLogo($shippingMethod, $carrier);
-                    }
+        $this->refreshCarrier($referenceId, $shippingMethod, false);
+        $this->syncDdpCarrier($shippingMethod);
+    }
 
-                    $carrier->update();
-                } catch (\Exception $e) {
-                    Logger::logError($e->getMessage(), 'Integration');
-                }
-            } else {
-                Logger::logWarning(TranslationUtility::__('Carrier not found'), 'Integration');
+    /**
+     * Refreshes an existing carrier from the shipping method.
+     *
+     * @param int $referenceId PrestaShop carrier reference ID.
+     * @param ShippingMethod $shippingMethod Packlink shipping method entity.
+     * @param bool $isDdp Whether the carrier is the duties-paid variant.
+     *
+     * @throws \PrestaShopException
+     */
+    private function refreshCarrier($referenceId, ShippingMethod $shippingMethod, $isDdp)
+    {
+        /** @var \Carrier $carrier PrestaShop carrier object. */
+        $carrier = \Carrier::getCarrierByReference($referenceId);
+
+        if (!$carrier) {
+            Logger::logWarning(TranslationUtility::__('Carrier not found'), 'Integration');
+
+            return;
+        }
+
+        try {
+            $this->setCarrierData($carrier, $shippingMethod, $isDdp);
+            $ranges = $this->setCarrierRanges($carrier);
+            $this->setCarrierZones($carrier, $shippingMethod, $ranges);
+
+            $carrier->setTaxRulesGroup((int)$shippingMethod->getTaxClass() ?: static::DEFAULT_TAX_CLASS);
+            $logoUrl = $shippingMethod->getLogoUrl();
+            $isDisplay = $this->validateLogoUrl($logoUrl);
+            if ($isDisplay) {
+                $this->updateCarrierLogo($shippingMethod, $carrier);
             }
+
+            $carrier->update();
+        } catch (\Exception $e) {
+            Logger::logError($e->getMessage(), 'Integration');
         }
     }
 
@@ -130,8 +217,8 @@ class CarrierService implements ShopShippingMethodService
      */
     public function delete(ShippingMethod $shippingMethod)
     {
-        $referenceId = $this->getCarrierReferenceId($shippingMethod->getId());
-        if ($referenceId === null) {
+        $referenceIds = $this->getCarrierReferenceIds($shippingMethod->getId());
+        if (empty($referenceIds)) {
             Logger::logWarning(TranslationUtility::__('Carrier not found'), 'Integration');
 
             return true;
@@ -139,24 +226,44 @@ class CarrierService implements ShopShippingMethodService
 
         $this->deleteCarrierServiceMapping($shippingMethod->getId());
 
+        foreach ($referenceIds as $referenceId) {
+            $this->removeCarrier($referenceId);
+        }
+
+        return true;
+    }
+
+    /**
+     * Marks the carrier behind the given reference ID as deleted and removes its logo.
+     *
+     * @param int $referenceId PrestaShop carrier reference ID.
+     *
+     * @throws \PrestaShopException
+     */
+    private function removeCarrier($referenceId)
+    {
         /** @var \Carrier $carrier PrestaShop carrier object. */
         $carrier = \Carrier::getCarrierByReference($referenceId);
 
         if (!$carrier) {
             Logger::logWarning(TranslationUtility::__('Carrier not found'), 'Integration');
-        } elseif ($carrier->deleted) {
-            Logger::logWarning(TranslationUtility::__('Carrier already deleted'), 'Integration');
-        } else {
-            $prestaCarrierLogoPath = $this->getPrestaCarrierLogoPath($carrier->id);
-            if (\Tools::file_exists_cache($prestaCarrierLogoPath)) {
-                unlink($prestaCarrierLogoPath);
-            }
 
-            $carrier->deleted = true;
-            $carrier->update();
+            return;
         }
 
-        return true;
+        if ($carrier->deleted) {
+            Logger::logWarning(TranslationUtility::__('Carrier already deleted'), 'Integration');
+
+            return;
+        }
+
+        $prestaCarrierLogoPath = $this->getPrestaCarrierLogoPath($carrier->id);
+        if (\Tools::file_exists_cache($prestaCarrierLogoPath)) {
+            unlink($prestaCarrierLogoPath);
+        }
+
+        $carrier->deleted = true;
+        $carrier->update();
     }
 
     /**
@@ -252,15 +359,13 @@ class CarrierService implements ShopShippingMethodService
      */
     public function getMappingByCarrierReferenceId($carrierReferenceId)
     {
-        $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
+        foreach (CachingUtility::getCarrierServiceMappings() as $mapping) {
+            if ((int)$mapping->carrierReferenceId === (int)$carrierReferenceId) {
+                return $mapping;
+            }
+        }
 
-        $filter = new QueryFilter();
-        $filter->where('carrierReferenceId', Operators::EQUALS, $carrierReferenceId);
-        /** @var CarrierServiceMapping $carrierServiceMapping */
-        /** @noinspection OneTimeUseVariablesInspection */
-        $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
-
-        return $carrierServiceMapping;
+        return null;
     }
 
     /**
@@ -275,14 +380,110 @@ class CarrierService implements ShopShippingMethodService
      */
     public function getCarrierReferenceId($methodId)
     {
-        $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
+        $mapping = $this->getMappingByMethodId($methodId, false);
 
-        $filter = new QueryFilter();
-        $filter->where('methodId', Operators::EQUALS, $methodId);
-        /** @var CarrierServiceMapping $carrierServiceMapping */
-        $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
+        return $mapping ? $mapping->carrierReferenceId : null;
+    }
 
-        return $carrierServiceMapping ? $carrierServiceMapping->carrierReferenceId : null;
+    /**
+     * Returns reference ID of the duties-paid carrier mapped by shipping method service ID.
+     *
+     * @param int $methodId Packlink shipping method ID.
+     *
+     * @return int|null PrestaShop carrier reference ID or null if the method has no DDP carrier.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    public function getDdpCarrierReferenceId($methodId)
+    {
+        $mapping = $this->getMappingByMethodId($methodId, true);
+
+        return $mapping ? $mapping->carrierReferenceId : null;
+    }
+
+    /**
+     * Returns reference IDs of every carrier mapped to the given shipping method, base and duties-paid.
+     *
+     * @param int $methodId Packlink shipping method ID.
+     *
+     * @return int[] PrestaShop carrier reference IDs.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    public function getCarrierReferenceIds($methodId)
+    {
+        $result = array();
+        foreach ($this->getMappingsByMethodId($methodId) as $mapping) {
+            $result[] = $mapping->carrierReferenceId;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Checks whether the carrier behind the given reference ID is a duties-paid carrier.
+     *
+     * @param int $carrierReferenceId PrestaShop carrier reference ID.
+     *
+     * @return bool
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    public function isDdpCarrier($carrierReferenceId)
+    {
+        $mapping = $this->getMappingByCarrierReferenceId($carrierReferenceId);
+
+        return $mapping !== null && (bool)$mapping->isDdp;
+    }
+
+    /**
+     * Returns all carrier service mappings for the given shipping method.
+     *
+     * @param int $methodId Packlink shipping method ID.
+     *
+     * @return CarrierServiceMapping[]
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function getMappingsByMethodId($methodId)
+    {
+        $result = array();
+        foreach (CachingUtility::getCarrierServiceMappings() as $mapping) {
+            if ((int)$mapping->methodId === (int)$methodId) {
+                $result[] = $mapping;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns the base or the duties-paid mapping of the given shipping method.
+     *
+     * The DDP flag is deliberately not part of the index map, so it is matched in PHP: mappings written
+     * before DDP support carry no value at all and must be read as the base carrier.
+     *
+     * @param int $methodId Packlink shipping method ID.
+     * @param bool $isDdp Whether the duties-paid mapping is wanted.
+     *
+     * @return CarrierServiceMapping|null
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function getMappingByMethodId($methodId, $isDdp)
+    {
+        foreach ($this->getMappingsByMethodId($methodId) as $mapping) {
+            if ((bool)$mapping->isDdp === (bool)$isDdp) {
+                return $mapping;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -297,12 +498,7 @@ class CarrierService implements ShopShippingMethodService
      */
     public function getShippingMethodId($carrierReferenceId)
     {
-        $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
-
-        $filter = new QueryFilter();
-        $filter->where('carrierReferenceId', Operators::EQUALS, $carrierReferenceId);
-        /** @var CarrierServiceMapping $carrierServiceMapping */
-        $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
+        $carrierServiceMapping = $this->getMappingByCarrierReferenceId($carrierReferenceId);
 
         return $carrierServiceMapping ? $carrierServiceMapping->methodId : null;
     }
@@ -465,10 +661,13 @@ class CarrierService implements ShopShippingMethodService
      *
      * @param \Carrier $carrier PrestaShop carrier object.
      * @param ShippingMethod $shippingMethod Packlink shipping method entity.
+     * @param bool $isDdp Whether the carrier is the duties-paid variant.
      */
-    private function setCarrierData(\Carrier $carrier, ShippingMethod $shippingMethod)
+    private function setCarrierData(\Carrier $carrier, ShippingMethod $shippingMethod, $isDdp = false)
     {
-        $carrier->name = $shippingMethod->getTitle();
+        $carrier->name = $isDdp
+            ? $shippingMethod->getTitle() . ' - ' . TranslationUtility::__(static::DDP_TITLE_SUFFIX)
+            : $shippingMethod->getTitle();
         $carrier->active = true;
         $carrier->deleted = false;
         if (!$carrier->id) {
@@ -496,22 +695,26 @@ class CarrierService implements ShopShippingMethodService
      *
      * @param int $carrierReferenceId Carrier entity reference ID.
      * @param int $methodId Packlink shipping method ID.
+     * @param bool $isDdp Whether the mapped carrier is the duties-paid variant.
      *
      * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
      */
-    private function saveCarrierServiceMapping($carrierReferenceId, $methodId)
+    private function saveCarrierServiceMapping($carrierReferenceId, $methodId, $isDdp = false)
     {
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
         $carrierServiceMapping = new CarrierServiceMapping();
 
         $carrierServiceMapping->carrierReferenceId = $carrierReferenceId;
         $carrierServiceMapping->methodId = $methodId;
+        $carrierServiceMapping->isDdp = (bool)$isDdp;
 
         $serviceMappingRepository->save($carrierServiceMapping);
+        // Same-request reads (e.g. syncDdpCarrier right after createCarrier) must see this write.
+        CachingUtility::resetCarrierServiceMappings();
     }
 
     /**
-     * Deletes carrier service mapping for given shipping method.
+     * Deletes every carrier service mapping for given shipping method, base and duties-paid alike.
      *
      * @param int $methodId Packlink shipping method ID.
      *
@@ -522,12 +725,29 @@ class CarrierService implements ShopShippingMethodService
     {
         $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
 
-        $filter = new QueryFilter();
-        $filter->where('methodId', Operators::EQUALS, $methodId);
-        $carrierServiceMapping = $serviceMappingRepository->selectOne($filter);
+        foreach ($this->getMappingsByMethodId($methodId) as $carrierServiceMapping) {
+            $serviceMappingRepository->delete($carrierServiceMapping);
+        }
+
+        CachingUtility::resetCarrierServiceMappings();
+    }
+
+    /**
+     * Deletes the carrier service mapping identified by a carrier reference ID.
+     *
+     * @param int $carrierReferenceId PrestaShop carrier reference ID.
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private function deleteCarrierServiceMappingByReferenceId($carrierReferenceId)
+    {
+        $carrierServiceMapping = $this->getMappingByCarrierReferenceId($carrierReferenceId);
 
         if ($carrierServiceMapping !== null) {
+            $serviceMappingRepository = RepositoryRegistry::getRepository(CarrierServiceMapping::getClassName());
             $serviceMappingRepository->delete($carrierServiceMapping);
+            CachingUtility::resetCarrierServiceMappings();
         }
     }
 

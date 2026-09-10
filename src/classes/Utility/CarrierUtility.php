@@ -47,11 +47,13 @@ class CarrierUtility
 
         /** @var ShippingMethod $method */
         foreach ($methods as $method) {
-            $carrierReferenceId = $service->getCarrierReferenceId($method->getId());
-            if ($carrierReferenceId) {
-                $carrier = \Carrier::getCarrierByReference($carrierReferenceId);
-                if (\Validate::isLoadedObject($carrier)) {
-                    $result[$carrier->id] = $method->getId();
+            // Both the base and the duties-paid carrier of a drop-off method require the drop-off picker.
+            foreach ($service->getCarrierReferenceIds($method->getId()) as $carrierReferenceId) {
+                if ($carrierReferenceId) {
+                    $carrier = \Carrier::getCarrierByReference($carrierReferenceId);
+                    if (\Validate::isLoadedObject($carrier)) {
+                        $result[$carrier->id] = $method->getId();
+                    }
                 }
             }
         }
@@ -79,20 +81,25 @@ class CarrierUtility
 
         /** @var ShippingMethod $method */
         foreach ($methods as $method) {
-            $carrierReferenceId = $service->getCarrierReferenceId($method->getId());
+            // The surcharge belongs to the method, so it applies to its duties-paid carrier as well.
+            $carrierReferenceIds = $service->getCarrierReferenceIds($method->getId());
 
             $services = $method->getShippingServices();
 
             foreach ($services as $shippingService) {
                 if($shippingService->cashOnDeliveryConfig &&  $shippingService->cashOnDeliveryConfig->offered) {
                     if($cod->account->getCashOnDeliveryFee() !== null) {
-                        $result[$carrierReferenceId] = $cod->account->getCashOnDeliveryFee();
-                        break;
+                        $fee = $cod->account->getCashOnDeliveryFee();
+                    } else {
+                        $fee = self::calculateFee(
+                            $cartTotal, $shippingService->cashOnDeliveryConfig->applyPercentageCashOnDelivery,
+                            $shippingService->cashOnDeliveryConfig->maxCashOnDelivery);
                     }
 
-                    $result[$carrierReferenceId] = self::calculateFee(
-                        $cartTotal, $shippingService->cashOnDeliveryConfig->applyPercentageCashOnDelivery,
-                        $shippingService->cashOnDeliveryConfig->maxCashOnDelivery);
+                    foreach ($carrierReferenceIds as $carrierReferenceId) {
+                        $result[$carrierReferenceId] = $fee;
+                    }
+
                     break;
                 }
             }

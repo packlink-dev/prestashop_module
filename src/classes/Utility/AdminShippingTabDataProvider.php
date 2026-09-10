@@ -178,9 +178,17 @@ class AdminShippingTabDataProvider
                 : '',
             'carrier_tracking_numbers' => $shipmentDetails->getCarrierTrackingNumbers(),
             'carrier_tracking_url' => $shipmentDetails->getCarrierTrackingUrl() ?: '',
-            'packlink_shipping_price' => $shipmentDetails->getShippingCost() !== null
+            // Empty (not '0') until Packlink prices the shipment: a shipment still being processed
+            // carries no price, and printing a zero reads as "this shipment was free" rather than
+            // "not priced yet". The line reappears on its own once a poll brings the real figure.
+            'packlink_shipping_price' => (float)$shipmentDetails->getShippingCost() > 0
                 ? $shipmentDetails->getShippingCost() . ' '
                 . CurrencySymbolService::getCurrencySymbol($shipmentDetails->getCurrency())
+                : '',
+            // Duty charged to the shopper on a duties-paid order. Empty (not '0,00') when the order
+            // carries no DDP selection, so the line is simply absent for ordinary shipments.
+            'ddp_cost' => $shipmentDetails->getDdpCost() !== null
+                ? MoneyFormatter::format((float)$shipmentDetails->getDdpCost(), $shipmentDetails->getCurrency())
                 : '',
             'link' => $shipmentDetails->getShipmentUrl(),
             'public_tracking_url' => self::getPublicTrackingUrl($shipmentDetails->getReference()),

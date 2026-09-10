@@ -3,6 +3,7 @@
 namespace Packlink\PrestaShop\Classes\BusinessLogicServices;
 
 use Packlink\BusinessLogic\Customs\Models\MappingFieldOptions;
+use Packlink\BusinessLogic\Customs\Models\TaxIdOption;
 use Packlink\PrestaShop\Classes\Utility\ProductFeatureSources;
 use Packlink\PrestaShop\Classes\Utility\TranslationUtility;
 
@@ -32,6 +33,29 @@ class CustomsMappingService extends \Packlink\BusinessLogic\Customs\CustomsMappi
     const SOURCE_ADDRESS_VAT = 'vat_number';
     const SOURCE_PRODUCT_HS_CODE = 'product_hs_code';
     const SOURCE_PRODUCT_COUNTRY_OF_ORIGIN = 'product_country_of_origin';
+
+    /**
+     * Returns the PrestaShop sources the receiver tax id can be filled from.
+     *
+     * Required by the core CustomsMappingService contract and served by the core CustomsController.
+     * Built from the same two sources as the 'mapping_receiver_tax_id' entry in
+     * getMappingFieldsOptions(), so the settings page and this endpoint cannot drift apart.
+     *
+     * @return TaxIdOption[]
+     */
+    public function getReceiverTaxIdOptions()
+    {
+        return array(
+            TaxIdOption::fromArray(array(
+                'value' => self::SOURCE_CUSTOMER_TAX_ID,
+                'name' => TranslationUtility::__('Customer tax ID'),
+            )),
+            TaxIdOption::fromArray(array(
+                'value' => self::SOURCE_ADDRESS_VAT,
+                'name' => TranslationUtility::__('Company VAT number'),
+            )),
+        );
+    }
 
     /**
      * Returns the data-mapping field definitions rendered on the customs settings page. Each entry

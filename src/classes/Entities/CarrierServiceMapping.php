@@ -25,11 +25,19 @@ class CarrierServiceMapping extends Entity
      */
     public $methodId;
     /**
+     * Whether this carrier is the duties-paid (DDP) variant of the shipping method.
+     *
+     * Absent on mappings created before DDP support; an absent value must read as FALSE.
+     *
+     * @var bool
+     */
+    public $isDdp = false;
+    /**
      * Array of field names.
      *
      * @var array
      */
-    protected $fields = array('id', 'methodId', 'carrierReferenceId');
+    protected $fields = array('id', 'methodId', 'carrierReferenceId', 'isDdp');
 
     /**
      * Returns full class name.
