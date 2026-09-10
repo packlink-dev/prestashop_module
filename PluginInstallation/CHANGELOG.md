@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.8.0](https://github.com/packlink-dev/prestashop_module/compare/v3.7.1...v3.8.0)
+### Added
+- Added DDP (Delivered Duty Paid) support: duties-charging services appear as a second selectable carrier whose price includes the composed duty amount with the merchant's per-service adjustment applied
+- Added the `Delivery Duty Paid` split line on the shipping step, order summary and order confirmation, with paths for PS 1.6 and 1.7+/9.x
+- Added the `DDP cost` line to the Packlink order panel
+- Added an upgrade step that creates DDP carriers for services whose effective behaviour already charges duties
+
+### Changed
+- The DDP selection and charged amount are persisted per cart and handed to the shipment draft; the order-validation request reuses the render-time duty quote instead of re-quoting
+
 ## [3.7.1](https://github.com/packlink-dev/prestashop_module/compare/v3.7.0...v3.7.1)
 ### Changed
 - Added zip code for Croatia
