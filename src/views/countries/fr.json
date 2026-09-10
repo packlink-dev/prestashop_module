@@ -38,7 +38,8 @@
     "invalidUrl": "Le champ doit contenir une URL valide.",
     "invalidFieldValue": "Le champ doit être défini sur « %s ».",
     "invalidMaxValue": "La valeur maximale autorisée est %s.",
-    "passwordRestriction": "Votre mot de passe doit contenir au moins %s caractères, dont au moins une lettre minuscule, une lettre majuscule, un chiffre et un symbole"
+    "passwordRestriction": "Votre mot de passe doit contenir au moins %s caractères, dont au moins une lettre minuscule, une lettre majuscule, un chiffre et un symbole",
+    "invalidHsCode": "Le code SH doit comporter 6 à 8 chiffres."
   },
   "login": {
     "apiKey": "Clé API",

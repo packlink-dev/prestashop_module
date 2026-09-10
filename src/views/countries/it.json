@@ -38,7 +38,8 @@
     "invalidUrl": "Il campo deve contenere un URL valido.",
     "invalidFieldValue": "Il campo deve essere impostato su \"%s\".",
     "invalidMaxValue": "Il valore massimo consentito è %s.",
-    "passwordRestriction": "La tua password deve contenere almeno %s caratteri e includere almeno una lettera minuscola, una lettera maiuscola, un numero e un simbolo"
+    "passwordRestriction": "La tua password deve contenere almeno %s caratteri e includere almeno una lettera minuscola, una lettera maiuscola, un numero e un simbolo",
+    "invalidHsCode": "Il codice HS deve contenere da 6 a 8 cifre."
   },
   "login": {
     "apiKey": "API Key",

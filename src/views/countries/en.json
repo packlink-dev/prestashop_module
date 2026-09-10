@@ -39,7 +39,8 @@
     "invalidFieldValue": "Field must be set to \"%s\".",
     "invalidMaxValue": "Maximal allowed value is %s.",
     "invalidIBAN": "Merchant IBAN number must be up to 24 characters and contain only numbers and capital letters.",
-    "passwordRestriction": "Your password must be at least %s characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol"
+    "passwordRestriction": "Your password must be at least %s characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol",
+    "invalidHsCode": "The HS code must be 6 to 8 digits."
   },
   "login": {
     "apiKey": "Api key",
