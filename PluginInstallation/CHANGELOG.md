@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.7.1](https://github.com/packlink-dev/prestashop_module/compare/v3.7.0...v3.7.1)
+### Changed
+- Added zip code for Croatia
+
 ## [3.7.0](https://github.com/packlink-dev/prestashop_module/compare/v3.6.2...v3.7.0)
 ### Added
 - Added customs support for international shipments: HS code and country of origin per product, customer tax ID data, and a customs data mapping screen in the module configuration
