@@ -214,7 +214,7 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
                 . ' INNER JOIN ' . bqSQL(_DB_PREFIX_ . static::TABLE_NAME) . ' AS queueTable'
                 . ' ON queueView.id = queueTable.id';
 
-            $records = \Db::getInstance()->executeS($query);
+            $records = \Db::getInstance()->executeS($query, true, false);
             $queuedItems = $this->unserializeEntities($records);
         } catch (\PrestaShopDatabaseException $exception) {
             // In case of exception return empty result set
