@@ -390,7 +390,7 @@ class BaseRepository implements RepositoryInterface
             ->where($condition);
         $this->applyLimitAndOrderBy($query, $filter);
 
-        $result = \Db::getInstance()->executeS($query);
+        $result = \Db::getInstance()->executeS($query, true, false);
 
         return !empty($result) ? $result : array();
     }
