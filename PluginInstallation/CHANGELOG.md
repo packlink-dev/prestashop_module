@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.8.1](https://github.com/packlink-dev/prestashop_module/compare/v3.8.0...v3.8.1)
+### Changed
+- Removed the escaping bypass from the checkout templates so all Packlink-rendered checkout values are escaped by Smarty
+- Packlink AJAX JSON responses are now sent with no-cache headers so they are never served from a cache
+
 ## [3.8.0](https://github.com/packlink-dev/prestashop_module/compare/v3.7.1...v3.8.0)
 ### Added
 - Added DDP (Delivered Duty Paid) support: duties-charging services appear as a second selectable carrier whose price includes the composed duty amount with the merchant's per-service adjustment applied
