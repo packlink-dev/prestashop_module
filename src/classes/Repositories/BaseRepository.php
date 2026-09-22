@@ -390,7 +390,27 @@ class BaseRepository implements RepositoryInterface
             ->where($condition);
         $this->applyLimitAndOrderBy($query, $filter);
 
-        $result = \Db::getInstance()->executeS($query);
+        return $this->executeUncachedSelect($query);
+    }
+
+    /**
+     * Executes a SELECT query on the Packlink entity table with PrestaShop's query cache turned off.
+     *
+     * Packlink entity rows back both the configuration store and the task queue, and those are written
+     * and read back within a single request: the task runner releases its lock by writing an empty runner
+     * status and then immediately reads that status back. When the cached SELECT serves the pre-write
+     * value in that window, the runner can never reset its own lock and shipment drafts stay stuck at
+     * "Draft is currently being created". These rows must always be read from the database.
+     *
+     * @param \DbQuery|string $query SELECT query.
+     *
+     * @return array Array of resulting records.
+     *
+     * @throws \PrestaShopDatabaseException
+     */
+    protected function executeUncachedSelect($query)
+    {
+        $result = \Db::getInstance()->executeS($query, true, false);
 
         return !empty($result) ? $result : array();
     }
