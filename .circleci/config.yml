@@ -3,7 +3,7 @@ version: 2.1
 
 orbs:
   slack: circleci/slack@3.4.2
-  gcp-cli: circleci/gcp-cli@1.8.3
+  gcp-cli: circleci/gcp-cli@4.0.1
 
 executors:
   deployer:
@@ -19,18 +19,17 @@ jobs:
     working_directory: ~/prestashop
     steps:
       - checkout
-      - gcp-cli/install
-      - gcp-cli/initialize
+      - gcp-cli/setup
       - run:
           name: Build Package
           command: sh packlink-build.sh ${CIRCLE_TAG}
       - run:
           name: Publish package to production cdn
           command: |
-            gsutil cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/latest.zip
-            gsutil acl ch -u AllUsers:R gs://${PROD_CDN_URL}/modules/prestashop/statics/latest.zip
-            gsutil cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
-            gsutil acl ch -u AllUsers:R gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gcloud storage cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/latest.zip
+            gcloud storage objects update --add-acl-grant=entity=allUsers,role=READER gs://${PROD_CDN_URL}/modules/prestashop/statics/latest.zip
+            gcloud storage cp artifact.zip gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
+            gcloud storage objects update --add-acl-grant=entity=allUsers,role=READER gs://${PROD_CDN_URL}/modules/prestashop/statics/${CIRCLE_TAG}.zip
       - slack/notify:
           color: '#00FF00'
           channel: '${SLACK_CHANNEL}'
