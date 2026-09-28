@@ -214,7 +214,9 @@ class QueueItemRepository extends BaseRepository implements QueueItemRepositoryI
                 . ' INNER JOIN ' . bqSQL(_DB_PREFIX_ . static::TABLE_NAME) . ' AS queueTable'
                 . ' ON queueView.id = queueTable.id';
 
-            $records = $this->executeUncachedSelect($query);
+            // Cache must be disabled because PrestaShop does not always invalidate the cached result
+            // for this query (it selects from a subquery alias), so newly enqueued items would be missed.
+            $records = \Db::getInstance()->executeS($query, true, false);
             $queuedItems = $this->unserializeEntities($records);
         } catch (\PrestaShopDatabaseException $exception) {
             // In case of exception return empty result set
