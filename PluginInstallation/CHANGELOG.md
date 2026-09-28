@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [3.8.2](https://github.com/packlink-dev/prestashop_module/compare/v3.8.1...v3.8.2)
+## [3.8.3](https://github.com/packlink-dev/prestashop_module/compare/v3.8.2...v3.8.3)
 ### Changed
 - Packlink entity rows are now read with PrestaShop's SQL query cache disabled, so a stale cached result can no longer leave the task runner unable to release its lock and shipment drafts stuck at "Draft is currently being created"
+
+## [3.8.2](https://github.com/packlink-dev/prestashop_module/compare/v3.8.1...v3.8.2)
+### Changed
+- Added compatibility with presta 9.1.5
 
 ## [3.8.1](https://github.com/packlink-dev/prestashop_module/compare/v3.8.0...v3.8.1)
 ### Changed
