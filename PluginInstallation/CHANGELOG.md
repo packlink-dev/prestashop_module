@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.8.4](https://github.com/packlink-dev/prestashop_module/compare/v3.8.3...v3.8.4)
+### Changed
+- Queued task items are now always read with PrestaShop's SQL query cache disabled, so the task runner can no longer miss newly queued tasks when a shared cache backend (e.g. Memcached) is enabled
+
 ## [3.8.3](https://github.com/packlink-dev/prestashop_module/compare/v3.8.2...v3.8.3)
 ### Changed
 - Packlink entity rows are now read with PrestaShop's SQL query cache disabled, so a stale cached result can no longer leave the task runner unable to release its lock and shipment drafts stuck at "Draft is currently being created"
