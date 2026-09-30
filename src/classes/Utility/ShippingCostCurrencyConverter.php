@@ -74,6 +74,8 @@ class ShippingCostCurrencyConverter
             $amount *= (float) $currencyTo->conversion_rate;
         }
 
-        return (float) \Tools::ps_round($amount, _PS_PRICE_DISPLAY_PRECISION_);
+        // No rounding here: PrestaShop rounds the carrier cost itself, and _PS_PRICE_DISPLAY_PRECISION_
+        // no longer exists on PrestaShop 9.
+        return (float) $amount;
     }
 }
