@@ -1265,6 +1265,7 @@ class Packlink extends CarrierModule
             'integrationStatusUrl' => $this->getFrontAction('integrationstatus'),
             'platformDomain' => $platformDomain,
             'baseResourcesUrl' => $this->getPathUri() . 'views/img/core',
+            'dashboardLogo' => $this->getPathUri() . 'views/img/logo-pl.svg',
             'gridResizerScript' => $this->getPathUri() . 'views/js/core/GridResizerService.js?v=' . $this->version,
         ));
 

@@ -16,6 +16,7 @@ src/views/js/core
 src/views/js/location
 src/views/css/app.css
 src/views/css/locationPicker.css
+src/views/css/fonts
 src/views/css/README.md
 src/views/templates/core
 src/views/img/core/images/*

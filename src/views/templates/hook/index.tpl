@@ -1,7 +1,7 @@
 <div id="pl-page">
   <header id="pl-main-header">
     <div class="pl-main-logo">
-      <img src="https://cdn.packlink.com/apps/giger/logos/packlink-pro.svg" alt="logo">
+      <img src="{html_entity_decode($dashboardLogo|escape:'html':'UTF-8')}" alt="logo">
     </div>
     <div class="pl-header-holder" id="pl-header-section"></div>
   </header>

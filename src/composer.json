@@ -13,7 +13,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=7.0",
-    "packlink/integration-core": "4.4.0",
+    "packlink/integration-core": "dev-CR-SET-73-rebranding-v2 as 4.4.0",
     "ext-json": "*",
     "ext-curl": "*",
     "ext-zip": "*",
