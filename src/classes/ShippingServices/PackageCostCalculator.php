@@ -19,6 +19,7 @@ use Packlink\BusinessLogic\ShippingMethod\ShippingCostCalculator;
 use Packlink\BusinessLogic\ShippingMethod\ShippingMethodService;
 use Packlink\PrestaShop\Classes\Bootstrap;
 use Packlink\PrestaShop\Classes\Utility\CachingUtility;
+use Packlink\PrestaShop\Classes\Utility\ShippingCostCurrencyConverter;
 
 /**
  * Class PackageCostCalculator.
@@ -76,14 +77,21 @@ class PackageCostCalculator
         if (self::displayBackupCarrier($cart, $calculatedCosts, $carrierReferenceId)) {
             $allCosts = self::getCostsForAllShippingMethods($cart, $shippingProducts);
             if (!empty($allCosts)) {
+                $allCosts = self::convertCostsToCartCurrency($allCosts, $cart);
+
                 return self::applyShopCostCalculationSettings(min(array_values($allCosts)), $cart);
             }
         }
 
         if ($calculatedCosts !== false) {
             return isset($calculatedCosts[$methodId])
-                ? self::resolveCost($cart, $calculatedCosts[$methodId], $methodId, $carrierReferenceId, $shippingProducts)
-                : false;
+                ? self::resolveCost(
+                    $cart,
+                    self::convertCostToCartCurrency($calculatedCosts[$methodId], $cart, $methodId),
+                    $methodId,
+                    $carrierReferenceId,
+                    $shippingProducts
+                ) : false;
         }
 
         $warehouse = CachingUtility::getDefaultWarehouse();
@@ -113,8 +121,13 @@ class PackageCostCalculator
         CachingUtility::setCosts($calculatedCosts);
 
         return isset($calculatedCosts[$methodId])
-            ? self::resolveCost($cart, $calculatedCosts[$methodId], $methodId, $carrierReferenceId, $shippingProducts)
-            : false;
+            ? self::resolveCost(
+                $cart,
+                self::convertCostToCartCurrency($calculatedCosts[$methodId], $cart, $methodId),
+                $methodId,
+                $carrierReferenceId,
+                $shippingProducts
+            ) : false;
     }
 
     /**
@@ -402,6 +415,57 @@ class PackageCostCalculator
     }
 
     /**
+     * Converts shipping costs from service currency to cart currency.
+     *
+     * @param array $costs Shipping costs keyed by shipping method ID.
+     * @param \Cart $cart
+     *
+     * @return array
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private static function convertCostsToCartCurrency(array $costs, Cart $cart)
+    {
+        $convertedCosts = array();
+
+        foreach ($costs as $methodId => $cost) {
+            $convertedCosts[$methodId] = self::convertCostToCartCurrency($cost, $cart, $methodId);
+        }
+
+        return $convertedCosts;
+    }
+
+    /**
+     * Converts a single shipping cost from service currency to cart currency.
+     *
+     * @param float $cost
+     * @param \Cart $cart
+     * @param int|string $methodId
+     *
+     * @return float
+     *
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException
+     * @throws \Logeecom\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException
+     */
+    private static function convertCostToCartCurrency($cost, Cart $cart, $methodId)
+    {
+        /** @var \Packlink\BusinessLogic\ShippingMethod\ShippingMethodService $shippingMethodService */
+        $shippingMethodService = ServiceRegister::getService(ShippingMethodService::CLASS_NAME);
+        $shippingMethod = $shippingMethodService->getShippingMethod($methodId);
+
+        if ($shippingMethod === null) {
+            return $cost;
+        }
+
+        return ShippingCostCurrencyConverter::convertToCartCurrency(
+            $cost,
+            $shippingMethod->getCurrency(),
+            (int) $cart->id_currency
+        );
+    }
+
+    /**
      * Checks shipping cost settings and handling costs and applies settings to the given cost.
      *
      * @param float $cost
@@ -420,9 +484,12 @@ class PackageCostCalculator
             'PS_SHIPPING_FREE_WEIGHT',
         ));
 
-        if ((float)$configuration['PS_SHIPPING_FREE_PRICE'] > 0
-            && self::getCartTotal($cart) >= (float)$configuration['PS_SHIPPING_FREE_PRICE']
-        ) {
+        $freeShippingPrice = \Tools::convertPrice(
+            (float)$configuration['PS_SHIPPING_FREE_PRICE'],
+            \Currency::getCurrencyInstance((int)$cart->id_currency)
+        );
+
+        if ($freeShippingPrice > 0 && self::getCartTotal($cart) >= $freeShippingPrice) {
             return 0;
         }
 

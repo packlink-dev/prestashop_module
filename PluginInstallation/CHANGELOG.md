@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.8.5](https://github.com/packlink-dev/prestashop_module/compare/v3.8.4...v3.8.5)
+### Fixed
+- Packlink shipping costs are now converted from the service currency to the cart currency, so carts in a non-default currency no longer show the raw service price (e.g. 3.28 EUR displayed as 3 RSD)
+- The free shipping threshold is now converted to the cart currency before it is compared with the cart total
+### Changed
+- System info now lists all enabled shop currencies instead of only the default one
+
 ## [3.8.4](https://github.com/packlink-dev/prestashop_module/compare/v3.8.3...v3.8.4)
 ### Changed
 - Queued task items are now always read with PrestaShop's SQL query cache disabled, so the task runner can no longer miss newly queued tasks when a shared cache backend (e.g. Memcached) is enabled
