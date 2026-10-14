@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0d7040cbcec4488431bec97e65fa8067",
+    "content-hash": "1ae774c14fd41617d713cb21ce99de8a",
     "packages": [
         {
             "name": "iio/libmergepdf",
@@ -62,16 +62,16 @@
         },
         {
             "name": "packlink/integration-core",
-            "version": "dev-CR-SET-73-rebranding-v2",
+            "version": "v4.4.3",
             "source": {
                 "type": "git",
                 "url": "git@github.com:packlink-dev/ecommerce_module_core.git",
-                "reference": "967e2db1cf0fd3cf9824dd9132cf065a875d6310"
+                "reference": "cbee61363f91f9a4badd51dffee360f8fbce7ae4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/967e2db1cf0fd3cf9824dd9132cf065a875d6310",
-                "reference": "967e2db1cf0fd3cf9824dd9132cf065a875d6310",
+                "url": "https://api.github.com/repos/packlink-dev/ecommerce_module_core/zipball/cbee61363f91f9a4badd51dffee360f8fbce7ae4",
+                "reference": "cbee61363f91f9a4badd51dffee360f8fbce7ae4",
                 "shasum": ""
             },
             "require": {
@@ -113,7 +113,7 @@
                 "proprietary"
             ],
             "description": "Packlink integrations core library",
-            "time": "2026-10-07T09:23:05+00:00"
+            "time": "2026-10-14T07:38:40+00:00"
         },
         {
             "name": "setasign/fpdf",
@@ -1562,18 +1562,9 @@
             "time": "2020-07-08T17:02:28+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "packlink/integration-core",
-            "version": "dev-CR-SET-73-rebranding-v2",
-            "alias": "4.4.0",
-            "alias_normalized": "4.4.0.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "packlink/integration-core": 20
-    },
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
