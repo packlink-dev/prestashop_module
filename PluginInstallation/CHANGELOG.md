@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.8.7](https://github.com/packlink-dev/prestashop_module/compare/v3.8.6...v3.8.7)
+### Changed
+- Added compatibility with PrestaShop 9.2
+
 ## [3.8.6](https://github.com/packlink-dev/prestashop_module/compare/v3.8.5...v3.8.6)
 ### Changed
 - Rebrand the module to the new Packlink PRO logo and Figtree font, with black delivery type icons and a black drop-off map pin at checkout (upgrades the packlink/integration-core shared library to 4.4.3)
